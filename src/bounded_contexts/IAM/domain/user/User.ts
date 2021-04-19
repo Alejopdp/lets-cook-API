@@ -1,42 +1,83 @@
-export class User {
-    private _id: string | number;
+import { Entity } from "../../../../core/domain/Entity";
+import { Guard } from "../../../../core/logic/Guard";
+import { Role } from "../role/Role";
+import { UserId } from "./UserId";
+import { UserPassword } from "./UserPassword";
+
+export class User extends Entity<User> {
     private _name: string;
     private _email: string;
-    private _phoneNumber: string;
     private _isEmailVerified: boolean;
-    private _password: string;
-    private _emailVerificationCode: number;
+    private _password: UserPassword;
+    private _role: Role;
+    private _emailVerificationCode?: number;
     private _resetPasswordCode?: number;
     private _resetPasswordExpires?: Date;
 
-    constructor(
-        id: string,
+    protected constructor(
         name: string,
         email: string,
         isEmailVerified: boolean,
-        emailVerificationCode: number,
-        password: string,
-        phoneNumber: string,
+        password: UserPassword,
+        role: Role,
+        emailVerificationCode?: number,
         resetPasswordCode?: number,
-        resetPasswordExpires?: Date
+        resetPasswordExpires?: Date,
+        id?: UserId
     ) {
-        this._id = id;
+        super(id);
         this._name = name;
         this._email = email;
         this._isEmailVerified = isEmailVerified;
         this._emailVerificationCode = emailVerificationCode;
         this._password = password;
-        this._phoneNumber = phoneNumber;
+        this._role = role;
         this._resetPasswordCode = resetPasswordCode;
         this._resetPasswordExpires = resetPasswordExpires;
     }
 
-    /**
-     * Getter id
-     * @return {string | number}
-     */
-    public get id(): string | number {
-        return this._id;
+    public static create(
+        name: string,
+        email: string,
+        isEmailVerified: boolean,
+        password: UserPassword,
+        role: Role,
+        emailVerificationCode?: number,
+        resetPasswordCode?: number,
+        resetPasswordExpires?: Date,
+        id?: UserId
+    ): User {
+        const guardedProps = [
+            { argument: name, argumentName: "Nombre completo" },
+            { argument: email, argumentName: "Correo electrónico" },
+            { argument: role, argumentName: "Rol" },
+        ];
+
+        const guardResult = Guard.againstNullOrUndefinedOrEmptyBulk(guardedProps);
+
+        if (!guardResult.succeeded) {
+            throw new Error(guardResult.message);
+        } else {
+            return new User(
+                name,
+                email,
+                isEmailVerified,
+                password,
+                role,
+                emailVerificationCode,
+                resetPasswordCode,
+                resetPasswordExpires,
+                id
+            );
+        }
+    }
+
+    public changeRole(newRole: Role): void {
+        this.role = newRole;
+    }
+
+    public changePassword(aPassword: UserPassword): void {
+        this.password = aPassword;
     }
 
     /**
@@ -65,26 +106,26 @@ export class User {
 
     /**
      * Getter emailVerificationCode
-     * @return {number}
+     * @return {number | undefined}
      */
-    public get emailVerificationCode(): number {
+    public get emailVerificationCode(): number | undefined {
         return this._emailVerificationCode;
     }
 
     /**
      * Getter password
-     * @return {string}
+     * @return {UserPassword}
      */
-    public get password(): string {
+    public get password(): UserPassword {
         return this._password;
     }
 
     /**
-     * Getter phoneNumber
-     * @return {string}
+     * Getter role
+     * @return {Role}
      */
-    public get phoneNumber(): string {
-        return this._phoneNumber;
+    public get role(): Role {
+        return this._role;
     }
 
     /**
@@ -104,18 +145,13 @@ export class User {
     }
 
     /**
-     * Setter id
-     * @param {string | number} value
-     */
-    public set id(value: string | number) {
-        this._id = value;
-    }
-
-    /**
      * Setter name
      * @param {string} value
      */
     public set name(value: string) {
+        const guardResult = Guard.againstNullOrUndefined(value, "Nombre completo");
+        if (!guardResult.succeeded) throw new Error(guardResult.message);
+
         this._name = value;
     }
 
@@ -124,6 +160,9 @@ export class User {
      * @param {string} value
      */
     public set email(value: string) {
+        const guardResult = Guard.againstNullOrUndefined(value, "Correo electrónico");
+        if (!guardResult.succeeded) throw new Error(guardResult.message);
+
         this._email = value;
     }
 
@@ -137,26 +176,18 @@ export class User {
 
     /**
      * Setter emailVerificationCode
-     * @param {number} value
+     * @param {number | undefined} value
      */
-    public set emailVerificationCode(value: number) {
+    public set emailVerificationCode(value: number | undefined) {
         this._emailVerificationCode = value;
     }
 
     /**
      * Setter password
-     * @param {string} value
+     * @param {UserPassword} value
      */
-    public set password(value: string) {
+    public set password(value: UserPassword) {
         this._password = value;
-    }
-
-    /**
-     * Setter phoneNumber
-     * @param {string} value
-     */
-    public set phoneNumber(value: string) {
-        this._phoneNumber = value;
     }
 
     /**
@@ -174,6 +205,15 @@ export class User {
     public set resetPasswordExpires(value: Date | undefined) {
         this._resetPasswordExpires = value;
     }
-}
 
-const ola = "uolas";
+    /**
+     * Setter role
+     * @param {Role} value
+     */
+    public set role(value: Role) {
+        const guardResult = Guard.againstNullOrUndefined(value, "Rol");
+        if (!guardResult.succeeded) throw new Error(guardResult.message);
+
+        this._role = value;
+    }
+}
