@@ -1,5 +1,6 @@
 export interface CreateUserAsAdminDto {
     firstName: string;
-    secondName: string;
+    lastName: string;
     email: string;
+    roleTitle: string;
 }

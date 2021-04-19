@@ -26,4 +26,12 @@ export abstract class Entity<T> {
 
         return this._id.equals(object._id);
     }
+
+    /**
+     * Getter resetPasswordExpires
+     * @return {UniqueEntityID}
+     */
+    public get id(): UniqueEntityID {
+        return this._id;
+    }
 }

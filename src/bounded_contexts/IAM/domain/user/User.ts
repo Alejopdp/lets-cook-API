@@ -2,24 +2,27 @@ import { Entity } from "../../../../core/domain/Entity";
 import { Guard } from "../../../../core/logic/Guard";
 import { Role } from "../role/Role";
 import { UserId } from "./UserId";
+import { UserName } from "./UserName";
 import { UserPassword } from "./UserPassword";
 
 export class User extends Entity<User> {
-    private _name: string;
+    private _name: UserName;
     private _email: string;
     private _isEmailVerified: boolean;
-    private _password: UserPassword;
     private _role: Role;
+    private _password?: UserPassword;
+    private _isActivated: boolean;
     private _emailVerificationCode?: number;
     private _resetPasswordCode?: number;
     private _resetPasswordExpires?: Date;
 
     protected constructor(
-        name: string,
+        name: UserName,
         email: string,
         isEmailVerified: boolean,
-        password: UserPassword,
         role: Role,
+        isActivated: boolean,
+        password?: UserPassword,
         emailVerificationCode?: number,
         resetPasswordCode?: number,
         resetPasswordExpires?: Date,
@@ -31,17 +34,19 @@ export class User extends Entity<User> {
         this._isEmailVerified = isEmailVerified;
         this._emailVerificationCode = emailVerificationCode;
         this._password = password;
+        this._isActivated = isActivated;
         this._role = role;
         this._resetPasswordCode = resetPasswordCode;
         this._resetPasswordExpires = resetPasswordExpires;
     }
 
     public static create(
-        name: string,
+        name: UserName,
         email: string,
         isEmailVerified: boolean,
-        password: UserPassword,
         role: Role,
+        isActivated: boolean,
+        password?: UserPassword,
         emailVerificationCode?: number,
         resetPasswordCode?: number,
         resetPasswordExpires?: Date,
@@ -57,19 +62,22 @@ export class User extends Entity<User> {
 
         if (!guardResult.succeeded) {
             throw new Error(guardResult.message);
-        } else {
-            return new User(
-                name,
-                email,
-                isEmailVerified,
-                password,
-                role,
-                emailVerificationCode,
-                resetPasswordCode,
-                resetPasswordExpires,
-                id
-            );
         }
+
+        if (!password && isActivated)
+            throw new Error("No es posible activar un usuario sin contraseña");
+        return new User(
+            name,
+            email,
+            isEmailVerified,
+            role,
+            isActivated,
+            password,
+            emailVerificationCode,
+            resetPasswordCode,
+            resetPasswordExpires,
+            id
+        );
     }
 
     public changeRole(newRole: Role): void {
@@ -82,9 +90,9 @@ export class User extends Entity<User> {
 
     /**
      * Getter name
-     * @return {string}
+     * @return {UserName}
      */
-    public get name(): string {
+    public get name(): UserName {
         return this._name;
     }
 
@@ -114,9 +122,9 @@ export class User extends Entity<User> {
 
     /**
      * Getter password
-     * @return {UserPassword}
+     * @return {UserPassword | undefined}
      */
-    public get password(): UserPassword {
+    public get password(): UserPassword | undefined {
         return this._password;
     }
 
@@ -145,10 +153,18 @@ export class User extends Entity<User> {
     }
 
     /**
-     * Setter name
-     * @param {string} value
+     * Getter isActivated
+     * @return {boolean}
      */
-    public set name(value: string) {
+    public get isActivated(): boolean {
+        return this._isActivated;
+    }
+
+    /**
+     * Setter name
+     * @param {UserName} value
+     */
+    public set name(value: UserName) {
         const guardResult = Guard.againstNullOrUndefined(value, "Nombre completo");
         if (!guardResult.succeeded) throw new Error(guardResult.message);
 
@@ -184,9 +200,9 @@ export class User extends Entity<User> {
 
     /**
      * Setter password
-     * @param {UserPassword} value
+     * @param {UserPassword | undefined} value
      */
-    public set password(value: UserPassword) {
+    public set password(value: UserPassword | undefined) {
         this._password = value;
     }
 
@@ -215,5 +231,13 @@ export class User extends Entity<User> {
         if (!guardResult.succeeded) throw new Error(guardResult.message);
 
         this._role = value;
+    }
+
+    /**
+     * Setter isActivated
+     * @param {boolean} value
+     */
+    public set isActivated(value: boolean) {
+        this._isActivated = value;
     }
 }
