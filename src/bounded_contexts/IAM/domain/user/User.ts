@@ -64,11 +64,10 @@ export class User extends Entity<User> {
             throw new Error(guardResult.message);
         }
 
-        if (!password && isActivated)
-            throw new Error("No es posible activar un usuario sin contraseña");
+        if (!password && isActivated) throw new Error("No es posible activar un usuario sin contraseña");
         return new User(
             name,
-            email,
+            email.toLowerCase(),
             isEmailVerified,
             role,
             isActivated,

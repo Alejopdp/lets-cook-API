@@ -1,10 +1,15 @@
 import { IValueObject } from "../../../../core/domain/ValueObject";
+import { Guard } from "../../../../core/logic/Guard";
 
 export class UserName implements IValueObject<UserName> {
     private _firstName: string;
     private _lastName: string;
 
     constructor(firstName: string, lastName: string) {
+        const guardResult = Guard.againstNullOrUndefinedOrEmpty(firstName, "Primer nombre");
+
+        if (!guardResult.succeeded) throw new Error(guardResult.message);
+
         this._firstName = firstName;
         this._lastName = lastName;
     }
@@ -14,7 +19,7 @@ export class UserName implements IValueObject<UserName> {
     }
 
     public getFullName(): string {
-        return this.firstName + " " + this.lastName;
+        return this.lastName ? this.firstName + " " + this.lastName : this.firstName;
     }
 
     /**

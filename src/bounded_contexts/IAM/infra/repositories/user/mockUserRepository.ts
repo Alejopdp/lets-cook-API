@@ -23,6 +23,10 @@ export class MockUserRepository implements IUserRepository {
         return this.database;
     }
 
+    public async findByEmail(email: string): Promise<User | undefined> {
+        return this.database.find((u) => u.email === email.toLowerCase());
+    }
+
     /**
      * Getter database
      * @return {User[]}

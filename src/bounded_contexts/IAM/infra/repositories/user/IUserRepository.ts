@@ -5,4 +5,5 @@ export interface IUserRepository {
     save(user: User): Promise<void>;
     findById(userId: UserId): Promise<User | undefined>;
     findAll(): Promise<User[]>;
+    findByEmail(email: string): Promise<User | undefined>;
 }

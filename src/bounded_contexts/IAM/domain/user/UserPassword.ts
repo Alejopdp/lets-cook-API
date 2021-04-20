@@ -10,16 +10,18 @@ export class UserPassword implements IValueObject<UserPassword> {
         this._isHashed = isHashed;
     }
 
-    public static create(plainTextPassword: string, isHashed: boolean): UserPassword {
-        if (isHashed) return new UserPassword(plainTextPassword, isHashed);
+    public static create(passwordValue: string, isHashed: boolean): UserPassword {
+        if (isHashed) return new UserPassword(passwordValue, isHashed);
 
-        this.validatePassword(plainTextPassword);
+        this.validatePassword(passwordValue);
 
-        return new UserPassword(plainTextPassword, isHashed);
+        return new UserPassword(passwordValue, isHashed);
     }
 
-    public equals(aUserPassword: UserPassword): boolean {
-        return this.value === aUserPassword.value && this.isHashed === aUserPassword.isHashed;
+    public equals(aPassword: UserPassword): boolean {
+        if (aPassword.isHashed) throw new Error("No es posible comparar 2 hashes");
+
+        return this.isHashed ? bcrypt.compareSync(aPassword.value, this.value) : this.value === aPassword.value;
     }
 
     protected static has8CharactersOrMore(plainTextPassword: string): boolean {
@@ -40,9 +42,7 @@ export class UserPassword implements IValueObject<UserPassword> {
             !this.hasAtLeastOneNumber(plainTextPassword) ||
             !this.hasAtLeastOneUpperCaseCharacter(plainTextPassword)
         ) {
-            throw new Error(
-                "La contraseña debe tener al menos 8 caracteres, 1 letra mayúscula y 1 número"
-            );
+            throw new Error("La contraseña debe tener al menos 8 caracteres, 1 letra mayúscula y 1 número");
         }
     }
 

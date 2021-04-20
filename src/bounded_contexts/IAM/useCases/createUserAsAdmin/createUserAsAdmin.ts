@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { Role } from "../../domain/role/Role";
 import { User } from "../../domain/user/User";
 import { UserName } from "../../domain/user/UserName";
@@ -19,8 +20,7 @@ export class CreateUserAsAdmin {
         const userName: UserName = new UserName(dto.firstName, dto.lastName);
         const userRole: Role | undefined = await this.roleRepository.findByTitle(dto.roleTitle);
 
-        if (!userRole)
-            throw new Error(`El rol ${dto.roleTitle} no existe para asignarselo a un usuario`);
+        if (!userRole) throw new Error(`El rol ${dto.roleTitle} no existe para asignarselo a un usuario`);
 
         const user: User = User.create(userName, dto.email, true, userRole, false);
 

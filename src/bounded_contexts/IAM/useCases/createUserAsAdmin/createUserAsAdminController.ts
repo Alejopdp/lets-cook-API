@@ -15,7 +15,7 @@ export class CreateUserAsAdminController extends BaseController {
         try {
             const dto: CreateUserAsAdminDto = {
                 email: this.req.body.email,
-                firstName: this.req.body.firstaName,
+                firstName: this.req.body.firstName,
                 lastName: this.req.body.lastName,
                 roleTitle: this.req.body.roleTitle,
             };

@@ -7,22 +7,6 @@ import { UserPassword } from "../../../domain/user/UserPassword";
 
 describe("[DOMAIN] - User test", function () {
     describe("User creation", function () {
-        describe("Missing name creation", function () {
-            var password: UserPassword;
-            var role: Role;
-            var userName: UserName;
-
-            before(function () {
-                userName = new UserName("", "");
-                password = UserPassword.create("Pass1234", false);
-                role = new Role("Admin", [Permission.CREATE_ADMIN_USER, Permission.CREATE_PLAN]);
-            });
-
-            it("Should throw", function () {
-                expect(() => User.create(userName, "alejoscotti@gmail.com", true, role, true, password));
-            });
-        });
-
         describe("Missing email creation", function () {
             var password: UserPassword;
             var role: Role;
@@ -53,7 +37,7 @@ describe("[DOMAIN] - User test", function () {
             });
 
             it("Should have it name correctly created", function () {
-                expect(user.name).to.be.equal("Alejo");
+                expect(user.name.getFullName()).to.be.equal("Alejo Scotti");
             });
 
             it("Should have it email correctly created", function () {
