@@ -1,23 +1,26 @@
-import { IEmailService } from "./IEmailService";
+import { INotificationService } from "./INotificationService";
 import Mail from "nodemailer/lib/mailer";
 import nodemailer from "nodemailer";
 import { MailOptions } from "nodemailer/lib/json-transport";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
 
-export class NodemailerService implements IEmailService {
+export class NodemailerService implements INotificationService {
     private _transporter: Mail;
 
     constructor(transporter: Mail) {
         this._transporter = transporter;
     }
 
-    public static createNodemailerService(user: string | undefined, password: string | undefined) {
-        const transporter = nodemailer.createTransport({
+    public static create(user: string | undefined, password: string | undefined) {
+        const options: SMTPTransport.Options = {
             service: "gmail",
             auth: {
                 user,
                 pass: password,
             },
-        });
+        };
+
+        const transporter: Mail = nodemailer.createTransport(options);
 
         return new NodemailerService(transporter);
     }

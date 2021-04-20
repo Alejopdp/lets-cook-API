@@ -1,8 +1,9 @@
 import { logger } from "../../../../../config";
+import { INotificationService } from "../../../../shared/notificationService/INotificationService";
+import { ITokenService } from "../../application/tokenService/ITokenService";
 import { Role } from "../../domain/role/Role";
 import { User } from "../../domain/user/User";
 import { UserName } from "../../domain/user/UserName";
-import { UserPassword } from "../../domain/user/UserPassword";
 import { IRoleRepository } from "../../infra/repositories/role/IRoleRepository";
 import { IUserRepository } from "../../infra/repositories/user/IUserRepository";
 import { CreateUserAsAdminDto } from "./createUserAsAdminDto";
@@ -10,10 +11,19 @@ import { CreateUserAsAdminDto } from "./createUserAsAdminDto";
 export class CreateUserAsAdmin {
     private _userRepository: IUserRepository;
     private _roleRepository: IRoleRepository;
+    private _notificationService: INotificationService;
+    private _tokenService: ITokenService;
 
-    constructor(userRepository: IUserRepository, roleRepository: IRoleRepository) {
+    constructor(
+        userRepository: IUserRepository,
+        roleRepository: IRoleRepository,
+        notificationService: INotificationService,
+        tokenService: ITokenService
+    ) {
         this._userRepository = userRepository;
         this._roleRepository = roleRepository;
+        this._notificationService = notificationService;
+        this._tokenService = tokenService;
     }
 
     public async execute(dto: CreateUserAsAdminDto): Promise<void> {
@@ -25,6 +35,8 @@ export class CreateUserAsAdmin {
         const user: User = User.create(userName, dto.email, true, userRole, false);
 
         await this.userRepository.save(user);
+        // await this.notificationService.notifyNewBackOfficeUser(user.email, "");
+        logger.info(`Token para generar contraseña ${this.tokenService.passwordGenerationToken({ email: user.email })}`);
     }
 
     /**
@@ -41,5 +53,21 @@ export class CreateUserAsAdmin {
      */
     public get roleRepository(): IRoleRepository {
         return this._roleRepository;
+    }
+
+    /**
+     * Getter notificationService
+     * @return {INotificationService}
+     */
+    public get notificationService(): INotificationService {
+        return this._notificationService;
+    }
+
+    /**
+     * Getter tokenService
+     * @return {ITokenService}
+     */
+    public get tokenService(): ITokenService {
+        return this._tokenService;
     }
 }
