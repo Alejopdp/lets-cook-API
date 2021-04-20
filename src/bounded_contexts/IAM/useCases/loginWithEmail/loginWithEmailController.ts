@@ -1,4 +1,3 @@
-import { logger } from "../../../../../config";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { LoginWithEmail } from "./loginWithEmail";
 import { LoginWithEmailDto } from "./loginWithEmailDto";

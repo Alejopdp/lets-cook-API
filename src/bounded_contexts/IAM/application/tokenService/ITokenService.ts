@@ -1,4 +1,5 @@
 export interface ITokenService {
-    signLoginToken(payload: any, seed: any): string;
-    isLoginTokenVerified(token: string, seed: any): Promise<string | object>;
+    signLoginToken(payload: any): string;
+    isTokenVerified(token: string): Promise<string | object>;
+    passwordGenerationToken(payload: any): string;
 }
