@@ -31,7 +31,7 @@ export class LoginWithEmail {
             permissions: user.role.permissions,
         };
 
-        return LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload, "productionTokenSeed"), tokenPayload); // TO DO: Use env 4 token seed
+        return LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), tokenPayload); // TO DO: Use env 4 token seed
     }
 
     /**
