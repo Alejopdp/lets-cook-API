@@ -5,6 +5,7 @@ import { loginWithEmailController } from "../../useCases/loginWithEmail";
 import { middleware } from "../../../../shared/middleware";
 import { generateNewPasswordController } from "../../useCases/generateNewPassword";
 import { getUserByIdController } from "../../useCases/getUserById";
+import { updateUserController } from "../../useCases/updateUser";
 
 const userRouter = express.Router();
 
@@ -17,5 +18,8 @@ userRouter.get("/verify-token", middleware.ensureTokenValid(), (req, res) => res
 // POSTs
 userRouter.post("/generate-password", middleware.ensureTokenValid(), (req, res) => generateNewPasswordController.execute(req, res));
 userRouter.post("/", (req, res) => createUserAsAdminController.execute(req, res));
+
+// PUTs
+userRouter.put("/:id", (req, res) => updateUserController.execute(req, res));
 
 export { userRouter };
