@@ -4,10 +4,12 @@ import { getDataForGeneratingPasswordController } from "../../useCases/getDataFo
 import { loginWithEmailController } from "../../useCases/loginWithEmail";
 import { middleware } from "../../../../shared/middleware";
 import { generateNewPasswordController } from "../../useCases/generateNewPassword";
+import { getUserByIdController } from "../../useCases/getUserById";
 
 const userRouter = express.Router();
 
 // // GETs
+userRouter.get("/:id", (req, res) => getUserByIdController.execute(req, res));
 userRouter.get("/login", (req, res) => loginWithEmailController.execute(req, res));
 userRouter.get("/generate-password", middleware.ensureTokenValid(), (req, res) => getDataForGeneratingPasswordController.execute(req, res));
 userRouter.get("/verify-token", middleware.ensureTokenValid(), (req, res) => res.status(200));
