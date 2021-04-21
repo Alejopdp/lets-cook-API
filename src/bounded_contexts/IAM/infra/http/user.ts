@@ -10,6 +10,7 @@ const userRouter = express.Router();
 // // GETs
 userRouter.get("/login", (req, res) => loginWithEmailController.execute(req, res));
 userRouter.get("/generate-password", middleware.ensureTokenValid(), (req, res) => getDataForGeneratingPasswordController.execute(req, res));
+userRouter.get("/verify-token", middleware.ensureTokenValid(), (req, res) => res.status(200));
 
 // POSTs
 userRouter.post("/generate-password", middleware.ensureTokenValid(), (req, res) => generateNewPasswordController.execute(req, res));

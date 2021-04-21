@@ -1,12 +1,17 @@
 import { logger } from "../../../../../config";
+import { UseCase } from "../../../../core/domain/UseCase";
+import { Either, Failure, isFailure, isSuccess } from "../../../../core/logic/Result";
 import { ITokenService } from "../../application/tokenService/ITokenService";
 import { User } from "../../domain/user/User";
 import { UserPassword } from "../../domain/user/UserPassword";
 import { IUserRepository } from "../../infra/repositories/user/IUserRepository";
 import { LoginWithEmailDto } from "./loginWithEmailDto";
+import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser } from "./loginWithEmailErrors";
 import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
 
-export class LoginWithEmail {
+type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
+
+export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Response>> {
     private _userRepository: IUserRepository;
     private _tokenService: ITokenService;
 
@@ -15,14 +20,16 @@ export class LoginWithEmail {
         this._tokenService = tokenService;
     }
 
-    public async execute(dto: LoginWithEmailDto): Promise<any> {
+    public async execute(dto: LoginWithEmailDto): Promise<Response> {
         const user: User | undefined = await this.userRepository.findByEmail(dto.email);
 
-        if (!user) throw new Error("Usuario y/o contraseña incorrecta");
+        if (!user) return isFailure(invalidLoginArguments());
 
         const incomingPassword: UserPassword = UserPassword.create(dto.password, false);
 
-        if (!user.password?.equals(incomingPassword)) throw new Error("Usuario y/o contraseña incorrecta");
+        if (!user.password?.equals(incomingPassword)) return isFailure(invalidLoginArguments());
+
+        if (!user.isActivated) return isFailure(inactiveUser());
 
         const tokenPayload = {
             firstName: user.name.firstName,
@@ -31,7 +38,7 @@ export class LoginWithEmail {
             permissions: user.role.permissions,
         };
 
-        return LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), tokenPayload); // TO DO: Use env 4 token seed
+        return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), tokenPayload));
     }
 
     /**
