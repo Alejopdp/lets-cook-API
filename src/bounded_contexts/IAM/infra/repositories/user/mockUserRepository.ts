@@ -27,6 +27,9 @@ export class MockUserRepository implements IUserRepository {
         return this.database.find((u) => u.email === email.toLowerCase());
     }
 
+    public async delete(userId: UserId): Promise<void> {
+        this.database = this.database.filter((u) => !u.id.equals(userId));
+    }
     /**
      * Getter database
      * @return {User[]}
