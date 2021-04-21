@@ -10,7 +10,7 @@ export class MockUserRepository implements IUserRepository {
     }
 
     public async save(user: User): Promise<void> {
-        const filteredDatabase = this.database.filter((u) => u.id.equals(user.id));
+        const filteredDatabase = this.database.filter((u) => !u.id.equals(user.id));
 
         this.database = [...filteredDatabase, user];
     }

@@ -8,21 +8,23 @@ import { getUserByIdController } from "../../useCases/getUserById";
 import { updateUserController } from "../../useCases/updateUser";
 import { getAllUsersController } from "../../useCases/getAllUsers";
 import { deleteUserController } from "../../useCases/deleteUser";
+import { forgotPasswordController } from "../../useCases/forgotPassword";
 
 const userRouter = express.Router();
 
 // // GETs
-userRouter.get("/:id", (req, res) => getUserByIdController.execute(req, res));
 userRouter.get("/login", (req, res) => loginWithEmailController.execute(req, res));
 userRouter.get("/generate-password", middleware.ensureTokenValid(), (req, res) => getDataForGeneratingPasswordController.execute(req, res));
 userRouter.get("/verify-token", middleware.ensureTokenValid(), (req, res) => res.status(200));
 userRouter.get("/", (req, res) => getAllUsersController.execute(req, res));
+userRouter.get("/:id", (req, res) => getUserByIdController.execute(req, res));
 
 // POSTs
 userRouter.post("/generate-password", middleware.ensureTokenValid(), (req, res) => generateNewPasswordController.execute(req, res));
 userRouter.post("/", (req, res) => createUserAsAdminController.execute(req, res));
 
 // PUTs
+userRouter.put("/forgot-password/:id", (req, res) => forgotPasswordController.execute(req, res));
 userRouter.put("/:id", (req, res) => updateUserController.execute(req, res));
 
 // DELETEs

@@ -10,6 +10,9 @@ export class NodemailerService implements INotificationService {
     constructor(transporter: Mail) {
         this._transporter = transporter;
     }
+    notifyUserToGeneratePassword(email: string, redirectUrl: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
     public static create(user: string | undefined, password: string | undefined) {
         const options: SMTPTransport.Options = {
@@ -36,7 +39,7 @@ export class NodemailerService implements INotificationService {
         return mailOptions;
     }
 
-    public async notifyNewBackOfficeUser(email: string, redirectUrl: string): Promise<void> {
+    public async notifyNewBackOfficeUserToGeneratePassword(email: string, redirectUrl: string): Promise<void> {
         // TO DO: Pass redirectUrl for generating password
         await this.nodemailer.sendMail(this.getMailOptions(email, "Tu usuario fue creado"));
     }

@@ -85,6 +85,12 @@ export class User extends Entity<User> {
 
     public changePassword(aPassword: UserPassword): void {
         this.password = aPassword;
+        this.isActivated = true;
+    }
+
+    public requestChangePassword(): void {
+        this.password = undefined;
+        this.isActivated = false;
     }
 
     /**

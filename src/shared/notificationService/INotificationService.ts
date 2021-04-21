@@ -1,3 +1,4 @@
 export interface INotificationService {
-    notifyNewBackOfficeUser(email: string, redirectUrl: string): Promise<void>;
+    notifyNewBackOfficeUserToGeneratePassword(email: string, redirectUrl: string): Promise<void>;
+    notifyUserToGeneratePassword(email: string, redirectUrl: string): Promise<void>;
 }

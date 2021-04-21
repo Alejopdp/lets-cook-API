@@ -25,11 +25,11 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
 
         if (!user) return isFailure(invalidLoginArguments());
 
+        if (!user.isActivated) return isFailure(inactiveUser());
+
         const incomingPassword: UserPassword = UserPassword.create(dto.password, false);
 
         if (!user.password?.equals(incomingPassword)) return isFailure(invalidLoginArguments());
-
-        if (!user.isActivated) return isFailure(inactiveUser());
 
         const tokenPayload = {
             firstName: user.name.firstName,
