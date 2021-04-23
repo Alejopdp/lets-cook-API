@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { Either, Failure } from "../../../../core/logic/Result";
 import { LoginWithEmail } from "./loginWithEmail";

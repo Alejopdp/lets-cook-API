@@ -13,13 +13,13 @@ import { forgotPasswordController } from "../../useCases/forgotPassword";
 const userRouter = express.Router();
 
 // // GETs
-userRouter.get("/login", (req, res) => loginWithEmailController.execute(req, res));
 userRouter.get("/generate-password", middleware.ensureTokenValid(), (req, res) => getDataForGeneratingPasswordController.execute(req, res));
-userRouter.get("/verify-token", middleware.ensureTokenValid(), (req, res) => res.status(200));
+userRouter.get("/verify-token", middleware.ensureTokenValid(), (req, res) => res.status(200).json({}));
 userRouter.get("/", (req, res) => getAllUsersController.execute(req, res));
 userRouter.get("/:id", (req, res) => getUserByIdController.execute(req, res));
 
 // POSTs
+userRouter.post("/login", (req, res) => loginWithEmailController.execute(req, res));
 userRouter.post("/generate-password", middleware.ensureTokenValid(), (req, res) => generateNewPasswordController.execute(req, res));
 userRouter.post("/", (req, res) => createUserAsAdminController.execute(req, res));
 
