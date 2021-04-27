@@ -14,6 +14,10 @@ export class RecipeCookDuration implements IValueObject<RecipeCookDuration> {
         return this.timeValue === aRecipeCookDuration.timeValue && this.timeUnit === aRecipeCookDuration.timeUnit;
     }
 
+    public value(): string {
+        return `${this.timeValue}${this.timeUnit}`;
+    }
+
     /**
      * Getter timeValue
      * @return {number}

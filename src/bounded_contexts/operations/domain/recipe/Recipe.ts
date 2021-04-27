@@ -5,6 +5,7 @@ import { RecipeNutritionalData } from "./RecipeNutritionalData/RecipeNutritional
 import { RecipeTag } from "./RecipeTag";
 import { RecipeVariant } from "./RecipeVariant/RecipeVariant";
 import * as _ from "lodash";
+import { Month } from "./Months";
 
 export class Recipe extends Entity<Recipe> {
     private _recipeGeneralData: RecipeGeneralData;
@@ -13,12 +14,13 @@ export class Recipe extends Entity<Recipe> {
     private _recipeBackOfficeTags: RecipeTag[];
     private _recipeNutritionalData: RecipeNutritionalData;
 
+
     constructor(
         recipeGeneralData: RecipeGeneralData,
         recipeVaraints: RecipeVariant[],
         recipeImageTags: RecipeTag[],
         recipeBackOfficeTags: RecipeTag[],
-        recipeNutritionalData: RecipeNutritionalData,
+        recipeNutritionalData: RecipeNutritionalData
         id?: RecipeId
     ) {
         super(id);

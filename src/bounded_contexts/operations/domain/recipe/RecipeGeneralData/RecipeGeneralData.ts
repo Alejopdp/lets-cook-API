@@ -1,10 +1,11 @@
+import { IValueObject } from "../../../../../core/domain/ValueObject";
 import { RecipeCookDuration } from "./RecipeCookDuration";
 import { RecipeDescription } from "./RecipeDescription";
 import { RecipeDifficultyLevel } from "./RecipeDifficultyLevel";
 import { RecipeSku } from "./RecipeSku";
 import { RecipeWeight } from "./RecipeWeight";
 
-export class RecipeGeneralData {
+export class RecipeGeneralData implements IValueObject<RecipeGeneralData> {
     private _name: string;
     private _recipeDescription: RecipeDescription;
     private _cookDuration: RecipeCookDuration;
@@ -29,6 +30,18 @@ export class RecipeGeneralData {
         this._recipeWeight = recipeWeight;
         this._recipeSku = recipeSku;
         this._imageUrl = imageUrl;
+    }
+
+    public equals(aRecipeGeneralData: RecipeGeneralData): boolean {
+        return (
+            this.name === aRecipeGeneralData.name &&
+            this.recipeDescription.equals(aRecipeGeneralData.recipeDescription) &&
+            this.cookDuration.equals(aRecipeGeneralData.cookDuration) &&
+            this.difficultyLevel === aRecipeGeneralData.difficultyLevel &&
+            this.recipeWeight.equals(aRecipeGeneralData.recipeWeight) &&
+            this.recipeSku.equals(aRecipeGeneralData.recipeSku) &&
+            this.imageUrl === aRecipeGeneralData.imageUrl
+        );
     }
 
     /**

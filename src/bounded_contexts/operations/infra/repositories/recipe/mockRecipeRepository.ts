@@ -19,6 +19,10 @@ export class MockRecipeRepository implements IRecipeRepository {
         return this.database.find((r) => r.id.equals(recipeId));
     }
 
+    public async findAll(): Promise<Recipe[]> {
+        return this.database;
+    }
+
     public async findBy(conditions: any): Promise<Recipe[]> {
         throw new Error("Method not implemented.");
     }

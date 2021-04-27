@@ -23,12 +23,12 @@ export class S3StorageService implements IStorageService {
         await this.s3.upload(params).promise();
     }
 
-    public async savePlanImage(planName: string, fileName: string, file?: ReadStream): Promise<string> {
+    public async savePlanImage(planName: string, fileExtension: string, file?: ReadStream): Promise<string> {
         try {
             if (!file) return "";
             const planNameWithoutSpaces = planName.replace(/\s/g, "_");
 
-            const objectKey = `plans/${planNameWithoutSpaces}/${planNameWithoutSpaces}${path.extname(fileName)}`;
+            const objectKey = `plans/${planNameWithoutSpaces}/${planNameWithoutSpaces}${fileExtension}`;
             await this.uploadFile(objectKey, file);
 
             return objectKey;
@@ -38,8 +38,19 @@ export class S3StorageService implements IStorageService {
         }
     }
 
-    public async saveRecipeImage(): Promise<string> {
-        throw new Error("Method not implemented.");
+    public async saveRecipeImage(recipeName: string, fileName: string, file?: ReadStream): Promise<string> {
+        try {
+            if (!file) return "";
+            const recipeNameWithoutSpaces = recipeName.replace(/\s/g, "_");
+
+            const objectKey = `recipes/${recipeNameWithoutSpaces}/${recipeNameWithoutSpaces}${path.extname(fileName)}`;
+            await this.uploadFile(objectKey, file);
+
+            return objectKey;
+        } catch (error) {
+            logger.error(error);
+            throw new Error("Al cargar la imagen de la receta");
+        }
     }
 
     /**

@@ -24,7 +24,8 @@ export class CreatePlan {
             dto.isActive,
             dto.planType,
             dto.planVariants,
-            dto.availablePlanFrecuencies
+            dto.availablePlanFrecuencies,
+            dto.hasRecipes
         );
 
         const imageUrl = await this.storageService.savePlanImage(dto.planName, dto.planImageFileName, dto.planImage);

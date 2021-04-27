@@ -26,6 +26,10 @@ export class MockPlanRepository implements IPlanRepository {
         throw new Error("Method not implemented.");
     }
 
+    public async findAllWithRecipesFlag(): Promise<Plan[]> {
+        return this.database.filter((plan) => plan.hasRecipes);
+    }
+
     public async delete(planId: PlanId): Promise<void> {
         this.database = this.database.filter((p) => p.id.equals(planId));
     }

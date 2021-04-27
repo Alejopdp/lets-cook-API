@@ -15,6 +15,7 @@ export class Plan extends Entity<Plan> {
     private _type: PlanType;
     private _planVariants: PlanVariant[];
     private _availablePlanFrecuencies: PlanFrequency[];
+    private _hasRecipes: boolean;
 
     protected constructor(
         name: string,
@@ -25,6 +26,7 @@ export class Plan extends Entity<Plan> {
         type: PlanType,
         planVariants: PlanVariant[],
         availablePlanFrecuencies: PlanFrequency[],
+        hasRecipes: boolean,
         id?: PlanId
     ) {
         super(id);
@@ -35,6 +37,7 @@ export class Plan extends Entity<Plan> {
         this._isActive = isActive;
         this._type = type;
         this._planVariants = planVariants;
+        this._hasRecipes = hasRecipes;
         this._availablePlanFrecuencies = availablePlanFrecuencies;
     }
 
@@ -47,6 +50,7 @@ export class Plan extends Entity<Plan> {
         type: PlanType,
         planVariants: PlanVariant[],
         availablePlanFrecuencies: PlanFrequency[],
+        hasRecipes: boolean,
         id?: PlanId
     ): Plan {
         const guardedProps = [
@@ -64,7 +68,7 @@ export class Plan extends Entity<Plan> {
         if (planVariants.length < 1) throw new Error("No puede crear un plan sin ninguna variante");
         if (availablePlanFrecuencies.length < 1) throw new Error("Hay que ingresar al menos 1 frecuencia disponible para el plan");
 
-        return new Plan(name, description, planSku, imageUrl, isActive, type, planVariants, availablePlanFrecuencies, id);
+        return new Plan(name, description, planSku, imageUrl, isActive, type, planVariants, availablePlanFrecuencies, hasRecipes, id);
     }
 
     /**
@@ -132,6 +136,14 @@ export class Plan extends Entity<Plan> {
     }
 
     /**
+     * Getter hasRecipes
+     * @return {boolean}
+     */
+    public get hasRecipes(): boolean {
+        return this._hasRecipes;
+    }
+
+    /**
      * Setter name
      * @param {string} value
      */
@@ -193,5 +205,13 @@ export class Plan extends Entity<Plan> {
      */
     public set availablePlanFrecuencies(value: PlanFrequency[]) {
         this._availablePlanFrecuencies = value;
+    }
+
+    /**
+     * Setter hasRecipes
+     * @param {boolean} value
+     */
+    public set hasRecipes(value: boolean) {
+        this._hasRecipes = value;
     }
 }
