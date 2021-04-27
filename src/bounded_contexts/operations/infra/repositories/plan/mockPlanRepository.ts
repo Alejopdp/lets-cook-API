@@ -18,6 +18,10 @@ export class MockPlanRepository implements IPlanRepository {
         return this.database.find((p) => p.id.equals(planId));
     }
 
+    public async findAll(): Promise<Plan[]> {
+        return this.database;
+    }
+
     public async findBy(conditions: any): Promise<Plan[]> {
         throw new Error("Method not implemented.");
     }

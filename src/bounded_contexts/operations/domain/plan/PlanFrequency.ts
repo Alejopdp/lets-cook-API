@@ -1,6 +1,6 @@
 export enum PlanFrequency {
-    OneTime = "Por única vez",
-    Weekly = "Semanal",
-    Biweekly = "Quincenal",
-    Monthly = "Mensual",
+    PorUnicaVez = "Por única vez",
+    Semanal = "Semanal",
+    Quincenal = "Quincenal",
+    Mensual = "Mensual",
 }

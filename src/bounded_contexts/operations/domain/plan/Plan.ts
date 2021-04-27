@@ -50,8 +50,9 @@ export class Plan extends Entity<Plan> {
         id?: PlanId
     ): Plan {
         const guardedProps = [
-            { argument: name, argumentName: "Nombre completo" },
-            { argument: description, argumentName: "Correo electrónico" },
+            { argument: name, argumentName: "Nombre" },
+            { argument: description, argumentName: "Descripción" },
+            { argument: type, argumentName: "Tipo de plan" },
         ];
 
         const guardResult = Guard.againstNullOrUndefinedOrEmptyBulk(guardedProps);
