@@ -14,13 +14,12 @@ export class Recipe extends Entity<Recipe> {
     private _recipeBackOfficeTags: RecipeTag[];
     private _recipeNutritionalData: RecipeNutritionalData;
 
-
     constructor(
         recipeGeneralData: RecipeGeneralData,
         recipeVaraints: RecipeVariant[],
         recipeImageTags: RecipeTag[],
         recipeBackOfficeTags: RecipeTag[],
-        recipeNutritionalData: RecipeNutritionalData
+        recipeNutritionalData: RecipeNutritionalData,
         id?: RecipeId
     ) {
         super(id);
