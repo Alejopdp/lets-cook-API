@@ -47,7 +47,7 @@ describe("[DOMAIN] - Recipe tests", () => {
 
         describe("Recipe without variations", () => {
             it("Should throw", function () {
-                expect(() => new Recipe(recipeGeneralData, [], [], [], recipeNutritionalData)).to.throw();
+                expect(() => new Recipe(recipeGeneralData, [], [], [], recipeNutritionalData, [])).to.throw();
             });
         });
 
@@ -79,7 +79,9 @@ describe("[DOMAIN] - Recipe tests", () => {
             });
 
             it("Should be created correctly", function () {
-                expect(() => new Recipe(recipeGeneralData, [recipeVariant1, recipeVariant2], [], [], recipeNutritionalData)).to.not.throw();
+                expect(
+                    () => new Recipe(recipeGeneralData, [recipeVariant1, recipeVariant2], [], [], recipeNutritionalData, [])
+                ).to.not.throw();
             });
         });
 
@@ -117,7 +119,7 @@ describe("[DOMAIN] - Recipe tests", () => {
             before(function () {
                 tag1 = new RecipeTag("Mas vendido");
                 tag2 = new RecipeTag("Mas vendido");
-                recipe = new Recipe(recipeGeneralData, [], [tag1, tag2], [], recipeNutritionalData);
+                recipe = new Recipe(recipeGeneralData, [], [tag1, tag2], [], recipeNutritionalData, []);
             });
 
             it("Should create the recipe removing the duplicated recipe tags", function () {
@@ -132,7 +134,7 @@ describe("[DOMAIN] - Recipe tests", () => {
             before(function () {
                 tag1 = new RecipeTag("Mas vendido");
                 tag2 = new RecipeTag("Mas vendido");
-                recipe = new Recipe(recipeGeneralData, [], [], [tag1, tag2], recipeNutritionalData);
+                recipe = new Recipe(recipeGeneralData, [], [], [tag1, tag2], recipeNutritionalData, []);
             });
 
             it("Should create the recipe removing the duplicated recipe tags", function () {

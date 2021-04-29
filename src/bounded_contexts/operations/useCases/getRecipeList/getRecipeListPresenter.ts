@@ -1,4 +1,6 @@
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Recipe } from "../../domain/recipe/Recipe";
+import { Week } from "../../domain/week/Week";
 
 export class GetRecipeListPresenter {
     public static present(recipes: Recipe[]): any {
@@ -17,7 +19,15 @@ export class GetRecipeListPresenter {
                 weight: recipe.recipeGeneralData.recipeWeight.value(),
                 backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
                 imageTags: recipe.recipeImageTags.map((tag) => tag.name),
-
+                availableWeeks: recipe.availableWeeks.map((week: Week) => {
+                    return {
+                        id: week.id.value,
+                        label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
+                            week.maxDay
+                        )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
+                    };
+                }),
+                availableMonths: recipe.availableMonths,
                 // TO DO: Calendar
             });
         }

@@ -15,6 +15,7 @@ export interface CreateRecipeDto {
     imageTags: string[];
     nutritionalInfo: string[];
     relatedPlans: number[] | string[];
+    availableWeeksIds: number[] | string[];
     availableMonths: Month[];
     backOfficeTags: string[];
 }

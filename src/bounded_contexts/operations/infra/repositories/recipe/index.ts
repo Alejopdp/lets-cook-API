@@ -1,4 +1,5 @@
 import { Ingredient } from "../../../domain/ingredient/ingredient";
+import { Month } from "../../../domain/recipe/Months";
 import { Recipe } from "../../../domain/recipe/Recipe";
 import { RecipeCookDuration } from "../../../domain/recipe/RecipeGeneralData/RecipeCookDuration";
 import { RecipeDescription } from "../../../domain/recipe/RecipeGeneralData/RecipeDescription";
@@ -13,6 +14,7 @@ import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { RecipeVariant } from "../../../domain/recipe/RecipeVariant/RecipeVariant";
 import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/RecipeVariantRestriction";
 import { RecipeVariantSku } from "../../../domain/recipe/RecipeVariant/RecipeVariantSku";
+import { week1, week2 } from "../week";
 import { IRecipeRepository } from "./IRecipeRepository";
 import { MockRecipeRepository } from "./mockRecipeRepository";
 
@@ -54,6 +56,8 @@ const burgerHallouli: Recipe = new Recipe(
     [masVendida],
     [tagParaFiltro1, tagParaFiltro2],
     new RecipeNutritionalData([]),
+    [week1, week2],
+    [Month.Abril, Month.Mayo, Month.Marzo, Month.Agosto],
     burgerRecipeId
 );
 
@@ -79,6 +83,8 @@ const arepasDeCrhistian: Recipe = new Recipe(
     [masVendida, masRica],
     [tagParaFiltro1],
     new RecipeNutritionalData([]),
+    [week1, week2],
+    [Month.Abril, Month.Mayo, Month.Marzo, Month.Agosto],
     arepasRecipeId
 );
 

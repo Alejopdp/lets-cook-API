@@ -6,6 +6,7 @@ import { RecipeTag } from "./RecipeTag";
 import { RecipeVariant } from "./RecipeVariant/RecipeVariant";
 import * as _ from "lodash";
 import { Month } from "./Months";
+import { Week } from "../week/Week";
 
 export class Recipe extends Entity<Recipe> {
     private _recipeGeneralData: RecipeGeneralData;
@@ -13,6 +14,8 @@ export class Recipe extends Entity<Recipe> {
     private _recipeImageTags: RecipeTag[];
     private _recipeBackOfficeTags: RecipeTag[];
     private _recipeNutritionalData: RecipeNutritionalData;
+    private _availableWeeks: Week[];
+    private _availableMonths: Month[];
 
     constructor(
         recipeGeneralData: RecipeGeneralData,
@@ -20,6 +23,8 @@ export class Recipe extends Entity<Recipe> {
         recipeImageTags: RecipeTag[],
         recipeBackOfficeTags: RecipeTag[],
         recipeNutritionalData: RecipeNutritionalData,
+        availableWeeks: Week[],
+        availableMonths: Month[],
         id?: RecipeId
     ) {
         super(id);
@@ -28,6 +33,8 @@ export class Recipe extends Entity<Recipe> {
         this._recipeImageTags = _.uniqBy(recipeImageTags, (tag) => tag.name);
         this._recipeBackOfficeTags = _.uniqBy(recipeBackOfficeTags, (tag) => tag.name);
         this._recipeNutritionalData = recipeNutritionalData;
+        this._availableWeeks = availableWeeks;
+        this._availableMonths = availableMonths;
     }
 
     /**
@@ -71,6 +78,22 @@ export class Recipe extends Entity<Recipe> {
     }
 
     /**
+     * Getter availableWeeks
+     * @return {Week[]}
+     */
+    public get availableWeeks(): Week[] {
+        return this._availableWeeks;
+    }
+
+    /**
+     * Getter availableMonths
+     * @return {Month[]}
+     */
+    public get availableMonths(): Month[] {
+        return this._availableMonths;
+    }
+
+    /**
      * Setter recipeGeneralData
      * @param {RecipeGeneralData} value
      */
@@ -108,5 +131,21 @@ export class Recipe extends Entity<Recipe> {
      */
     public set recipeNutritionalData(value: RecipeNutritionalData) {
         this._recipeNutritionalData = value;
+    }
+
+    /**
+     * Setter availableWeeks
+     * @param {Week[]} value
+     */
+    public set availableWeeks(value: Week[]) {
+        this._availableWeeks = value;
+    }
+
+    /**
+     * Setter availableMonths
+     * @param {Month[]} value
+     */
+    public set availableMonths(value: Month[]) {
+        this._availableMonths = value;
     }
 }
