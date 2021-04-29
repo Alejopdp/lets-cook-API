@@ -28,7 +28,6 @@ export class GetRecipeListPresenter {
                     };
                 }),
                 availableMonths: recipe.availableMonths,
-                // TO DO: Calendar
             });
         }
         return presentedRecipes;
