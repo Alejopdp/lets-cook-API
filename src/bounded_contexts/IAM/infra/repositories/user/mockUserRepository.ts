@@ -10,7 +10,7 @@ export class MockUserRepository implements IUserRepository {
     }
 
     public async save(user: User): Promise<void> {
-        const filteredDatabase = this.database.filter((u) => u.id.equals(user.id));
+        const filteredDatabase = this.database.filter((u) => !u.id.equals(user.id));
 
         this.database = [...filteredDatabase, user];
     }
@@ -25,6 +25,10 @@ export class MockUserRepository implements IUserRepository {
 
     public async findByEmail(email: string): Promise<User | undefined> {
         return this.database.find((u) => u.email === email.toLowerCase());
+    }
+
+    public async delete(id: UserId): Promise<void> {
+        this.database = this.database.filter((user) => !user.id.equals(id));
     }
 
     /**

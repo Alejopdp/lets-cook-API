@@ -18,7 +18,7 @@ export class UpdateUserController extends BaseController {
                 id: parseInt(this.req.params.id),
                 firstName: this.req.body.firstName,
                 lastName: this.req.body.lastName,
-                roleTitle: this.req.body.roleTitle,
+                roleTitle: this.req.body.role,
             };
 
             const result: Either<Failure<UpdateUserErrors>, any> = await this.updateUser.execute(dto);

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { logger } from "../../../config";
 import { jwtTokenService } from "../../bounded_contexts/IAM/application/tokenService";
 import { ITokenService } from "../../bounded_contexts/IAM/application/tokenService/ITokenService";
 const rateLimit = require("express-rate-limit");
