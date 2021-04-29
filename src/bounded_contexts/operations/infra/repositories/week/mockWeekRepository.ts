@@ -1,3 +1,4 @@
+import { logger } from "../../../../../../config";
 import { Week } from "../../../domain/week/Week";
 import { WeekId } from "../../../domain/week/WeekId";
 import { IWeekRepository } from "./IWeekRepository";
