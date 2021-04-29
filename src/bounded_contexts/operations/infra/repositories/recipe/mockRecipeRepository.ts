@@ -1,5 +1,7 @@
+import _ from "lodash";
 import { Recipe } from "../../../domain/recipe/Recipe";
 import { RecipeId } from "../../../domain/recipe/RecipeId";
+import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { IRecipeRepository } from "./IRecipeRepository";
 
 export class MockRecipeRepository implements IRecipeRepository {
@@ -21,6 +23,10 @@ export class MockRecipeRepository implements IRecipeRepository {
 
     public async findAll(): Promise<Recipe[]> {
         return this.database;
+    }
+
+    public async findAllBackOfficeTags(): Promise<RecipeTag[]> {
+        return _.uniq(_.flatten(this.database.map((recipe) => recipe.recipeBackOfficeTags)));
     }
 
     public async findBy(conditions: any): Promise<Recipe[]> {

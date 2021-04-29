@@ -1,18 +1,13 @@
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Ingredient } from "../../domain/ingredient/ingredient";
 import { Plan } from "../../domain/plan/Plan";
+import { Week } from "../../domain/week/Week";
 
 export class GetDataForCreatingARecipePresenter {
-    public static present(plans: Plan[], ingredients: Ingredient[]): any {
+    public static present(plans: Plan[], ingredients: Ingredient[], weeks: Week[]): any {
         const presentedPlans = [];
         const presentedIngredients = [];
-        const weeks = [
-            { id: 1, label: "10-17 Abril" },
-            { id: 2, label: "18-23 Abril" },
-            { id: 3, label: "26-03 Mayo" },
-            { id: 4, label: "04-11 Mayo" },
-            { id: 5, label: "12-19 Mayo" },
-            { id: 6, label: "20-27 Mayo" },
-        ];
+        const presentedWeeks = [];
 
         for (let plan of plans) {
             presentedPlans.push({
@@ -25,6 +20,15 @@ export class GetDataForCreatingARecipePresenter {
             presentedIngredients.push(ingredient.name);
         }
 
-        return { plans: presentedPlans, ingredients: presentedIngredients, weeks };
+        for (let week of weeks) {
+            presentedWeeks.push({
+                id: week.id.value,
+                label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
+                    week.maxDay
+                )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
+            });
+        }
+
+        return { plans: presentedPlans, ingredients: presentedIngredients, weeks: presentedWeeks };
     }
 }

@@ -3,6 +3,7 @@ import multer from "multer";
 import { createRecipeController } from "../../useCases/createRecipe";
 import { getDataForCreatingARecipeController } from "../../useCases/getDataForCreatingARecipe";
 import { getRecipeByIdController } from "../../useCases/getRecipeById";
+import { getRecipeFiltersController } from "../../useCases/getRecipeFilters";
 import { getRecipeListController } from "../../useCases/getRecipeList";
 import { updateRecipeController } from "../../useCases/updateRecipe";
 
@@ -15,6 +16,7 @@ const options: multer.Options = {
 // GETs
 recipeRouter.get("/", (req, res) => getRecipeListController.execute(req, res));
 recipeRouter.get("/get-data-for-creation", (req, res) => getDataForCreatingARecipeController.execute(req, res));
+recipeRouter.get("/filters", (req, res) => getRecipeFiltersController.execute(req, res));
 recipeRouter.get("/:id", (req, res) => getRecipeByIdController.execute(req, res));
 
 // POSTs
