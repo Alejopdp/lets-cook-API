@@ -1,5 +1,4 @@
 import { BaseController } from "../../../../core/infra/BaseController";
-import { Permission } from "../../domain/permission/Permission";
 import { CreateUserAsAdmin } from "./createUserAsAdmin";
 import { CreateUserAsAdminDto } from "./createUserAsAdminDto";
 
@@ -17,7 +16,7 @@ export class CreateUserAsAdminController extends BaseController {
                 email: this.req.body.email,
                 firstName: this.req.body.firstName,
                 lastName: this.req.body.lastName,
-                roleTitle: this.req.body.roleTitle,
+                roleTitle: this.req.body.role,
             };
 
             await this.useCase.execute(dto);
