@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { createPlanController } from "../../useCases/createPlan";
+import { deletePlanController } from "../../useCases/deletePlan";
 import { getPlanListController } from "../../useCases/getPlanList";
 import { togglePlanStateController } from "../../useCases/togglePlanState";
 
@@ -18,5 +19,8 @@ planRouter.put("/toggle-state/:id", (req, res) => togglePlanStateController.exec
 
 // POSTs
 planRouter.post("/", multer(options).single("planImage"), (req, res) => createPlanController.execute(req, res));
+
+// DELETEs
+planRouter.delete("/:id", (req, res) => deletePlanController.execute(req, res));
 
 export { planRouter };

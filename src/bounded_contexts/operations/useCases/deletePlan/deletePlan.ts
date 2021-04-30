@@ -1,25 +1,22 @@
-import { logger } from "../../../../../config";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanId } from "../../domain/plan/PlanId";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
-import { TogglePlanStateDto } from "./togglePlanStateDto";
+import { DeletePlanDto } from "./deletePlanDto";
 
-export class TogglePlanState {
+export class DeletePlan {
     private _planRepository: IPlanRepository;
 
     constructor(planRepository: IPlanRepository) {
         this._planRepository = planRepository;
     }
 
-    public async execute(dto: TogglePlanStateDto): Promise<any> {
+    public async execute(dto: DeletePlanDto): Promise<void> {
         const planId: PlanId = new PlanId(dto.planId);
         const plan: Plan | undefined = await this.planRepository.findById(planId);
 
-        if (!plan) throw new Error("El plan indicado no existe");
+        // TO DO: validations
 
-        plan.toggleState();
-
-        await this.planRepository.save(plan);
+        await this.planRepository.delete(planId);
     }
 
     /**

@@ -31,7 +31,7 @@ export class MockPlanRepository implements IPlanRepository {
     }
 
     public async delete(planId: PlanId): Promise<void> {
-        this.database = this.database.filter((p) => p.id.equals(planId));
+        this.database = this.database.filter((p) => !p.id.equals(planId));
     }
 
     /**

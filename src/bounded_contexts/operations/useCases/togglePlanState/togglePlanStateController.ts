@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { TogglePlanState } from "./togglePlanState";
 import { TogglePlanStateDto } from "./togglePlanStateDto";
@@ -20,6 +21,7 @@ export class TogglePlanStateController extends BaseController {
 
             return this.ok(this.res);
         } catch (error) {
+            logger.error(error);
             return this.fail(error);
         }
     }
