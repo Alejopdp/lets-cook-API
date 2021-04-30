@@ -71,6 +71,12 @@ export class Plan extends Entity<Plan> {
         return new Plan(name, description, planSku, imageUrl, isActive, type, planVariants, availablePlanFrecuencies, hasRecipes, id);
     }
 
+    public toggleState(): void {
+        // TO DO: Validate existing subscriptions with this plan?
+
+        this.isActive = !this.isActive;
+    }
+
     /**
      * Getter name
      * @return {string}

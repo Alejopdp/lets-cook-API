@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { createPlanController } from "../../useCases/createPlan";
 import { getPlanListController } from "../../useCases/getPlanList";
+import { togglePlanStateController } from "../../useCases/togglePlanState";
 
 const planRouter = express.Router();
 
@@ -11,6 +12,9 @@ const options: multer.Options = {
 
 // GETs
 planRouter.get("/", (req, res) => getPlanListController.execute(req, res));
+
+// PUT
+planRouter.put("/toggle-state/:id", (req, res) => togglePlanStateController.execute(req, res));
 
 // POSTs
 planRouter.post("/", multer(options).single("planImage"), (req, res) => createPlanController.execute(req, res));
