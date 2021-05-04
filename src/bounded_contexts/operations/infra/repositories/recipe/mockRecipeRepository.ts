@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { logger } from "../../../../../../config";
 import { Recipe } from "../../../domain/recipe/Recipe";
 import { RecipeId } from "../../../domain/recipe/RecipeId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
@@ -34,7 +35,7 @@ export class MockRecipeRepository implements IRecipeRepository {
     }
 
     public async delete(recipeId: RecipeId): Promise<void> {
-        this.database = this.database.filter((r) => r.id.equals(recipeId));
+        this.database = this.database.filter((r) => !r.id.equals(recipeId));
     }
 
     /**

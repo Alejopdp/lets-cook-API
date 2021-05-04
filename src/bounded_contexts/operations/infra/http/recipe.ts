@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { createRecipeController } from "../../useCases/createRecipe";
+import { deleteRecipeController } from "../../useCases/deleteRecipe";
 import { getDataForCreatingARecipeController } from "../../useCases/getDataForCreatingARecipe";
 import { getRecipeByIdController } from "../../useCases/getRecipeById";
 import { getRecipeFiltersController } from "../../useCases/getRecipeFilters";
@@ -24,5 +25,8 @@ recipeRouter.post("/", multer(options).single("recipeImage"), (req, res) => crea
 
 // PUTs
 recipeRouter.put("/:id", multer(options).single("recipeImage"), (req, res) => updateRecipeController.execute(req, res));
+
+// DELETEs
+recipeRouter.delete("/:id", (req, res) => deleteRecipeController.execute(req, res));
 
 export { recipeRouter };
