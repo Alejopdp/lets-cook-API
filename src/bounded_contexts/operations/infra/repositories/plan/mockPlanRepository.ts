@@ -1,5 +1,6 @@
 import { Plan } from "../../../domain/plan/Plan";
 import { PlanId } from "../../../domain/plan/PlanId";
+import { PlanType } from "../../../domain/plan/PlanType/PlanType";
 import { IPlanRepository } from "./IPlanRepository";
 
 export class MockPlanRepository implements IPlanRepository {
@@ -20,6 +21,10 @@ export class MockPlanRepository implements IPlanRepository {
 
     public async findAll(): Promise<Plan[]> {
         return this.database;
+    }
+
+    public async findAdditionalPlanList(): Promise<Plan[]> {
+        return this.database.filter((plan) => plan.type === PlanType.Adicional);
     }
 
     public async findBy(conditions: any): Promise<Plan[]> {

@@ -2,6 +2,9 @@ import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanSku } from "../../domain/plan/PlanSku";
+import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
+import { PlanVariantAttribute } from "../../domain/plan/PlanVariant/PlanVariantAttribute";
+import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { CreatePlanDto } from "./createPlanDto";
 
@@ -16,6 +19,55 @@ export class CreatePlan {
 
     public async execute(dto: CreatePlanDto): Promise<void> {
         const planSku: PlanSku = new PlanSku(dto.planSku);
+
+        const planVariants: PlanVariant[] = [];
+
+        for (let variant of dto.planVariants) {
+            var attributes: PlanVariantAttribute[] = [];
+
+            attributes = Object.entries(variant).map((entry) => new PlanVariantAttribute(entry[0], entry[1] as string));
+
+            if (dto.hasRecipes) {
+                attributes = attributes.filter(
+                    (attr) =>
+                        attr.key.toLowerCase() !== "personas" &&
+                        attr.key.toLowerCase() !== "recetas" &&
+                        attr.key.toLowerCase() !== "id" &&
+                        attr.key.toLowerCase() !== "sku" &&
+                        attr.key.toLowerCase() !== "price" &&
+                        attr.key.toLowerCase() !== "pricewithoffer"
+                );
+
+                let variantWithRecipe: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+                    variant.Personas,
+                    variant.Recetas,
+                    new PlanSku(variant.sku),
+                    "",
+                    variant.price,
+                    variant.priceWithOffer,
+                    attributes
+                );
+                planVariants.push(variantWithRecipe);
+            } else {
+                attributes = attributes.filter(
+                    (attr) =>
+                        attr.key.toLowerCase() !== "id" &&
+                        attr.key.toLowerCase() !== "sku" &&
+                        attr.key.toLowerCase() !== "price" &&
+                        attr.key.toLowerCase() !== "pricewithoffer"
+                );
+
+                let planVariant: PlanVariant = new PlanVariant(
+                    new PlanSku(variant.sku),
+                    "",
+                    variant.price,
+                    attributes,
+                    variant.priceWithOffer
+                );
+                planVariants.push(planVariant);
+            }
+        }
+
         const plan: Plan = Plan.create(
             dto.planName,
             dto.planDescription,
@@ -23,7 +75,7 @@ export class CreatePlan {
             "",
             dto.isActive,
             dto.planType,
-            dto.planVariants,
+            planVariants,
             dto.availablePlanFrecuencies,
             dto.hasRecipes
         );

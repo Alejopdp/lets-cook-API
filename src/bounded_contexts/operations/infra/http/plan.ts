@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { createPlanController } from "../../useCases/createPlan";
 import { deletePlanController } from "../../useCases/deletePlan";
+import { getAdditionalPlanListController } from "../../useCases/getAdditionalPlanList";
 import { getPlanListController } from "../../useCases/getPlanList";
 import { togglePlanStateController } from "../../useCases/togglePlanState";
 
@@ -13,6 +14,7 @@ const options: multer.Options = {
 
 // GETs
 planRouter.get("/", (req, res) => getPlanListController.execute(req, res));
+planRouter.get("/additionals", (req, res) => getAdditionalPlanListController.execute(req, res));
 
 // PUT
 planRouter.put("/toggle-state/:id", (req, res) => togglePlanStateController.execute(req, res));

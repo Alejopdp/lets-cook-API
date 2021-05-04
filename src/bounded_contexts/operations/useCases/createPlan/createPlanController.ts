@@ -5,9 +5,6 @@ import fs from "fs";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { CreatePlan } from "./createPlan";
-import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
-import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
-import { PlanSku } from "../../domain/plan/PlanSku";
 import { logger } from "../../../../../config";
 
 export class CreatePlanController extends BaseController {
@@ -20,6 +17,7 @@ export class CreatePlanController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
+            logger.info(`A ver ese body papai: ${JSON.stringify(this.req.body)}`);
             const planImagePath = this.req.file.path;
             const planImage: ReadStream = fs.createReadStream(planImagePath);
 
@@ -27,16 +25,15 @@ export class CreatePlanController extends BaseController {
                 planName: this.req.body.name,
                 planDescription: this.req.body.description,
                 planSku: this.req.body.sku,
-                isActive: this.req.body.isActive === "Active",
+                isActive: JSON.parse(this.req.body.isActive),
                 planImage,
                 planImageFileName: this.req.file.originalname,
-                availablePlanFrecuencies: this.req.body.frequencies
+                availablePlanFrecuencies: JSON.parse(this.req.body.availablePlanFrecuencies)
                     .map((freq: string) => (<any>PlanFrequency)[freq.toString()])
                     .filter((freq: PlanFrequency) => freq),
-                planType: (<any>PlanType)[this.req.body.planType],
-                hasRecipes: this.req.body.hasRecipes,
-                planVariants: [new PlanVariantWithRecipe(3, 2, new PlanSku("PLVGG"), "Variante 1", 30, 20, [])],
-                // planVariants: this.req.body.planVariants
+                planType: (<any>PlanType)[this.req.body.type],
+                hasRecipes: JSON.parse(this.req.body.hasRecipes),
+                planVariants: JSON.parse(this.req.body.variants),
             };
 
             await this.createPlan.execute(dto);

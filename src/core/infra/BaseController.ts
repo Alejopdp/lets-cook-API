@@ -1,4 +1,5 @@
 import * as express from "express";
+import { logger } from "../../../config";
 
 export abstract class BaseController {
     // or even private
@@ -63,7 +64,7 @@ export abstract class BaseController {
     }
 
     public fail(error: Error | string) {
-        // console.log(error);
+        logger.error(error.toString());
         return this.res.status(500).json({
             message: error.toString(),
         });
