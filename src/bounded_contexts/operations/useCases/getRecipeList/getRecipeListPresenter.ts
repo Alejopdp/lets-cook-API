@@ -1,4 +1,5 @@
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { PlanId } from "../../domain/plan/PlanId";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { Week } from "../../domain/week/Week";
 
@@ -28,6 +29,7 @@ export class GetRecipeListPresenter {
                     };
                 }),
                 availableMonths: recipe.availableMonths,
+                relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.value),
             });
         }
         return presentedRecipes;

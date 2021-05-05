@@ -16,6 +16,9 @@ export class PlanVariant {
         this._attributes = attributes;
     }
 
+    public getConcatenatedAttributesAsString(): string {
+        return this.attributes.reduce((acc, att) => acc + att.value, "");
+    }
     /**
      * Getter sku
      * @return {PlanSku}

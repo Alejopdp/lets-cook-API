@@ -1,4 +1,3 @@
-import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanSku } from "../../domain/plan/PlanSku";
@@ -19,7 +18,6 @@ export class CreatePlan {
 
     public async execute(dto: CreatePlanDto): Promise<void> {
         const planSku: PlanSku = new PlanSku(dto.planSku);
-
         const planVariants: PlanVariant[] = [];
 
         for (let variant of dto.planVariants) {

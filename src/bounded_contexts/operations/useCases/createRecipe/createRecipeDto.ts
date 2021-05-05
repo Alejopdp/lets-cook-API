@@ -18,4 +18,5 @@ export interface CreateRecipeDto {
     availableWeeksIds: number[] | string[];
     availableMonths: Month[];
     backOfficeTags: string[];
+    planIds: string[] | number[]
 }

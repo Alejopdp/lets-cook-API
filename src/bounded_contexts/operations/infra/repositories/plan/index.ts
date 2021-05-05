@@ -3,6 +3,8 @@ import { PlanFrequency } from "../../../domain/plan/PlanFrequency";
 import { PlanId } from "../../../domain/plan/PlanId";
 import { PlanSku } from "../../../domain/plan/PlanSku";
 import { PlanType } from "../../../domain/plan/PlanType/PlanType";
+import { PlanVariant } from "../../../domain/plan/PlanVariant/PlanVariant";
+import { PlanVariantAttribute } from "../../../domain/plan/PlanVariant/PlanVariantAttribute";
 import { PlanVariantWithRecipe } from "../../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 import { IPlanRepository } from "./IPlanRepository";
 import { MockPlanRepository } from "./mockPlanRepository";
@@ -15,37 +17,50 @@ const plan5Id: PlanId = new PlanId(5);
 const plan6Id: PlanId = new PlanId(6);
 const plan7Id: PlanId = new PlanId(7);
 const plan8Id: PlanId = new PlanId(8);
-const plan9Id: PlanId = new PlanId(9);
-const plan10Id: PlanId = new PlanId(10);
-const plan11Id: PlanId = new PlanId(11);
-const plan12Id: PlanId = new PlanId(12);
 
-const variantWithoutGluten1 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNGL1"), "Familiar 1 sin gluten", 30, 20, []);
+const attr1: PlanVariantAttribute = new PlanVariantAttribute("Key 1", "Value 1");
+const attr2: PlanVariantAttribute = new PlanVariantAttribute("Key 2", "Value 2");
+const attr3: PlanVariantAttribute = new PlanVariantAttribute("Key 2", "Valu 3");
+
+const variantWithoutGluten1 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNGL1"), "Familiar 1 sin gluten", 30, 20, [attr1, attr2]);
+const variantWithoutGlutenAndMilk1 = new PlanVariantWithRecipe(2, 3, new PlanSku("PLFMLNGL1"), "Familiar 1 sin gluten ni lacteos", 35, 25, [
+    attr1,
+    attr3,
+]);
+const variantWithoutGluten1bis = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNGL1"), "Familiar 1 sin gluten bis", 3, 2, [
+    attr1,
+    attr3,
+]);
+const variantWithoutGlutenAndMilk1bis = new PlanVariantWithRecipe(
+    2,
+    3,
+    new PlanSku("PLFMLNGL1"),
+    "Familiar 1 sin gluten ni lacteos bis",
+    5,
+    3,
+    [attr1, attr2]
+);
 const variantWithoutGluten2 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLVEGNGL1"), "Vegetariano 1 sin gluten", 30, 20, []);
 const variantWithoutGluten3 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLCARNGL1"), "Carnívoro 1 sin gluten", 30, 20, []);
 const variantWithoutGluten4 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNGL2"), "Familiar 2 sin gluten", 30, 20, []);
 const variantWithoutGluten5 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLVEGNGL2"), "Vegetariano 2 sin gluten", 30, 20, []);
 const variantWithoutGluten6 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLCARNGL2"), "Carnívoro 2 sin gluten", 30, 20, []);
-const variantWithoutGluten7 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNGL3"), "Familiar 3 sin gluten", 30, 20, []);
-const variantWithoutGluten8 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLVEGNGL3"), "Vegetariano 3 sin gluten", 30, 20, []);
-const variantWithoutGluten9 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLCARNGL3"), "Carnívoro 3 sin gluten", 30, 20, []);
-const variantWithoutGluten10 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNG4"), "Familiar 4 sin gluten", 30, 20, []);
-const variantWithoutGluten11 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLVEGNGL4"), "Vegetariano 4 sin gluten", 30, 20, []);
-const variantWithoutGluten12 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLCARNGL4"), "Carnívoro 4 sin gluten", 30, 20, []);
+const variantWithoutGluten7 = new PlanVariant(new PlanSku("PLCER1"), "", 10, [], 8);
+const variantWithoutGluten8 = new PlanVariant(new PlanSku("PLVIN2"), "", 15, [], 12);
 
-const plan1: Plan = Plan.create(
+export const plan1: Plan = Plan.create(
     "Plan familiar 1",
     "Plan para toda la familia",
     new PlanSku("PLFML1"),
     "",
     true,
     PlanType.Principal,
-    [variantWithoutGluten1],
+    [variantWithoutGluten1, variantWithoutGlutenAndMilk1, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
     [PlanFrequency.Mensual],
     true,
     plan1Id
 );
-const plan2: Plan = Plan.create(
+export const plan2: Plan = Plan.create(
     "Plan vegetariano 1",
     "Plan para vegetarianos",
     new PlanSku("PLVEG1"),
@@ -57,7 +72,7 @@ const plan2: Plan = Plan.create(
     true,
     plan2Id
 );
-const plan3: Plan = Plan.create(
+export const plan3: Plan = Plan.create(
     "Plan carnívoro 1",
     "Para los que le gustan los asaditos",
     new PlanSku("PLCAR1"),
@@ -70,7 +85,7 @@ const plan3: Plan = Plan.create(
     plan3Id
 );
 
-const plan4: Plan = Plan.create(
+export const plan4: Plan = Plan.create(
     "Plan familiar 2",
     "Plan para toda la familia",
     new PlanSku("PLFML2"),
@@ -82,7 +97,7 @@ const plan4: Plan = Plan.create(
     true,
     plan4Id
 );
-const plan5: Plan = Plan.create(
+export const plan5: Plan = Plan.create(
     "Plan vegetariano 2",
     "Plan para vegetarianos",
     new PlanSku("PLVEG2"),
@@ -94,7 +109,7 @@ const plan5: Plan = Plan.create(
     true,
     plan5Id
 );
-const plan6: Plan = Plan.create(
+export const plan6: Plan = Plan.create(
     "Plan carnívoro 2",
     "Para los que le gustan los asaditos",
     new PlanSku("PLCAR2"),
@@ -107,79 +122,30 @@ const plan6: Plan = Plan.create(
     plan6Id
 );
 
-const plan7: Plan = Plan.create(
-    "Plan familiar 3",
-    "Plan para toda la familia",
-    new PlanSku("PLFML3"),
+export const plan7: Plan = Plan.create(
+    "Plan cerveza",
+    "Plan para tomar una cervecita",
+    new PlanSku("PLCER"),
     "",
     true,
-    PlanType.Principal,
+    PlanType.Adicional,
     [variantWithoutGluten7],
-    [PlanFrequency.Mensual],
-    true,
+    [PlanFrequency.PorUnicaVez],
+    false,
     plan7Id
 );
-const plan8: Plan = Plan.create(
-    "Plan vegetariano 3",
-    "Plan para vegetarianos",
-    new PlanSku("PLVEG3"),
+export const plan8: Plan = Plan.create(
+    "Plan de Vinos",
+    "Plan para tomar un vino",
+    new PlanSku("PLVIN"),
     "",
     true,
-    PlanType.Principal,
+    PlanType.Adicional,
     [variantWithoutGluten8],
-    [PlanFrequency.Semanal, PlanFrequency.Quincenal],
-    true,
+    [PlanFrequency.PorUnicaVez],
+    false,
     plan8Id
 );
-const plan9: Plan = Plan.create(
-    "Plan carnívoro 3",
-    "Para los que le gustan los asaditos",
-    new PlanSku("PLCAR3"),
-    "",
-    true,
-    PlanType.Principal,
-    [variantWithoutGluten9],
-    [PlanFrequency.Mensual],
-    false,
-    plan9Id
-);
 
-const plan10: Plan = Plan.create(
-    "Plan familiar 4",
-    "Plan para toda la familia",
-    new PlanSku("PLFML4"),
-    "",
-    true,
-    PlanType.Principal,
-    [variantWithoutGluten10],
-    [PlanFrequency.Mensual],
-    true,
-    plan10Id
-);
-const plan11: Plan = Plan.create(
-    "Plan vegetariano 4",
-    "Plan para vegetarianos",
-    new PlanSku("PLVEG4"),
-    "",
-    true,
-    PlanType.Principal,
-    [variantWithoutGluten11],
-    [PlanFrequency.Semanal, PlanFrequency.Quincenal],
-    true,
-    plan11Id
-);
-const plan12: Plan = Plan.create(
-    "Plan carnívoro 4",
-    "Para los que le gustan los asaditos",
-    new PlanSku("PLCAR4"),
-    "",
-    true,
-    PlanType.Principal,
-    [variantWithoutGluten12],
-    [PlanFrequency.Mensual],
-    false,
-    plan12Id
-);
-
-const mockDatabase: Plan[] = [plan1, plan2, plan3, plan4, plan5, plan6, plan7, plan8, plan9, plan10, plan11, plan12];
+const mockDatabase: Plan[] = [plan1, plan2, plan3, plan4, plan5, plan6, plan7, plan8];
 export const mockPlanRepository: IPlanRepository = new MockPlanRepository(mockDatabase);

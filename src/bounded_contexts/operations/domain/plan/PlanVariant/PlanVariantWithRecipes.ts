@@ -24,6 +24,10 @@ export class PlanVariantWithRecipe extends PlanVariant {
         this._numberOfRecipes = numberOfRecipes;
     }
 
+    public getConcatenatedAttributesAsString(): string {
+        return this.numberOfPersons.toString() + this.numberOfRecipes.toString() + super.getConcatenatedAttributesAsString();
+    }
+
     /**
      * Getter numberOfPersons
      * @return {number}

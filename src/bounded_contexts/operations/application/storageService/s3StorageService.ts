@@ -14,7 +14,7 @@ export class S3StorageService implements IStorageService {
     public async uploadFile(objectKey: string, file: ReadStream): Promise<void> {
         const params: PutObjectRequest = {
             Bucket: process.env.S3_BUCKET_NAME as string,
-            Key: `${process.env.NODE_ENV}/${objectKey}`,
+            Key: `${objectKey}`,
             Body: file,
             ACL: "public-read",
             ContentType: "image/jpg",
@@ -23,12 +23,18 @@ export class S3StorageService implements IStorageService {
         await this.s3.upload(params).promise();
     }
 
-    public async savePlanImage(planName: string, fileExtension: string, file?: ReadStream): Promise<string> {
+    public getPresignedUrlForFile(objectKey: string): string {
+        var params = { Bucket: process.env.S3_BUCKET_NAME, Key: objectKey };
+
+        return this.s3.getSignedUrl("getObject", params);
+    }
+
+    public async savePlanImage(planName: string, fileName: string, file?: ReadStream): Promise<string> {
         try {
             if (!file) return "";
             const planNameWithoutSpaces = planName.replace(/\s/g, "_");
 
-            const objectKey = `plans/${planNameWithoutSpaces}/${planNameWithoutSpaces}${fileExtension}`;
+            const objectKey = `${process.env.NODE_ENV}/plans/${planNameWithoutSpaces}/${planNameWithoutSpaces}${path.extname(fileName)}`;
             await this.uploadFile(objectKey, file);
 
             return objectKey;
@@ -43,7 +49,9 @@ export class S3StorageService implements IStorageService {
             if (!file) return "";
             const recipeNameWithoutSpaces = recipeName.replace(/\s/g, "_");
 
-            const objectKey = `recipes/${recipeNameWithoutSpaces}/${recipeNameWithoutSpaces}${path.extname(fileName)}`;
+            const objectKey = `${process.env.NODE_ENV}/recipes/${recipeNameWithoutSpaces}/${recipeNameWithoutSpaces}${path.extname(
+                fileName
+            )}`;
             await this.uploadFile(objectKey, file);
 
             return objectKey;

@@ -36,6 +36,7 @@ export class CreateRecipeController extends BaseController {
                 relatedPlans: this.req.body.relatedPlans,
                 sku: this.req.body.sku,
                 weight: this.req.body.weight,
+                planIds: this.req.body.planIds,
             };
 
             await this.createRecipe.execute(dto);

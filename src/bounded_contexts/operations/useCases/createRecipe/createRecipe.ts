@@ -1,4 +1,5 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
+import { PlanId } from "../../domain/plan/PlanId";
 import { Month } from "../../domain/recipe/Months";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { RecipeCookDuration } from "../../domain/recipe/RecipeGeneralData/RecipeCookDuration";
@@ -46,6 +47,7 @@ export class CreateRecipe {
         const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData([]); // TO DO: Get from DTO
         const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId: number | string) => new WeekId(weekId));
         const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
+        const planIds: PlanId[] = dto.planIds.map((id: string | number) => new PlanId(id));
 
         const recipe: Recipe = new Recipe(
             recipeGeneralData,
@@ -54,7 +56,8 @@ export class CreateRecipe {
             recipeBackOfficeTags,
             recipeNutritionalData,
             weeks,
-            dto.availableMonths
+            dto.availableMonths,
+            planIds
         );
 
         await this.recipeRepository.save(recipe);

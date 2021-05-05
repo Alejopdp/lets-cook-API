@@ -7,6 +7,7 @@ import { RecipeVariant } from "./RecipeVariant/RecipeVariant";
 import * as _ from "lodash";
 import { Month } from "./Months";
 import { Week } from "../week/Week";
+import { PlanId } from "../plan/PlanId";
 
 export class Recipe extends Entity<Recipe> {
     private _recipeGeneralData: RecipeGeneralData;
@@ -16,6 +17,7 @@ export class Recipe extends Entity<Recipe> {
     private _recipeNutritionalData: RecipeNutritionalData;
     private _availableWeeks: Week[];
     private _availableMonths: Month[];
+    private _relatedPlans: PlanId[];
 
     constructor(
         recipeGeneralData: RecipeGeneralData,
@@ -25,6 +27,7 @@ export class Recipe extends Entity<Recipe> {
         recipeNutritionalData: RecipeNutritionalData,
         availableWeeks: Week[],
         availableMonths: Month[],
+        relatedPlans: PlanId[],
         id?: RecipeId
     ) {
         super(id);
@@ -35,6 +38,7 @@ export class Recipe extends Entity<Recipe> {
         this._recipeNutritionalData = recipeNutritionalData;
         this._availableWeeks = availableWeeks;
         this._availableMonths = availableMonths;
+        this._relatedPlans = relatedPlans;
     }
 
     /**
@@ -94,6 +98,14 @@ export class Recipe extends Entity<Recipe> {
     }
 
     /**
+     * Getter relatedPlans
+     * @return {PlanId[]}
+     */
+    public get relatedPlans(): PlanId[] {
+        return this._relatedPlans;
+    }
+
+    /**
      * Setter recipeGeneralData
      * @param {RecipeGeneralData} value
      */
@@ -147,5 +159,13 @@ export class Recipe extends Entity<Recipe> {
      */
     public set availableMonths(value: Month[]) {
         this._availableMonths = value;
+    }
+
+    /**
+     * Setter relatedPlans
+     * @param {PlanId[]} value
+     */
+    public set relatedPlans(value: PlanId[]) {
+        this._relatedPlans = value;
     }
 }

@@ -17,6 +17,7 @@ import { RecipeVariantSku } from "../../../domain/recipe/RecipeVariant/RecipeVar
 import { week1, week2 } from "../week";
 import { IRecipeRepository } from "./IRecipeRepository";
 import { MockRecipeRepository } from "./mockRecipeRepository";
+import { plan1, plan2 } from "../plan";
 
 const lechuga: Ingredient = new Ingredient("Lechuga");
 const tomate: Ingredient = new Ingredient("Tomate");
@@ -58,6 +59,7 @@ const burgerHallouli: Recipe = new Recipe(
     new RecipeNutritionalData([]),
     [week1, week2],
     [Month.Abril, Month.Mayo, Month.Marzo, Month.Agosto],
+    [plan1.id],
     burgerRecipeId
 );
 
@@ -85,6 +87,7 @@ const arepasDeCrhistian: Recipe = new Recipe(
     new RecipeNutritionalData([]),
     [week1, week2],
     [Month.Abril, Month.Mayo, Month.Marzo, Month.Agosto],
+    [plan2.id],
     arepasRecipeId
 );
 

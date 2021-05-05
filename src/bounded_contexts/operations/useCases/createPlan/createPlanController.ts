@@ -5,7 +5,6 @@ import fs from "fs";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { CreatePlan } from "./createPlan";
-import { logger } from "../../../../../config";
 
 export class CreatePlanController extends BaseController {
     private _createPlan: CreatePlan;
@@ -17,7 +16,6 @@ export class CreatePlanController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            logger.info(`A ver ese body papai: ${JSON.stringify(this.req.body)}`);
             const planImagePath = this.req.file.path;
             const planImage: ReadStream = fs.createReadStream(planImagePath);
 
