@@ -25,6 +25,7 @@ export class GetRecipeByIdPresenter {
                 };
             }),
             availableMonths: recipe.availableMonths,
+            relatedPlans: recipe.relatedPlans.map((planId) => planId.value),
         };
     }
 }

@@ -1,5 +1,4 @@
 import _ from "lodash";
-import { logger } from "../../../../../../config";
 import { Recipe } from "../../../domain/recipe/Recipe";
 import { RecipeId } from "../../../domain/recipe/RecipeId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
