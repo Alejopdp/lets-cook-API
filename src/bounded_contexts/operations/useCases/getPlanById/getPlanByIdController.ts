@@ -18,9 +18,9 @@ export class GetPlanByIdController extends BaseController {
 
             const result = await this.getPlanById.execute(dto);
 
-            this.ok(this.res, result);
+            return this.ok(this.res, result);
         } catch (error) {
-            return error.response;
+            return this.fail(error);
         }
     }
 
