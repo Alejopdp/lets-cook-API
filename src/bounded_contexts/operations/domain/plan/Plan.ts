@@ -202,6 +202,8 @@ export class Plan extends Entity<Plan> {
      * @param {PlanVariant[]} value
      */
     public set planVariants(value: PlanVariant[]) {
+        if (value.length < 1) throw new Error("No puede crear un plan sin ninguna variante");
+
         this._planVariants = value;
     }
 
