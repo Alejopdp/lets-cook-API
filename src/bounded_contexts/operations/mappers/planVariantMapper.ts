@@ -1,3 +1,4 @@
+import { logger } from "../../../../config";
 import { Mapper } from "../../../core/infra/Mapper";
 import { PlanSku } from "../domain/plan/PlanSku";
 import { PlanVariant } from "../domain/plan/PlanVariant/PlanVariant";
@@ -20,7 +21,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             );
         }
 
-        return new PlanVariant(raw.sku, raw.name, raw.price, attributes, raw.priceWithOffer);
+        return new PlanVariant(new PlanSku(raw.sku), raw.name, raw.price, attributes, raw.priceWithOffer);
     }
 
     public toPersistence(t: PlanVariant) {

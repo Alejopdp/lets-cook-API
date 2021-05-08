@@ -19,6 +19,8 @@ export class TogglePlanState {
 
         plan.toggleState();
 
+        logger.warn(`Después de togglear, antes del save: ${JSON.stringify(plan)}`);
+
         await this.planRepository.save(plan);
     }
 

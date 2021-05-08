@@ -4,6 +4,7 @@ import { IPlanRepository } from "./IPlanRepository";
 import { Plan as MongoosePlan } from "../../../../../infraestructure/mongoose/models";
 import { planMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
+import { logger } from "../../../../../../config";
 
 export class MongoosePlanRepository implements IPlanRepository {
     public async save(plan: Plan): Promise<void> {
@@ -13,6 +14,8 @@ export class MongoosePlanRepository implements IPlanRepository {
             const nameLocaleKey = `name.${plan.locale}`;
             const descriptionLocaleKey = `description.${plan.locale}`;
             const imageWithLocale = `imageUrl.${plan.locale}`;
+
+            logger.warn(`Antes de updatear el plan: ${JSON.stringify(planToUpdate)}`);
 
             await MongoosePlan.updateOne(
                 { _id: plan.id.value },
