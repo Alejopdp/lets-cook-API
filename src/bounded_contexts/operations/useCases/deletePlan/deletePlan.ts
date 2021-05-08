@@ -1,4 +1,3 @@
-import { Plan } from "../../domain/plan/Plan";
 import { PlanId } from "../../domain/plan/PlanId";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { DeletePlanDto } from "./deletePlanDto";
@@ -12,9 +11,6 @@ export class DeletePlan {
 
     public async execute(dto: DeletePlanDto): Promise<void> {
         const planId: PlanId = new PlanId(dto.planId);
-        const plan: Plan | undefined = await this.planRepository.findById(planId);
-
-        // TO DO: validations
 
         await this.planRepository.delete(planId);
     }

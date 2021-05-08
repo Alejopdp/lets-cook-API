@@ -1,6 +1,7 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
+import { GetPlanListDto } from "./getPlanListDto";
 import { GetPlanListPresenter } from "./getPlanListPresenter";
 
 export class GetPlanList {
@@ -12,26 +13,10 @@ export class GetPlanList {
         this._storageService = storageService;
     }
 
-    public async execute(): Promise<any> {
-        var plans: Plan[] = await this.planRepository.findAll();
+    public async execute(dto: GetPlanListDto): Promise<any> {
+        var plans: Plan[] = await this.planRepository.findAll(dto.locale);
 
-        // TO DO: Change for forEach when db is implemented
-        plans = [
-            ...plans.map((plan) =>
-                Plan.create(
-                    plan.name,
-                    plan.description,
-                    plan.planSku,
-                    (plan.imageUrl = plan.imageUrl ? this.storageService.getPresignedUrlForFile(plan.imageUrl) : plan.imageUrl),
-                    plan.isActive,
-                    plan.type,
-                    plan.planVariants,
-                    plan.availablePlanFrecuencies,
-                    plan.hasRecipes,
-                    plan.id
-                )
-            ),
-        ];
+        plans.forEach((plan) => (plan.imageUrl = this.storageService.getPresignedUrlForFile(plan.imageUrl)));
 
         return GetPlanListPresenter.present(plans);
     }

@@ -5,6 +5,7 @@ import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { UpdatePlan } from "./updatePlan";
 import { UpdatePlanDto } from "./updatePlanDto";
 import fs from "fs";
+import { Locale } from "../../domain/locale/Locale";
 
 export class UpdatePlanController extends BaseController {
     private _updatePlan: UpdatePlan;
@@ -20,7 +21,7 @@ export class UpdatePlanController extends BaseController {
             const planImage: ReadStream = fs.createReadStream(planImagePath);
 
             const dto: UpdatePlanDto = {
-                id: parseInt(this.req.params.id),
+                id: this.req.params.id,
                 planName: this.req.body.name,
                 planDescription: this.req.body.description,
                 planSku: this.req.body.sku,
@@ -33,6 +34,7 @@ export class UpdatePlanController extends BaseController {
                 planType: (<any>PlanType)[this.req.body.type],
                 hasRecipes: JSON.parse(this.req.body.hasRecipes),
                 planVariants: JSON.parse(this.req.body.variants),
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             await this.updatePlan.execute(dto);

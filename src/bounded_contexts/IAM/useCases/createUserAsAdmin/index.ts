@@ -1,13 +1,20 @@
 import { nodemailerService } from "../../../../shared/notificationService";
 import { jwtTokenService } from "../../application/tokenService";
-import { mockRoleRepository } from "../../infra/repositories/role";
-import { mockUserRepository } from "../../infra/repositories/user";
+import { mockRoleRepository, mongooseRoleRepository } from "../../infra/repositories/role";
+import { mockUserRepository, mongooseUserRepository } from "../../infra/repositories/user";
 import { CreateUserAsAdmin } from "./createUserAsAdmin";
 import { CreateUserAsAdminController } from "./createUserAsAdminController";
 
+// export const createUserAsAdmin: CreateUserAsAdmin = new CreateUserAsAdmin(
+//     mockUserRepository,
+//     mockRoleRepository,
+//     nodemailerService,
+//     jwtTokenService
+// );
+
 export const createUserAsAdmin: CreateUserAsAdmin = new CreateUserAsAdmin(
-    mockUserRepository,
-    mockRoleRepository,
+    mongooseUserRepository,
+    mongooseRoleRepository,
     nodemailerService,
     jwtTokenService
 );

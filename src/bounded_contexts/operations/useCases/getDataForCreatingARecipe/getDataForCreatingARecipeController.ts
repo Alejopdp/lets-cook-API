@@ -1,5 +1,7 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { GetDataForCreatingARecipe } from "./getDataForCreatingARecipe";
+import { GetDataForCreatingARecipeDto } from "./getDataForCreatingARecipeDto";
 
 export class GetDataForCreatingARecipeController extends BaseController {
     private _getDataForCreatingARecipe: GetDataForCreatingARecipe;
@@ -11,7 +13,10 @@ export class GetDataForCreatingARecipeController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const result = await this.getDataForCreatingARecipe.execute();
+            const dto: GetDataForCreatingARecipeDto = {
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+            };
+            const result = await this.getDataForCreatingARecipe.execute(dto);
 
             return this.ok(this.res, result);
         } catch (error) {

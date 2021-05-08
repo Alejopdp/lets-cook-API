@@ -5,6 +5,7 @@ import { PlanId } from "./PlanId";
 import { PlanSku } from "./PlanSku";
 import { PlanType } from "./PlanType/PlanType";
 import { PlanVariant } from "./PlanVariant/PlanVariant";
+import { Locale } from "../locale/Locale";
 
 export class Plan extends Entity<Plan> {
     private _name: string;
@@ -16,6 +17,7 @@ export class Plan extends Entity<Plan> {
     private _planVariants: PlanVariant[];
     private _availablePlanFrecuencies: PlanFrequency[];
     private _hasRecipes: boolean;
+    private _locale: Locale;
 
     protected constructor(
         name: string,
@@ -27,6 +29,7 @@ export class Plan extends Entity<Plan> {
         planVariants: PlanVariant[],
         availablePlanFrecuencies: PlanFrequency[],
         hasRecipes: boolean,
+        locale: Locale,
         id?: PlanId
     ) {
         super(id);
@@ -39,6 +42,7 @@ export class Plan extends Entity<Plan> {
         this._planVariants = planVariants;
         this._hasRecipes = hasRecipes;
         this._availablePlanFrecuencies = availablePlanFrecuencies;
+        this._locale = locale;
     }
 
     public static create(
@@ -51,6 +55,7 @@ export class Plan extends Entity<Plan> {
         planVariants: PlanVariant[],
         availablePlanFrecuencies: PlanFrequency[],
         hasRecipes: boolean,
+        locale: Locale,
         id?: PlanId
     ): Plan {
         const guardedProps = [
@@ -68,7 +73,19 @@ export class Plan extends Entity<Plan> {
         if (planVariants.length < 1) throw new Error("No puede crear un plan sin ninguna variante");
         if (availablePlanFrecuencies.length < 1) throw new Error("Hay que ingresar al menos 1 frecuencia disponible para el plan");
 
-        return new Plan(name, description, planSku, imageUrl, isActive, type, planVariants, availablePlanFrecuencies, hasRecipes, id);
+        return new Plan(
+            name,
+            description,
+            planSku,
+            imageUrl,
+            isActive,
+            type,
+            planVariants,
+            availablePlanFrecuencies,
+            hasRecipes,
+            locale,
+            id
+        );
     }
 
     public toggleState(): void {
@@ -150,6 +167,14 @@ export class Plan extends Entity<Plan> {
     }
 
     /**
+     * Getter locale
+     * @return {Locale}
+     */
+    public get locale(): Locale {
+        return this._locale;
+    }
+
+    /**
      * Setter name
      * @param {string} value
      */
@@ -221,5 +246,13 @@ export class Plan extends Entity<Plan> {
      */
     public set hasRecipes(value: boolean) {
         this._hasRecipes = value;
+    }
+
+    /**
+     * Setter locale
+     * @param {Locale} value
+     */
+    public set locale(value: Locale) {
+        this._locale = value;
     }
 }

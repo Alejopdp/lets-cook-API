@@ -1,4 +1,5 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
+import { Locale } from "../../domain/locale/Locale";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanSku } from "../../domain/plan/PlanSku";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
@@ -19,6 +20,7 @@ export class CreatePlan {
     public async execute(dto: CreatePlanDto): Promise<void> {
         const planSku: PlanSku = new PlanSku(dto.planSku);
         const planVariants: PlanVariant[] = [];
+        const locale: Locale = (<any>Locale)[dto.locale] || Locale.es;
 
         for (let variant of dto.planVariants) {
             var attributes: PlanVariantAttribute[] = [];
@@ -75,7 +77,8 @@ export class CreatePlan {
             dto.planType,
             planVariants,
             dto.availablePlanFrecuencies,
-            dto.hasRecipes
+            dto.hasRecipes,
+            locale
         );
 
         const imageUrl = await this.storageService.savePlanImage(dto.planName, dto.planImageFileName, dto.planImage);

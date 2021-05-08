@@ -6,6 +6,7 @@ import { UserName } from "../../../domain/user/UserName";
 import { UserPassword } from "../../../domain/user/UserPassword";
 import { IUserRepository } from "./IUserRepository";
 import { MockUserRepository } from "./mockUserRepository";
+import { MongooseUserRepository } from "./mongooseUserRepository";
 
 const mockDatabase: User[] = [];
 
@@ -47,3 +48,4 @@ mockDatabase.push(adminUser1);
 mockDatabase.push(adminUser2);
 
 export const mockUserRepository: IUserRepository = new MockUserRepository([...mockDatabase]);
+export const mongooseUserRepository: MongooseUserRepository = new MongooseUserRepository();

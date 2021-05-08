@@ -1,5 +1,5 @@
 export interface UpdateUserDto {
-    id: number;
+    id: number | string;
     firstName: string;
     lastName: string;
     roleTitle: string;

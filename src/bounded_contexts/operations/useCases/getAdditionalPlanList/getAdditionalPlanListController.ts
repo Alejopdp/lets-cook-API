@@ -1,5 +1,7 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { GetAdditionalPlanList } from "./getAdditionalPlanList";
+import { GetAdditionalPlanListDto } from "./getAdditionalPlanListDto";
 
 export class GetAdditionalPlanListController extends BaseController {
     private _getAdditionalPlanList: GetAdditionalPlanList;
@@ -11,7 +13,10 @@ export class GetAdditionalPlanListController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const result = await this.getAdditionalPlanList.execute();
+            const dto: GetAdditionalPlanListDto = {
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+            };
+            const result = await this.getAdditionalPlanList.execute(dto);
 
             return this.ok(this.res, result);
         } catch (error) {

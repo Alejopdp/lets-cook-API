@@ -4,6 +4,7 @@ import { Week } from "../../domain/week/Week";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
+import { GetRecipeFiltersDto } from "./getRecipeFiltersDto";
 import { GetRecipeFiltersPresenter } from "./getRecipeFiltersPresenter";
 
 export class GetRecipeFilters {
@@ -17,9 +18,9 @@ export class GetRecipeFilters {
         this._recipeRepository = recipeRepository;
     }
 
-    public async execute(): Promise<any> {
+    public async execute(dto: GetRecipeFiltersDto): Promise<any> {
         const weeks: Week[] = await this.weekRepository.findAll();
-        const plansWithRecipes: Plan[] = await this.planRepository.findAllWithRecipesFlag();
+        const plansWithRecipes: Plan[] = await this.planRepository.findAllWithRecipesFlag(dto.locale);
         const backOfficeTags: RecipeTag[] = await this.recipeRepository.findAllBackOfficeTags();
 
         return GetRecipeFiltersPresenter.present(weeks, plansWithRecipes, backOfficeTags);

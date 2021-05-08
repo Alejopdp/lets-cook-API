@@ -13,7 +13,7 @@ export class DeletePlanController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: DeletePlanDto = {
-                planId: parseInt(this.req.params.id),
+                planId: this.req.params.id,
             };
 
             await this.deletePlan.execute(dto);

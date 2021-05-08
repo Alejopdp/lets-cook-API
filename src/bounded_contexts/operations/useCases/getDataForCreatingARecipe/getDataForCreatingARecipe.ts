@@ -4,6 +4,7 @@ import { Week } from "../../domain/week/Week";
 import { IIngredientRepository } from "../../infra/repositories/ingredient/IIngredientRepository";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
+import { GetDataForCreatingARecipeDto } from "./getDataForCreatingARecipeDto";
 import { GetDataForCreatingARecipePresenter } from "./getDataForCreatingARecipePresenter";
 
 export class GetDataForCreatingARecipe {
@@ -17,8 +18,8 @@ export class GetDataForCreatingARecipe {
         this._weekRepository = weekRepository;
     }
 
-    public async execute(): Promise<any> {
-        const plans: Plan[] = await this.planRepository.findAllWithRecipesFlag();
+    public async execute(dto: GetDataForCreatingARecipeDto): Promise<any> {
+        const plans: Plan[] = await this.planRepository.findAllWithRecipesFlag(dto.locale);
         const ingredients: Ingredient[] = await this.ingredientRepository.findAll();
         const weeks: Week[] = await this.weekRepository.findAll();
 

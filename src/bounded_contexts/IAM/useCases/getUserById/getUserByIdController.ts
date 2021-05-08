@@ -15,7 +15,7 @@ export class GetUserByIdController extends BaseController {
     async executeImpl(): Promise<any> {
         try {
             const dto: GetUserByIdDto = {
-                id: parseInt(this.req.params.id),
+                id: this.req.params.id,
             };
 
             const result: Either<Failure<GetUserByIdErrors>, any> = await this.getUserById.execute(dto);

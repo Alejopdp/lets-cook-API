@@ -19,7 +19,7 @@ export class UpdatePlan {
     }
 
     public async execute(dto: UpdatePlanDto): Promise<void> {
-        const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.id));
+        const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.id), dto.locale);
 
         if (!plan) throw new Error("El plan ingresado no existe");
 

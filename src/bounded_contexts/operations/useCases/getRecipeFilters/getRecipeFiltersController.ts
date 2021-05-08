@@ -1,5 +1,7 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { GetRecipeFilters } from "./getRecipeFilters";
+import { GetRecipeFiltersDto } from "./getRecipeFiltersDto";
 
 export class GetRecipeFiltersControllers extends BaseController {
     private _getRecipeFilters: GetRecipeFilters;
@@ -11,7 +13,11 @@ export class GetRecipeFiltersControllers extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const result = await this.getRecipeFilters.execute();
+            const dto: GetRecipeFiltersDto = {
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+            };
+
+            const result = await this.getRecipeFilters.execute(dto);
 
             return this.ok(this.res, result);
         } catch (error) {

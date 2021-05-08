@@ -5,6 +5,7 @@ import fs from "fs";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { CreatePlan } from "./createPlan";
+import { logger } from "../../../../../config";
 
 export class CreatePlanController extends BaseController {
     private _createPlan: CreatePlan;
@@ -32,6 +33,7 @@ export class CreatePlanController extends BaseController {
                 planType: (<any>PlanType)[this.req.body.type],
                 hasRecipes: JSON.parse(this.req.body.hasRecipes),
                 planVariants: JSON.parse(this.req.body.variants),
+                locale: this.req.body.locale,
             };
 
             await this.createPlan.execute(dto);
@@ -50,13 +52,5 @@ export class CreatePlanController extends BaseController {
      */
     public get createPlan(): CreatePlan {
         return this._createPlan;
-    }
-
-    /**
-     * Setter createPlan
-     * @param {CreatePlan} value
-     */
-    public set createPlan(value: CreatePlan) {
-        this._createPlan = value;
     }
 }

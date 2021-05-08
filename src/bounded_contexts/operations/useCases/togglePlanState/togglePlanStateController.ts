@@ -1,5 +1,6 @@
 import { logger } from "../../../../../config";
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { TogglePlanState } from "./togglePlanState";
 import { TogglePlanStateDto } from "./togglePlanStateDto";
 
@@ -14,7 +15,8 @@ export class TogglePlanStateController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: TogglePlanStateDto = {
-                planId: parseInt(this.req.params.id),
+                planId: this.req.params.id,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             await this.togglePlanState.execute(dto);

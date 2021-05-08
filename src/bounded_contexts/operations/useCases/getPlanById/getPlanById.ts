@@ -15,25 +15,11 @@ export class GetPlanById {
     }
 
     public async execute(dto: GetPlanByIdDto): Promise<any> {
-        var plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.planId));
+        var plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.planId), dto.locale);
 
         if (!plan) throw new Error("El plan ingresado no existe");
 
-        // TO DO Change when db is implemented
-        plan = Plan.create(
-            plan.name,
-            plan.description,
-            plan.planSku,
-            plan.imageUrl ? this.storageService.getPresignedUrlForFile(plan.imageUrl) : "",
-            plan.isActive,
-            plan.type,
-            plan.planVariants,
-            plan.availablePlanFrecuencies,
-            plan.hasRecipes,
-            plan.id
-        );
-
-        // plan.imageUrl = plan.imageUrl ? this.storageService.getPresignedUrlForFile(plan.imageUrl) : "";
+        plan.imageUrl = plan.imageUrl ? this.storageService.getPresignedUrlForFile(plan.imageUrl) : "";
 
         return GetPlanByIdPresenter.present(plan);
     }

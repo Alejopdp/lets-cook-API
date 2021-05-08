@@ -13,4 +13,5 @@ export interface CreatePlanDto {
     isActive: boolean;
     availablePlanFrecuencies: PlanFrequency[];
     hasRecipes: boolean;
+    locale: string;
 }

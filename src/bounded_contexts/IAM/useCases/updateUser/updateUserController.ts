@@ -15,7 +15,7 @@ export class UpdateUserController extends BaseController {
     async executeImpl(): Promise<any> {
         try {
             const dto: UpdateUserDto = {
-                id: parseInt(this.req.params.id),
+                id: this.req.params.id,
                 firstName: this.req.body.firstName,
                 lastName: this.req.body.lastName,
                 roleTitle: this.req.body.role,

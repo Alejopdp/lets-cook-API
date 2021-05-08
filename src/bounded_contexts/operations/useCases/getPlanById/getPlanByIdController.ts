@@ -1,4 +1,6 @@
+import { logger } from "../../../../../config";
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { GetPlanById } from "./getPlanById";
 import { GetPlanByIdDto } from "./getPlanByIdDto";
 
@@ -13,7 +15,8 @@ export class GetPlanByIdController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: GetPlanByIdDto = {
-                planId: parseInt(this.req.params.id),
+                planId: this.req.params.id,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             const result = await this.getPlanById.execute(dto);

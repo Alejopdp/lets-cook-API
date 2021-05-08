@@ -13,7 +13,7 @@ export class TogglePlanState {
 
     public async execute(dto: TogglePlanStateDto): Promise<any> {
         const planId: PlanId = new PlanId(dto.planId);
-        const plan: Plan | undefined = await this.planRepository.findById(planId);
+        const plan: Plan | undefined = await this.planRepository.findById(planId, dto.locale);
 
         if (!plan) throw new Error("El plan indicado no existe");
 

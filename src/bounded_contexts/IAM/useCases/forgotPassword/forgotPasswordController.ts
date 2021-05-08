@@ -13,7 +13,7 @@ export class ForgotPasswordController extends BaseController {
     async executeImpl(): Promise<any> {
         try {
             const dto: ForgotPasswordDto = {
-                id: parseInt(this.req.params.id),
+                id: this.req.params.id,
             };
 
             await this.forgotPassword.execute(dto);
