@@ -15,6 +15,7 @@ export class PlanMapper implements Mapper<Plan> {
         const type: PlanType = (<any>PlanType)[raw.type];
         const frequencies: PlanFrequency[] = raw.availableFrequencies.map((freq: string) => (<any>PlanFrequency)[freq]);
         const variants: PlanVariant[] = raw.variants.map((variant: any) => planVariantMapper.toDomain(variant));
+        const additionalPlans: Plan[] = raw.additionalPlans.map((plan: any) => this.toDomain(plan, locale));
 
         return Plan.create(
             raw.name[locale] || raw.name["es"],
@@ -26,11 +27,12 @@ export class PlanMapper implements Mapper<Plan> {
             variants,
             frequencies,
             raw.hasRecipes,
+            additionalPlans,
             locale,
             new PlanId(raw._id)
         );
     }
-    public toPersistence(t: Plan) {
+    public toPersistence(t: Plan): any {
         const variants: any[] = t.planVariants.map((variant) => planVariantMapper.toPersistence(variant));
 
         return {
@@ -44,6 +46,7 @@ export class PlanMapper implements Mapper<Plan> {
             variants,
             hasRecipes: t.hasRecipes,
             availableFrequencies: t.availablePlanFrecuencies,
+            additionalPlans: t.additionalPlans.map((plan: Plan) => plan.id.value),
         };
     }
 }

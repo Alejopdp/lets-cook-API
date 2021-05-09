@@ -6,6 +6,7 @@ import { PlanSku } from "./PlanSku";
 import { PlanType } from "./PlanType/PlanType";
 import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { Locale } from "../locale/Locale";
+import { logger } from "../../../../../config";
 
 export class Plan extends Entity<Plan> {
     private _name: string;
@@ -17,6 +18,7 @@ export class Plan extends Entity<Plan> {
     private _planVariants: PlanVariant[];
     private _availablePlanFrecuencies: PlanFrequency[];
     private _hasRecipes: boolean;
+    private _additionalPlans: Plan[];
     private _locale: Locale;
 
     protected constructor(
@@ -29,6 +31,7 @@ export class Plan extends Entity<Plan> {
         planVariants: PlanVariant[],
         availablePlanFrecuencies: PlanFrequency[],
         hasRecipes: boolean,
+        additionalPlans: Plan[],
         locale: Locale,
         id?: PlanId
     ) {
@@ -42,6 +45,7 @@ export class Plan extends Entity<Plan> {
         this._planVariants = planVariants;
         this._hasRecipes = hasRecipes;
         this._availablePlanFrecuencies = availablePlanFrecuencies;
+        this._additionalPlans = additionalPlans;
         this._locale = locale;
     }
 
@@ -55,6 +59,7 @@ export class Plan extends Entity<Plan> {
         planVariants: PlanVariant[],
         availablePlanFrecuencies: PlanFrequency[],
         hasRecipes: boolean,
+        additionalPlans: Plan[],
         locale: Locale,
         id?: PlanId
     ): Plan {
@@ -72,6 +77,8 @@ export class Plan extends Entity<Plan> {
 
         if (planVariants.length < 1) throw new Error("No puede crear un plan sin ninguna variante");
         if (availablePlanFrecuencies.length < 1) throw new Error("Hay que ingresar al menos 1 frecuencia disponible para el plan");
+        if (type === PlanType.Adicional && additionalPlans.length > 0)
+            throw new Error("Un plan adicional no puede tener relacionado otros planes adidiconales");
 
         return new Plan(
             name,
@@ -83,6 +90,7 @@ export class Plan extends Entity<Plan> {
             planVariants,
             availablePlanFrecuencies,
             hasRecipes,
+            additionalPlans,
             locale,
             id
         );
@@ -92,6 +100,24 @@ export class Plan extends Entity<Plan> {
         // TO DO: Validate existing subscriptions with this plan?
 
         this.isActive = !this.isActive;
+    }
+
+    public canHaveAdditionalPlans(): boolean {
+        return this.type === PlanType.Principal;
+    }
+
+    public updateAdditionalPlans(additionalPlans: Plan[]): void {
+        if (!this.canHaveAdditionalPlans() && additionalPlans.length > 0)
+            throw new Error("Un plan adicional no puede tener relacionado otros planes adidiconales");
+        this.additionalPlans = additionalPlans;
+    }
+
+    public changeType(newType: PlanType): void {
+        if (this.type === PlanType.Principal && newType === PlanType.Adicional && this.additionalPlans.length > 0) {
+            throw new Error("Tiene que desasociar los planes adicionales antes de convertirlo en un plan adicional");
+        } else {
+            this.type = newType;
+        }
     }
 
     /**
@@ -164,6 +190,14 @@ export class Plan extends Entity<Plan> {
      */
     public get hasRecipes(): boolean {
         return this._hasRecipes;
+    }
+
+    /**
+     * Getter additionalPlans
+     * @return {Plan[]}
+     */
+    public get additionalPlans(): Plan[] {
+        return this._additionalPlans;
     }
 
     /**
@@ -246,6 +280,14 @@ export class Plan extends Entity<Plan> {
      */
     public set hasRecipes(value: boolean) {
         this._hasRecipes = value;
+    }
+
+    /**
+     * Setter additionalPlans
+     * @param {Plan[]} value
+     */
+    public set additionalPlans(value: Plan[]) {
+        this._additionalPlans = value;
     }
 
     /**

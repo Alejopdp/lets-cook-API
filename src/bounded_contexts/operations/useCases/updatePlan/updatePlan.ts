@@ -20,6 +20,13 @@ export class UpdatePlan {
 
     public async execute(dto: UpdatePlanDto): Promise<void> {
         const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.id), dto.locale);
+        const additionalPlans: Plan[] =
+            dto.additionalPlansIds.length > 0
+                ? await this.planRepository.findAdditionalPlanListById(
+                      dto.additionalPlansIds.map((id: string | number) => new PlanId(id)),
+                      dto.locale
+                  )
+                : [];
 
         if (!plan) throw new Error("El plan ingresado no existe");
 
@@ -82,7 +89,8 @@ export class UpdatePlan {
         plan.name = dto.planName;
         plan.planVariants = planVariants;
         plan.planSku = planSku;
-        plan.type = dto.planType; // TO DO: Remove additional plans relation
+        plan.updateAdditionalPlans(additionalPlans);
+        plan.changeType(dto.planType);
 
         if (!dto.hasRecipes && dto.hasRecipes !== plan.hasRecipes) {
             plan.hasRecipes = dto.hasRecipes;

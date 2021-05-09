@@ -27,7 +27,7 @@ export class MongoosePlanRepository implements IPlanRepository {
     }
 
     public async findById(planId: PlanId, locale: Locale): Promise<Plan | undefined> {
-        const planDb = await MongoosePlan.findById(planId.value, { deletionFlag: false });
+        const planDb = await MongoosePlan.findById(planId.value, { deletionFlag: false }).populate("additionalPlans");
 
         return planDb ? planMapper.toDomain(planDb, locale) : undefined;
     }
@@ -37,11 +37,15 @@ export class MongoosePlanRepository implements IPlanRepository {
     }
 
     public async findAdditionalPlanList(locale: Locale): Promise<Plan[]> {
-        return await this.findBy({ type: "Additional" }, locale);
+        return await this.findBy({ type: "Adicional" }, locale);
+    }
+
+    public async findAdditionalPlanListById(ids: PlanId[], locale: Locale): Promise<Plan[]> {
+        return await this.findBy({ _id: ids }, locale);
     }
 
     public async findBy(conditions: any, locale: Locale): Promise<Plan[]> {
-        const plansDb = await MongoosePlan.find({ ...conditions, deletionFlag: false });
+        const plansDb = await MongoosePlan.find({ ...conditions, deletionFlag: false }).populate("additionalPlans");
 
         return plansDb.map((raw: any) => planMapper.toDomain(raw, locale));
     }

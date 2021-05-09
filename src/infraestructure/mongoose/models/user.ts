@@ -39,6 +39,7 @@ const UserSchema = new mongoose.Schema(
 
         deletionFlag: {
             type: Boolean,
+            default: false,
         },
     },
     { collection: "User", timestamps: true }

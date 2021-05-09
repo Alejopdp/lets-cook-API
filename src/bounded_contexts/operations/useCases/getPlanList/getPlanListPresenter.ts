@@ -44,6 +44,7 @@ export class GetPlanListPresenter {
                 imageUrl: plan.imageUrl,
                 hasRecipes: plan.hasRecipes,
                 variants: presentedVariants,
+                additionalPlans: plan.additionalPlans.map((plan: Plan) => plan.id.value),
             });
         }
 

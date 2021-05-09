@@ -1,6 +1,8 @@
+import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Locale } from "../../domain/locale/Locale";
 import { Plan } from "../../domain/plan/Plan";
+import { PlanId } from "../../domain/plan/PlanId";
 import { PlanSku } from "../../domain/plan/PlanSku";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../../domain/plan/PlanVariant/PlanVariantAttribute";
@@ -21,6 +23,13 @@ export class CreatePlan {
         const planSku: PlanSku = new PlanSku(dto.planSku);
         const planVariants: PlanVariant[] = [];
         const locale: Locale = (<any>Locale)[dto.locale] || Locale.es;
+        const additionalPlans: Plan[] =
+            dto.additionalPlansIds.length > 0
+                ? await this.planRepository.findAdditionalPlanListById(
+                      dto.additionalPlansIds.map((id: string | number) => new PlanId(id)),
+                      dto.locale
+                  )
+                : [];
 
         for (let variant of dto.planVariants) {
             var attributes: PlanVariantAttribute[] = [];
@@ -78,6 +87,7 @@ export class CreatePlan {
             planVariants,
             dto.availablePlanFrecuencies,
             dto.hasRecipes,
+            additionalPlans,
             locale
         );
 

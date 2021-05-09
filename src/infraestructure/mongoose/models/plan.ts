@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import * as uuid from "uuid";
 const PlanVariantSchema = new mongoose.Schema({
     sku: {
@@ -96,6 +96,13 @@ const PlanSchema = new mongoose.Schema(
                 isRequired: true,
             },
         ],
+
+        additionalPlans: {
+            type: [String],
+            ref: "Plan",
+            required: true,
+            default: [],
+        },
 
         deletionFlag: {
             type: Boolean,

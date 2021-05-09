@@ -66,6 +66,9 @@ export class GetPlanByIdPresenter {
             hasRecipes: plan.hasRecipes,
             variants: presentedVariants,
             attributes: [...attributesAndValues, ...attributes],
+            additionalPlans: plan.additionalPlans.map((plan) => {
+                return { id: plan.id.value, name: plan.name };
+            }),
         };
     }
 }

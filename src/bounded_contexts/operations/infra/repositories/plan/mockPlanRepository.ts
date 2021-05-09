@@ -1,3 +1,4 @@
+import { Locale } from "../../../domain/locale/Locale";
 import { Plan } from "../../../domain/plan/Plan";
 import { PlanId } from "../../../domain/plan/PlanId";
 import { PlanType } from "../../../domain/plan/PlanType/PlanType";
@@ -8,6 +9,10 @@ export class MockPlanRepository implements IPlanRepository {
 
     constructor(database: Plan[]) {
         this._database = database;
+    }
+
+    findAdditionalPlanListById(ids: PlanId[], locale: Locale): Promise<Plan[]> {
+        throw new Error("Method not implemented.");
     }
 
     public async save(plan: Plan): Promise<void> {

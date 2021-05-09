@@ -6,6 +6,7 @@ import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { CreatePlan } from "./createPlan";
 import { logger } from "../../../../../config";
+import { Locale } from "../../domain/locale/Locale";
 
 export class CreatePlanController extends BaseController {
     private _createPlan: CreatePlan;
@@ -33,7 +34,8 @@ export class CreatePlanController extends BaseController {
                 planType: (<any>PlanType)[this.req.body.type],
                 hasRecipes: JSON.parse(this.req.body.hasRecipes),
                 planVariants: JSON.parse(this.req.body.variants),
-                locale: this.req.body.locale,
+                additionalPlansIds: JSON.parse(this.req.body.additionalPlans),
+                locale: (<any>Locale)[this.req.query.locale as string],
             };
 
             await this.createPlan.execute(dto);

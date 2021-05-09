@@ -7,13 +7,15 @@ import { PlanVariantWithRecipe } from "../domain/plan/PlanVariant/PlanVariantWit
 
 export class PlanVariantMapper implements Mapper<PlanVariant> {
     public toDomain(raw: any): PlanVariant {
+        logger.warn(`RAW PLAN VARIANT: ${JSON.stringify(raw)}`);
         const attributes: PlanVariantAttribute[] = raw.attributes.map((attr: any) => new PlanVariantAttribute(attr.key, attr.value));
+        const sku: PlanSku = new PlanSku(raw.sku);
 
         if (!!raw.numberOfPersons && !!raw.numberOfRecipes) {
             return new PlanVariantWithRecipe(
                 raw.numberOfPersons,
                 raw.numberOfRecipes,
-                new PlanSku(raw.sku),
+                sku,
                 raw.name,
                 raw.price,
                 raw.priceWithOffer,
@@ -21,7 +23,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             );
         }
 
-        return new PlanVariant(new PlanSku(raw.sku), raw.name, raw.price, attributes, raw.priceWithOffer);
+        return new PlanVariant(sku, raw.name, raw.price, attributes, raw.priceWithOffer);
     }
 
     public toPersistence(t: PlanVariant) {

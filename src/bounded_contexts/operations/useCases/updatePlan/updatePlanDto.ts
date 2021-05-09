@@ -15,5 +15,6 @@ export interface UpdatePlanDto {
     isActive: boolean;
     availablePlanFrecuencies: PlanFrequency[];
     hasRecipes: boolean;
+    additionalPlansIds: string[] | number[];
     locale: Locale;
 }

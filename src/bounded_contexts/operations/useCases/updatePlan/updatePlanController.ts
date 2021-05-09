@@ -35,6 +35,7 @@ export class UpdatePlanController extends BaseController {
                 hasRecipes: JSON.parse(this.req.body.hasRecipes),
                 planVariants: JSON.parse(this.req.body.variants),
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                additionalPlansIds: JSON.parse(this.req.body.additionalPlans),
             };
 
             await this.updatePlan.execute(dto);

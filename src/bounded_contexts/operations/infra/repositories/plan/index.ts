@@ -62,6 +62,7 @@ export const plan1: Plan = Plan.create(
     [variantWithoutGluten1, variantWithoutGlutenAndMilk1, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
     [PlanFrequency.Mensual],
     true,
+    [],
     Locale.es,
     plan1Id
 );
@@ -75,6 +76,7 @@ export const plan2: Plan = Plan.create(
     [variantWithoutGluten2],
     [PlanFrequency.Semanal, PlanFrequency.Quincenal],
     true,
+    [],
     Locale.es,
     plan2Id
 );
@@ -88,6 +90,7 @@ export const plan3: Plan = Plan.create(
     [variantWithoutGluten3],
     [PlanFrequency.Mensual],
     false,
+    [],
     Locale.es,
     plan3Id
 );
@@ -102,6 +105,7 @@ export const plan4: Plan = Plan.create(
     [variantWithoutGluten4],
     [PlanFrequency.Mensual],
     true,
+    [],
     Locale.es,
     plan4Id
 );
@@ -115,6 +119,7 @@ export const plan5: Plan = Plan.create(
     [variantWithoutGluten5],
     [PlanFrequency.Semanal, PlanFrequency.Quincenal],
     true,
+    [],
     Locale.es,
     plan5Id
 );
@@ -128,6 +133,7 @@ export const plan6: Plan = Plan.create(
     [variantWithoutGluten6],
     [PlanFrequency.Mensual],
     false,
+    [],
     Locale.es,
     plan6Id
 );
@@ -142,6 +148,7 @@ export const plan7: Plan = Plan.create(
     [variantWithoutGluten7],
     [PlanFrequency.PorUnicaVez],
     false,
+    [],
     Locale.es,
     plan7Id
 );
@@ -155,6 +162,7 @@ export const plan8: Plan = Plan.create(
     [variantWithoutGluten8],
     [PlanFrequency.PorUnicaVez],
     false,
+    [],
     Locale.es,
     plan8Id
 );
