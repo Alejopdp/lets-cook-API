@@ -1,14 +1,16 @@
 import { logger } from "../../../../config";
 import { Mapper } from "../../../core/infra/Mapper";
+import { Locale } from "../domain/locale/Locale";
 import { PlanSku } from "../domain/plan/PlanSku";
 import { PlanVariant } from "../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../domain/plan/PlanVariant/PlanVariantAttribute";
 import { PlanVariantWithRecipe } from "../domain/plan/PlanVariant/PlanVariantWithRecipes";
 
 export class PlanVariantMapper implements Mapper<PlanVariant> {
-    public toDomain(raw: any): PlanVariant {
-        logger.warn(`RAW PLAN VARIANT: ${JSON.stringify(raw)}`);
-        const attributes: PlanVariantAttribute[] = raw.attributes.map((attr: any) => new PlanVariantAttribute(attr.key, attr.value));
+    public toDomain(raw: any, locale: Locale): PlanVariant {
+        const attributes: PlanVariantAttribute[] = raw.attributes.map(
+            (attr: any) => new PlanVariantAttribute(attr.key[locale] || attr.key["es"], attr.value[locale] || attr.value["es"])
+        );
         const sku: PlanSku = new PlanSku(raw.sku);
 
         if (!!raw.numberOfPersons && !!raw.numberOfRecipes) {
@@ -16,7 +18,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
                 raw.numberOfPersons,
                 raw.numberOfRecipes,
                 sku,
-                raw.name,
+                raw.name[locale] || raw.name["es"],
                 raw.price,
                 raw.priceWithOffer,
                 attributes
@@ -26,18 +28,18 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
         return new PlanVariant(sku, raw.name, raw.price, attributes, raw.priceWithOffer);
     }
 
-    public toPersistence(t: PlanVariant) {
+    public toPersistence(t: PlanVariant, locale: Locale) {
         return {
             // @ts-ignore
             numberOfPersons: t.numberOfPersons,
             // @ts-ignore
             numberOfRecipes: t.numberOfRecipes,
             sku: t.sku.code,
-            name: t.name,
+            name: { [locale]: t.name },
             price: t.price,
             priceWithOffer: t.priceWithOffer,
             attributes: t.attributes.map((attr: PlanVariantAttribute) => {
-                return { key: attr.key, value: attr.value };
+                return { key: { [locale]: attr.key }, value: { [locale]: attr.value } };
             }),
         };
     }

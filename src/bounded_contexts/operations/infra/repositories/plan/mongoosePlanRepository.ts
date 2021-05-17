@@ -5,25 +5,44 @@ import { Plan as MongoosePlan } from "../../../../../infraestructure/mongoose/mo
 import { planMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
-
 export class MongoosePlanRepository implements IPlanRepository {
     public async save(plan: Plan): Promise<void> {
         const planDb = planMapper.toPersistence(plan);
         if (await MongoosePlan.exists({ _id: plan.id.value })) {
-            const { name, description, ...planToUpdate } = planDb;
-            const nameLocaleKey = `name.${plan.locale}`;
-            const descriptionLocaleKey = `description.${plan.locale}`;
-            const imageWithLocale = `imageUrl.${plan.locale}`;
-
-            logger.warn(`Antes de updatear el plan: ${JSON.stringify(planToUpdate)}`);
-
-            await MongoosePlan.updateOne(
-                { _id: plan.id.value },
-                { ...planToUpdate, $set: { [nameLocaleKey]: name[plan.locale], [descriptionLocaleKey]: description[plan.locale] } }
-            );
+            await MongoosePlan.updateOne({ _id: plan.id.value }, this.getRawPlanWithLocaleForUpdatingIt(planDb, plan.locale));
         } else {
             await MongoosePlan.create(planDb);
         }
+    }
+
+    private getRawPlanWithLocaleForUpdatingIt(planDb: any, locale: Locale): any {
+        const { name, description, ...planToUpdate } = planDb;
+        const nameLocaleKey = `name.${locale}`;
+        const descriptionLocaleKey = `description.${locale}`;
+        const imageWithLocale = `imageUrl.${locale}`;
+
+        return {
+            ...planToUpdate,
+            $set: {
+                [nameLocaleKey]: name[locale],
+                [descriptionLocaleKey]: description[locale],
+                // "variants.$[planVariant].attributes": this.getRawPlanVariantsWithLocaleForUpdatingThem(planDb.variants, locale),
+            },
+        };
+    }
+
+    private getRawPlanVariantsWithLocaleForUpdatingThem(planVariants: any[], locale: Locale): any {
+        return planVariants.map((pv) => {
+            const attributesWithLocale = pv.attributes.map((attribute: any) => {
+                const { key, value, ...attributeToUpdate } = attribute;
+                const keyLocale = `key.${locale}`;
+                const valueLocale = `value.${locale}`;
+
+                return { ...attributeToUpdate, [keyLocale]: key[locale], [valueLocale]: value[locale] };
+            });
+
+            return { ...pv, attributes: attributesWithLocale };
+        });
     }
 
     public async findById(planId: PlanId, locale: Locale): Promise<Plan | undefined> {
