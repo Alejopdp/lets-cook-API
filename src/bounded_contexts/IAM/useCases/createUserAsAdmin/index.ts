@@ -1,4 +1,4 @@
-import { nodemailerService } from "../../../../shared/notificationService";
+import { awsSesService, nodemailerService } from "../../../../shared/notificationService";
 import { jwtTokenService } from "../../application/tokenService";
 import { mockRoleRepository } from "../../infra/repositories/role";
 import { mockUserRepository } from "../../infra/repositories/user";
@@ -8,7 +8,7 @@ import { CreateUserAsAdminController } from "./createUserAsAdminController";
 export const createUserAsAdmin: CreateUserAsAdmin = new CreateUserAsAdmin(
     mockUserRepository,
     mockRoleRepository,
-    nodemailerService,
+    awsSesService,
     jwtTokenService
 );
 export const createUserAsAdminController: CreateUserAsAdminController = new CreateUserAsAdminController(createUserAsAdmin);

@@ -31,8 +31,10 @@ export class ForgotPassword implements UseCase<ForgotPasswordDto, Promise<Respon
         user.requestChangePassword();
 
         const token = this.tokenService.passwordGenerationToken({ email: user.email, id: user.id.value });
-        logger.info(`Token 4 new password: ${JSON.stringify(token)}`);
-        // await this.notificationService.notifyNewBackOfficeUserToGeneratePassword(user.email, "");
+        await this.notificationService.notifyNewBackOfficeUserToGeneratePassword(
+            user.email,
+            `${process.env.ADMIN_ORIGIN_URL}/nueva-contrasena?token=${token}`
+        );
 
         await this.userRepository.save(user);
 
