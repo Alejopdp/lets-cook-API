@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { PlanId } from "../../domain/plan/PlanId";
 import { Month } from "../../domain/recipe/Months";
@@ -28,6 +29,7 @@ export class CreateRecipe {
     }
 
     public async execute(dto: CreateRecipeDto): Promise<void> {
+        logger.warn(`A ver ese dto: ${JSON.stringify(dto)}`);
         const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, dto.recipeImageExtension, dto.recipeImage);
         const recipeSku: RecipeSku = new RecipeSku(dto.sku);
         const recipeDescription: RecipeDescription = new RecipeDescription(dto.shortDescription, dto.longDescription);
