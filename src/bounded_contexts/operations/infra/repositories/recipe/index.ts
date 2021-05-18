@@ -91,5 +91,15 @@ const arepasDeCrhistian: Recipe = new Recipe(
     arepasRecipeId
 );
 
-const mockDatabase: Recipe[] = [burgerHallouli, arepasDeCrhistian];
+const mockDatabase: Recipe[] = [
+    burgerHallouli,
+    arepasDeCrhistian,
+    arepasDeCrhistian,
+    burgerHallouli,
+    arepasDeCrhistian,
+    arepasDeCrhistian,
+    burgerHallouli,
+    arepasDeCrhistian,
+    arepasDeCrhistian,
+];
 export const mockRecipeRepository: IRecipeRepository = new MockRecipeRepository(mockDatabase);

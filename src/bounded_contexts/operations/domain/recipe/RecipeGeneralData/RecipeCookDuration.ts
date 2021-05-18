@@ -15,9 +15,12 @@ export class RecipeCookDuration implements IValueObject<RecipeCookDuration> {
     }
 
     public value(): string {
-        return `${this.timeValue}${this.timeUnit}`;
+        return this.getMinutesValues();
     }
 
+    private getMinutesValues(): string {
+        return `${this.timeValue} min`;
+    }
     /**
      * Getter timeValue
      * @return {number}
