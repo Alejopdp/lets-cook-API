@@ -33,6 +33,10 @@ export class AwsSesService implements INotificationService {
         await this.sendMail([email], "Tu usuario fue creado", redirectUrl, redirectUrl);
     }
 
+    public async notifyNewBackOfficeUserToRecoverPassword(email: string, redirectUrl: string): Promise<void> {
+        await this.sendMail([email], "Cambiar la contraseña", redirectUrl, redirectUrl);
+    }
+
     public async notifyUserToGeneratePassword(email: string, redirectUrl: string): Promise<void> {
         await this.sendMail([email], "Tu usuario fue creado", redirectUrl, redirectUrl);
     }

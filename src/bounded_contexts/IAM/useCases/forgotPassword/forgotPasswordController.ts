@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { ForgotPassword } from "./forgotPassword";
 import { ForgotPasswordDto } from "./forgotPasswordDto";
@@ -13,13 +14,14 @@ export class ForgotPasswordController extends BaseController {
     async executeImpl(): Promise<any> {
         try {
             const dto: ForgotPasswordDto = {
-                id: this.req.params.id,
+                email: this.req.params.email,
             };
 
             await this.forgotPassword.execute(dto);
 
             return this.ok(this.res);
         } catch (err) {
+            logger.error(err);
             return this.fail(err);
         }
     }

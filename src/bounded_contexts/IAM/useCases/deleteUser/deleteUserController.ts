@@ -14,7 +14,7 @@ export class DeleteUserController extends BaseController {
     async executeImpl(): Promise<any> {
         try {
             const dto: DeleteUserDto = {
-                id: parseInt(this.req.params.id),
+                id: this.req.params.id,
             };
 
             await this.deleteUser.execute(dto);

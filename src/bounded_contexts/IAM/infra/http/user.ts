@@ -24,7 +24,7 @@ userRouter.post("/generate-password", middleware.ensureTokenValid(), (req, res) 
 userRouter.post("/", (req, res) => createUserAsAdminController.execute(req, res));
 
 // PUTs
-userRouter.put("/forgot-password/:id", (req, res) => forgotPasswordController.execute(req, res));
+userRouter.put("/forgot-password/:email", (req, res) => forgotPasswordController.execute(req, res));
 userRouter.put("/:id", (req, res) => updateUserController.execute(req, res));
 
 // DELETEs

@@ -23,15 +23,14 @@ export class ForgotPassword implements UseCase<ForgotPasswordDto, Promise<Respon
     }
 
     public async execute(dto: ForgotPasswordDto): Promise<Response> {
-        const userId: UserId = new UserId(dto.id);
-        const user: User | undefined = await this.userRepository.findById(userId);
+        const user: User | undefined = await this.userRepository.findByEmail(dto.email);
 
         if (!user) return isFailure(invalidArguments());
 
         user.requestChangePassword();
 
         const token = this.tokenService.passwordGenerationToken({ email: user.email, id: user.id.value });
-        await this.notificationService.notifyNewBackOfficeUserToGeneratePassword(
+        await this.notificationService.notifyNewBackOfficeUserToRecoverPassword(
             user.email,
             `${process.env.ADMIN_ORIGIN_URL}/nueva-contrasena?token=${token}`
         );
