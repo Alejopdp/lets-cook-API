@@ -15,7 +15,7 @@ export class RecipeWeight implements IValueObject<RecipeWeight> {
     }
 
     public value(): string {
-        return `${this.weightValue}${this.weightUnit}`;
+        return `${this.weightValue} ${this.weightUnit}`;
     }
 
     /**

@@ -14,7 +14,8 @@ export class PlanMapper implements Mapper<Plan> {
         const sku: PlanSku = new PlanSku(raw.sku);
         const type: PlanType = (<any>PlanType)[raw.type];
         const frequencies: PlanFrequency[] = raw.availableFrequencies.map((freq: string) => (<any>PlanFrequency)[freq]);
-        const variants: PlanVariant[] = raw.variants.map((variant: any) => planVariantMapper.toDomain(variant, locale));
+        // const variants: PlanVariant[] = raw.variants.map((variant: any) => planVariantMapper.toDomain(variant, locale));
+        const variants: PlanVariant[] = raw.variants.map((variant: any) => planVariantMapper.toDomain(variant));
         const additionalPlans: Plan[] = raw.additionalPlans.map((plan: any) => this.toDomain(plan, locale));
 
         return Plan.create(
@@ -33,7 +34,8 @@ export class PlanMapper implements Mapper<Plan> {
         );
     }
     public toPersistence(t: Plan): any {
-        const variants: any[] = t.planVariants.map((variant) => planVariantMapper.toPersistence(variant, t.locale));
+        // const variants: any[] = t.planVariants.map((variant) => planVariantMapper.toPersistence(variant, t.locale));
+        const variants: any[] = t.planVariants.map((variant) => planVariantMapper.toPersistence(variant));
 
         return {
             _id: t.id.value || undefined,

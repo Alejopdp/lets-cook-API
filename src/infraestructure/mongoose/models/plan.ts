@@ -7,12 +7,7 @@ const PlanVariantSchema = new mongoose.Schema({
     },
 
     name: {
-        es: {
-            type: String,
-        },
-        en: {
-            type: String,
-        },
+        type: String,
     },
 
     price: {
@@ -35,23 +30,8 @@ const PlanVariantSchema = new mongoose.Schema({
 
     attributes: [
         {
-            key: {
-                es: {
-                    type: String,
-                },
-                en: {
-                    type: String,
-                },
-            },
-
-            value: {
-                es: {
-                    type: String,
-                },
-                en: {
-                    type: String,
-                },
-            },
+            key: String,
+            value: String,
         },
     ],
 });
