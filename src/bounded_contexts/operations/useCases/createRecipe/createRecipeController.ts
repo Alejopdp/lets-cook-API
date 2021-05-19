@@ -6,7 +6,6 @@ import { CreateRecipe } from "./createRecipe";
 import { CreateRecipeDto } from "./createRecipeDto";
 import fs from "fs";
 import path from "path";
-import { logger } from "../../../../../config";
 
 export class CreateRecipeController extends BaseController {
     private _createRecipe: CreateRecipe;
@@ -39,6 +38,8 @@ export class CreateRecipeController extends BaseController {
                 sku: this.req.body.sku,
                 weight: this.req.body.weight,
                 planIds: JSON.parse(this.req.body.planIds),
+                variants: JSON.parse(this.req.body.variants),
+                tools: JSON.parse(this.req.body.tools),
             };
 
             await this.createRecipe.execute(dto);

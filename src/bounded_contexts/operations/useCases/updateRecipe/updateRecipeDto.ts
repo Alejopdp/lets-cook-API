@@ -1,6 +1,7 @@
 import { ReadStream } from "fs";
 import { Month } from "../../domain/recipe/Months";
 import { RecipeDifficultyLevel } from "../../domain/recipe/RecipeGeneralData/RecipeDifficultyLevel";
+import { NewVariant } from "../createRecipe/createRecipeDto";
 
 export interface UpdateRecipeDto {
     recipeId: string | number;
@@ -18,4 +19,6 @@ export interface UpdateRecipeDto {
     relatedPlans: number[] | string[];
     availableMonths: Month[];
     backOfficeTags: string[];
+    tools: string[];
+    variants: NewVariant[];
 }

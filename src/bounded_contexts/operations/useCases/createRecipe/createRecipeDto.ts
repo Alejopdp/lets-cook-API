@@ -2,6 +2,12 @@ import { ReadStream } from "fs";
 import { Month } from "../../domain/recipe/Months";
 import { RecipeDifficultyLevel } from "../../domain/recipe/RecipeGeneralData/RecipeDifficultyLevel";
 
+export interface NewVariant {
+    ingredients: string[];
+    restrictions: string[];
+    sku: string;
+}
+
 export interface CreateRecipeDto {
     sku: string;
     name: string;
@@ -18,4 +24,6 @@ export interface CreateRecipeDto {
     availableMonths: Month[];
     backOfficeTags: string[];
     planIds: string[] | number[];
+    variants: NewVariant[];
+    tools: string[];
 }

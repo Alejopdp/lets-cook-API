@@ -16,6 +16,7 @@ export class GetRecipeByIdPresenter {
             weight: recipe.recipeGeneralData.recipeWeight.value(),
             backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
             imageTags: recipe.recipeImageTags.map((tag) => tag.name),
+            tools: recipe.recipeTools,
             availableWeeks: recipe.availableWeeks.map((week: Week) => {
                 return {
                     id: week.id.value,
@@ -26,6 +27,13 @@ export class GetRecipeByIdPresenter {
             }),
             availableMonths: recipe.availableMonths,
             relatedPlans: recipe.relatedPlans.map((planId) => planId.value),
+            recipeVariants: recipe.recipeVaraints.map((variant) => {
+                return {
+                    ingredients: variant.ingredients.map((ing) => ing.name),
+                    restrictions: variant.recipeVariantRestriction,
+                    sku: variant.sku.code,
+                };
+            }),
         };
     }
 }

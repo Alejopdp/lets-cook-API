@@ -1,4 +1,5 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
+import { PlanId } from "../../domain/plan/PlanId";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { RecipeCookDuration } from "../../domain/recipe/RecipeGeneralData/RecipeCookDuration";
 import { RecipeDescription } from "../../domain/recipe/RecipeGeneralData/RecipeDescription";
@@ -50,6 +51,8 @@ export class UpdateRecipe {
         recipe.recipeImageTags = recipeImageTags;
         recipe.recipeBackOfficeTags = recipeBackOfficeTags;
         recipe.recipeNutritionalData = recipeNutritionalData;
+        recipe.relatedPlans = dto.relatedPlans.map((id: string | number) => new PlanId(id));
+        recipe.recipeTools = dto.tools;
     }
 
     /**

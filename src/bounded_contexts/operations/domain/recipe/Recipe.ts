@@ -18,6 +18,7 @@ export class Recipe extends Entity<Recipe> {
     private _availableWeeks: Week[];
     private _availableMonths: Month[];
     private _relatedPlans: PlanId[];
+    private _recipeTools: string[];
 
     constructor(
         recipeGeneralData: RecipeGeneralData,
@@ -28,6 +29,7 @@ export class Recipe extends Entity<Recipe> {
         availableWeeks: Week[],
         availableMonths: Month[],
         relatedPlans: PlanId[],
+        recipeTools: string[],
         id?: RecipeId
     ) {
         super(id);
@@ -39,6 +41,11 @@ export class Recipe extends Entity<Recipe> {
         this._availableWeeks = availableWeeks;
         this._availableMonths = availableMonths;
         this._relatedPlans = relatedPlans;
+        this._recipeTools = recipeTools;
+    }
+
+    public updateWeeks(weeks: Week[]): void {
+        this.availableWeeks = weeks;
     }
 
     /**
@@ -106,6 +113,14 @@ export class Recipe extends Entity<Recipe> {
     }
 
     /**
+     * Getter recipeTools
+     * @return {string[]}
+     */
+    public get recipeTools(): string[] {
+        return this._recipeTools;
+    }
+
+    /**
      * Setter recipeGeneralData
      * @param {RecipeGeneralData} value
      */
@@ -167,5 +182,13 @@ export class Recipe extends Entity<Recipe> {
      */
     public set relatedPlans(value: PlanId[]) {
         this._relatedPlans = value;
+    }
+
+    /**
+     * Setter recipeTools
+     * @param {string[]} value
+     */
+    public set recipeTools(value: string[]) {
+        this._recipeTools = value;
     }
 }

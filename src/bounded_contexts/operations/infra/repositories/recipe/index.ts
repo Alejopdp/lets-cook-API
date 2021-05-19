@@ -33,8 +33,8 @@ const masRica = new RecipeTag("Mas rica");
 const tagParaFiltro1 = new RecipeTag("Tag1");
 const tagParaFiltro2 = new RecipeTag("Tag2");
 
-const burgerRecipeId = new RecipeId(1);
-const arepasRecipeId = new RecipeId(2);
+// const burgerRecipeId = new RecipeId(1);
+// const arepasRecipeId = new RecipeId(2);
 
 const burgerHallouliData: RecipeGeneralData = new RecipeGeneralData(
     "Burger de Hallouli",
@@ -60,7 +60,8 @@ const burgerHallouli: Recipe = new Recipe(
     [week1, week2],
     [Month.Abril, Month.Mayo, Month.Marzo, Month.Agosto],
     [plan1.id],
-    burgerRecipeId
+    []
+    // burgerRecipeId
 );
 
 const arepasDeCrhistianData: RecipeGeneralData = new RecipeGeneralData(
@@ -75,8 +76,8 @@ const arepasDeCrhistianData: RecipeGeneralData = new RecipeGeneralData(
 const simpleArepaVariant: RecipeVariant = new RecipeVariant(
     [pan],
     [RecipeVariantRestriction.SinLactosa, RecipeVariantRestriction.Vegetariano, RecipeVariantRestriction.Vegano],
-    new RecipeVariantSku("ARPVEG"),
-    burgerRecipeId
+    new RecipeVariantSku("ARPVEG")
+    // burgerRecipeId
 );
 const completaArepaVariant: RecipeVariant = new RecipeVariant([pan, tomate, lechuga, queso, carne], [], new RecipeVariantSku("ARPCAR"));
 const arepasDeCrhistian: Recipe = new Recipe(
@@ -88,7 +89,8 @@ const arepasDeCrhistian: Recipe = new Recipe(
     [week1, week2],
     [Month.Abril, Month.Mayo, Month.Marzo, Month.Agosto],
     [plan2.id],
-    arepasRecipeId
+    []
+    // arepasRecipeId
 );
 
 const mockDatabase: Recipe[] = [burgerHallouli, arepasDeCrhistian];
