@@ -1,5 +1,6 @@
 import { Ingredient } from "../../domain/ingredient/ingredient";
 import { Plan } from "../../domain/plan/Plan";
+import { Month } from "../../domain/recipe/Months";
 import { Week } from "../../domain/week/Week";
 import { IIngredientRepository } from "../../infra/repositories/ingredient/IIngredientRepository";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
@@ -22,8 +23,22 @@ export class GetDataForCreatingARecipe {
         const plans: Plan[] = await this.planRepository.findAllWithRecipesFlag(dto.locale);
         const ingredients: Ingredient[] = await this.ingredientRepository.findAll();
         const weeks: Week[] = await this.weekRepository.findAll();
+        const months: Month[] = [
+            Month.Enero,
+            Month.Febrero,
+            Month.Marzo,
+            Month.Abril,
+            Month.Mayo,
+            Month.Junio,
+            Month.Julio,
+            Month.Agosto,
+            Month.Septiembre,
+            Month.Octubre,
+            Month.Noviembre,
+            Month.Diciembre,
+        ];
 
-        return GetDataForCreatingARecipePresenter.present(plans, ingredients, weeks);
+        return GetDataForCreatingARecipePresenter.present(plans, ingredients, weeks, months);
     }
 
     /**

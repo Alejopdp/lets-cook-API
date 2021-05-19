@@ -7,6 +7,7 @@ import { getRecipeByIdController } from "../../useCases/getRecipeById";
 import { getRecipeFiltersController } from "../../useCases/getRecipeFilters";
 import { getRecipeListController } from "../../useCases/getRecipeList";
 import { updateRecipeController } from "../../useCases/updateRecipe";
+import { updateRecipeWeeksController } from "../../useCases/updateRecipeWeeks";
 
 const recipeRouter = express.Router();
 
@@ -24,6 +25,7 @@ recipeRouter.get("/:id", (req, res) => getRecipeByIdController.execute(req, res)
 recipeRouter.post("/", multer(options).single("recipeImage"), (req, res) => createRecipeController.execute(req, res));
 
 // PUTs
+recipeRouter.put("/update-weeks/:id", (req, res) => updateRecipeWeeksController.execute(req, res));
 recipeRouter.put("/:id", multer(options).single("recipeImage"), (req, res) => updateRecipeController.execute(req, res));
 
 // DELETEs

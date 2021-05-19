@@ -30,6 +30,14 @@ export class GetRecipeListPresenter {
                 }),
                 availableMonths: recipe.availableMonths,
                 relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.value),
+                tools: recipe.recipeTools,
+                recipeVariants: recipe.recipeVaraints.map((variant) => {
+                    return {
+                        ingredients: variant.ingredients.map((ing) => ing.name),
+                        restrictions: variant.recipeVariantRestriction,
+                        sku: variant.sku.code,
+                    };
+                }),
             });
         }
         return presentedRecipes;

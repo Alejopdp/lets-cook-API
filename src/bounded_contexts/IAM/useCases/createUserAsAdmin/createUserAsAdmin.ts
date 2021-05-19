@@ -35,8 +35,10 @@ export class CreateUserAsAdmin {
         const user: User = User.create(userName, dto.email, true, userRole, false);
 
         await this.userRepository.save(user);
-        // await this.notificationService.notifyNewBackOfficeUser(user.email, "");
-        logger.info(`Token para generar contraseña ${this.tokenService.passwordGenerationToken({ email: user.email })}`);
+        await this.notificationService.notifyNewBackOfficeUserToGeneratePassword(
+            user.email,
+            `${process.env.ADMIN_ORIGIN_URL}/nueva-contrasena?token=${this.tokenService.passwordGenerationToken({ email: user.email })}`
+        );
     }
 
     /**

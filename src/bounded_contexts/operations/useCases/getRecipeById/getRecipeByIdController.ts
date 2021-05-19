@@ -13,7 +13,7 @@ export class GetRecipeByIdController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: GetRecipeByIdDto = {
-                recipeId: parseInt(this.req.params.id),
+                recipeId: this.req.params.id,
             };
             const result = await this.getRecipeById.execute(dto);
 

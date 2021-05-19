@@ -17,6 +17,10 @@ export class MockIngredientRepository implements IIngredientRepository {
         return this.database.find((i) => i.name === name);
     }
 
+    public async findAllByName(names: string[]): Promise<Ingredient[]> {
+        return this.database.filter((ingredient) => names.some((name) => ingredient.name === name));
+    }
+
     public async findAll(): Promise<Ingredient[]> {
         return this.database;
     }

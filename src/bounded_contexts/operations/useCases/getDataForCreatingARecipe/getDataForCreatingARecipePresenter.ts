@@ -1,10 +1,11 @@
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Ingredient } from "../../domain/ingredient/ingredient";
 import { Plan } from "../../domain/plan/Plan";
+import { Month } from "../../domain/recipe/Months";
 import { Week } from "../../domain/week/Week";
 
 export class GetDataForCreatingARecipePresenter {
-    public static present(plans: Plan[], ingredients: Ingredient[], weeks: Week[]): any {
+    public static present(plans: Plan[], ingredients: Ingredient[], weeks: Week[], months: Month[]): any {
         const presentedPlans = [];
         const presentedIngredients = [];
         const presentedWeeks = [];
@@ -29,6 +30,6 @@ export class GetDataForCreatingARecipePresenter {
             });
         }
 
-        return { plans: presentedPlans, ingredients: presentedIngredients, weeks: presentedWeeks };
+        return { plans: presentedPlans, ingredients: presentedIngredients, weeks: presentedWeeks, months };
     }
 }

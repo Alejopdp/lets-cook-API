@@ -21,21 +21,25 @@ export class UpdateRecipeController extends BaseController {
             const recipeImage: ReadStream = fs.createReadStream(recipeImagePath);
 
             const dto: UpdateRecipeDto = {
-                recipeId: parseInt(this.req.params.id),
-                availableMonths: this.req.body.availableMonths.map((month: string) => (<any>Month)[month]).filter((month: Month) => month),
-                backOfficeTags: this.req.body.backOfficeTags,
-                cookTime: this.req.body.cookTime,
+                recipeId: this.req.params.id,
+                availableMonths: JSON.parse(this.req.body.availableMonths)
+                    .map((month: string) => (<any>Month)[month])
+                    .filter((month: Month) => month),
+                backOfficeTags: JSON.parse(this.req.body.backOfficeTags),
+                cookTime: this.req.body.cookDuration,
                 difficultyLevel: (<any>RecipeDifficultyLevel)[this.req.body.difficultyLevel],
-                imageTags: this.req.body.imageTags,
+                imageTags: JSON.parse(this.req.body.imageTags),
                 recipeImage,
                 recipeImageExtension: path.extname(this.req.file.originalname),
                 shortDescription: this.req.body.shortDescription,
                 longDescription: this.req.body.longDescription,
                 name: this.req.body.name,
                 nutritionalInfo: [],
-                relatedPlans: this.req.body.relatedPlans,
+                relatedPlans: JSON.parse(this.req.body.planIds),
                 sku: this.req.body.sku,
                 weight: this.req.body.weight,
+                tools: JSON.parse(this.req.body.tools),
+                variants: JSON.parse(this.req.body.variants),
             };
 
             await this.updateRecipe.execute(dto);

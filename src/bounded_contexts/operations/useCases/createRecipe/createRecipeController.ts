@@ -21,22 +21,25 @@ export class CreateRecipeController extends BaseController {
             const recipeImage: ReadStream = fs.createReadStream(recipeImagePath);
 
             const dto: CreateRecipeDto = {
-                availableMonths: this.req.body.availableMonths.map((month: string) => (<any>Month)[month]).filter((month: Month) => month),
-                backOfficeTags: this.req.body.backOfficeTags,
-                cookTime: this.req.body.cookTime,
+                availableMonths: JSON.parse(this.req.body.availableMonths)
+                    .map((month: string) => (<any>Month)[month])
+                    .filter((month: Month) => month),
+                backOfficeTags: JSON.parse(this.req.body.backOfficeTags),
+                cookTime: this.req.body.cookDuration,
                 difficultyLevel: (<any>RecipeDifficultyLevel)[this.req.body.difficultyLevel],
-                imageTags: this.req.body.imageTags,
+                imageTags: JSON.parse(this.req.body.imageTags),
                 recipeImage,
                 recipeImageExtension: path.extname(this.req.file.originalname),
                 shortDescription: this.req.body.shortDescription,
                 longDescription: this.req.body.longDescription,
                 name: this.req.body.name,
                 nutritionalInfo: [],
-                availableWeeksIds: this.req.body.availableWeeksIds.map((id: string) => parseInt(id)),
-                relatedPlans: this.req.body.relatedPlans,
+                availableWeeksIds: JSON.parse(this.req.body.availableWeeksIds).map((id: string) => parseInt(id)),
                 sku: this.req.body.sku,
                 weight: this.req.body.weight,
-                planIds: this.req.body.planIds,
+                planIds: JSON.parse(this.req.body.planIds),
+                variants: JSON.parse(this.req.body.variants),
+                tools: JSON.parse(this.req.body.tools),
             };
 
             await this.createRecipe.execute(dto);
