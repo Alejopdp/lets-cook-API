@@ -13,7 +13,7 @@ import { RecipeNutritionalData } from "../../../domain/recipe/RecipeNutritionalD
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { RecipeVariant } from "../../../domain/recipe/RecipeVariant/RecipeVariant";
 import { RecipeVariantId } from "../../../domain/recipe/RecipeVariant/RecipeVariantId";
-import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/RecipeVariantRestriction";
+import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariantSku } from "../../../domain/recipe/RecipeVariant/RecipeVariantSku";
 
 describe("[DOMAIN] - Recipe tests", () => {

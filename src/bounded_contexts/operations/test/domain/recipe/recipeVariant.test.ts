@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { Ingredient } from "../../../domain/ingredient/ingredient";
 import { RecipeVariant } from "../../../domain/recipe/RecipeVariant/RecipeVariant";
-import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/RecipeVariantRestriction";
+import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariantSku } from "../../../domain/recipe/RecipeVariant/RecipeVariantSku";
 
 describe("[DOMAIN] - Recipe variant tests", () => {

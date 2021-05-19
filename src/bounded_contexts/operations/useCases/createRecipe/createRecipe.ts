@@ -62,6 +62,8 @@ export class CreateRecipe {
         const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId: number | string) => new WeekId(weekId));
         const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
         const planIds: PlanId[] = dto.planIds.map((id: string | number) => new PlanId(id));
+        console.log("DTO.VARIANTS: ", dto.variants)
+        console.log("RECIPECREATORDTO: ", recipeCreatorDto)
         const recipeVariants: RecipeVariant[] = await this.recipeVariantsCreator.execute(recipeCreatorDto);
         const months: Month[] = dto.availableMonths.map((month) => (<any>Month)[month]);
 

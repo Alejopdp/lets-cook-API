@@ -2,13 +2,21 @@ import { MomentTimeService } from "../../application/timeService/momentTimeServi
 import { Ingredient } from "../../domain/ingredient/ingredient";
 import { Plan } from "../../domain/plan/Plan";
 import { Month } from "../../domain/recipe/Months";
+import { RecipeVariantRestriction } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { Week } from "../../domain/week/Week";
 
 export class GetDataForCreatingARecipePresenter {
-    public static present(plans: Plan[], ingredients: Ingredient[], weeks: Week[], months: Month[]): any {
+    public static present(
+        plans: Plan[],
+        ingredients: Ingredient[],
+        weeks: Week[],
+        months: Month[],
+        restrictions: RecipeVariantRestriction[]
+    ): any {
         const presentedPlans = [];
         const presentedIngredients = [];
         const presentedWeeks = [];
+        const presentedRestrictions = [];
 
         for (let plan of plans) {
             presentedPlans.push({
@@ -30,6 +38,20 @@ export class GetDataForCreatingARecipePresenter {
             });
         }
 
-        return { plans: presentedPlans, ingredients: presentedIngredients, weeks: presentedWeeks, months };
+        for (let restriction of restrictions) {
+            presentedRestrictions.push({
+                id: restriction.id.value,
+                label: restriction.label,
+                value: restriction.value,
+            });
+        }
+
+        return {
+            plans: presentedPlans,
+            ingredients: presentedIngredients,
+            weeks: presentedWeeks,
+            months,
+            restrictions: presentedRestrictions,
+        };
     }
 }

@@ -40,7 +40,10 @@ export class UpdateRecipeController extends BaseController {
                 weight: this.req.body.weight,
                 tools: JSON.parse(this.req.body.tools),
                 variants: JSON.parse(this.req.body.variants),
+                availableWeeksIds: JSON.parse(this.req.body.availableWeeksIds).map((id: string) => parseInt(id)),
             };
+
+            console.log("A ver el dto de update: ", dto);
 
             await this.updateRecipe.execute(dto);
 

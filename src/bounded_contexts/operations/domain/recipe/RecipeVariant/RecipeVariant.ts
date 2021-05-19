@@ -1,6 +1,6 @@
 import { Entity } from "../../../../../core/domain/Entity";
 import { Ingredient } from "../../ingredient/ingredient";
-import { RecipeVariantRestriction } from "./RecipeVariantRestriction";
+import { RecipeVariantRestriction } from "./recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariantSku } from "./RecipeVariantSku";
 import { RecipeVariantId } from "./RecipeVariantId";
 import * as _ from "lodash";

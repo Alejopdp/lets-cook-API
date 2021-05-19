@@ -18,6 +18,7 @@ export interface UpdateRecipeDto {
     nutritionalInfo: string[];
     relatedPlans: number[] | string[];
     availableMonths: Month[];
+    availableWeeksIds: string[] | number[];
     backOfficeTags: string[];
     tools: string[];
     variants: NewVariant[];

@@ -11,9 +11,11 @@ export class GetRecipeByIdPresenter {
             shortDescription: recipe.recipeGeneralData.recipeDescription.shortDescription,
             longDescription: recipe.recipeGeneralData.recipeDescription.longDescription,
             cookDuration: recipe.recipeGeneralData.cookDuration.value(),
+            cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
             difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
             imageUrl: recipe.recipeGeneralData.imageUrl,
             weight: recipe.recipeGeneralData.recipeWeight.value(),
+            weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
             backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
             imageTags: recipe.recipeImageTags.map((tag) => tag.name),
             tools: recipe.recipeTools,
@@ -30,7 +32,13 @@ export class GetRecipeByIdPresenter {
             recipeVariants: recipe.recipeVaraints.map((variant) => {
                 return {
                     ingredients: variant.ingredients.map((ing) => ing.name),
-                    restrictions: variant.recipeVariantRestriction,
+                    restrictions: variant.recipeVariantRestriction.map((r) => {
+                        return {
+                            id: r.id.value,
+                            value: r.value,
+                            label: r.label,
+                        };
+                    }),
                     sku: variant.sku.code,
                 };
             }),

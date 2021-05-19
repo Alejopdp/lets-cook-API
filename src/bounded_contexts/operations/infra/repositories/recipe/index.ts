@@ -12,12 +12,13 @@ import { RecipeId } from "../../../domain/recipe/RecipeId";
 import { RecipeNutritionalData } from "../../../domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { RecipeVariant } from "../../../domain/recipe/RecipeVariant/RecipeVariant";
-import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/RecipeVariantRestriction";
+import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariantSku } from "../../../domain/recipe/RecipeVariant/RecipeVariantSku";
 import { week1, week2 } from "../week";
 import { IRecipeRepository } from "./IRecipeRepository";
 import { MockRecipeRepository } from "./mockRecipeRepository";
 import { plan1, plan2 } from "../plan";
+import { sinLactosa, vegano, Vegetariano } from "../recipeVariantRestriction";
 
 const lechuga: Ingredient = new Ingredient("Lechuga");
 const tomate: Ingredient = new Ingredient("Tomate");
@@ -75,7 +76,7 @@ const arepasDeCrhistianData: RecipeGeneralData = new RecipeGeneralData(
 );
 const simpleArepaVariant: RecipeVariant = new RecipeVariant(
     [pan],
-    [RecipeVariantRestriction.SinLactosa, RecipeVariantRestriction.Vegetariano, RecipeVariantRestriction.Vegano],
+    [sinLactosa, Vegetariano, vegano],
     new RecipeVariantSku("ARPVEG")
     // burgerRecipeId
 );
