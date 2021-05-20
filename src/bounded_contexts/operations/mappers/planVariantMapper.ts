@@ -19,7 +19,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             );
         }
 
-        return new PlanVariant(raw.sku, raw.name, raw.price, attributes, raw.priceWithOffer);
+        // return new PlanVariant(raw.sku, raw.name, raw.price, attributes, raw.priceWithOffer);
         return new PlanVariant(new PlanSku(raw.sku), raw.name, raw.price, attributes, raw.priceWithOffer);
     }
 
