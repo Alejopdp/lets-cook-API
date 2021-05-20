@@ -79,9 +79,11 @@ export class UpdatePlan {
             }
         }
 
-        // const imageUrl = await this.storageService.savePlanImage(dto.planName, dto.planImageFileName, dto.planImage);
+        if (dto.planImage) {
+            const imageUrl = await this.storageService.savePlanImage(dto.planName, dto.planImageFileName, dto.planImage);
 
-        // plan.imageUrl = imageUrl;
+            plan.imageUrl = imageUrl;
+        }
 
         plan.availablePlanFrecuencies = dto.availablePlanFrecuencies;
         plan.description = dto.planDescription;

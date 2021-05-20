@@ -23,10 +23,11 @@ export class S3StorageService implements IStorageService {
         await this.s3.upload(params).promise();
     }
 
-    public getPresignedUrlForFile(objectKey: string): string {
+    public async getPresignedUrlForFile(objectKey: string): Promise<string> {
         var params = { Bucket: process.env.S3_BUCKET_NAME, Key: objectKey };
+        const url: string = await this.s3.getSignedUrlPromise("getObject", params);
 
-        return this.s3.getSignedUrl("getObject", params);
+        return url;
     }
 
     public async savePlanImage(planName: string, fileName: string, file?: ReadStream): Promise<string> {
@@ -59,6 +60,10 @@ export class S3StorageService implements IStorageService {
             logger.error(error);
             throw new Error("Al cargar la imagen de la receta");
         }
+    }
+
+    public async getObject(objectKey: string): Promise<any> {
+        throw new Error("Not implemented yet");
     }
 
     /**

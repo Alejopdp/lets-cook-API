@@ -12,7 +12,7 @@ export interface UpdateRecipeDto {
     cookTime: number;
     difficultyLevel: RecipeDifficultyLevel;
     weight: number;
-    recipeImage: ReadStream;
+    recipeImage?: ReadStream;
     recipeImageExtension: string;
     imageTags: string[];
     nutritionalInfo: string[];

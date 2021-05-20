@@ -15,7 +15,7 @@ export class GetRecipeList {
     public async execute(): Promise<void> {
         const recipeList: Recipe[] = await this.recipeRepository.findAll();
 
-        return GetRecipeListPresenter.present(recipeList);
+        return await GetRecipeListPresenter.present(recipeList);
     }
 
     /**

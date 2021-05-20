@@ -18,6 +18,7 @@ export class CreatePlanController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
+            if (!this.req.file) throw new Error("No ha ingresado una imagen para el plan");
             const planImagePath = this.req.file.path;
             const planImage: ReadStream = fs.createReadStream(planImagePath);
 

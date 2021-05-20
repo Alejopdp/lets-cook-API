@@ -47,7 +47,11 @@ export class UpdateRecipe {
         const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId: number | string) => new WeekId(weekId));
         const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
 
-        const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, dto.recipeImageExtension, dto.recipeImage);
+        var imageUrl: string = recipe.recipeGeneralData.imageUrl;
+        if (dto.recipeImage) {
+            imageUrl = await this.storageService.saveRecipeImage(dto.name, dto.recipeImageExtension, dto.recipeImage);
+        }
+
         const recipeSku: RecipeSku = new RecipeSku(dto.sku);
         const recipeDescription: RecipeDescription = new RecipeDescription(dto.shortDescription, dto.longDescription);
         const recipeCookTime: RecipeCookDuration = new RecipeCookDuration(dto.cookTime);

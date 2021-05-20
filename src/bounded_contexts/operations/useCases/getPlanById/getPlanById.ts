@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanId } from "../../domain/plan/PlanId";
@@ -19,7 +20,8 @@ export class GetPlanById {
 
         if (!plan) throw new Error("El plan ingresado no existe");
 
-        plan.imageUrl = plan.imageUrl ? this.storageService.getPresignedUrlForFile(plan.imageUrl) : "";
+        plan.imageUrl = plan.imageUrl ? await this.storageService.getPresignedUrlForFile(plan.imageUrl) : "";
+        logger.warn(`A ver el plan image: ${plan.imageUrl}`);
 
         return GetPlanByIdPresenter.present(plan);
     }

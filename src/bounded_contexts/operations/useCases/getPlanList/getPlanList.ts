@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
@@ -16,7 +17,9 @@ export class GetPlanList {
     public async execute(dto: GetPlanListDto): Promise<any> {
         var plans: Plan[] = await this.planRepository.findAll(dto.locale);
 
-        plans.forEach((plan) => (plan.imageUrl = this.storageService.getPresignedUrlForFile(plan.imageUrl)));
+        for (let plan of plans) {
+            plan.imageUrl = await this.storageService.getPresignedUrlForFile(plan.imageUrl);
+        }
 
         return GetPlanListPresenter.present(plans);
     }

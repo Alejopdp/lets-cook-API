@@ -36,6 +36,6 @@ export class MongooseUserRepository implements IUserRepository {
     }
 
     public async delete(userId: UserId): Promise<void> {
-        await MongooseUser.updateOne({ id: userId.value }, { deletionFlag: true });
+        await MongooseUser.updateOne({ _id: userId.value }, { deletionFlag: true });
     }
 }

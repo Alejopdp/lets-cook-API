@@ -5,4 +5,5 @@ export const s3 = new S3({
     secretAccessKey: process.env.S3_ASSETS_SECRET_KEY,
     signatureVersion: "v4",
     apiVersion: "2006-03-01",
+    region: "eu-west-3",
 });

@@ -32,6 +32,10 @@ export class CreateUserAsAdmin {
 
         if (!userRole) throw new Error(`El rol ${dto.roleTitle} no existe para asignarselo a un usuario`);
 
+        const exists: boolean = !!(await this.userRepository.findByEmail(dto.email));
+
+        if (exists) throw new Error(`Ya existe un usuario con el email ${dto.email}`);
+
         const user: User = User.create(userName, dto.email, true, userRole, false);
 
         await this.userRepository.save(user);

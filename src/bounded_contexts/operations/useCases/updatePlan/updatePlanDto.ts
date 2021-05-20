@@ -8,7 +8,7 @@ export interface UpdatePlanDto {
     planName: string;
     planDescription: string;
     planSku: string;
-    planImage: ReadStream;
+    planImage?: ReadStream;
     planImageFileName: string;
     planType: PlanType;
     planVariants: Array<any>;

@@ -17,6 +17,7 @@ export class CreateRecipeController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
+            if (!this.req.file) throw new Error("No ha ingresado una imagen para la receta");
             const recipeImagePath = this.req.file.path;
             const recipeImage: ReadStream = fs.createReadStream(recipeImagePath);
 

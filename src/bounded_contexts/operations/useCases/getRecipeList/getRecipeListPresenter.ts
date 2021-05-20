@@ -5,7 +5,7 @@ import { Recipe } from "../../domain/recipe/Recipe";
 import { Week } from "../../domain/week/Week";
 
 export class GetRecipeListPresenter {
-    public static present(recipes: Recipe[]): any {
+    public static async present(recipes: Recipe[]): Promise<any> {
         const presentedRecipes = [];
 
         for (let recipe of recipes) {
@@ -18,7 +18,9 @@ export class GetRecipeListPresenter {
                 cookDuration: recipe.recipeGeneralData.cookDuration.value(),
                 cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
                 difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
-                imageUrl: recipe.recipeGeneralData.imageUrl ? s3Service.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl) : "",
+                imageUrl: recipe.recipeGeneralData.imageUrl
+                    ? await s3Service.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
+                    : "",
                 weight: recipe.recipeGeneralData.recipeWeight.value(),
                 weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
                 backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),

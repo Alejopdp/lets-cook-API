@@ -17,8 +17,15 @@ export class UpdatePlanController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const planImagePath = this.req.file.path;
-            const planImage: ReadStream = fs.createReadStream(planImagePath);
+            var planImagePath = "";
+            var planImage: ReadStream | undefined;
+            var planImageFileName: string = "";
+
+            if (this.req.file) {
+                planImagePath = this.req.file.path;
+                planImage = fs.createReadStream(planImagePath);
+                planImageFileName = this.req.file.originalname;
+            }
 
             const dto: UpdatePlanDto = {
                 id: this.req.params.id,
@@ -27,7 +34,7 @@ export class UpdatePlanController extends BaseController {
                 planSku: this.req.body.sku,
                 isActive: JSON.parse(this.req.body.isActive),
                 planImage,
-                planImageFileName: this.req.file.originalname,
+                planImageFileName,
                 availablePlanFrecuencies: JSON.parse(this.req.body.availablePlanFrecuencies)
                     .map((freq: string) => (<any>PlanFrequency)[freq.toString()])
                     .filter((freq: PlanFrequency) => freq),
@@ -40,7 +47,9 @@ export class UpdatePlanController extends BaseController {
 
             await this.updatePlan.execute(dto);
 
-            fs.unlinkSync(planImagePath);
+            if (planImagePath) {
+                fs.unlinkSync(planImagePath);
+            }
 
             return this.ok(this.res);
         } catch (error) {
