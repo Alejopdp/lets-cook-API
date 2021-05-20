@@ -1,3 +1,4 @@
+import { s3Service } from "../../application/storageService";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { PlanId } from "../../domain/plan/PlanId";
 import { Recipe } from "../../domain/recipe/Recipe";
@@ -17,7 +18,7 @@ export class GetRecipeListPresenter {
                 cookDuration: recipe.recipeGeneralData.cookDuration.value(),
                 cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
                 difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
-                imageUrl: recipe.recipeGeneralData.imageUrl,
+                imageUrl: recipe.recipeGeneralData.imageUrl ? s3Service.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl) : "",
                 weight: recipe.recipeGeneralData.recipeWeight.value(),
                 weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
                 backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),

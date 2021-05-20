@@ -13,7 +13,7 @@ export class DeleteRecipeController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: DeleteRecipeDto = {
-                recipeId: parseInt(this.req.params.id),
+                recipeId: this.req.params.id,
             };
 
             await this.deleteRecipe.execute(dto);
