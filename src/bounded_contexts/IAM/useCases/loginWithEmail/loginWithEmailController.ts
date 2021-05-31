@@ -36,11 +36,14 @@ export class LoginWithEmailController extends BaseController {
                 }
             }
 
-            // this.res.setHeader('Set-Cookie', cookie.serialize('auth', result.value.token, {
-            //     httpOnly: true,
-            //     secure: process.env.NODE_ENV !== 'Development',
-            //     path: '/'
-            // }))
+            this.res.setHeader(
+                "Set-Cookie",
+                cookie.serialize("auth", result.value.token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV !== "Development",
+                    path: "/",
+                })
+            );
             return this.ok(this.res, result.value);
         } catch (err) {
             return this.fail(err);
