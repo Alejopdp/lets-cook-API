@@ -60,7 +60,7 @@ export class MongoosePlanRepository implements IPlanRepository {
     }
 
     public async findAdditionalPlanListById(ids: PlanId[], locale: Locale): Promise<Plan[]> {
-        return await this.findBy({ _id: ids }, locale);
+        return await this.findBy({ _id: ids, type: "Adicional" }, locale);
     }
 
     public async findBy(conditions: any, locale: Locale): Promise<Plan[]> {
