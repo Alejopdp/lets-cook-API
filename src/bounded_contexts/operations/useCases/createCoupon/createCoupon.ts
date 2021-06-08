@@ -8,9 +8,6 @@ import { FixedPrice } from "../../domain/cupons/CuponType/FixedPrice";
 import { FreeShipping } from "../../domain/cupons/CuponType/FreeShipping";
 import { PercentPrice } from "../../domain/cupons/CuponType/PercentagePrice";
 import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
-import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
-import { PlanVariantAttribute } from "../../domain/plan/PlanVariant/PlanVariantAttribute";
-import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { CreateCouponDto } from "./createCouponDto";
 

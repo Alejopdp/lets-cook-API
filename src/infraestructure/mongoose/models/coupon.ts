@@ -18,7 +18,7 @@ const CouponSchema = new mongoose.Schema(
             },
             value: {
                 type: Number,
-                required: true
+                required: false
             }
         },
         minRequireType: {
@@ -27,7 +27,7 @@ const CouponSchema = new mongoose.Schema(
         },
         minRequireValue: {
             type: Number,
-            required: true
+            required: false
         },
         productsForApplyingType: {
             type: String,

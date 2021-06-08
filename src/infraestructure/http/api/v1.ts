@@ -12,6 +12,7 @@ v1Router.use("/role", roleRouter);
 v1Router.use("/plan", planRouter);
 v1Router.use("/recipe", recipeRouter);
 v1Router.use("/coupon", couponRouter);
+v1Router.use("/envio", couponRouter);
 
 // All routes go here
 

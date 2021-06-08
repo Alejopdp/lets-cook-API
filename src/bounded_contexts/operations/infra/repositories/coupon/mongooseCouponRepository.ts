@@ -1,5 +1,5 @@
 import { Coupon } from "../../../domain/cupons/Cupon";
-import { PlanId } from "../../../domain/plan/PlanId";
+import { CouponId } from "../../../domain/cupons/CouponId";
 import { ICouponRepository } from "./ICouponRepository";
 import { Coupon as MongooseCoupon } from "../../../../../infraestructure/mongoose/models";
 import { couponMapper } from "../../../mappers/couponMapper";
@@ -9,9 +9,10 @@ import { logger } from "../../../../../../config";
 export class MongooseCouponRepository implements ICouponRepository {
     public async save(coupon: Coupon): Promise<void> {
         const couponDb = couponMapper.toPersistence(coupon);
-        console.log("Test: ", couponDb)
-        if (await MongooseCoupon.exists({ _id: coupon.couponCode })) {
-            await MongooseCoupon.updateOne({ _id: coupon.couponCode });
+        // console.log("Test: ", couponDb)
+        if (await MongooseCoupon.exists({ _id: coupon.id.value })) {
+            console.log("Test: ", coupon.id.value, couponDb.state, couponDb.state === "deleted" ? true : false)
+            await MongooseCoupon.updateOne({ _id: coupon.id.value }, { $set: { state: couponDb.state, deletionFlag: couponDb.state === "deleted" ? true : false } });
         } else {
             await MongooseCoupon.create(couponDb);
         }
@@ -47,11 +48,11 @@ export class MongooseCouponRepository implements ICouponRepository {
     //     });
     // }
 
-    // public async findById(planId: PlanId, locale: Locale): Promise<Plan | undefined> {
-    //     const planDb = await MongoosePlan.findById(planId.value, { deletionFlag: false }).populate("additionalPlans");
+    public async findById(couponId: CouponId): Promise<Coupon | undefined> {
+        const couponDb = await MongooseCoupon.findById(couponId.value, { deletionFlag: false });
 
-    //     return planDb ? planMapper.toDomain(planDb, locale) : undefined;
-    // }
+        return couponDb ? couponMapper.toDomain(couponDb) : undefined;
+    }
 
     public async findAll(): Promise<Coupon[]> {
         return await this.findBy({});
@@ -67,7 +68,6 @@ export class MongooseCouponRepository implements ICouponRepository {
 
     public async findBy(conditions: any): Promise<Coupon[]> {
         const couponsDb = await MongooseCoupon.find({ ...conditions, deletionFlag: false })
-        // console.log("Response: ",couponsDb)
         return couponsDb.map((raw: any) => couponMapper.toDomain(raw));
     }
 

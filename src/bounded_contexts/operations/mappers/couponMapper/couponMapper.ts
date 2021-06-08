@@ -1,3 +1,4 @@
+import { CouponId } from './../../domain/cupons/CouponId';
 import { Coupon } from './../../domain/cupons/Cupon';
 // import { planVariantMapper } from ".";
 // import { logger } from "../../../../config";
@@ -36,12 +37,13 @@ export class CouponMapper implements Mapper<Coupon> {
             raw.maxChargeQtyValue,
             raw.startDate,
             raw.endDate,
-            raw.state
+            raw.state,
+            new CouponId(raw._id)
         );
     }
     public toPersistence(t: Coupon): any {
         // const variants: any[] = t.planVariants.map((variant) => planVariantMapper.toPersistence(variant));
-        console.log("toPersistence: ",t)
+        // console.log("toPersistence: ",t)
         return {
             _id: t.id.value,
             couponCode: t.couponCode,

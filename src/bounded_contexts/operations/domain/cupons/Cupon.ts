@@ -3,11 +3,13 @@ import { Entity } from "../../../../core/domain/Entity";
 import { Guard } from "../../../../core/logic/Guard";
 import { ICouponType } from "./CuponType/ICuponType";
 import { PlanId } from "../plan/PlanId";
+import { CouponId } from "../cupons/CouponId";
 import { ILimitAplication } from "./LimitAplication/ILimitAplication";
 // import { PlanType } from "./PlanType/PlanType";
 // import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { Locale } from "../locale/Locale";
 import { logger } from "../../../../../config";
+import { String } from "aws-sdk/clients/apigateway";
 
 export class Coupon extends Entity<Coupon> {
     private _couponCode: string;
@@ -35,9 +37,10 @@ export class Coupon extends Entity<Coupon> {
         maxChargeQtyValue: number,
         startDate: Date,
         endDate: Date,
-        state: string
+        state: string,
+        id?: CouponId
     ) {
-        super();
+        super(id);
         this._couponCode = couponCode;
         this._type = type;
         this._minRequireType = minRequireType;
@@ -64,24 +67,9 @@ export class Coupon extends Entity<Coupon> {
         maxChargeQtyValue: number,
         startDate: Date,
         endDate: Date,
-        state: string
+        state: string,
+        id?: CouponId
     ): Coupon {
-        // const guardedProps = [
-        //     { argument: name, argumentName: "Nombre" },
-        //     { argument: description, argumentName: "Descripción" },
-        //     { argument: type, argumentName: "Tipo de plan" },
-        // ];
-
-        // const guardResult = Guard.againstNullOrUndefinedOrEmptyBulk(guardedProps);
-
-        // if (!guardResult.succeeded) {
-        //     throw new Error(guardResult.message);
-        // }
-
-        // if (planVariants.length < 1) throw new Error("No puede crear un plan sin ninguna variante");
-        // if (availablePlanFrecuencies.length < 1) throw new Error("Hay que ingresar al menos 1 frecuencia disponible para el plan");
-        // if (type === PlanType.Adicional && additionalPlans.length > 0)
-        //     throw new Error("Un plan adicional no puede tener relacionado otros planes adidiconales");
 
         return new Coupon(
             couponCode,
@@ -95,8 +83,13 @@ export class Coupon extends Entity<Coupon> {
             maxChargeQtyValue,
             startDate,
             endDate,
-            state
+            state,
+            id
         );
+    }
+
+    public updateState(state: string): void {
+        this.state = state;
     }
 
     // public toggleState(): void {
@@ -236,77 +229,84 @@ export class Coupon extends Entity<Coupon> {
         this._type = value;
     }
 
-    // /**
-    //  * Setter planSku
-    //  * @param {PlanSku} value
-    //  */
-    // public set planSku(value: PlanSku) {
-    //     this._planSku = value;
-    // }
+    /**
+     * Setter planSku
+     * @param {String} value
+     */
+    public set minRequireType(value: string) {
+        this._minRequireType = value;
+    }
 
-    // /**
-    //  * Setter imageUrl
-    //  * @param {string} value
-    //  */
-    // public set imageUrl(value: string) {
-    //     this._imageUrl = value;
-    // }
+    /**
+     * Setter imageUrl
+     * @param {number} value
+     */
+    public set minRequireValue(value: number) {
+        this._minRequireValue = value;
+    }
 
-    // /**
-    //  * Setter isActive
-    //  * @param {boolean} value
-    //  */
-    // public set isActive(value: boolean) {
-    //     this._isActive = value;
-    // }
+    /**
+     * Setter isActive
+     * @param {string} value
+     */
+    public set productsForApplyingType(value: string) {
+        this._productsForApplyingType = value;
+    }
 
-    // /**
-    //  * Setter type
-    //  * @param {PlanType} value
-    //  */
-    // public set type(value: PlanType) {
-    //     this._type = value;
-    // }
+    /**
+     * Setter type
+     * @param {PlanId[]} value
+     */
+    public set productsForApplyingValue(value: PlanId[]) {
+        this._productsForApplyingValue = value;
+    }
 
-    // /**
-    //  * Setter planVariants
-    //  * @param {PlanVariant[]} value
-    //  */
-    // public set planVariants(value: PlanVariant[]) {
-    //     if (value.length < 1) throw new Error("No puede crear un plan sin ninguna variante");
+    /**
+     * Setter planVariants
+     * @param {ILimitAplication[]} value
+     */
+    public set limites(value: ILimitAplication[]) {
+        // if (value.length < 1) throw new Error("No puede crear un plan sin ninguna variante");
+        this._limites = value;
+    }
 
-    //     this._planVariants = value;
-    // }
+    /**
+     * Setter availablePlanFrecuencies
+     * @param {string} value
+     */
+    public set maxChargeQtyType(value: string) {
+        this._maxChargeQtyType = value;
+    }
 
-    // /**
-    //  * Setter availablePlanFrecuencies
-    //  * @param {PlanFrequency[]} value
-    //  */
-    // public set availablePlanFrecuencies(value: PlanFrequency[]) {
-    //     this._availablePlanFrecuencies = value;
-    // }
+    /**
+     * Setter hasRecipes
+     * @param {number} value
+     */
+    public set maxChargeQtyValue(value: number) {
+        this._maxChargeQtyValue = value;
+    }
 
-    // /**
-    //  * Setter hasRecipes
-    //  * @param {boolean} value
-    //  */
-    // public set hasRecipes(value: boolean) {
-    //     this._hasRecipes = value;
-    // }
+    /**
+     * Setter additionalPlans
+     * @param {Date} value
+     */
+    public set startDate(value: Date) {
+        this._startDate = value;
+    }
 
-    // /**
-    //  * Setter additionalPlans
-    //  * @param {Plan[]} value
-    //  */
-    // public set additionalPlans(value: Plan[]) {
-    //     this._additionalPlans = value;
-    // }
+    /**
+     * Setter locale
+     * @param {Date} value
+     */
+    public set endDate(value: Date) {
+        this._endDate = value;
+    }
 
-    // /**
-    //  * Setter locale
-    //  * @param {Locale} value
-    //  */
-    // public set locale(value: Locale) {
-    //     this._locale = value;
-    // }
+    /**
+     * Setter locale
+     * @param {string} value
+     */
+     public set state(value: string) {
+        this._state = value;
+    }
 }

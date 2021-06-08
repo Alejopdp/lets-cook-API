@@ -1,8 +1,8 @@
 import { s3Service } from "../../application/storageService";
-import { mockPlanRepository, mongoosePlanRepository } from "../../infra/repositories/plan";
-import { UpdatePlan } from "./updatePlan";
-import { UpdatePlanController } from "./updatePlanController";
+import { mongooseCouponRepository } from "../../infra/repositories/coupon";
+import { UpdateCoupon } from "./updateCouponState";
+import { UpdateCouponStateController } from "./updateCouponStateController";
 
 // export const updatePlan: UpdatePlan = new UpdatePlan(mockPlanRepository, s3Service);
-export const updatePlan: UpdatePlan = new UpdatePlan(mongoosePlanRepository, s3Service);
-export const updatePlanController: UpdatePlanController = new UpdatePlanController(updatePlan);
+export const updateCouponState: UpdateCoupon = new UpdateCoupon(mongooseCouponRepository, s3Service);
+export const updateCouponStateController: UpdateCouponStateController = new UpdateCouponStateController(updateCouponState);

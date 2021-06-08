@@ -20,7 +20,7 @@ export class CreateCouponController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            console.log("Body: ",this.req.body)
+            // console.log("Body: ",this.req.body)
             // if (!this.req.file) throw new Error("No ha ingresado una imagen para el plan");
             // const planImagePath = this.req.file.path;
             // const planImage: ReadStream = fs.createReadStream(planImagePath);
