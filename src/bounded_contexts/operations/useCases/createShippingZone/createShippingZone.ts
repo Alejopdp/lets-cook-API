@@ -11,7 +11,7 @@ import { PercentPrice } from "../../domain/cupons/CuponType/PercentagePrice";
 import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { CreateShippingZoneDto } from "./createShippingZoneDto";
-import { shippingRouter } from "../../infra/http/envio";
+import { shippingRouter } from "../../infra/http/shipping";
 
 export class CreateShippingZone {
     private _shippingRepository: IShippingZoneRepository;

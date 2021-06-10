@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { createShippingZoneController } from "../../useCases/createShippingZone";
-import { getShippingListController } from './../../useCases/getShippingZoneList/index';
+import { getShippingListController } from '../../useCases/getShippingZoneList/index';
 import { getShippingZoneByIdController } from "../../useCases/getShippingZoneById";
 import { deleteShippingZoneController } from "../../useCases/deleteShippingZone";
 import { updateShippingZoneController } from "../../useCases/updateShippingZone";
