@@ -2,27 +2,27 @@ import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
-import { UpdateCoupon } from "./updateCouponState";
-import { UpdateCuponStateDto } from "./updateCouponStateDto";
+import { UpdateShippingZone } from "./updateShippingZoneState";
+import { UpdateShippingZoneStateDto } from "./updateCouponStateDto";
 import fs from "fs";
 import { Locale } from "../../domain/locale/Locale";
 
-export class UpdateCouponStateController extends BaseController {
-    private _updateCouponState: UpdateCoupon;
+export class UpdateShippingZoneStateController extends BaseController {
+    private _updateShippingZoneState: UpdateShippingZone;
 
-    constructor(updateCouponState: UpdateCoupon) {
+    constructor(updateShippingZoneState: UpdateShippingZone) {
         super();
-        this._updateCouponState = updateCouponState;
+        this._updateShippingZoneState = updateShippingZoneState;
     }
 
     protected async executeImpl(): Promise<any> {
         try {
-            const dto: UpdateCuponStateDto = {
+            const dto: UpdateShippingZoneStateDto = {
                 id: this.req.params.id,
                 state: this.req.body.state
             };
 
-            await this.updateCouponState.execute(dto);
+            await this.updateShippingZoneState.execute(dto);
 
             return this.ok(this.res);
         } catch (error) {
@@ -34,7 +34,7 @@ export class UpdateCouponStateController extends BaseController {
      * Getter updatePlan
      * @return {UpdatePlan}
      */
-    public get updateCouponState(): UpdateCoupon {
-        return this._updateCouponState;
+    public get updateShippingZoneState(): UpdateShippingZone {
+        return this._updateShippingZoneState;
     }
 }

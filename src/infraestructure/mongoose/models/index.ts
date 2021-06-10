@@ -4,4 +4,5 @@ export * from "./plan";
 export * from "./role";
 export * from "./user";
 export * from "./coupon";
+export * from "./shipping";
 // export * from "./week";

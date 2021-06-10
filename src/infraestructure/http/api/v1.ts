@@ -4,6 +4,7 @@ import { userRouter } from "../../../bounded_contexts/IAM/infra/http/user";
 import { planRouter } from "../../../bounded_contexts/operations/infra/http/plan";
 import { recipeRouter } from "../../../bounded_contexts/operations/infra/http/recipe";
 import { couponRouter } from "../../../bounded_contexts/operations/infra/http/coupon";
+import { shippingRouter } from "../../../bounded_contexts/operations/infra/http/shipping";
 
 const v1Router = express.Router();
 
@@ -12,7 +13,7 @@ v1Router.use("/role", roleRouter);
 v1Router.use("/plan", planRouter);
 v1Router.use("/recipe", recipeRouter);
 v1Router.use("/coupon", couponRouter);
-v1Router.use("/envio", couponRouter);
+v1Router.use("/shipping", shippingRouter);
 
 // All routes go here
 
