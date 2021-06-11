@@ -1,8 +1,9 @@
 import { logger } from "../config";
 import { mongooseRoleRepository } from "../src/bounded_contexts/IAM/infra/repositories/role";
 import { mongooseUserRepository } from "../src/bounded_contexts/IAM/infra/repositories/user";
+import { mongooseIngredientRepository } from "../src/bounded_contexts/operations/infra/repositories/ingredient";
 import { mongooseWeekRepository } from "../src/bounded_contexts/operations/infra/repositories/week";
-import { restoreDb } from "../src/config/config";
+import { getIngredients } from "./ingredient";
 import { adminRole } from "./role";
 import { adminUser1, adminUser2 } from "./user";
 import { getArrayOfFutureWeeks } from "./week";
@@ -15,4 +16,6 @@ export const loadMockData = async () => {
     logger.info("Users loaded");
     await mongooseWeekRepository.bulkSave(getArrayOfFutureWeeks());
     logger.info("Weeks loaded");
+    await mongooseIngredientRepository.bulkSave(getIngredients());
+    logger.info("Ingredients loaded");
 };
