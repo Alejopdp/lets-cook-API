@@ -42,6 +42,7 @@ export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
             },
             sku: t.recipeSku.code,
             imageUrl: t.imageUrl,
+            difficultyLevel: t.difficultyLevel,
         };
     }
 }

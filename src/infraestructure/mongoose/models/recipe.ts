@@ -86,48 +86,58 @@ const RecipeVariant = new mongoose.Schema({
     restrictions: [RecipeRestriction],
 });
 
-const RecipeSchema = new mongoose.Schema({
-    _id: {
-        type: String,
-        default: uuid.v4,
+const RecipeSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: uuid.v4,
+        },
+
+        recipeGeneralData: RecipeGeneralData,
+        recipeVariants: [RecipeVariant],
+        imageTags: [
+            {
+                type: String,
+            },
+        ],
+
+        backOfficeTags: [
+            {
+                type: String,
+            },
+        ],
+
+        tools: [
+            {
+                type: String,
+            },
+        ],
+
+        availableMonths: [
+            {
+                type: String,
+            },
+        ],
+
+        availableWeeks: {
+            type: [String],
+            ref: "Week",
+            default: [],
+        },
+
+        relatedPlans: {
+            type: [String],
+            ref: "Plan",
+            required: true,
+            default: [],
+        },
+
+        deletionFlag: {
+            type: Boolean,
+            default: false,
+        },
     },
+    { collection: "Recipe", timestamps: true }
+);
 
-    recipeGeneralData: RecipeGeneralData,
-    recipeVariants: [RecipeVariant],
-    imageTags: [
-        {
-            type: String,
-        },
-    ],
-
-    backOfficeTagas: [
-        {
-            type: String,
-        },
-    ],
-
-    tools: [
-        {
-            type: String,
-        },
-    ],
-
-    availableMonths: [
-        {
-            type: String,
-        },
-    ],
-
-    availableWeeks: [
-        {
-            type: String,
-        },
-    ],
-
-    relatedPlans: {
-        type: [String],
-        ref: "Plan",
-        required: true,
-        default: [],
-    },
-});
+export const Recipe = mongoose.model("Recipe", RecipeSchema);
