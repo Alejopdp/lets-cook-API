@@ -2,6 +2,7 @@ import { Week } from "../../../domain/week/Week";
 import { WeekId } from "../../../domain/week/WeekId";
 import { IWeekRepository } from "./IWeekRepository";
 import { MockWeekRepository } from "./mockWeekRepository";
+import { MongooseWeekRepository } from "./mongooseWeekRepository";
 
 var database: Week[] = [];
 
@@ -18,3 +19,4 @@ export var week8 = Week.create(new Date(2021, 6, 6), new Date(2021, 6, 12), new 
 
 database = [week1, week2, week3, week4, week5, week6, week7, week8];
 export const mockWeekRepository: IWeekRepository = new MockWeekRepository(database);
+export const mongooseWeekRepository: IWeekRepository = new MongooseWeekRepository();
