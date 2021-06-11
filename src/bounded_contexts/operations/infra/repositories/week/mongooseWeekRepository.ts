@@ -33,7 +33,7 @@ export class MongooseWeekRepository implements IWeekRepository {
     }
 
     public async findAllById(weeksIds: WeekId[]): Promise<Week[]> {
-        return await this.findBy({ _id: weeksIds.map((id) => id.value) });
+        return await this.findBy({ _id: { $in: weeksIds.map((id) => id.value) } });
     }
 
     public async findBy(conditions: any, locale?: Locale): Promise<Week[]> {

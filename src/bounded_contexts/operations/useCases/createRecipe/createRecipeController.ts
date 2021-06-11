@@ -35,7 +35,7 @@ export class CreateRecipeController extends BaseController {
                 longDescription: this.req.body.longDescription,
                 name: this.req.body.name,
                 nutritionalInfo: [],
-                availableWeeksIds: JSON.parse(this.req.body.availableWeeksIds).map((id: string) => parseInt(id)),
+                availableWeeksIds: JSON.parse(this.req.body.availableWeeksIds),
                 sku: this.req.body.sku,
                 weight: this.req.body.weight,
                 planIds: JSON.parse(this.req.body.planIds),

@@ -5,7 +5,7 @@ import { WeekId } from "../domain/week/WeekId";
 
 export class WeekMapper implements Mapper<Week> {
     public toDomain(raw: any, locale?: Locale): Week {
-        return new Week(raw.minDay, raw.maxDay, new WeekId(raw.id));
+        return new Week(raw.minDay, raw.maxDay, new WeekId(raw._id));
     }
 
     public toPersistence(t: Week, locale?: Locale) {
