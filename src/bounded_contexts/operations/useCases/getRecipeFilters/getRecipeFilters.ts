@@ -19,7 +19,7 @@ export class GetRecipeFilters {
     }
 
     public async execute(dto: GetRecipeFiltersDto): Promise<any> {
-        const weeks: Week[] = await this.weekRepository.findAll();
+        const weeks: Week[] = await this.weekRepository.findNextEight();
         const plansWithRecipes: Plan[] = await this.planRepository.findAllWithRecipesFlag(dto.locale);
         const backOfficeTags: RecipeTag[] = await this.recipeRepository.findAllBackOfficeTags();
 
