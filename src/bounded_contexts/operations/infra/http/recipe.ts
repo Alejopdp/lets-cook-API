@@ -1,5 +1,6 @@
 import express from "express";
 import multer from "multer";
+import { middleware } from "../../../../shared/middleware";
 import { createRecipeController } from "../../useCases/createRecipe";
 import { deleteRecipeController } from "../../useCases/deleteRecipe";
 import { getDataForCreatingARecipeController } from "../../useCases/getDataForCreatingARecipe";
@@ -16,7 +17,7 @@ const options: multer.Options = {
 };
 
 // GETs
-recipeRouter.get("/", (req, res) => getRecipeListController.execute(req, res));
+recipeRouter.get("/", middleware.ensureAuthenticated(), (req, res) => getRecipeListController.execute(req, res));
 recipeRouter.get("/get-data-for-creation", (req, res) => getDataForCreatingARecipeController.execute(req, res));
 recipeRouter.get("/filters", (req, res) => getRecipeFiltersController.execute(req, res));
 recipeRouter.get("/:id", (req, res) => getRecipeByIdController.execute(req, res));

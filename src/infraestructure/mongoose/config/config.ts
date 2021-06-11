@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { logger } from "../../../../config";
+import { logger, restoreDb } from "../../../../config";
+import { loadMockData } from "../../../../scripts/db";
 import { User, Role } from "../models";
 
 export const connectToDatabase = async () => {
@@ -13,8 +14,16 @@ export const connectToDatabase = async () => {
             useCreateIndex: true,
         });
 
+        await resetDatabase();
         logger.info("Database connected");
     } catch (error) {
         logger.error(error);
+    }
+};
+
+const resetDatabase = async () => {
+    if (restoreDb) {
+        await mongoose.connection.db.dropDatabase();
+        await loadMockData();
     }
 };
