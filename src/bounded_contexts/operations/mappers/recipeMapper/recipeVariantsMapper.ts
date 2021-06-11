@@ -1,4 +1,4 @@
-import { recipeRestrictionMapper } from ".";
+import { recipeRestrictionMapper } from "..";
 import { Mapper } from "../../../../core/infra/Mapper";
 import { Ingredient } from "../../domain/ingredient/ingredient";
 import { Locale } from "../../domain/locale/Locale";
@@ -17,7 +17,7 @@ export class RecipeVariantsMapper implements Mapper<RecipeVariant> {
     public toPersistence(t: RecipeVariant, locale?: Locale) {
         return {
             ingredients: t.ingredients.map((ing) => ing.name),
-            restrictions: t.recipeVariantRestriction.map((r) => recipeRestrictionMapper.toPersistence(r)),
+            restrictions: t.recipeVariantRestriction.map((r) => r.id.value),
             sku: t.sku.code,
         };
     }

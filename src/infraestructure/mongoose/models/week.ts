@@ -16,6 +16,11 @@ const WeekSchema = new mongoose.Schema(
             type: Date,
             required: true,
         },
+
+        deletionFlag: {
+            type: Boolean,
+            default: false
+        }
     },
     { collection: "Week", timestamps: true }
 );

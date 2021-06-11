@@ -16,6 +16,7 @@ export const connectToDatabase = async () => {
         await resetDatabase();
         logger.info("Database connected");
     } catch (error) {
+        console.log(error);
         logger.error(error);
     }
 };

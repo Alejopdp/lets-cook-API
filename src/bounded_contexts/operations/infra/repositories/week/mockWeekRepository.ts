@@ -1,4 +1,5 @@
 import { logger } from "../../../../../../config";
+import { Locale } from "../../../domain/locale/Locale";
 import { Week } from "../../../domain/week/Week";
 import { WeekId } from "../../../domain/week/WeekId";
 import { IWeekRepository } from "./IWeekRepository";
@@ -8,6 +9,18 @@ export class MockWeekRepository implements IWeekRepository {
 
     constructor(database: Week[]) {
         this._database = database;
+    }
+
+    bulkSave(weeks: Week[]): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+    findBy(conditions: any, locale?: Locale): Promise<Week[]> {
+        throw new Error("Method not implemented.");
+    }
+
+    findNextEight(): Promise<Week[]> {
+        throw new Error("Method not implemented.");
     }
 
     public async save(week: Week): Promise<void> {

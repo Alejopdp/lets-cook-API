@@ -1,6 +1,7 @@
 import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { MockRecipeRestrictionRepository } from "./mockRecipeRestrictionRepository";
+import { MongooseRecipeVariantRestrictionRepository } from "./mongooseRecipeRestrictionRepository";
 
 const database: RecipeVariantRestriction[] = [];
 
@@ -15,3 +16,5 @@ database.push(vegano);
 database.push(Vegetariano);
 
 export const mockRecipeRestrictionRepository: MockRecipeRestrictionRepository = new MockRecipeRestrictionRepository(database);
+export const mongooseRecipeVariantRestrictionRepository: MongooseRecipeVariantRestrictionRepository =
+    new MongooseRecipeVariantRestrictionRepository();

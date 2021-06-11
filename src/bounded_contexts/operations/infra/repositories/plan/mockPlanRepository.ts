@@ -11,6 +11,10 @@ export class MockPlanRepository implements IPlanRepository {
         this._database = database;
     }
 
+    public async bulkSave(plans: Plan[]): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
     findAdditionalPlanListById(ids: PlanId[], locale: Locale): Promise<Plan[]> {
         throw new Error("Method not implemented.");
     }

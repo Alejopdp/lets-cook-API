@@ -1,3 +1,4 @@
+import { logger } from "../config";
 import { Ingredient } from "../src/bounded_contexts/operations/domain/ingredient/ingredient";
 import { Locale } from "../src/bounded_contexts/operations/domain/locale/Locale";
 import { Plan } from "../src/bounded_contexts/operations/domain/plan/Plan";
@@ -13,15 +14,22 @@ import { WeightUnit } from "../src/bounded_contexts/operations/domain/recipe/Rec
 import { RecipeNutritionalData } from "../src/bounded_contexts/operations/domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
 import { RecipeTag } from "../src/bounded_contexts/operations/domain/recipe/RecipeTag";
 import { RecipeVariant } from "../src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariant";
+import { RecipeVariantRestriction } from "../src/bounded_contexts/operations/domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariantSku } from "../src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariantSku";
 import { Week } from "../src/bounded_contexts/operations/domain/week/Week";
 import { mongoosePlanRepository } from "../src/bounded_contexts/operations/infra/repositories/plan";
-import { sinLactosa, vegano, Vegetariano } from "../src/bounded_contexts/operations/infra/repositories/recipeVariantRestriction";
+import {
+    mongooseRecipeVariantRestrictionRepository,
+    sinLactosa,
+    vegano,
+    Vegetariano,
+} from "../src/bounded_contexts/operations/infra/repositories/recipeVariantRestriction";
 import { mongooseWeekRepository } from "../src/bounded_contexts/operations/infra/repositories/week";
 
 export const getMockRecipes = async (): Promise<Recipe[]> => {
     const weeks: Week[] = await mongooseWeekRepository.findNextEight();
     const plans: Plan[] = await mongoosePlanRepository.findAll(Locale.es);
+    const restrictions: RecipeVariantRestriction[] = await mongooseRecipeVariantRestrictionRepository.findAll();
 
     const lechuga: Ingredient = new Ingredient("Lechuga");
     const tomate: Ingredient = new Ingredient("Tomate");
@@ -41,19 +49,19 @@ export const getMockRecipes = async (): Promise<Recipe[]> => {
         "Burger de Hallouli",
         new RecipeDescription("Alta hamburguesa", "Alta hamburguesa papá la mejor de todas"),
         new RecipeCookDuration(45),
-        RecipeDifficultyLevel.Easy,
+        RecipeDifficultyLevel.Facil,
         new RecipeWeight(250, WeightUnit.Gram),
         new RecipeSku("BRGH"),
         "development/plans/Plan_test/Plan_test.png"
     );
     const carneBurgerVariant1: RecipeVariant = new RecipeVariant(
         [lechuga, tomate, cebolla, carne, pan, queso],
-        [],
+        [restrictions[0]],
         new RecipeVariantSku("BRGHCAR")
     );
     const cerdoVariant1: RecipeVariant = new RecipeVariant(
         [lechuga, tomate, cebolla, cerdo, pan, queso],
-        [],
+        [restrictions[0]],
         new RecipeVariantSku("BRGHCER")
     );
     const burgerHallouli: Recipe = new Recipe(
@@ -73,18 +81,22 @@ export const getMockRecipes = async (): Promise<Recipe[]> => {
         "Arepas de Crhistian",
         new RecipeDescription("Las mejores arepas de Colombia", "Las mejores arepas hechas por el mejor dev de Colombia"),
         new RecipeCookDuration(50),
-        RecipeDifficultyLevel.Hard,
+        RecipeDifficultyLevel.Alta,
         new RecipeWeight(150, WeightUnit.Gram),
         new RecipeSku("ARP"),
         "development/plans/Plan_test/Plan_test.png"
     );
     const simpleArepaVariant: RecipeVariant = new RecipeVariant(
         [pan],
-        [sinLactosa, Vegetariano, vegano],
+        [restrictions[0]],
         new RecipeVariantSku("ARPVEG")
         // burgerRecipeId
     );
-    const completaArepaVariant: RecipeVariant = new RecipeVariant([pan, tomate, lechuga, queso, carne], [], new RecipeVariantSku("ARPCAR"));
+    const completaArepaVariant: RecipeVariant = new RecipeVariant(
+        [pan, tomate, lechuga, queso, carne],
+        [restrictions[0]],
+        new RecipeVariantSku("ARPCAR")
+    );
     const arepasDeCrhistian: Recipe = new Recipe(
         arepasDeCrhistianData,
         [simpleArepaVariant, completaArepaVariant],

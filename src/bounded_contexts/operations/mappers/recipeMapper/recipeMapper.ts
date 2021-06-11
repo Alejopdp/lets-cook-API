@@ -37,6 +37,7 @@ export class RecipeMapper implements Mapper<Recipe> {
             new RecipeId(raw._id)
         );
     }
+
     public toPersistence(t: Recipe, locale?: Locale) {
         const recipeGeneralData = recipeGeneralDataMapper.toPersistence(t.recipeGeneralData);
         const recipeVariants = t.recipeVaraints.map((variant) => recipeVariantMapper.toPersistence(variant));

@@ -3,8 +3,9 @@ import { Recipe as RecipeModel } from "../../../../../infraestructure/mongoose/m
 import { RecipeId } from "../../../domain/recipe/RecipeId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { IRecipeRepository } from "./IRecipeRepository";
-import { recipeMapper } from "../../../mappers";
 import _ from "lodash";
+import { logger } from "../../../../../../config";
+import { recipeMapper } from "../../../mappers/recipeMapper";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
     public async save(recipe: Recipe): Promise<void> {
@@ -34,13 +35,21 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     }
 
     public async findById(recipeId: RecipeId): Promise<Recipe | undefined> {
-        const recipeDb = await RecipeModel.findById(recipeId.value);
+        const recipeDb = await RecipeModel.findById(recipeId.value).populate({
+            path: "recipeVariants",
+            populate: { path: "restrictions" },
+        });
 
         return recipeDb ? recipeMapper.toDomain(recipeDb) : undefined;
     }
 
     public async findBy(conditions: any): Promise<Recipe[]> {
-        const recipesDb = await RecipeModel.find({ ...conditions, deletionFlag: false }).populate("availableWeeks");
+        const recipesDb = await RecipeModel.find({ ...conditions, deletionFlag: false })
+            .populate("availableWeeks")
+            .populate({
+                path: "recipeVariants",
+                populate: { path: "restrictions" },
+            });
 
         return recipesDb.map((recipe) => recipeMapper.toDomain(recipe));
     }

@@ -4,10 +4,12 @@ import { mongooseUserRepository } from "../src/bounded_contexts/IAM/infra/reposi
 import { mongooseIngredientRepository } from "../src/bounded_contexts/operations/infra/repositories/ingredient";
 import { mongoosePlanRepository } from "../src/bounded_contexts/operations/infra/repositories/plan";
 import { mongooseRecipeRepository } from "../src/bounded_contexts/operations/infra/repositories/recipe";
+import { mongooseRecipeVariantRestrictionRepository } from "../src/bounded_contexts/operations/infra/repositories/recipeVariantRestriction";
 import { mongooseWeekRepository } from "../src/bounded_contexts/operations/infra/repositories/week";
 import { getIngredients } from "./ingredient";
 import { getMockPlans } from "./plan";
 import { getMockRecipes } from "./recipe";
+import { getMockRecipeVartiantRestrictions } from "./recipeVariantRestriction";
 import { adminRole } from "./role";
 import { adminUser1, adminUser2 } from "./user";
 import { getArrayOfFutureWeeks } from "./week";
@@ -24,6 +26,9 @@ export const loadMockData = async () => {
     logger.info("Ingredients loaded");
     await mongoosePlanRepository.bulkSave(getMockPlans());
     logger.info("Plans loaded");
-    await mongooseRecipeRepository.bulkSave(await getMockRecipes());
+    await mongooseRecipeVariantRestrictionRepository.bulkSave(getMockRecipeVartiantRestrictions());
+    logger.info("Restrictiones loaded");
+    const mockRecipes = await getMockRecipes();
+    await mongooseRecipeRepository.bulkSave(mockRecipes);
     logger.info("Recipes loaded");
 };

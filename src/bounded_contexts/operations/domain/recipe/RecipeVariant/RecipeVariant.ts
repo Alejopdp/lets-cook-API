@@ -1,9 +1,9 @@
 import { Entity } from "../../../../../core/domain/Entity";
 import { Ingredient } from "../../ingredient/ingredient";
-import { RecipeVariantRestriction } from "./recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariantSku } from "./RecipeVariantSku";
 import { RecipeVariantId } from "./RecipeVariantId";
 import * as _ from "lodash";
+import { RecipeVariantRestriction } from "./recipeVariantResitriction/RecipeVariantRestriction";
 
 export class RecipeVariant extends Entity<RecipeVariant> {
     private _ingredients: Ingredient[];

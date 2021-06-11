@@ -8,6 +8,9 @@ export class MockRecipeRestrictionRepository implements IRecipeRestrictionReposi
     constructor(database: RecipeVariantRestriction[]) {
         this._database = database;
     }
+    bulkSave(recipeVariantRestrictions: RecipeVariantRestriction[]): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
     public async findAllByValue(value: string): Promise<RecipeVariantRestriction[]> {
         return this.database.filter((r) => r.value === value);

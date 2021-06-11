@@ -3,6 +3,7 @@ import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/r
 
 export interface IRecipeRestrictionRepository {
     save(recipe: RecipeVariantRestriction): Promise<void>;
+    bulkSave(recipeVariantRestrictions: RecipeVariantRestriction[]): Promise<void>
     findAll(): Promise<RecipeVariantRestriction[]>;
     findAllByValue(value: string): Promise<RecipeVariantRestriction[]>;
     findById(recipeRestrictionId: RecipeRestrictionId): Promise<RecipeVariantRestriction | undefined>;

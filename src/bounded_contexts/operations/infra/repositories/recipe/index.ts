@@ -12,7 +12,6 @@ import { RecipeId } from "../../../domain/recipe/RecipeId";
 import { RecipeNutritionalData } from "../../../domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { RecipeVariant } from "../../../domain/recipe/RecipeVariant/RecipeVariant";
-import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariantSku } from "../../../domain/recipe/RecipeVariant/RecipeVariantSku";
 import { week1, week2 } from "../week";
 import { IRecipeRepository } from "./IRecipeRepository";
@@ -42,7 +41,7 @@ const burgerHallouliData: RecipeGeneralData = new RecipeGeneralData(
     "Burger de Hallouli",
     new RecipeDescription("Alta hamburguesa", "Alta hamburguesa papá la mejor de todas"),
     new RecipeCookDuration(45),
-    RecipeDifficultyLevel.Easy,
+    RecipeDifficultyLevel.Facil,
     new RecipeWeight(250, WeightUnit.Gram),
     new RecipeSku("BRGH"),
     ""
@@ -70,7 +69,7 @@ const arepasDeCrhistianData: RecipeGeneralData = new RecipeGeneralData(
     "Arepas de Crhistian",
     new RecipeDescription("Las mejores arepas de Colombia", "Las mejores arepas hechas por el mejor dev de Colombia"),
     new RecipeCookDuration(50),
-    RecipeDifficultyLevel.Hard,
+    RecipeDifficultyLevel.Alta,
     new RecipeWeight(150, WeightUnit.Gram),
     new RecipeSku("ARP"),
     ""
@@ -107,4 +106,4 @@ const mockDatabase: Recipe[] = [
     arepasDeCrhistian,
 ];
 export const mockRecipeRepository: IRecipeRepository = new MockRecipeRepository(mockDatabase);
-export const mongooseRecipeRepository: IRecipeRepository = new MongooseRecipeRepository();
+export const mongooseRecipeRepository: MongooseRecipeRepository = new MongooseRecipeRepository();

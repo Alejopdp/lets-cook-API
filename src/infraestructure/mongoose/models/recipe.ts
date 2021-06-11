@@ -57,19 +57,6 @@ const RecipeGeneralData = new mongoose.Schema({
     },
 });
 
-const RecipeRestriction = new mongoose.Schema({
-    label: {
-        type: String,
-        required: true,
-    },
-
-    value: {
-        type: {
-            type: String,
-        },
-    },
-});
-
 const RecipeVariant = new mongoose.Schema({
     sku: {
         type: String,
@@ -83,7 +70,12 @@ const RecipeVariant = new mongoose.Schema({
         },
     ],
 
-    restrictions: [RecipeRestriction],
+    restrictions: [
+        {
+            type: String,
+            ref: "RecipeVariantRestriction",
+        },
+    ],
 });
 
 const RecipeSchema = new mongoose.Schema(

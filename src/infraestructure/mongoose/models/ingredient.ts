@@ -7,6 +7,11 @@ const IngredientSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
+
+        deletionFlag: {
+            type: Boolean,
+            default: false
+        }
     },
     { collection: "Ingredient", timestamps: true }
 );

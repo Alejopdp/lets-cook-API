@@ -11,6 +11,10 @@ export class MockRecipeRepository implements IRecipeRepository {
         this._database = database;
     }
 
+    public async bulkSave(recipes: Recipe[]): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
     public async save(recipe: Recipe): Promise<void> {
         const filteredDatabase = this.database.filter((r) => !recipe.equals(r));
 
