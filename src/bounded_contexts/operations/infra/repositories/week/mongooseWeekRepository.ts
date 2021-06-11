@@ -37,8 +37,14 @@ export class MongooseWeekRepository implements IWeekRepository {
     }
 
     public async findBy(conditions: any, locale?: Locale): Promise<Week[]> {
-        const plansDb = await WeekModel.find({ ...conditions, deletionFlag: false });
+        const weeksDb = await WeekModel.find({ ...conditions, deletionFlag: false });
 
-        return plansDb.map((raw: any) => weekMapper.toDomain(raw, locale));
+        return weeksDb.map((raw: any) => weekMapper.toDomain(raw, locale));
+    }
+
+    public async findNextEight(): Promise<Week[]> {
+        const weeksDb = await WeekModel.find({}).limit(8);
+
+        return weeksDb.map((week: any) => weekMapper.toDomain(week));
     }
 }

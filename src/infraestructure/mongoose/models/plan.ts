@@ -104,6 +104,11 @@ const PlanSchema = new mongoose.Schema(
             default: [],
         },
 
+        tools: {
+            type: [String],
+            default: [],
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,

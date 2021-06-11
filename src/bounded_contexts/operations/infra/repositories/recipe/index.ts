@@ -17,6 +17,7 @@ import { RecipeVariantSku } from "../../../domain/recipe/RecipeVariant/RecipeVar
 import { week1, week2 } from "../week";
 import { IRecipeRepository } from "./IRecipeRepository";
 import { MockRecipeRepository } from "./mockRecipeRepository";
+import { MongooseRecipeRepository } from "./mongooseRecipeRepository";
 import { plan1, plan2 } from "../plan";
 import { sinLactosa, vegano, Vegetariano } from "../recipeVariantRestriction";
 
@@ -106,3 +107,4 @@ const mockDatabase: Recipe[] = [
     arepasDeCrhistian,
 ];
 export const mockRecipeRepository: IRecipeRepository = new MockRecipeRepository(mockDatabase);
+export const mongooseRecipeRepository: IRecipeRepository = new MongooseRecipeRepository();

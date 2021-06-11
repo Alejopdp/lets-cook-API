@@ -45,6 +45,12 @@ export class MongoosePlanRepository implements IPlanRepository {
         });
     }
 
+    public async bulkSave(plans: Plan[]): Promise<void> {
+        const plansToSave = plans.map((plan) => planMapper.toPersistence(plan));
+
+        await MongoosePlan.create(plansToSave);
+    }
+
     public async findById(planId: PlanId, locale: Locale): Promise<Plan | undefined> {
         const planDb = await MongoosePlan.findById(planId.value, { deletionFlag: false }).populate("additionalPlans");
 
