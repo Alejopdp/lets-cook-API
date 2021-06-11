@@ -10,9 +10,7 @@ const port = process.env.PORT || "3001";
 // Logging
 
 function setUpLogger() {
-    const logFormat = winston.format.printf(
-        (info) => `[${info.timestamp}][${String(info.level)}]: ${info.message}`
-    );
+    const logFormat = winston.format.printf((info) => `[${info.timestamp}][${String(info.level)}]: ${info.message}`);
     winston.loggers.add("default", {
         format: winston.format.combine(
             winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
