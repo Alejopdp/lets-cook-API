@@ -5,6 +5,7 @@ import { Month } from "../../domain/recipe/Months";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { RecipeCookDuration } from "../../domain/recipe/RecipeGeneralData/RecipeCookDuration";
 import { RecipeDescription } from "../../domain/recipe/RecipeGeneralData/RecipeDescription";
+import { RecipeDifficultyLevel } from "../../domain/recipe/RecipeGeneralData/RecipeDifficultyLevel";
 import { RecipeGeneralData } from "../../domain/recipe/RecipeGeneralData/RecipeGeneralData";
 import { RecipeSku } from "../../domain/recipe/RecipeGeneralData/RecipeSku";
 import { RecipeWeight } from "../../domain/recipe/RecipeGeneralData/RecipeWeight";
@@ -62,8 +63,6 @@ export class CreateRecipe {
         const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId: number | string) => new WeekId(weekId));
         const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
         const planIds: PlanId[] = dto.planIds.map((id: string | number) => new PlanId(id));
-        console.log("DTO.VARIANTS: ", dto.variants)
-        console.log("RECIPECREATORDTO: ", recipeCreatorDto)
         const recipeVariants: RecipeVariant[] = await this.recipeVariantsCreator.execute(recipeCreatorDto);
         const months: Month[] = dto.availableMonths.map((month) => (<any>Month)[month]);
 

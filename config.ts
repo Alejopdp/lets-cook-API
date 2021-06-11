@@ -40,7 +40,7 @@ const logger = winston.loggers.get("default");
 process.env.SEED = process.env.SEED || "dev-seed";
 process.env.CADUCIDAD_TOKEN = "30d";
 
-var restoreDb = process.env.DB_RESTORE || false;
+var restoreDb = process.env.DB_RESTORE === "true" || false;
 
 // Conecto con Firebase
 
