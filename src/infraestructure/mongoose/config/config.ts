@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { logger, restoreDb } from "../../../../config";
 import { loadMockData } from "../../../../scripts/db";
-import { User, Role } from "../models";
 
 export const connectToDatabase = async () => {
     const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;

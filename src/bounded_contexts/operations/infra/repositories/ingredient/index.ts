@@ -1,6 +1,7 @@
 import { Ingredient } from "../../../domain/ingredient/ingredient";
 import { IIngredientRepository } from "./IIngredientRepository";
 import { MockIngredientRepository } from "./mockIngredientRepository";
+import { MongooseIngredientRepository } from "./mongooseIngredientRepository";
 
 const lechuga: Ingredient = new Ingredient("Lechuga");
 const tomate: Ingredient = new Ingredient("Tomate");
@@ -15,3 +16,4 @@ const jamon: Ingredient = new Ingredient("Jamón");
 
 const mockDatabase: Ingredient[] = [lechuga, tomate, cebolla, pollo, cerdo, carne, queso, pan, ajo, jamon];
 export const mockIngredientRepository: IIngredientRepository = new MockIngredientRepository(mockDatabase);
+export const mongooseIngredientRepository: MongooseIngredientRepository = new MongooseIngredientRepository();
