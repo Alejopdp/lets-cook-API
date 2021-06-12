@@ -1,6 +1,6 @@
-import { mockPlanRepository, mongoosePlanRepository } from "../../infra/repositories/plan";
-import { mockRecipeRepository, mongooseRecipeRepository } from "../../infra/repositories/recipe";
-import { mockWeekRepository, mongooseWeekRepository } from "../../infra/repositories/week";
+import { mongoosePlanRepository } from "../../infra/repositories/plan";
+import { mongooseRecipeRepository } from "../../infra/repositories/recipe";
+import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { GetRecipeFilters } from "./getRecipeFilters";
 import { GetRecipeFiltersControllers } from "./getRecipeFiltersController";
 

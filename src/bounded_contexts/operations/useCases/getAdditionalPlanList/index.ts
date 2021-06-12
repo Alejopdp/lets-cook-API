@@ -1,4 +1,4 @@
-import { mockPlanRepository, mongoosePlanRepository } from "../../infra/repositories/plan";
+import { mongoosePlanRepository } from "../../infra/repositories/plan";
 import { GetAdditionalPlanList } from "./getAdditionalPlanList";
 import { GetAdditionalPlanListController } from "./getAdditionalPlanListController";
 

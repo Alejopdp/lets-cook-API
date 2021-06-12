@@ -10,6 +10,10 @@ export class NodemailerService implements INotificationService {
     constructor(transporter: Mail) {
         this._transporter = transporter;
     }
+
+    notifyNewBackOfficeUserToRecoverPassword(email: string, redirectUrl: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
     notifyUserToGeneratePassword(email: string, redirectUrl: string): Promise<void> {
         throw new Error("Method not implemented.");
     }

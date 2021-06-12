@@ -6,7 +6,7 @@ import { PlanSku } from "./PlanSku";
 import { PlanType } from "./PlanType/PlanType";
 import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { Locale } from "../locale/Locale";
-import { logger } from "../../../../../config";
+import { PlanSlug } from "./PlanSlug";
 
 export class Plan extends Entity<Plan> {
     private _name: string;
@@ -20,6 +20,10 @@ export class Plan extends Entity<Plan> {
     private _hasRecipes: boolean;
     private _additionalPlans: Plan[];
     private _locale: Locale;
+    private _planSlug: PlanSlug;
+    private _abilityToChooseRecipe: boolean;
+    private _iconLinealUrl: string;
+    private _iconLinealColorUrl: string;
 
     protected constructor(
         name: string,
@@ -33,6 +37,10 @@ export class Plan extends Entity<Plan> {
         hasRecipes: boolean,
         additionalPlans: Plan[],
         locale: Locale,
+        planSlug: PlanSlug,
+        abilityToChooseRecipe: boolean,
+        iconLinealUrl: string,
+        iconLinealColorUrl: string,
         id?: PlanId
     ) {
         super(id);
@@ -47,6 +55,10 @@ export class Plan extends Entity<Plan> {
         this._availablePlanFrecuencies = availablePlanFrecuencies;
         this._additionalPlans = additionalPlans;
         this._locale = locale;
+        this._planSlug = planSlug;
+        this._abilityToChooseRecipe = abilityToChooseRecipe;
+        this._iconLinealUrl = iconLinealUrl;
+        this._iconLinealColorUrl = iconLinealColorUrl;
     }
 
     public static create(
@@ -61,6 +73,10 @@ export class Plan extends Entity<Plan> {
         hasRecipes: boolean,
         additionalPlans: Plan[],
         locale: Locale,
+        planSlug: PlanSlug,
+        abilityToChooserecipe: boolean,
+        iconLinealUrl: string,
+        iconLinealColorUrl: string,
         id?: PlanId
     ): Plan {
         const guardedProps = [
@@ -92,6 +108,10 @@ export class Plan extends Entity<Plan> {
             hasRecipes,
             additionalPlans,
             locale,
+            planSlug,
+            abilityToChooserecipe,
+            iconLinealUrl,
+            iconLinealColorUrl,
             id
         );
     }
@@ -209,6 +229,38 @@ export class Plan extends Entity<Plan> {
     }
 
     /**
+     * Getter planSlug
+     * @return {PlanSlug}
+     */
+    public get planSlug(): PlanSlug {
+        return this._planSlug;
+    }
+
+    /**
+     * Getter abilityToChooseRecipe
+     * @return {boolean}
+     */
+    public get abilityToChooseRecipe(): boolean {
+        return this._abilityToChooseRecipe;
+    }
+
+    /**
+     * Getter iconLinealUrl
+     * @return {string}
+     */
+    public get iconLinealUrl(): string {
+        return this._iconLinealUrl;
+    }
+
+    /**
+     * Getter iconLinealColorUrl
+     * @return {string}
+     */
+    public get iconLinealColorUrl(): string {
+        return this._iconLinealColorUrl;
+    }
+
+    /**
      * Setter name
      * @param {string} value
      */
@@ -296,5 +348,37 @@ export class Plan extends Entity<Plan> {
      */
     public set locale(value: Locale) {
         this._locale = value;
+    }
+
+    /**
+     * Setter planSlug
+     * @param {PlanSlug} value
+     */
+    public set planSlug(value: PlanSlug) {
+        this._planSlug = value;
+    }
+
+    /**
+     * Setter abilityToChooseRecipe
+     * @param {boolean} value
+     */
+    public set abilityToChooseRecipe(value: boolean) {
+        this._abilityToChooseRecipe = value;
+    }
+
+    /**
+     * Setter iconLinealUrl
+     * @param {string} value
+     */
+    public set iconLinealUrl(value: string) {
+        this._iconLinealUrl = value;
+    }
+
+    /**
+     * Setter iconLinealColorUrl
+     * @param {string} value
+     */
+    public set iconLinealColorUrl(value: string) {
+        this._iconLinealColorUrl = value;
     }
 }

@@ -1,5 +1,5 @@
 import { s3Service } from "../../application/storageService";
-import { mockPlanRepository, mongoosePlanRepository } from "../../infra/repositories/plan";
+import { mongoosePlanRepository } from "../../infra/repositories/plan";
 import { GetPlanList } from "./getPlanList";
 import { GetPlanListController } from "./getPlanListController";
 

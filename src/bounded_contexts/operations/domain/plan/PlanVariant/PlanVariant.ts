@@ -7,13 +7,22 @@ export class PlanVariant {
     private _price: number;
     private _priceWithOffer?: number;
     private _attributes: PlanVariantAttribute[];
+    private _description: string;
 
-    constructor(sku: PlanSku, name: string, price: number, attributes: PlanVariantAttribute[], priceWithOffer?: number) {
+    constructor(
+        sku: PlanSku,
+        name: string,
+        price: number,
+        attributes: PlanVariantAttribute[],
+        description: string,
+        priceWithOffer?: number
+    ) {
         this._sku = sku;
         this._name = name;
         this._price = price;
         this._priceWithOffer = priceWithOffer;
         this._attributes = attributes;
+        this._description = description;
     }
 
     public getConcatenatedAttributesAsString(): string {
@@ -60,6 +69,14 @@ export class PlanVariant {
     }
 
     /**
+     * Getter description
+     * @return {string}
+     */
+    public get description(): string {
+        return this._description;
+    }
+
+    /**
      * Setter sku
      * @param {PlanSku} value
      */
@@ -97,5 +114,13 @@ export class PlanVariant {
      */
     public set attributes(value: PlanVariantAttribute[]) {
         this._attributes = value;
+    }
+
+    /**
+     * Setter description
+     * @param {string} value
+     */
+    public set description(value: string) {
+        this._description = value;
     }
 }

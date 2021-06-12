@@ -15,12 +15,13 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
                 raw.name,
                 raw.price,
                 raw.priceWithOffer,
-                attributes
+                attributes,
+                raw.description
             );
         }
 
         // return new PlanVariant(raw.sku, raw.name, raw.price, attributes, raw.priceWithOffer);
-        return new PlanVariant(new PlanSku(raw.sku), raw.name, raw.price, attributes, raw.priceWithOffer);
+        return new PlanVariant(new PlanSku(raw.sku), raw.name, raw.price, attributes, raw.description, raw.priceWithOffer);
     }
 
     public toPersistence(t: PlanVariant) {
@@ -36,6 +37,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             attributes: t.attributes.map((attr: PlanVariantAttribute) => {
                 return { key: attr.key, value: attr.value };
             }),
+            description: t.description,
         };
     }
 }

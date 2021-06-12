@@ -20,6 +20,12 @@ export class UpdatePlanController extends BaseController {
             var planImagePath = "";
             var planImage: ReadStream | undefined;
             var planImageFileName: string = "";
+            var iconLinealPath = "";
+            var iconLineal: ReadStream | undefined;
+            var iconLinealFileName: string = "";
+            var iconLinealColorPath = "";
+            var iconLinealColor: ReadStream | undefined;
+            var iconLinealColorFileName: string = "";
 
             if (this.req.file) {
                 planImagePath = this.req.file.path;
@@ -43,6 +49,12 @@ export class UpdatePlanController extends BaseController {
                 planVariants: JSON.parse(this.req.body.variants),
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
                 additionalPlansIds: JSON.parse(this.req.body.additionalPlans),
+                abilityToChooseRecipe: JSON.parse(this.req.body.abilityToChooseRecipe),
+                planSlug: this.req.body.planSlug,
+                iconLinealColorFileName: iconLinealColorFileName,
+                iconLinealFileName: iconLinealFileName,
+                iconLinealColorFile: iconLinealColor,
+                iconLinealFile: iconLineal,
             };
 
             await this.updatePlan.execute(dto);
