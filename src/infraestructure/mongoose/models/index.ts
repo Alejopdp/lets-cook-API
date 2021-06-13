@@ -5,3 +5,6 @@ export * from "./role";
 export * from "./user";
 export * from "./week";
 export * from "./recipeRestriction";
+export * from "./coupon";
+export * from "./shipping";
+// export * from "./week";
