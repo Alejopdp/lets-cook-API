@@ -16,7 +16,6 @@ export class GetShippingZoneList {
 
     public async execute(): Promise<any> {
         var shippings: ShippingZone[] = await this.shippingRepository.findAll();
-        // console.log("GetCoupon Use Case: ", coupons)
         return GetShippingListPresenter.present(shippings);
     }
 
