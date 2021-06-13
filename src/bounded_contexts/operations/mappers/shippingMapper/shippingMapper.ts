@@ -16,10 +16,6 @@ import { PlanId } from "../../domain/plan/PlanId";
 
 export class ShippingMapper implements Mapper<ShippingZone> {
     public toDomain(raw: any): ShippingZone {
-        // const type: ShippingZoneRadio = raw.type.type === "fixed" ? new FixedPrice(raw.type.type, raw.type.value) : 
-        //     raw.type.type === "free" ? new FreeShipping(raw.type.type, raw.type.value) : 
-        //     new PercentPrice(raw.type.type, raw.type.value);
-        // const productsForApplying: PlanId[] = raw.productsForApplyingValue.map((id: string) => new PlanId(id));
         const radio: ShippingZoneRadio = raw.radio.map((radio: any) => 
             new Coordinates(radio.latitude, radio.longitude));
 
@@ -33,8 +29,7 @@ export class ShippingMapper implements Mapper<ShippingZone> {
         );
     }
     public toPersistence(t: ShippingZone): any {
-        // const variants: any[] = t.planVariants.map((variant) => planVariantMapper.toPersistence(variant));
-        // console.log("toPersistence: ",t)
+        console.log("toPersistence: ",t)
         return {
             name: t.name,
             reference: t.reference,

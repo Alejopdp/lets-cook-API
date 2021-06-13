@@ -7,8 +7,5 @@ export interface IShippingZoneRepository {
     findAll(): Promise<ShippingZone[]>;
     updateState(state: ShippingZone): Promise<void>;
     findById(planId: ShippingZoneId): Promise<ShippingZone | undefined>;
-    // findAdditionalPlanList(locale: Locale): Promise<Plan[]>;
-    // findAdditionalPlanListById(ids: PlanId[], locale: Locale): Promise<Plan[]>
-    // findBy(conditions: any, locale: Locale): Promise<Plan[]>;
     delete(planId: ShippingZoneId): Promise<void>;
 }
