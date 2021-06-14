@@ -17,11 +17,9 @@ export class UpdateShippingZone {
     public async execute(dto: UpdateShippingZoneStateDto): Promise<void> {
         const shippingZoneId: ShippingZoneId = new ShippingZoneId(dto.id);
         const shipping: ShippingZone | undefined = await this.shippingZoneRepository.findById(shippingZoneId);
-        if (!shipping) throw new Error("El cupon ingresado no existe");
+        if (!shipping) throw new Error("La zona de envío ingresada no existe");
 
-        shipping.updateState(dto.state)
-
-        // console.log("UseCase: ",coupon)
+        shipping.updateState(dto.state);
 
         await this.shippingZoneRepository.updateState(shipping);
     }

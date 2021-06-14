@@ -1,6 +1,4 @@
 import { logger } from "../../../../../config";
-import { IStorageService } from "../../application/storageService/IStorageService";
-import { Locale } from "../../domain/locale/Locale";
 import { Coupon } from "../../domain/cupons/Cupon";
 import { PlanId } from "../../domain/plan/PlanId";
 import { ICouponType } from "../../domain/cupons/CuponType/ICuponType";
@@ -13,20 +11,19 @@ import { CreateCouponDto } from "./createCouponDto";
 
 export class CreateCoupon {
     private _couponRepository: ICouponRepository;
-    private _storageService: IStorageService;
 
-    constructor(couponRepository: ICouponRepository, storageService: IStorageService) {
+    constructor(couponRepository: ICouponRepository) {
         this._couponRepository = couponRepository;
-        this._storageService = storageService;
     }
 
     public async execute(dto: CreateCouponDto): Promise<void> {
-        const type: ICouponType = 
-        dto.discountType === "fixed" ? new FixedPrice(dto.discountType, dto.discountValue) : 
-        dto.discountType === "free" ? new FreeShipping(dto.discountType, dto.discountValue) : 
-        new PercentPrice(dto.discountType, dto.discountValue);
-        const productsForApplying: PlanId[] = dto.productsForApplyingValue
-        .map((id: string) => new PlanId(id));
+        const type: ICouponType =
+            dto.discountType === "fixed"
+                ? new FixedPrice(dto.discountType, dto.discountValue)
+                : dto.discountType === "free"
+                ? new FreeShipping(dto.discountType, dto.discountValue)
+                : new PercentPrice(dto.discountType, dto.discountValue);
+        const productsForApplying: PlanId[] = dto.productsForApplyingValue.map((id: string) => new PlanId(id));
 
         const coupon: Coupon = Coupon.create(
             dto.couponCode,
@@ -42,7 +39,6 @@ export class CreateCoupon {
             dto.endDate,
             "active"
         );
-        console.log("CouponUseCase: ", coupon)
         await this.couponRepository.save(coupon);
     }
 
@@ -52,13 +48,5 @@ export class CreateCoupon {
      */
     public get couponRepository(): ICouponRepository {
         return this._couponRepository;
-    }
-
-    /**
-     * Getter storageService
-     * @return {IStorageService}
-     */
-    public get storageService(): IStorageService {
-        return this._storageService;
     }
 }

@@ -1,17 +1,9 @@
-import { updateShippingZone } from './../../useCases/updateShippingZone/index';
+import { updateShippingZone } from "./../../useCases/updateShippingZone/index";
 // Principal
 import { Entity } from "../../../../core/domain/Entity";
 import { Guard } from "../../../../core/logic/Guard";
 import { ShippingZoneRadio } from "./ShippingZoneRadio/ShippingZoneRadio";
-import { Coordinates } from './ShippingZoneRadio/Coordinates';
 import { ShippingZoneId } from "../shipping/ShippingZoneId";
-import { CouponId } from "../cupons/CouponId";
-// import { ILimitAplication } from "./LimitAplication/ILimitAplication";
-// import { PlanType } from "./PlanType/PlanType";
-// import { PlanVariant } from "./PlanVariant/PlanVariant";
-import { Locale } from "../locale/Locale";
-import { logger } from "../../../../../config";
-import { String } from "aws-sdk/clients/apigateway";
 
 export class ShippingZone extends Entity<ShippingZone> {
     private _name: string;
@@ -20,14 +12,7 @@ export class ShippingZone extends Entity<ShippingZone> {
     private _state: string;
     private _radio: ShippingZoneRadio;
 
-    protected constructor(
-        name: string,
-        reference: string,
-        cost: number,
-        state: string,
-        radio: ShippingZoneRadio,
-        id?: ShippingZoneId
-    ) {
+    protected constructor(name: string, reference: string, cost: number, state: string, radio: ShippingZoneRadio, id?: ShippingZoneId) {
         super(id);
         this._name = name;
         this._reference = reference;
@@ -44,15 +29,7 @@ export class ShippingZone extends Entity<ShippingZone> {
         radio: ShippingZoneRadio,
         id?: ShippingZoneId
     ): ShippingZone {
-
-        return new ShippingZone(
-            name,
-            reference,
-            cost,
-            state,
-            radio,
-            id
-        );
+        return new ShippingZone(name, reference, cost, state, radio, id);
     }
 
     public updateShippingRadio(radio: ShippingZoneRadio): void {
@@ -62,30 +39,6 @@ export class ShippingZone extends Entity<ShippingZone> {
     public updateState(state: string): void {
         this.state = state;
     }
-
-    // public toggleState(): void {
-    //     // TO DO: Validate existing subscriptions with this plan?
-
-    //     this.isActive = !this.isActive;
-    // }
-
-    // public canHaveAdditionalPlans(): boolean {
-    //     return this.type === PlanType.Principal;
-    // }
-
-    // public updateAdditionalPlans(additionalPlans: Plan[]): void {
-    //     if (!this.canHaveAdditionalPlans() && additionalPlans.length > 0)
-    //         throw new Error("Un plan adicional no puede tener relacionado otros planes adidiconales");
-    //     this.additionalPlans = additionalPlans;
-    // }
-
-    // public changeType(newType: PlanType): void {
-    //     if (this.type === PlanType.Principal && newType === PlanType.Adicional && this.additionalPlans.length > 0) {
-    //         throw new Error("Tiene que desasociar los planes adicionales antes de convertirlo en un plan adicional");
-    //     } else {
-    //         this.type = newType;
-    //     }
-    // }
 
     /**
      * Getter name
@@ -99,7 +52,7 @@ export class ShippingZone extends Entity<ShippingZone> {
      * Getter reference
      * @return {string}
      */
-     public get reference(): string {
+    public get reference(): string {
         return this._reference;
     }
 
@@ -107,7 +60,7 @@ export class ShippingZone extends Entity<ShippingZone> {
      * Getter cost
      * @return {number}
      */
-     public get cost(): number {
+    public get cost(): number {
         return this._cost;
     }
 
@@ -115,7 +68,7 @@ export class ShippingZone extends Entity<ShippingZone> {
      * Getter state
      * @return {string}
      */
-     public get state(): string {
+    public get state(): string {
         return this._state;
     }
 
@@ -126,7 +79,6 @@ export class ShippingZone extends Entity<ShippingZone> {
     public get radio(): ShippingZoneRadio {
         return this._radio;
     }
-
 
     /**
      * Setter name
@@ -140,7 +92,7 @@ export class ShippingZone extends Entity<ShippingZone> {
      * Setter reference
      * @param {String} value
      */
-     public set reference(value: string) {
+    public set reference(value: string) {
         this._reference = value;
     }
 
@@ -156,7 +108,7 @@ export class ShippingZone extends Entity<ShippingZone> {
      * Setter reference
      * @param {string} value
      */
-     public set state(value: string) {
+    public set state(value: string) {
         this._state = value;
     }
 

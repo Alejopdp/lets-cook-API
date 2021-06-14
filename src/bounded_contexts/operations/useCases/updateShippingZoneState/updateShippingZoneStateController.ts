@@ -19,7 +19,7 @@ export class UpdateShippingZoneStateController extends BaseController {
         try {
             const dto: UpdateShippingZoneStateDto = {
                 id: this.req.params.id,
-                state: this.req.body.state
+                state: this.req.body.state,
             };
 
             await this.updateShippingZoneState.execute(dto);
