@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import { createCouponController } from "../../useCases/createCoupon";
-// import { deletePlanController } from "../../useCases/deletePlan";
+import { createCouponControllerCSV } from "../../useCases/createCouponFromCSV";
 // import { getAdditionalPlanListController } from "../../useCases/getAdditionalPlanList";
 import { getCouponByIdController } from "../../useCases/getCouponById";
 import { getCouponListController } from "../../useCases/getCouponList";
@@ -25,6 +25,7 @@ couponRouter.put("/:id", multer(options).single(""), (req, res) => updateCouponS
 
 // POSTs
 couponRouter.post("/", multer(options).single(""), (req, res) => createCouponController.execute(req, res));
+couponRouter.post("/import", multer(options).single("coupons"), (req, res) => createCouponControllerCSV.execute(req, res));
 
 // // DELETEs
 // planRouter.delete("/:id", (req, res) => deletePlanController.execute(req, res));

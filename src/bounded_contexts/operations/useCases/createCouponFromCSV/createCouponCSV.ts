@@ -9,7 +9,7 @@ import { FreeShipping } from "../../domain/cupons/CuponType/FreeShipping";
 import { PercentPrice } from "../../domain/cupons/CuponType/PercentagePrice";
 import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
-import { CreateCouponDto } from "./createCouponDto";
+import { CreateCouponCSVDto } from "./createCouponDto";
 
 export class CreateCoupon {
     private _couponRepository: ICouponRepository;
@@ -20,7 +20,7 @@ export class CreateCoupon {
         this._storageService = storageService;
     }
 
-    public async execute(dto: CreateCouponDto): Promise<void> {
+    public async execute(dto: CreateCouponCSVDto): Promise<void> {
         const type: ICouponType = 
         dto.discountType === "fixed" ? new FixedPrice(dto.discountType, dto.discountValue) : 
         dto.discountType === "free" ? new FreeShipping(dto.discountType, dto.discountValue) : 
