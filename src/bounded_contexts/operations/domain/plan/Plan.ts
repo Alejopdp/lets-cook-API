@@ -7,6 +7,7 @@ import { PlanType } from "./PlanType/PlanType";
 import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { Locale } from "../locale/Locale";
 import { logger } from "../../../../../config";
+import { PlanVariantId } from "./PlanVariant/PlanVariantId";
 
 export class Plan extends Entity<Plan> {
     private _name: string;
@@ -118,6 +119,10 @@ export class Plan extends Entity<Plan> {
         } else {
             this.type = newType;
         }
+    }
+
+    public getPlanVariantById(planVariantId: PlanVariantId): PlanVariant | undefined {
+        return this.planVariants.find((variant) => variant.id.equals(planVariantId));
     }
 
     /**

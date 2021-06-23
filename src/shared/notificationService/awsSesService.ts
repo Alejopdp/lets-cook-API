@@ -41,6 +41,10 @@ export class AwsSesService implements INotificationService {
         await this.sendMail([email], "Tu usuario fue creado", redirectUrl, redirectUrl);
     }
 
+    public async notifyCustomerAboutNewSubscriptionSuccessfullyCreated(): Promise<void> {}
+
+    public async notifyAdminsAboutNewSubscriptionSuccessfullyCreated(): Promise<void> {}
+
     /**
      * Getter ses
      * @return {SES}

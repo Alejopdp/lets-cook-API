@@ -1,14 +1,24 @@
+import { Entity } from "../../../../../core/domain/Entity";
 import { PlanSku } from "../PlanSku";
 import { PlanVariantAttribute } from "./PlanVariantAttribute";
+import { PlanVariantId } from "./PlanVariantId";
 
-export class PlanVariant {
+export class PlanVariant extends Entity<PlanVariant> {
     private _sku: PlanSku;
     private _name: string;
     private _price: number;
     private _priceWithOffer?: number;
     private _attributes: PlanVariantAttribute[];
 
-    constructor(sku: PlanSku, name: string, price: number, attributes: PlanVariantAttribute[], priceWithOffer?: number) {
+    constructor(
+        sku: PlanSku,
+        name: string,
+        price: number,
+        attributes: PlanVariantAttribute[],
+        priceWithOffer?: number,
+        planVariantId?: PlanVariantId
+    ) {
+        super(planVariantId);
         this._sku = sku;
         this._name = name;
         this._price = price;
