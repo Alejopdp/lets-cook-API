@@ -1,6 +1,7 @@
 import { Locale } from "../../../domain/locale/Locale";
 import { Plan } from "../../../domain/plan/Plan";
 import { PlanId } from "../../../domain/plan/PlanId";
+import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 
 export interface IPlanRepository {
     save(plan: Plan): Promise<void>;
@@ -8,6 +9,7 @@ export interface IPlanRepository {
     findAll(locale: Locale): Promise<Plan[]>;
     findAllWithRecipesFlag(locale: Locale): Promise<Plan[]>;
     findById(planId: PlanId, locale: Locale): Promise<Plan | undefined>;
+    findByPlanVariantId(planVariantId: PlanVariantId): Promise<Plan | undefined>;
     findAdditionalPlanList(locale: Locale): Promise<Plan[]>;
     findAdditionalPlanListById(ids: PlanId[], locale: Locale): Promise<Plan[]>;
     findBy(conditions: any, locale: Locale): Promise<Plan[]>;

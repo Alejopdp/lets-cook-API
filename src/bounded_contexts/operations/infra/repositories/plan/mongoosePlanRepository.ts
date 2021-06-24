@@ -5,6 +5,7 @@ import { Plan as MongoosePlan } from "../../../../../infraestructure/mongoose/mo
 import { planMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
+import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 export class MongoosePlanRepository implements IPlanRepository {
     public async save(plan: Plan): Promise<void> {
         const planDb = planMapper.toPersistence(plan);
@@ -57,12 +58,6 @@ export class MongoosePlanRepository implements IPlanRepository {
         return planDb ? planMapper.toDomain(planDb, locale) : undefined;
     }
 
-    // public async findPlanById(planId: PlanId, locale: Locale): Promise<Plan | undefined> {
-    //     const planDb = await MongoosePlan.findById(planId.value, { deletionFlag: false }).populate("additionalPlans");
-
-    //     return planDb ? planMapper.toDomain(planDb, locale) : undefined;
-    // }
-
     public async findAll(locale: Locale): Promise<Plan[]> {
         return await this.findBy({}, locale);
     }
@@ -79,6 +74,12 @@ export class MongoosePlanRepository implements IPlanRepository {
         const plansDb = await MongoosePlan.find({ ...conditions, deletionFlag: false }).populate("additionalPlans");
 
         return plansDb.map((raw: any) => planMapper.toDomain(raw, locale));
+    }
+
+    public async findByPlanVariantId(planVariantId: PlanVariantId): Promise<Plan | undefined> {
+        const planDb = await MongoosePlan.findOne({ "variants._id": planVariantId.value });
+
+        return planDb ? planMapper.toDomain(planDb, Locale.es) : undefined;
     }
 
     public async findAllWithRecipesFlag(locale: Locale): Promise<Plan[]> {

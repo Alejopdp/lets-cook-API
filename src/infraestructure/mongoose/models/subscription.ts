@@ -44,8 +44,9 @@ const SubscriptionSchema = new mongoose.Schema(
         },
 
         customer: {
-            string: String,
+            type: String,
             ref: "Customer",
+            required: true,
         },
 
         restrictions: {

@@ -5,6 +5,7 @@ import { Subscription as MongooseSubscription } from "../../../../../infraestruc
 import { subscriptionMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
+import { CustomerId } from "../../../domain/customer/CustomerId";
 
 export class MongooseSubscriptionRepository implements ISubscriptionRepository {
     public async save(subscription: Subscription): Promise<void> {
@@ -36,6 +37,10 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         const subscriptionsDb = await MongooseSubscription.find({ ...conditions, deletionFlag: false });
 
         return subscriptionsDb.map((raw: any) => subscriptionMapper.toDomain(raw, locale));
+    }
+
+    public async findByCustomerId(customerId: CustomerId): Promise<Subscription[]> {
+        return await this.findBy({ customer: customerId.value }, Locale.es);
     }
 
     public async delete(subscriptionId: SubscriptionId): Promise<void> {
