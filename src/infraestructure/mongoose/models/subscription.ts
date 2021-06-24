@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import * as uuid from "uuid";
 
 const SubscriptionSchema = new mongoose.Schema(
@@ -8,7 +8,7 @@ const SubscriptionSchema = new mongoose.Schema(
             default: uuid.v4,
         },
         planVariant: {
-            type: [String],
+            type: String,
             ref: "PlanVariant",
             required: true,
         },
@@ -48,4 +48,4 @@ const SubscriptionSchema = new mongoose.Schema(
     { collection: "Subscription", timestamps: true }
 );
 
-export const Shipping = mongoose.model("Subscription", SubscriptionSchema);
+export const Subscription = mongoose.model("Subscription", SubscriptionSchema);
