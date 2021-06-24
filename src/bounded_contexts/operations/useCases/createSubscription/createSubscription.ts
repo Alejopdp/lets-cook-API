@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { INotificationService } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { Locale } from "../../domain/locale/Locale";
@@ -53,6 +54,8 @@ export class CreateSubscription {
 
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
+
+        logger.info(`Subscription: ${JSON.stringify(subscription)}`);
     }
 
     // /**

@@ -1,5 +1,6 @@
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CreateSubscription } from "./createSubscription";
+import { CreateSubscriptionDto } from "./createSubscriptionDto";
 
 export class CreateSubscriptionController extends BaseController {
     private _createSubscription: CreateSubscription;
@@ -9,8 +10,22 @@ export class CreateSubscriptionController extends BaseController {
         this._createSubscription = createSubscription;
     }
 
-    protected executeImpl(): Promise<any> {
-        throw new Error("Method not implemented.");
+    protected async executeImpl(): Promise<any> {
+        try {
+            const dto: CreateSubscriptionDto = {
+                customerId: this.req.body.customerId,
+                planFrequency: this.req.body.planFrequency,
+                planId: this.req.body.planId,
+                planVariantId: this.req.body.planVariantId,
+                restrictionComment: this.req.body.restrictionComment,
+            };
+
+            await this.createSubscription.execute(dto);
+
+            return this.ok(this.res);
+        } catch (error) {
+            return this.fail(error);
+        }
     }
 
     /**

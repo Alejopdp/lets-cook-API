@@ -3,6 +3,7 @@ import { Mapper } from "../../../core/infra/Mapper";
 import { PlanSku } from "../domain/plan/PlanSku";
 import { PlanVariant } from "../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../domain/plan/PlanVariant/PlanVariantAttribute";
+import { PlanVariantId } from "../domain/plan/PlanVariant/PlanVariantId";
 import { PlanVariantWithRecipe } from "../domain/plan/PlanVariant/PlanVariantWithRecipes";
 export class PlanVariantMapper implements Mapper<PlanVariant> {
     public toDomain(raw: any): PlanVariant {
@@ -15,12 +16,13 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
                 raw.name,
                 raw.price,
                 raw.priceWithOffer,
-                attributes
+                attributes,
+                new PlanVariantId(raw._id)
             );
         }
 
         // return new PlanVariant(raw.sku, raw.name, raw.price, attributes, raw.priceWithOffer);
-        return new PlanVariant(new PlanSku(raw.sku), raw.name, raw.price, attributes, raw.priceWithOffer);
+        return new PlanVariant(new PlanSku(raw.sku), raw.name, raw.price, attributes, raw.priceWithOffer, new PlanVariantId(raw._id));
     }
 
     public toPersistence(t: PlanVariant) {
@@ -36,6 +38,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             attributes: t.attributes.map((attr: PlanVariantAttribute) => {
                 return { key: attr.key, value: attr.value };
             }),
+            _id: t.id.value,
         };
     }
 }

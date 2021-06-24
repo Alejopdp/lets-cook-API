@@ -1,6 +1,11 @@
 import mongoose, { Mongoose } from "mongoose";
 import * as uuid from "uuid";
 const PlanVariantSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: uuid.v4(),
+    },
+
     sku: {
         type: String,
         required: true,
@@ -40,7 +45,7 @@ const PlanSchema = new mongoose.Schema(
     {
         _id: {
             type: String,
-            default: uuid.v4,
+            default: uuid.v4(),
         },
         name: {
             es: {

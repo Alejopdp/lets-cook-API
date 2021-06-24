@@ -1,6 +1,7 @@
 import { PlanSku } from "../PlanSku";
 import { PlanVariant } from "./PlanVariant";
 import { PlanVariantAttribute } from "./PlanVariantAttribute";
+import { PlanVariantId } from "./PlanVariantId";
 
 export class PlanVariantWithRecipe extends PlanVariant {
     private _numberOfPersons: number;
@@ -13,9 +14,10 @@ export class PlanVariantWithRecipe extends PlanVariant {
         name: string,
         price: number,
         priceWithOffer: number,
-        attributes: PlanVariantAttribute[]
+        attributes: PlanVariantAttribute[],
+        id?: PlanVariantId
     ) {
-        super(sku, name, price, attributes, priceWithOffer);
+        super(sku, name, price, attributes, priceWithOffer, id);
 
         if (numberOfPersons < 1) throw new Error("Hay que ingresar por lo menos 1 persona");
         if (numberOfRecipes < 1) throw new Error("Hay que ingresar por lo menos 1 receta");
