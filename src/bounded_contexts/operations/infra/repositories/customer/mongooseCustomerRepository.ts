@@ -6,6 +6,7 @@ import { Customer as MongooseCustomer } from "../../../../../infraestructure/mon
 import { customerMapper } from "../../../mappers/customerMapper";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
+import { CustomerId } from "../../../domain/customer/CustomerId";
 
 export class MongooseCustomerRepository implements ICustomerRepository {
     public async save(customer: Customer): Promise<void> {
@@ -21,30 +22,31 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         isEmailVerified: customerDb.isEmailVerified,
                         password: customerDb.password,
                         state: customerDb.state,
-                        codeToRecoverPassword: customerDb.codeToRecoverPassword
+                        codeToRecoverPassword: customerDb.codeToRecoverPassword,
                     },
                 }
             );
         } else {
-            console.log(customerDb)
+            console.log(customerDb);
             await MongooseCustomer.create(customerDb);
         }
     }
 
-    // public async updateState(shipping: ShippingZone): Promise<void> {
-    //     const shippingDb = shippingMapper.toPersistence(shipping);
-    //     await MongooseShippingZone.updateOne({ _id: shipping.id.value }, { $set: { state: shippingDb.state } });
-    // }
-
     public async findByEmail(email: string): Promise<Customer | undefined> {
         const customerDb = await MongooseCustomer.findOne({ email, deletionFlag: false });
-        
+
         return !!customerDb ? customerMapper.toDomain(customerDb) : undefined;
     }
 
     public async isEmailVerified(email: string): Promise<boolean> {
-        let emailFound: any = await MongooseCustomer.find({ email:  email});
-        return emailFound.length > 0 ? true : false
+        let emailFound: any = await MongooseCustomer.find({ email: email });
+        return emailFound.length > 0 ? true : false;
+    }
+
+    public async findById(id: CustomerId): Promise<Customer | undefined> {
+        const customerDb = await MongooseCustomer.findById(id.value);
+
+        return !!customerDb ? customerMapper.toDomain(customerDb) : undefined;
     }
 
     // public async findBy(conditions: any): Promise<ShippingZone[]> {
