@@ -5,8 +5,6 @@ import { PlanId } from "./PlanId";
 import { PlanSku } from "./PlanSku";
 import { PlanType } from "./PlanType/PlanType";
 import { PlanVariant } from "./PlanVariant/PlanVariant";
-import { Locale } from "../locale/Locale";
-import { logger } from "../../../../../config";
 
 export class Plan extends Entity<Plan> {
     private _name: string;
