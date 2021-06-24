@@ -23,7 +23,8 @@ export class GetPlanByIdPresenter {
 
             if (plan.hasRecipes) {
                 presentedVariants.push({
-                    id: variant.getConcatenatedAttributesAsString(),
+                    oldId: variant.getConcatenatedAttributesAsString(),
+                    id: variant.id.value,
                     sku: variant.sku.code,
                     name: variant.name,
                     price: variant.price,
@@ -36,7 +37,8 @@ export class GetPlanByIdPresenter {
                 });
             } else {
                 presentedVariants.push({
-                    id: variant.getConcatenatedAttributesAsString(),
+                    oldId: variant.getConcatenatedAttributesAsString(),
+                    id: variant.id.value,
                     sku: variant.sku.code,
                     name: variant.name,
                     price: variant.price,

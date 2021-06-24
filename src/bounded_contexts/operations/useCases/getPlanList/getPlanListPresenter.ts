@@ -12,6 +12,7 @@ export class GetPlanListPresenter {
             for (let variant of plan.planVariants) {
                 if (plan.hasRecipes) {
                     presentedVariants.push({
+                        id: variant.id.value,
                         sku: variant.sku.code,
                         name: variant.name,
                         price: variant.price,
@@ -24,6 +25,7 @@ export class GetPlanListPresenter {
                     });
                 } else {
                     presentedVariants.push({
+                        id: variant.id.value,
                         sku: variant.sku.code,
                         name: variant.name,
                         price: variant.price,

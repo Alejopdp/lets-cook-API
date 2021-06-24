@@ -21,7 +21,6 @@ export class GetPlanById {
         if (!plan) throw new Error("El plan ingresado no existe");
 
         plan.imageUrl = plan.imageUrl ? await this.storageService.getPresignedUrlForFile(plan.imageUrl) : "";
-        logger.warn(`A ver el plan image: ${plan.imageUrl}`);
 
         return GetPlanByIdPresenter.present(plan);
     }
