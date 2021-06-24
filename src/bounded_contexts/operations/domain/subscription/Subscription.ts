@@ -1,5 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
+import { CouponId } from "../cupons/CouponId";
+import { CustomerId } from "../customer/CustomerId";
 import { PlanFrequency } from "../plan/PlanFrequency";
 import { PlanVariant } from "../plan/PlanVariant/PlanVariant";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
@@ -13,6 +15,9 @@ export class Subscription extends Entity<Subscription> {
     private _state: ISubscriptionState;
     private _restrictionComment: string;
     private _restrictions: RecipeVariantRestriction[];
+    private _billingDayOfWeek: number;
+    private _customerId: CustomerId;
+    private _couponId?: CouponId;
     private _billingStartDate?: Date;
     private _creationDate: Date;
     private _couponChargesQtyApplied: number;
@@ -25,6 +30,9 @@ export class Subscription extends Entity<Subscription> {
         restrictionComment: string,
         creationDate: Date,
         couponChargesQtyApplied: number,
+        customerId: CustomerId,
+        couponId?: CouponId,
+        billingDayOfWeek?: number,
         billingStartDate?: Date,
         cancellationReason?: CancellationReason,
         subscriptionId?: SubscriptionId
@@ -35,9 +43,12 @@ export class Subscription extends Entity<Subscription> {
         this._state = state;
         this._restrictions = restrictions;
         this._restrictionComment = restrictionComment;
+        this._customerId = customerId;
+        this._couponId = couponId;
         this._billingStartDate = billingStartDate;
         this._creationDate = creationDate;
         this._couponChargesQtyApplied = couponChargesQtyApplied;
+        this._billingDayOfWeek = billingDayOfWeek || 6; // Saturday
     }
 
     /**
@@ -81,6 +92,22 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
+     * Getter customerId
+     * @return {CustomerId}
+     */
+    public get customerId(): CustomerId {
+        return this._customerId;
+    }
+
+    /**
+     * Getter couponId
+     * @return {CouponId | undefined}
+     */
+    public get couponId(): CouponId | undefined {
+        return this._couponId;
+    }
+
+    /**
      * Getter creationDate
      * @return {Date}
      */
@@ -110,6 +137,14 @@ export class Subscription extends Entity<Subscription> {
      */
     public get restrictionComment(): string {
         return this._restrictionComment;
+    }
+
+    /**
+     * Getter billingDayOfWeek
+     * @return {number}
+     */
+    public get billingDayOfWeek(): number {
+        return this._billingDayOfWeek;
     }
 
     /**
@@ -145,6 +180,21 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
+     * Setter customerId
+     * @param {CustomerId} value
+     */
+    public set customerId(value: CustomerId) {
+        this._customerId = value;
+    }
+
+    /**
+     * Setter couponId
+     * @param {CouponId | undefined} value
+     */
+    public set couponId(value: CouponId | undefined) {
+        this._couponId = value;
+    }
+    /**
      * Setter billingStartDate
      * @param {Date | undefined} value
      */
@@ -174,5 +224,13 @@ export class Subscription extends Entity<Subscription> {
      */
     public set restrictionComment(value: string) {
         this._restrictionComment = value;
+    }
+
+    /**
+     * Setter billingDayOfWeek
+     * @param {number} value
+     */
+    public set billingDayOfWeek(value: number) {
+        this._billingDayOfWeek = value;
     }
 }

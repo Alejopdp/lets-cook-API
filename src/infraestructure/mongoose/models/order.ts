@@ -1,7 +1,7 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import * as uuid from "uuid";
 
-const SubscriptionSchema = new mongoose.Schema(
+const OrderSchema = new mongoose.Schema(
     {
         _id: {
             type: String,
@@ -13,8 +13,8 @@ const SubscriptionSchema = new mongoose.Schema(
             required: true,
         },
 
-        frequency: {
-            type: String,
+        shippingDate: {
+            type: Date,
             required: true,
         },
 
@@ -22,36 +22,20 @@ const SubscriptionSchema = new mongoose.Schema(
             type: String, // Possible an enum
             required: true,
         },
-        restrictionComment: {
+
+        week: {
             type: String,
+            ref: "Week",
             required: true,
-            default: "",
         },
 
-        billingStartDate: {
+        billingDate: {
             type: Date,
             required: true,
         },
 
-        billingDayOfWeek: {
+        price: {
             type: Number,
-            required: true,
-        },
-
-        coupon: {
-            type: String,
-            ref: "Coupon",
-        },
-
-        customer: {
-            type: String,
-            ref: "Customer",
-            required: true,
-        },
-
-        restrictions: {
-            type: [String],
-            ref: "RecipeRestriction",
             required: true,
         },
 
@@ -61,7 +45,7 @@ const SubscriptionSchema = new mongoose.Schema(
             default: false,
         },
     },
-    { collection: "Subscription", timestamps: true }
+    { collection: "Order", timestamps: true }
 );
 
-export const Subscription = mongoose.model("Subscription", SubscriptionSchema);
+export const Order = mongoose.model("Order", OrderSchema);

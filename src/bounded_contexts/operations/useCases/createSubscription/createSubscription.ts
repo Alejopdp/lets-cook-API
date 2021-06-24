@@ -1,6 +1,8 @@
 import { logger } from "../../../../../config";
 import { INotificationService } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
+import { Customer } from "../../domain/customer/Customer";
+import { CustomerId } from "../../domain/customer/CustomerId";
 import { Locale } from "../../domain/locale/Locale";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
@@ -9,23 +11,30 @@ import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionActive } from "../../domain/subscription/subscriptionState/SubscriptionActive";
+import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
 
 export class CreateSubscription {
-    // private _customerRepository: ICustomerRepository;
+    private _customerRepository: ICustomerRepository;
     private _planRepository: IPlanRepository;
     private _paymentService: IPaymentService;
     private _notificationService: INotificationService;
 
-    constructor(planRepository: IPlanRepository, paymentService: IPaymentService, notificationService: INotificationService) {
-        // this._customerRepository = customerRepository;
+    constructor(
+        customerRepository: ICustomerRepository,
+        planRepository: IPlanRepository,
+        paymentService: IPaymentService,
+        notificationService: INotificationService
+    ) {
+        this._customerRepository = customerRepository;
         this._planRepository = planRepository;
         this._notificationService = notificationService;
         this._paymentService = paymentService;
     }
 
     public async execute(dto: CreateSubscriptionDto): Promise<void> {
+        // const customer: Customer | undefined = await this.customerRepository.findById(new CustomerId(dto.customerId));
         const planFrequency: PlanFrequency = (<any>PlanFrequency)[dto.planFrequency];
         const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.planId), Locale.es);
         if (!!!plan) throw new Error("El plan ingresado no existe");
@@ -58,13 +67,13 @@ export class CreateSubscription {
         logger.info(`Subscription: ${JSON.stringify(subscription)}`);
     }
 
-    // /**
-    //  * Getter customerRepository
-    //  * @return {ICustomerRepository}
-    //  */
-    // public get customerRepository(): ICustomerRepository {
-    //     return this._customerRepository;
-    // }
+    /**
+     * Getter customerRepository
+     * @return {ICustomerRepository}
+     */
+    public get customerRepository(): ICustomerRepository {
+        return this._customerRepository;
+    }
 
     /**
      * Getter planRepository
@@ -90,13 +99,13 @@ export class CreateSubscription {
         return this._notificationService;
     }
 
-    // /**
-    //  * Setter customerRepository
-    //  * @param {ICustomerRepository} value
-    //  */
-    // public set customerRepository(value: ICustomerRepository) {
-    // 	this._customerRepository = value;
-    // }
+    /**
+     * Setter customerRepository
+     * @param {ICustomerRepository} value
+     */
+    public set customerRepository(value: ICustomerRepository) {
+        this._customerRepository = value;
+    }
 
     /**
      * Setter planRepository

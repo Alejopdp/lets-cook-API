@@ -1,20 +1,20 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import * as uuid from "uuid";
 
-const SubscriptionSchema = new mongoose.Schema(
+const PaymentOrderSchema = new mongoose.Schema(
     {
         _id: {
             type: String,
             default: uuid.v4,
         },
-        planVariant: {
+
+        paymentIntentId: {
             type: String,
-            ref: "PlanVariant",
             required: true,
         },
 
-        frequency: {
-            type: String,
+        shippingDate: {
+            type: Date,
             required: true,
         },
 
@@ -22,36 +22,30 @@ const SubscriptionSchema = new mongoose.Schema(
             type: String, // Possible an enum
             required: true,
         },
-        restrictionComment: {
+
+        week: {
             type: String,
+            ref: "Week",
             required: true,
-            default: "",
         },
 
-        billingStartDate: {
+        billingDate: {
             type: Date,
             required: true,
         },
 
-        billingDayOfWeek: {
+        amount: {
             type: Number,
             required: true,
         },
 
-        coupon: {
-            type: String,
-            ref: "Coupon",
-        },
-
-        customer: {
-            type: String,
-            ref: "Customer",
+        discountAmount: {
+            type: Number,
             required: true,
         },
 
-        restrictions: {
-            type: [String],
-            ref: "RecipeRestriction",
+        shippingCoste: {
+            type: Number,
             required: true,
         },
 
@@ -61,7 +55,7 @@ const SubscriptionSchema = new mongoose.Schema(
             default: false,
         },
     },
-    { collection: "Subscription", timestamps: true }
+    { collection: "PaymentOrder", timestamps: true }
 );
 
-export const Subscription = mongoose.model("Subscription", SubscriptionSchema);
+export const PaymentOrder = mongoose.model("PaymentOrder", PaymentOrderSchema);
