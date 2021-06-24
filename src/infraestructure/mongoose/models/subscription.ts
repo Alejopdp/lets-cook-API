@@ -33,6 +33,21 @@ const SubscriptionSchema = new mongoose.Schema(
             required: true,
         },
 
+        billingDayOfWeek: {
+            type: Number,
+            required: true,
+        },
+
+        coupon: {
+            type: String,
+            ref: "Coupon",
+        },
+
+        customer: {
+            string: String,
+            ref: "Customer",
+        },
+
         restrictions: {
             type: [String],
             ref: "RecipeRestriction",
