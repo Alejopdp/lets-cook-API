@@ -6,6 +6,7 @@ import { getShippingZoneByIdController } from "../../useCases/getShippingZoneByI
 import { deleteShippingZoneController } from "../../useCases/deleteShippingZone";
 import { updateShippingZoneController } from "../../useCases/updateShippingZone";
 import { updateShippingZoneStateController } from "../../useCases/updateShippingZoneState";
+import { getShippingRateController } from '../../useCases/getShippingRate'
 
 const shippingRouter = express.Router();
 
@@ -15,7 +16,7 @@ const options: multer.Options = {
 
 // // GETs
 shippingRouter.get("/", (req, res) => getShippingListController.execute(req, res));
-// planRouter.get("/additionals", (req, res) => getAdditionalPlanListController.execute(req, res));
+shippingRouter.get("/shipping-rate", (req, res) => getShippingRateController.execute(req, res));
 shippingRouter.get("/:id", (req, res) => getShippingZoneByIdController.execute(req, res));
 
 // // PUT

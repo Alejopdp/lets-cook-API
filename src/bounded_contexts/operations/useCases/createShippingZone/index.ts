@@ -1,6 +1,5 @@
 import { s3Service } from "../../application/storageService";
 import { mongooseShippingZoneRepository, } from "../../infra/repositories/shipping";
-import {  } from "../../infra/repositories/coupon/mockCouponRepository";
 import { CreateShippingZone } from "./createShippingZone";
 import { CreateShippingZoneController } from "./createShippingZoneController";
 

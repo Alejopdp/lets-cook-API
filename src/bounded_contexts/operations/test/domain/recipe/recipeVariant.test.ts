@@ -40,7 +40,7 @@ describe("[DOMAIN] - Recipe variant tests", () => {
             before(function () {
                 ingredient1 = new Ingredient("Test");
                 ingredient2 = new Ingredient(ingredient1.name);
-                recipeVariant = new RecipeVariant([ingredient1, ingredient2], [RecipeVariantRestriction.SinGluten], recipeVariantSku);
+                // recipeVariant = new RecipeVariant([ingredient1, ingredient2], [RecipeVariantRestriction.SinGluten], recipeVariantSku);
             });
 
             it("Should create the recipe with the duplicated ingredients removed", function () {

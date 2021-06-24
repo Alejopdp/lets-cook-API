@@ -27,6 +27,6 @@ export class MongooseRoleRepository implements IRoleRepository {
     public async findAll(): Promise<Role[]> {
         const rolesDb = await MongooseRole.find();
 
-        return rolesDb.length > 0 ? rolesDb.map((role) => roleMapper.toDomain(role)) : [];
+        return rolesDb.length > 0 ? rolesDb.map((role: any) => roleMapper.toDomain(role)) : [];
     }
 }

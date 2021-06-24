@@ -1,6 +1,5 @@
 import { s3Service } from "../../application/storageService";
 import { mongooseCouponRepository, } from "../../infra/repositories/coupon";
-import {  } from "../../infra/repositories/coupon/mockCouponRepository";
 import { CreateCoupon } from "./createCouponCSV";
 import { CreateCouponControllerCSV } from "./createCouponControllerCSV";
 
