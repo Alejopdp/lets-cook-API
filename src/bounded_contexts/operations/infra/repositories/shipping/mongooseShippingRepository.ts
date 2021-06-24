@@ -51,6 +51,6 @@ export class MongooseShippingRepository implements IShippingZoneRepository {
     }
 
     public async delete(shippingId: ShippingZoneId): Promise<void> {
-        await MongooseShippingZone.updateOne({ _id: shippingId.value }, { deletionFlag: true });
+        await MongooseShippingZone.updateOne({ _id: shippingId.value }, { $set: { deletionFlag: true } });
     }
 }

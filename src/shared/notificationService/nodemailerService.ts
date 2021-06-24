@@ -14,6 +14,11 @@ export class NodemailerService implements INotificationService {
         throw new Error("Method not implemented.");
     }
 
+    notifyNewBackOfficeUserToRecoverPassword(email: string, redirectUrl: string): Promise <void> {
+        console.log("Recover: ", email, redirectUrl)
+        throw new Error("Method not implemented.");
+    }
+
     public static create(user: string | undefined, password: string | undefined) {
         const options: SMTPTransport.Options = {
             service: "gmail",

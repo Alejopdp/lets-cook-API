@@ -60,6 +60,7 @@
         "nodemailer": "^6.5.0",
         "pg": "^8.3.0",
         "pg-hstore": "^2.3.3",
+        "point-in-polygon": "^1.1.0",
         "qrcode": "^1.4.4",
         "sequelize": "^6.3.4",
         "shallowequal": "^1.1.0",
@@ -68,6 +69,7 @@
         "typescript": "^3.9.7",
         "uuid": "^8.3.2",
         "winston": "^3.3.3",
+        "xlsx": "^0.17.0",
         "xmldom": "^0.6.0"
     },
     "devDependencies": {

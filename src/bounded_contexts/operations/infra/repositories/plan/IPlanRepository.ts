@@ -12,4 +12,5 @@ export interface IPlanRepository {
     findAdditionalPlanListById(ids: PlanId[], locale: Locale): Promise<Plan[]>;
     findBy(conditions: any, locale: Locale): Promise<Plan[]>;
     delete(planId: PlanId): Promise<void>;
+    // findPlanById(planId: PlanId): Promise<Plan | undefined>;
 }

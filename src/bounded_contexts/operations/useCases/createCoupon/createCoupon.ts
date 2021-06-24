@@ -39,7 +39,6 @@ export class CreateCoupon {
             dto.endDate,
             "active"
         );
-
         await this.couponRepository.save(coupon);
     }
 

@@ -26,7 +26,7 @@ export class MongooseUserRepository implements IUserRepository {
     public async findAll(): Promise<User[]> {
         const usersDb = await MongooseUser.find({ deletionFlag: false }).populate("roleId");
 
-        return usersDb.length > 0 ? usersDb.map((u) => userMapper.toDomain(u)) : [];
+        return usersDb.length > 0 ? usersDb.map((u: any) => userMapper.toDomain(u)) : [];
     }
 
     public async findByEmail(email: string): Promise<User | undefined> {

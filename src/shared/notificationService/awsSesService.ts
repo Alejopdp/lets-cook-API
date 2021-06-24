@@ -10,6 +10,7 @@ export class AwsSesService implements INotificationService {
     }
 
     private async sendMail(toAddresses: string[], subject: string, textBody: string, htmlBody: string): Promise<void> {
+        // console.log('Send Mail: ', toAddresses, subject, textBody, htmlBody)
         const mailParams: SendEmailRequest = {
             Destination: {
                 ToAddresses: toAddresses,
@@ -20,11 +21,13 @@ export class AwsSesService implements INotificationService {
                     Data: subject,
                 },
                 Body: {
-                    Text: { Data: textBody },
+                    Text: { Data: 'Code' },
                     Html: { Data: htmlBody },
                 },
             },
         };
+        console.log(mailParams)
+
 
         await this.ses.sendEmail(mailParams).promise();
     }
@@ -34,6 +37,7 @@ export class AwsSesService implements INotificationService {
     }
 
     public async notifyNewBackOfficeUserToRecoverPassword(email: string, redirectUrl: string): Promise<void> {
+        // console.log('AWS:', email, redirectUrl)
         await this.sendMail([email], "Cambiar la contraseña", redirectUrl, redirectUrl);
     }
 

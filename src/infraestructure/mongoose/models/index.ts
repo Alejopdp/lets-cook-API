@@ -7,4 +7,5 @@ export * from "./week";
 export * from "./recipeRestriction";
 export * from "./coupon";
 export * from "./shipping";
+export * from "./customer";
 // export * from "./week";
