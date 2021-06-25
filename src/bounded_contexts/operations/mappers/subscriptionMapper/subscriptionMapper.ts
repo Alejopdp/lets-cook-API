@@ -8,6 +8,8 @@ import { RecipeVariantRestriction } from "../../domain/recipe/RecipeVariant/reci
 import { recipeRestrictionMapper } from "..";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { CouponId } from "../../domain/cupons/CouponId";
+import { customerMapper } from "../customerMapper";
+import { Customer } from "../../domain/customer/Customer";
 
 export class SubscriptionMapper implements Mapper<Subscription> {
     public toDomain(raw: any, locale?: Locale): Subscription {
@@ -15,6 +17,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
         const restrictions: RecipeVariantRestriction[] = raw.Restrictions.map((restriction: any) =>
             recipeRestrictionMapper.toDomain(restriction)
         );
+        const customer: Customer = customerMapper.toDomain(raw.Customer);
 
         return new Subscription(
             raw.PlanVariant,
@@ -24,7 +27,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             raw.restrictionComment,
             raw.createdAt,
             raw.couponChargesQtyApplied,
-            new CustomerId(raw.customer),
+            customer,
             new CouponId(raw.coupon),
             raw.billingDayOfWeek,
             raw.billingStartDate,
@@ -41,7 +44,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             restrictions: t.restrictions.map((restriction) => restriction.id.value),
             restrictionComment: t.restrictionComment,
             couponChargesQtyApplied: t.couponChargesQtyApplied,
-            customer: t.customerId.value,
+            customer: t.customer.id.value,
             coupon: t.couponId ? t.couponId.value : null,
             billingDayOfWeek: t.billingDayOfWeek,
             billingStartDate: t.billingStartDate,

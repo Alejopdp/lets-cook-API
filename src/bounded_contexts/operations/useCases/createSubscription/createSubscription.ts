@@ -1,6 +1,7 @@
 import { logger } from "../../../../../config";
 import { INotificationService } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
+import { CouponId } from "../../domain/cupons/CouponId";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { Locale } from "../../domain/locale/Locale";
@@ -34,7 +35,11 @@ export class CreateSubscription {
     }
 
     public async execute(dto: CreateSubscriptionDto): Promise<void> {
-        // const customer: Customer | undefined = await this.customerRepository.findById(new CustomerId(dto.customerId));
+        const customerId: CustomerId = new CustomerId(dto.customerId);
+        const couponId: CouponId | undefined = dto.couponId ? new CouponId() : false;
+        const customer: Customer | undefined = await this.customerRepository.findById(customerId);
+        if (!!!customer) throw new Error("No puedes pedir un nuevo plan");
+
         const planFrequency: PlanFrequency = (<any>PlanFrequency)[dto.planFrequency];
         const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.planId), Locale.es);
         if (!!!plan) throw new Error("El plan ingresado no existe");
@@ -49,7 +54,13 @@ export class CreateSubscription {
             [],
             dto.restrictionComment,
             new Date(),
-            0
+            0,
+            customer,
+            couponId,
+            undefined,
+            new Date(), // TO DO: Calculate
+            undefined,
+            undefined
         );
 
         // TO DO Create orders

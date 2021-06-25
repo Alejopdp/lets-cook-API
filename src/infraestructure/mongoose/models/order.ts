@@ -13,6 +13,12 @@ const OrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        plan: {
+            type: String,
+            ref: "Plan",
+            required: true,
+        },
+
         shippingDate: {
             type: Date,
             required: true,
