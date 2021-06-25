@@ -1,6 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { Plan } from "../plan/Plan";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
-import { WeekId } from "../week/WeekId";
+import { Week } from "../week/Week";
 import { OrderId } from "./OrderId";
 import { IOrderState } from "./orderState/IOrdeState";
 
@@ -8,16 +9,18 @@ export class Order extends Entity<Order> {
     private _shippingDate: Date;
     private _state: IOrderState;
     private _billingDate: Date;
-    private _weekId: WeekId;
+    private _week: Week;
     private _planVariantId: PlanVariantId;
+    private _plan: Plan;
     private _price: number;
 
     constructor(
         shippingDate: Date,
         state: IOrderState,
         billingDate: Date,
-        weekId: WeekId,
+        week: Week,
         planVariantId: PlanVariantId,
+        plan: Plan,
         price: number,
         orderId?: OrderId
     ) {
@@ -25,8 +28,9 @@ export class Order extends Entity<Order> {
         this._shippingDate = shippingDate;
         this._state = state;
         this._billingDate = billingDate;
-        this._weekId = weekId;
+        this._week = week;
         this._planVariantId = planVariantId;
+        this._plan = plan;
         this._price = price;
     }
 
@@ -55,11 +59,11 @@ export class Order extends Entity<Order> {
     }
 
     /**
-     * Getter weekId
-     * @return {WeekId}
+     * Getter week
+     * @return {Week}
      */
-    public get weekId(): WeekId {
-        return this._weekId;
+    public get week(): Week {
+        return this._week;
     }
 
     /**
@@ -68,6 +72,14 @@ export class Order extends Entity<Order> {
      */
     public get planVariantId(): PlanVariantId {
         return this._planVariantId;
+    }
+
+    /**
+     * Getter plan
+     * @return {Plan}
+     */
+    public get plan(): Plan {
+        return this._plan;
     }
 
     /**
@@ -103,11 +115,11 @@ export class Order extends Entity<Order> {
     }
 
     /**
-     * Setter weekId
-     * @param {WeekId} value
+     * Setter week
+     * @param {Week} value
      */
-    public set weekId(value: WeekId) {
-        this._weekId = value;
+    public set week(value: Week) {
+        this._week = value;
     }
 
     /**
@@ -116,6 +128,14 @@ export class Order extends Entity<Order> {
      */
     public set planVariantId(value: PlanVariantId) {
         this._planVariantId = value;
+    }
+
+    /**
+     * Setter plan
+     * @param {Plan} value
+     */
+    public set plan(value: Plan) {
+        this._plan = value;
     }
 
     /**

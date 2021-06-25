@@ -1,7 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
 import { CouponId } from "../cupons/CouponId";
-import { CustomerId } from "../customer/CustomerId";
+import { Customer } from "../customer/Customer";
 import { PlanFrequency } from "../plan/PlanFrequency";
 import { PlanVariant } from "../plan/PlanVariant/PlanVariant";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
@@ -16,7 +16,7 @@ export class Subscription extends Entity<Subscription> {
     private _restrictionComment: string;
     private _restrictions: RecipeVariantRestriction[];
     private _billingDayOfWeek: number;
-    private _customerId: CustomerId;
+    private _customer: Customer;
     private _couponId?: CouponId;
     private _billingStartDate?: Date;
     private _creationDate: Date;
@@ -30,7 +30,7 @@ export class Subscription extends Entity<Subscription> {
         restrictionComment: string,
         creationDate: Date,
         couponChargesQtyApplied: number,
-        customerId: CustomerId,
+        customer: Customer,
         couponId?: CouponId,
         billingDayOfWeek?: number,
         billingStartDate?: Date,
@@ -43,7 +43,7 @@ export class Subscription extends Entity<Subscription> {
         this._state = state;
         this._restrictions = restrictions;
         this._restrictionComment = restrictionComment;
-        this._customerId = customerId;
+        this._customer = customer;
         this._couponId = couponId;
         this._billingStartDate = billingStartDate;
         this._creationDate = creationDate;
@@ -92,11 +92,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Getter customerId
-     * @return {CustomerId}
+     * Getter customer
+     * @return {Customer}
      */
-    public get customerId(): CustomerId {
-        return this._customerId;
+    public get customer(): Customer {
+        return this._customer;
     }
 
     /**
@@ -180,11 +180,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Setter customerId
-     * @param {CustomerId} value
+     * Setter customer
+     * @param {Customer} value
      */
-    public set customerId(value: CustomerId) {
-        this._customerId = value;
+    public set customer(value: Customer) {
+        this._customer = value;
     }
 
     /**
