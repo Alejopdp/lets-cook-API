@@ -1,6 +1,36 @@
 import mongoose from "mongoose";
 import * as uuid from "uuid";
 
+const AddressSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: uuid.v4,
+    },
+
+    latitude: {
+        type: Number,
+        required: true,
+    },
+
+    longitude: {
+        type: Number,
+        required: true,
+    },
+
+    addressName: {
+        type: String,
+        required: true,
+    },
+
+    addressDetails: {
+        type: String,
+    },
+
+    addressFullName: {
+        type: String,
+    },
+});
+
 const CustomerSchema = new mongoose.Schema(
     {
         _id: {
@@ -21,10 +51,16 @@ const CustomerSchema = new mongoose.Schema(
         },
         state: {
             type: String,
-            required: true
+            required: true,
+        },
+        shippingAddress: {
+            type: AddressSchema,
+        },
+        billingAddress: {
+            type: AddressSchema,
         },
         codeToRecoverPassword: {
-            type: String
+            type: String,
         },
         deletionFlag: {
             type: Boolean,
