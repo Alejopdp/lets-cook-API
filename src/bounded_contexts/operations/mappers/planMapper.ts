@@ -32,7 +32,7 @@ export class PlanMapper implements Mapper<Plan> {
             additionalPlans,
             locale,
             planSlug,
-            raw.abilityToChooseRecipe,
+            raw.abilityToChooseRecipes,
             raw.iconLinealUrl,
             raw.iconLinealColorUrl,
             new PlanId(raw._id)
@@ -54,7 +54,7 @@ export class PlanMapper implements Mapper<Plan> {
             availableFrequencies: t.availablePlanFrecuencies,
             additionalPlans: t.additionalPlans.map((plan: Plan) => plan.id.value),
             slug: t.planSlug.slug,
-            abilityToChooseRecipe: t.abilityToChooseRecipe,
+            abilityToChooseRecipes: t.abilityToChooseRecipes,
             iconLinealUrl: t.iconLinealUrl,
             iconLinealColorUrl: t.iconLinealColorUrl,
         };

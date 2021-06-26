@@ -8,6 +8,7 @@ import { PlanVariantWithRecipe } from "../domain/plan/PlanVariant/PlanVariantWit
 export class PlanVariantMapper implements Mapper<PlanVariant> {
     public toDomain(raw: any): PlanVariant {
         const attributes: PlanVariantAttribute[] = raw.attributes.map((attr: any) => new PlanVariantAttribute(attr.key, attr.value));
+
         if (!!raw.numberOfPersons && !!raw.numberOfRecipes) {
             return new PlanVariantWithRecipe(
                 raw.numberOfPersons,

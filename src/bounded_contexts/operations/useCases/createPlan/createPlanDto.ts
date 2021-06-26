@@ -16,7 +16,7 @@ export interface CreatePlanDto {
     hasRecipes: boolean;
     additionalPlansIds: string[] | number[];
     planSlug: string;
-    abilityToChooseRecipe: boolean;
+    abilityToChooseRecipes: boolean;
     iconLinealFile: ReadStream;
     iconLinealFileName: string;
     iconLinealColorFile: ReadStream;

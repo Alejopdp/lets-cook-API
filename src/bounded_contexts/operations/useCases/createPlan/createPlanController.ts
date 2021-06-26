@@ -37,7 +37,7 @@ export class CreatePlanController extends BaseController {
                 planVariants: JSON.parse(this.req.body.variants),
                 additionalPlansIds: JSON.parse(this.req.body.additionalPlans),
                 planSlug: this.req.body.planSlug,
-                abilityToChooseRecipe: JSON.parse(this.req.body.abilityToChooseRecipe),
+                abilityToChooseRecipes: JSON.parse(this.req.body.abilityToChooseRecipes),
                 //@ts-ignore
                 iconLinealFile: "iconLineal",
                 iconLinealFileName: "iconLineal",

@@ -1,9 +1,16 @@
+import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 
 export class GetPlanListPresenter {
-    public static present(plans: Plan[]): any {
+    private _storageService: IStorageService;
+
+    constructor(storageService: IStorageService) {
+        this._storageService = storageService;
+    }
+
+    public async present(plans: Plan[]): Promise<any> {
         const presentedPlans = [];
 
         for (let plan of plans) {
@@ -43,13 +50,25 @@ export class GetPlanListPresenter {
                 availablePlanFrecuencies: plan.availablePlanFrecuencies,
                 isActive: plan.isActive,
                 type: plan.type,
-                imageUrl: plan.imageUrl,
+                imageUrl: await this.storageService.getPresignedUrlForFile(plan.imageUrl),
                 hasRecipes: plan.hasRecipes,
                 variants: presentedVariants,
                 additionalPlans: plan.additionalPlans.map((plan: Plan) => plan.id.value),
+                abilityToChooseRecipes: plan.abilityToChooseRecipes,
+                slug: plan.planSlug.slug,
+                icon: await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl),
+                iconWithColor: await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl),
             });
         }
 
         return presentedPlans;
+    }
+
+    /**
+     * Getter storageService
+     * @return {IStorageService}
+     */
+    public get storageService(): IStorageService {
+        return this._storageService;
     }
 }

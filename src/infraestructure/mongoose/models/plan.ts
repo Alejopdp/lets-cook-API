@@ -25,7 +25,7 @@ const PlanVariantSchema = new mongoose.Schema({
 
     priceWithOffer: {
         type: Number,
-        required: true,
+        // required: true,
     },
 
     numberOfPersons: {
@@ -122,7 +122,7 @@ const PlanSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
-        abilityToChooseRecipe: {
+        abilityToChooseRecipes: {
             type: Boolean,
             default: true,
         },

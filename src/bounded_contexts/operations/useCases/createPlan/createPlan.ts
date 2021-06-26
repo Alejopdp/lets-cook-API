@@ -97,7 +97,7 @@ export class CreatePlan {
             additionalPlans,
             locale,
             planSlug,
-            dto.abilityToChooseRecipe,
+            dto.abilityToChooseRecipes,
             "iconLineal",
             "iconLinealColor"
         );

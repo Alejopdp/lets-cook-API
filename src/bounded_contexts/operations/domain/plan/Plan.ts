@@ -23,7 +23,7 @@ export class Plan extends Entity<Plan> {
     private _additionalPlans: Plan[];
     private _locale: Locale;
     private _planSlug: PlanSlug;
-    private _abilityToChooseRecipe: boolean;
+    private _abilityToChooseRecipes: boolean;
     private _iconLinealUrl: string;
     private _iconLinealColorUrl: string;
 
@@ -40,7 +40,7 @@ export class Plan extends Entity<Plan> {
         additionalPlans: Plan[],
         locale: Locale,
         planSlug: PlanSlug,
-        abilityToChooseRecipe: boolean,
+        abilityToChooseRecipes: boolean,
         iconLinealUrl: string,
         iconLinealColorUrl: string,
         id?: PlanId
@@ -58,7 +58,7 @@ export class Plan extends Entity<Plan> {
         this._additionalPlans = additionalPlans;
         this._locale = locale;
         this._planSlug = planSlug;
-        this._abilityToChooseRecipe = abilityToChooseRecipe;
+        this._abilityToChooseRecipes = abilityToChooseRecipes;
         this._iconLinealUrl = iconLinealUrl;
         this._iconLinealColorUrl = iconLinealColorUrl;
     }
@@ -76,7 +76,7 @@ export class Plan extends Entity<Plan> {
         additionalPlans: Plan[],
         locale: Locale,
         planSlug: PlanSlug,
-        abilityToChooserecipe: boolean,
+        abilityToChooseRecipes: boolean,
         iconLinealUrl: string,
         iconLinealColorUrl: string,
         id?: PlanId
@@ -111,7 +111,7 @@ export class Plan extends Entity<Plan> {
             additionalPlans,
             locale,
             planSlug,
-            abilityToChooserecipe,
+            abilityToChooseRecipes,
             iconLinealUrl,
             iconLinealColorUrl,
             id
@@ -249,11 +249,11 @@ export class Plan extends Entity<Plan> {
     }
 
     /**
-     * Getter abilityToChooseRecipe
+     * Getter abilityToChooseRecipes
      * @return {boolean}
      */
-    public get abilityToChooseRecipe(): boolean {
-        return this._abilityToChooseRecipe;
+    public get abilityToChooseRecipes(): boolean {
+        return this._abilityToChooseRecipes;
     }
 
     /**
@@ -371,11 +371,11 @@ export class Plan extends Entity<Plan> {
     }
 
     /**
-     * Setter abilityToChooseRecipe
+     * Setter abilityToChooseRecipes
      * @param {boolean} value
      */
-    public set abilityToChooseRecipe(value: boolean) {
-        this._abilityToChooseRecipe = value;
+    public set abilityToChooseRecipes(value: boolean) {
+        this._abilityToChooseRecipes = value;
     }
 
     /**

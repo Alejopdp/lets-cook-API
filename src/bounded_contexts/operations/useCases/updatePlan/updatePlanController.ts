@@ -49,7 +49,7 @@ export class UpdatePlanController extends BaseController {
                 planVariants: JSON.parse(this.req.body.variants),
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
                 additionalPlansIds: JSON.parse(this.req.body.additionalPlans),
-                abilityToChooseRecipe: JSON.parse(this.req.body.abilityToChooseRecipe),
+                abilityToChooseRecipes: JSON.parse(this.req.body.abilityToChooseRecipes),
                 planSlug: this.req.body.planSlug,
                 iconLinealColorFileName: iconLinealColorFileName,
                 iconLinealFileName: iconLinealFileName,
