@@ -15,6 +15,9 @@ const PlanVariantSchema = new mongoose.Schema({
         type: String,
     },
 
+    description: {
+        type: String,
+    },
     price: {
         type: Number,
         required: true,
@@ -112,6 +115,24 @@ const PlanSchema = new mongoose.Schema(
         tools: {
             type: [String],
             default: [],
+        },
+
+        slug: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        abilityToChooseRecipe: {
+            type: Boolean,
+            default: true,
+        },
+        iconLinealUrl: {
+            type: String,
+            required: true,
+        },
+        iconLinealColorUrl: {
+            type: String,
+            required: true,
         },
 
         deletionFlag: {

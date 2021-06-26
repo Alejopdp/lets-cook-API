@@ -4,6 +4,7 @@ import { Locale } from "../../domain/locale/Locale";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanSku } from "../../domain/plan/PlanSku";
+import { PlanSlug } from "../../domain/plan/PlanSlug";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../../domain/plan/PlanVariant/PlanVariantAttribute";
 import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
@@ -23,10 +24,12 @@ export class CreatePlan {
         const planSku: PlanSku = new PlanSku(dto.planSku);
         const planVariants: PlanVariant[] = [];
         const locale: Locale = (<any>Locale)[dto.locale] || Locale.es;
+        const planSlug: PlanSlug = new PlanSlug(dto.planSlug);
         const additionalPlans: Plan[] =
             dto.additionalPlansIds.length > 0
                 ? await this.planRepository.findAdditionalPlanListById(
-                      dto.additionalPlansIds.map((id: string | number) => new PlanId(id)),
+                      //@ts-ignore
+                      dto.additionalPlansIds.map((id) => new PlanId(id)),
                       dto.locale
                   )
                 : [];
@@ -54,7 +57,9 @@ export class CreatePlan {
                     "",
                     variant.price,
                     variant.priceWithOffer,
-                    attributes
+                    attributes,
+                    "description"
+                    // variant.description
                 );
                 planVariants.push(variantWithRecipe);
             } else {
@@ -71,6 +76,8 @@ export class CreatePlan {
                     "",
                     variant.price,
                     attributes,
+                    "description",
+                    // variant.description
                     variant.priceWithOffer
                 );
                 planVariants.push(planVariant);
@@ -88,10 +95,20 @@ export class CreatePlan {
             dto.availablePlanFrecuencies,
             dto.hasRecipes,
             additionalPlans,
-            locale
+            locale,
+            planSlug,
+            dto.abilityToChooseRecipe,
+            "iconLineal",
+            "iconLinealColor"
         );
 
         const imageUrl = await this.storageService.savePlanImage(dto.planName, dto.planImageFileName, dto.planImage);
+        // const iconLinealUrl = await this.storageService.saveIconLinear(dto.planName, dto.iconLinealFileName, dto.iconLinealFile);
+        // const iconLinealColorUrl = await this.storageService.saveIconLinealColor(
+        //     dto.planName,
+        //     dto.iconLinealColorFileName,
+        //     dto.iconLinealColorFile
+        // );
 
         plan.imageUrl = imageUrl;
 

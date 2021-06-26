@@ -15,9 +15,10 @@ export class PlanVariantWithRecipe extends PlanVariant {
         price: number,
         priceWithOffer: number,
         attributes: PlanVariantAttribute[],
+        description: string,
         id?: PlanVariantId
     ) {
-        super(sku, name, price, attributes, priceWithOffer, id);
+        super(sku, name, price, attributes, description, priceWithOffer, id);
 
         if (numberOfPersons < 1) throw new Error("Hay que ingresar por lo menos 1 persona");
         if (numberOfRecipes < 1) throw new Error("Hay que ingresar por lo menos 1 receta");

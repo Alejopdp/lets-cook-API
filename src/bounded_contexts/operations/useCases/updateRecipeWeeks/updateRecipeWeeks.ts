@@ -17,6 +17,7 @@ export class UpdateRecipeWeeks {
 
     public async execute(dto: UpdateRecipeWeeksDto): Promise<void> {
         const recipeId: RecipeId = new RecipeId(dto.recipeId);
+        //@ts-ignore
         const weeksIds: WeekId[] = dto.weeksIds.map((id: string | number) => new WeekId(id));
         const recipe: Recipe | undefined = await this.recipeRepository.findById(recipeId);
         const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);

@@ -16,5 +16,11 @@ export interface UpdatePlanDto {
     availablePlanFrecuencies: PlanFrequency[];
     hasRecipes: boolean;
     additionalPlansIds: string[] | number[];
+    planSlug: string;
+    abilityToChooseRecipe: boolean;
+    iconLinealFile?: ReadStream;
+    iconLinealFileName: string;
+    iconLinealColorFile?: ReadStream;
+    iconLinealColorFileName: string;
     locale: Locale;
 }

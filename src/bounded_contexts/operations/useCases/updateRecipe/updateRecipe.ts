@@ -44,7 +44,8 @@ export class UpdateRecipe {
 
         if (!recipe) throw new Error("Error al buscar la receta");
         const variants: RecipeVariant[] = await this.recipeVariantCreator.execute(variantCreatorDto);
-        const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId: number | string) => new WeekId(weekId));
+        //@ts-ignore
+        const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId) => new WeekId(weekId));
         const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
 
         var imageUrl: string = recipe.recipeGeneralData.imageUrl;
@@ -74,6 +75,7 @@ export class UpdateRecipe {
         recipe.recipeImageTags = recipeImageTags;
         recipe.recipeBackOfficeTags = recipeBackOfficeTags;
         recipe.recipeNutritionalData = recipeNutritionalData;
+        //@ts-ignore
         recipe.relatedPlans = dto.relatedPlans.map((id: string | number) => new PlanId(id));
         recipe.recipeTools = dto.tools;
         recipe.updateWeeks(weeks);

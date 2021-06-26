@@ -1,5 +1,5 @@
-import { mockRecipeRepository, mongooseRecipeRepository } from "../../infra/repositories/recipe";
-import { mockWeekRepository, mongooseWeekRepository } from "../../infra/repositories/week";
+import { mongooseRecipeRepository } from "../../infra/repositories/recipe";
+import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { UpdateRecipeWeeks } from "./updateRecipeWeeks";
 import { UpdateRecipeWeeksController } from "./updateRecipeWeeksController";
 

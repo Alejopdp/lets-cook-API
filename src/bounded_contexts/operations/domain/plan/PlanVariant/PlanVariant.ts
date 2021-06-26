@@ -9,12 +9,14 @@ export class PlanVariant extends Entity<PlanVariant> {
     private _price: number;
     private _priceWithOffer?: number;
     private _attributes: PlanVariantAttribute[];
+    private _description: string;
 
     constructor(
         sku: PlanSku,
         name: string,
         price: number,
         attributes: PlanVariantAttribute[],
+        description: string,
         priceWithOffer?: number,
         planVariantId?: PlanVariantId
     ) {
@@ -24,6 +26,7 @@ export class PlanVariant extends Entity<PlanVariant> {
         this._price = price;
         this._priceWithOffer = priceWithOffer;
         this._attributes = attributes;
+        this._description = description;
     }
 
     public getConcatenatedAttributesAsString(): string {
@@ -74,6 +77,14 @@ export class PlanVariant extends Entity<PlanVariant> {
     }
 
     /**
+     * Getter description
+     * @return {string}
+     */
+    public get description(): string {
+        return this._description;
+    }
+
+    /**
      * Setter sku
      * @param {PlanSku} value
      */
@@ -111,5 +122,13 @@ export class PlanVariant extends Entity<PlanVariant> {
      */
     public set attributes(value: PlanVariantAttribute[]) {
         this._attributes = value;
+    }
+
+    /**
+     * Setter description
+     * @param {string} value
+     */
+    public set description(value: string) {
+        this._description = value;
     }
 }
