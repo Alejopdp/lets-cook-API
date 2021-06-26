@@ -125,6 +125,12 @@ export class Plan extends Entity<Plan> {
         return this.planVariants.find((variant) => variant.id.equals(planVariantId));
     }
 
+    public getPlanVariantPrice(planVariantId: PlanVariantId): number {
+        const planVariant: PlanVariant | undefined = this.getPlanVariantById(planVariantId);
+        if (!!!planVariant) throw new Error("La variante ingresada no existe");
+
+        return planVariant.getPaymentPrice();
+    }
     /**
      * Getter name
      * @return {string}

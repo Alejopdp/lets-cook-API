@@ -1,9 +1,10 @@
 import { updateShippingZone } from "./../../useCases/updateShippingZone/index";
 // Principal
 import { Entity } from "../../../../core/domain/Entity";
-import { Guard } from "../../../../core/logic/Guard";
+import { Guard, GuardArgumentCollection } from "../../../../core/logic/Guard";
 import { ShippingZoneRadio } from "./ShippingZoneRadio/ShippingZoneRadio";
 import { ShippingZoneId } from "../shipping/ShippingZoneId";
+import { Day } from "../day/Day";
 
 export class ShippingZone extends Entity<ShippingZone> {
     private _name: string;
@@ -11,14 +12,24 @@ export class ShippingZone extends Entity<ShippingZone> {
     private _cost: number;
     private _state: string;
     private _radio: ShippingZoneRadio;
+    private _shippingDayOfWeek: Day;
 
-    protected constructor(name: string, reference: string, cost: number, state: string, radio: ShippingZoneRadio, id?: ShippingZoneId) {
+    protected constructor(
+        name: string,
+        reference: string,
+        cost: number,
+        state: string,
+        radio: ShippingZoneRadio,
+        shippingDayOfWeek: Day,
+        id?: ShippingZoneId
+    ) {
         super(id);
         this._name = name;
         this._reference = reference;
         this._cost = cost;
         this._state = state;
         this._radio = radio;
+        this._shippingDayOfWeek = shippingDayOfWeek;
     }
 
     public static create(
@@ -27,9 +38,20 @@ export class ShippingZone extends Entity<ShippingZone> {
         cost: number,
         state: string,
         radio: ShippingZoneRadio,
+        shippingDayOfWeek: Day,
         id?: ShippingZoneId
     ): ShippingZone {
-        return new ShippingZone(name, reference, cost, state, radio, id);
+        const guardedArgs: GuardArgumentCollection = [
+            { argument: name, argumentName: "El nombre de zona de envío" },
+            { argument: reference, argumentName: "La referencia de zona de envío" },
+            { argument: cost, argumentName: "El costo de envío" },
+            { argument: radio, argumentName: "El radio de zona de envío" },
+            { argument: shippingDayOfWeek, argumentName: "El día de entrega" },
+        ];
+
+        Guard.againstNullOrUndefinedOrEmptyBulk(guardedArgs);
+
+        return new ShippingZone(name, reference, cost, state, radio, shippingDayOfWeek, id);
     }
 
     public updateShippingRadio(radio: ShippingZoneRadio): void {
@@ -38,6 +60,10 @@ export class ShippingZone extends Entity<ShippingZone> {
 
     public updateState(state: string): void {
         this.state = state;
+    }
+
+    public hasAddressInside(): boolean {
+        return true;
     }
 
     /**
@@ -81,6 +107,14 @@ export class ShippingZone extends Entity<ShippingZone> {
     }
 
     /**
+     * Getter shippingDayOfWeek
+     * @return {Day}
+     */
+    public get shippingDayOfWeek(): Day {
+        return this._shippingDayOfWeek;
+    }
+
+    /**
      * Setter name
      * @param {string} value
      */
@@ -118,5 +152,13 @@ export class ShippingZone extends Entity<ShippingZone> {
      */
     public set radio(value: ShippingZoneRadio) {
         this._radio = value;
+    }
+
+    /**
+     * Setter shippingDayOfWeek
+     * @param {Day} value
+     */
+    public set shippingDayOfWeek(value: Day) {
+        this._shippingDayOfWeek = value;
     }
 }

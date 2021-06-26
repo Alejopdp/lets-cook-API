@@ -1,6 +1,6 @@
-import { IPaymentOrdereState } from "./IPaymentOrderState";
+import { IPaymentOrderState } from "./IPaymentOrderState";
 
-export class PaymentOrderActive implements IPaymentOrdereState {
+export class PaymentOrderActive implements IPaymentOrderState {
     title: string;
     humanTitle: string;
     color: string;

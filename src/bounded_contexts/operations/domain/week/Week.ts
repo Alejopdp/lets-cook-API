@@ -26,6 +26,10 @@ export class Week extends Entity<Week> {
         return new Week(minDay, maxDay, id);
     }
 
+    public getLabel(): string {
+        return `${this.minDay} al ${this.maxDay}`;
+    }
+
     /**
      * Getter minDay
      * @return {Date}

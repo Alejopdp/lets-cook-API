@@ -19,7 +19,7 @@ export class MockWeekRepository implements IWeekRepository {
         throw new Error("Method not implemented.");
     }
 
-    findNextEight(): Promise<Week[]> {
+    findNextTwelve(): Promise<Week[]> {
         throw new Error("Method not implemented.");
     }
 

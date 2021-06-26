@@ -5,22 +5,27 @@ import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { SubscriptionStateFactory } from "../../domain/subscription/subscriptionState/SubscriptionStateFactory";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { RecipeVariantRestriction } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
-import { recipeRestrictionMapper } from "..";
+import { planMapper, recipeRestrictionMapper } from "..";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { CouponId } from "../../domain/cupons/CouponId";
 import { customerMapper } from "../customerMapper";
 import { Customer } from "../../domain/customer/Customer";
+import { Plan } from "../../domain/plan/Plan";
+import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
 
 export class SubscriptionMapper implements Mapper<Subscription> {
     public toDomain(raw: any, locale?: Locale): Subscription {
         const frequency: PlanFrequency = (<any>PlanFrequency)[raw.frequency];
-        const restrictions: RecipeVariantRestriction[] = raw.Restrictions.map((restriction: any) =>
+        const restrictions: RecipeVariantRestriction[] = raw.restrictions.map((restriction: any) =>
             recipeRestrictionMapper.toDomain(restriction)
         );
-        const customer: Customer = customerMapper.toDomain(raw.Customer);
+        const customer: Customer = customerMapper.toDomain(raw.customer);
+        const planVariantId: PlanVariantId = new PlanVariantId(raw.planVariant);
+        const plan: Plan = planMapper.toDomain(raw.plan, locale || Locale.es);
 
         return new Subscription(
-            raw.PlanVariant,
+            planVariantId,
+            plan,
             frequency,
             SubscriptionStateFactory.createState(raw.state),
             restrictions,
@@ -38,7 +43,8 @@ export class SubscriptionMapper implements Mapper<Subscription> {
 
     public toPersistence(t: Subscription, locale?: Locale) {
         return {
-            planVariantId: t.planVariant.id.value,
+            planVariant: t.planVariantId.value,
+            plan: t.plan.id.value,
             frequency: t.frequency,
             state: t.state.title,
             restrictions: t.restrictions.map((restriction) => restriction.id.value),
@@ -48,7 +54,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             coupon: t.couponId ? t.couponId.value : null,
             billingDayOfWeek: t.billingDayOfWeek,
             billingStartDate: t.billingStartDate,
-            cancellationReason: t.cancellationReason, // Separate attributes
+            // cancellationReason: t.cancellationReason, // Separate attributes
             _id: t.id.value,
         };
     }

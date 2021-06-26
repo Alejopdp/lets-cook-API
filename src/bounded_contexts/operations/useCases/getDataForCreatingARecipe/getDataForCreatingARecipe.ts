@@ -31,7 +31,7 @@ export class GetDataForCreatingARecipe {
     public async execute(dto: GetDataForCreatingARecipeDto): Promise<any> {
         const plans: Plan[] = await this.planRepository.findAllWithRecipesFlag(dto.locale);
         const ingredients: Ingredient[] = await this.ingredientRepository.findAll();
-        const weeks: Week[] = await this.weekRepository.findNextEight();
+        const weeks: Week[] = await this.weekRepository.findNextTwelve(false); // TO DO
         const months: Month[] = [
             Month.Enero,
             Month.Febrero,

@@ -1,9 +1,13 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { Plan } from "../plan/Plan";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
+import { Recipe } from "../recipe/Recipe";
+import { RecipeId } from "../recipe/RecipeId";
+import { RecipeVariantId } from "../recipe/RecipeVariant/RecipeVariantId";
+import { SubscriptionId } from "../subscription/SubscriptionId";
 import { Week } from "../week/Week";
 import { OrderId } from "./OrderId";
-import { IOrderState } from "./orderState/IOrdeState";
+import { IOrderState } from "./orderState/IOrderState";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -13,6 +17,9 @@ export class Order extends Entity<Order> {
     private _planVariantId: PlanVariantId;
     private _plan: Plan;
     private _price: number;
+    private _subscriptionId: SubscriptionId;
+    private _recipesVariantsIds: RecipeVariantId[];
+    private _recipes: Recipe[];
 
     constructor(
         shippingDate: Date,
@@ -22,6 +29,9 @@ export class Order extends Entity<Order> {
         planVariantId: PlanVariantId,
         plan: Plan,
         price: number,
+        subscriptionId: SubscriptionId,
+        recipeVariantsIds: RecipeVariantId[],
+        recipes: Recipe[],
         orderId?: OrderId
     ) {
         super(orderId);
@@ -32,6 +42,21 @@ export class Order extends Entity<Order> {
         this._planVariantId = planVariantId;
         this._plan = plan;
         this._price = price;
+        this._subscriptionId = subscriptionId;
+        this._recipesVariantsIds = recipeVariantsIds;
+        this._recipes = recipes;
+    }
+
+    public isSkipped(): boolean {
+        return this.state.isSkipped();
+    }
+
+    public skip(): void {
+        this.state.toSkipped(this);
+    }
+
+    public getWeekLabel(): string {
+        return this.week.getLabel();
     }
 
     /**
@@ -91,6 +116,30 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter subscriptionId
+     * @return {SubscriptionId}
+     */
+    public get subscriptionId(): SubscriptionId {
+        return this._subscriptionId;
+    }
+
+    /**
+     * Getter recipesVariantsIds
+     * @return {RecipeVariantId[]}
+     */
+    public get recipesVariantsIds(): RecipeVariantId[] {
+        return this._recipesVariantsIds;
+    }
+
+    /**
+     * Getter recipes
+     * @return {Recipe[]}
+     */
+    public get recipes(): Recipe[] {
+        return this._recipes;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -144,5 +193,28 @@ export class Order extends Entity<Order> {
      */
     public set price(value: number) {
         this._price = value;
+    }
+
+    /**
+     * Setter subscriptionId
+     * @param {SubscriptionId} value
+     */
+    public set subscriptionId(value: SubscriptionId) {
+        this._subscriptionId = value;
+    }
+
+    /**
+     * Setter recipesVariantsIds
+     * @param {RecipeVariantId[]} value
+     */
+    public set recipesVariantsIds(value: RecipeVariantId[]) {
+        this._recipesVariantsIds = value;
+    }
+    /**
+     * Setter recipes
+     * @param {Recipe[]} value
+     */
+    public set recipes(value: Recipe[]) {
+        this._recipes = value;
     }
 }

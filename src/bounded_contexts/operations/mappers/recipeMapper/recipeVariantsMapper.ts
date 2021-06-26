@@ -17,7 +17,7 @@ export class RecipeVariantsMapper implements Mapper<RecipeVariant> {
     public toPersistence(t: RecipeVariant, locale?: Locale) {
         return {
             ingredients: t.ingredients.map((ing) => ing.name),
-            restrictions: t.recipeVariantRestriction.map((r) => r.id.value),
+            restrictions: t.recipeVariantRestrictions.map((r) => r.id.value),
             sku: t.sku.code,
         };
     }

@@ -1,5 +1,7 @@
 import { IOrderState } from "./IOrderState";
 import { OrderActive } from "./OrderActive";
+import { OrderCancelled } from "./OrderCancelled";
+import { OrderSkipped } from "./OrderSkipped";
 
 export class OrderStateFactory {
     public static createState(stateTitle: string): IOrderState {
@@ -7,9 +9,9 @@ export class OrderStateFactory {
             case "ORDER_ACTIVE":
                 return new OrderActive();
             case "ORDER_SKIPPED":
-                return new OrderActive();
+                return new OrderSkipped();
             case "ORDER_CANCELLED":
-                return new OrderActive();
+                return new OrderCancelled();
             default:
                 throw new Error("Wrong order state");
         }

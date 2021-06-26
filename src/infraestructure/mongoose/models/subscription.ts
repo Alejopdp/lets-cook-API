@@ -13,6 +13,12 @@ const SubscriptionSchema = new mongoose.Schema(
             required: true,
         },
 
+        plan: {
+            type: String,
+            ref: "Plan",
+            required: true,
+        },
+
         frequency: {
             type: String,
             required: true,

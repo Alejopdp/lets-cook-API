@@ -45,6 +45,22 @@ const OrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        subscription: {
+            type: String,
+            ref: "Subscription",
+            required: true,
+        },
+
+        recipeVariants: {
+            type: [String],
+            ref: "RecipeVariant",
+        },
+
+        recipes: {
+            type: [String],
+            ref: "Recipe",
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,

@@ -9,33 +9,37 @@ const ShippingZoneSchema = new mongoose.Schema(
         },
         name: {
             type: String,
-            required: true
+            required: true,
         },
         reference: {
             type: String,
-            required: false
+            required: false,
         },
         cost: {
             type: Number,
-            required: true
+            required: true,
         },
         state: {
             type: String,
-            required: false
+            required: false,
         },
         radio: {
             type: [
                 {
                     latitude: {
                         type: Number,
-                        required: true
+                        required: true,
                     },
                     longitude: {
                         type: Number,
-                        required: true
-                    }
-                }
+                        required: true,
+                    },
+                },
             ],
+        },
+        shippingDayOfWeek: {
+            type: Number,
+            required: true,
         },
         deletionFlag: {
             type: Boolean,

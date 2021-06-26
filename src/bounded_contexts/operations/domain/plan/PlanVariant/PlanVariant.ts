@@ -29,6 +29,10 @@ export class PlanVariant extends Entity<PlanVariant> {
     public getConcatenatedAttributesAsString(): string {
         return this.attributes.reduce((acc, att) => acc + att.value, "");
     }
+
+    public getPaymentPrice(): number {
+        return this.priceWithOffer || this.price;
+    }
     /**
      * Getter sku
      * @return {PlanSku}
