@@ -77,7 +77,7 @@ export class UpdateRecipe {
         recipe.relatedPlans = dto.relatedPlans.map((id: string | number) => new PlanId(id));
         recipe.recipeTools = dto.tools;
         recipe.updateWeeks(weeks);
-        recipe.recipeVaraints = variants;
+        recipe.recipeVariants = variants;
         recipe.availableMonths = dto.availableMonths;
     }
 
