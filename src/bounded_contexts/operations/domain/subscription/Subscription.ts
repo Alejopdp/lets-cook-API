@@ -102,6 +102,16 @@ export class Subscription extends Entity<Subscription> {
         return todayWeekDay !== this.billingDayOfWeek && todayWeekDay >= 2;
     }
 
+    public swapPlan(nextOrders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): void {
+        // TO DO: Validations
+        this.plan = newPlan;
+        this.planVariantId = newPlanVariantId;
+
+        for (let order of nextOrders) {
+            order.swapPlan(newPlan, newPlanVariantId);
+        }
+    }
+
     public cancel(cancellationReason: CancellationReason, nextOrders: Order[]): void {
         this.cancellationReason = cancellationReason;
 

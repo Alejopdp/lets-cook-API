@@ -14,6 +14,7 @@ export interface IOrderRepository {
     findByIdList(ordersIds: OrderId[]): Promise<Order[]>;
     saveSkippedOrders(orders: Order[]): Promise<void>;
     saveCancelledOrders(orders: Order[]): Promise<void>;
+    saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void>;
     delete(orderId: OrderId): Promise<void>;
     // findOrderById(orderId: OrderId): Promise<Order | undefined>;
 }

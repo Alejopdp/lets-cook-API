@@ -6,6 +6,8 @@ import { orderMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
 import { SubscriptionId } from "../../../domain/subscription/SubscriptionId";
+import { Plan } from "../../../domain/plan/Plan";
+import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 
 export class MongooseOrderRepository implements IOrderRepository {
     public async save(order: Order): Promise<void> {
@@ -33,6 +35,12 @@ export class MongooseOrderRepository implements IOrderRepository {
         const ordersIdToSave = orders.map((order) => order.id.value);
 
         await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: "ORDER_CANCELLED" });
+    }
+
+    public async saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void> {
+        const ordersIdToSave = orders.map((order) => order.id.value);
+
+        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { plan: newPlan.id.value, planVariant: newPlanVariantId.value });
     }
 
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {

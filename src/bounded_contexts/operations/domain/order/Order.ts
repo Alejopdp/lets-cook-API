@@ -63,6 +63,13 @@ export class Order extends Entity<Order> {
         this.state.toCancelled(this);
     }
 
+    public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId): void {
+        this.plan = newPlan;
+        this.planVariantId = newPlanVariantId;
+        this.recipes = [];
+        this.recipesVariantsIds = [];
+    }
+
     /**
      * Getter shippingDate
      * @return {Date}

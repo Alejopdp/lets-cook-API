@@ -3,6 +3,7 @@ import { cancelASubscriptionController } from "../../useCases/cancelASubscriptio
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getCustomerSusbcriptionsController } from "../../useCases/getCustomerSubscriptions";
 import { getSubscriptionByIdController } from "../../useCases/getSubscriptionById";
+import { swapSubscriptionPlanController } from "../../useCases/swapSubscriptionPlan";
 
 const subscriptionRouter = express.Router();
 
@@ -16,6 +17,7 @@ subscriptionRouter.post("/", (req, res) => createSubscriptionController.execute(
 
 // PUTs
 subscriptionRouter.put("/cancel/:id", (req, res) => cancelASubscriptionController.execute(req, res));
+subscriptionRouter.put("/swap-plan/:id", (req, res) => swapSubscriptionPlanController.execute(req, res));
 
 // DELETEs
 
