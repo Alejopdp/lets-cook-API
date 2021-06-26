@@ -12,6 +12,8 @@ import { customerMapper } from "../customerMapper";
 import { Customer } from "../../domain/customer/Customer";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
+import { logger } from "../../../../../config";
+import { CancellationReason } from "../../domain/cancellationReason/CancellationReason";
 
 export class SubscriptionMapper implements Mapper<Subscription> {
     public toDomain(raw: any, locale?: Locale): Subscription {
@@ -22,6 +24,10 @@ export class SubscriptionMapper implements Mapper<Subscription> {
         const customer: Customer = customerMapper.toDomain(raw.customer);
         const planVariantId: PlanVariantId = new PlanVariantId(raw.planVariant);
         const plan: Plan = planMapper.toDomain(raw.plan, locale || Locale.es);
+        const couponId: CouponId | undefined = !!raw.coupon ? new CouponId(raw.coupon) : undefined;
+        const cancellation: CancellationReason | undefined = raw.cancellation
+            ? new CancellationReason(raw.cancellation.reason, raw.cancellation.comment)
+            : undefined;
 
         return new Subscription(
             planVariantId,
@@ -33,15 +39,16 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             raw.createdAt,
             raw.couponChargesQtyApplied,
             customer,
-            new CouponId(raw.coupon),
+            couponId,
             raw.billingDayOfWeek,
             raw.billingStartDate,
-            raw.cancellationReason,
+            cancellation,
             new SubscriptionId(raw._id)
         );
     }
 
     public toPersistence(t: Subscription, locale?: Locale) {
+        const cancellation = !!t.cancellationReason ? { reason: t.cancellationReason.title, comment: t.cancellationReason.comment } : null;
         return {
             planVariant: t.planVariantId.value,
             plan: t.plan.id.value,
@@ -54,7 +61,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             coupon: t.couponId ? t.couponId.value : null,
             billingDayOfWeek: t.billingDayOfWeek,
             billingStartDate: t.billingStartDate,
-            // cancellationReason: t.cancellationReason, // Separate attributes
+            cancellation,
             _id: t.id.value,
         };
     }

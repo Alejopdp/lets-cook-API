@@ -1,5 +1,7 @@
 import { Order } from "../Order";
 import { IOrderState } from "./IOrderState";
+import { OrderActive } from "./OrderActive";
+import { OrderCancelled } from "./OrderCancelled";
 
 export class OrderSkipped implements IOrderState {
     title: string;
@@ -12,10 +14,26 @@ export class OrderSkipped implements IOrderState {
         this.color = "yellow";
     }
 
-    public toSkipped(order: Order): void {
-        throw new Error("La orden ya se encuentra saltada");
+    public toCancelled(order: Order): void {
+        order.state = new OrderCancelled();
     }
+
+    public toActive(order: Order): void {
+        order.state = new OrderActive();
+    }
+
+    public toSkipped(order: Order): void {
+        order.state = new OrderSkipped();
+    }
+
     public isSkipped(): boolean {
         return true;
+    }
+
+    public isCancelled(): boolean {
+        return false;
+    }
+    public isActive(): boolean {
+        return false;
     }
 }

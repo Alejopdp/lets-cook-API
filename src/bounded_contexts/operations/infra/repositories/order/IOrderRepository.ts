@@ -13,6 +13,7 @@ export interface IOrderRepository {
     findNextTwelveBySubscription(subscriptionId: SubscriptionId): Promise<Order[]>;
     findByIdList(ordersIds: OrderId[]): Promise<Order[]>;
     saveSkippedOrders(orders: Order[]): Promise<void>;
+    saveCancelledOrders(orders: Order[]): Promise<void>;
     delete(orderId: OrderId): Promise<void>;
     // findOrderById(orderId: OrderId): Promise<Order | undefined>;
 }

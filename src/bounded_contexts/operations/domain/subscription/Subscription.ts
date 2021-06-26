@@ -58,6 +58,7 @@ export class Subscription extends Entity<Subscription> {
         this._creationDate = creationDate;
         this._couponChargesQtyApplied = couponChargesQtyApplied;
         this._billingDayOfWeek = billingDayOfWeek || 6; // Saturday
+        this._cancellationReason = cancellationReason;
     }
 
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
@@ -99,6 +100,16 @@ export class Subscription extends Entity<Subscription> {
         const todayWeekDay: number = new Date().getDay();
 
         return todayWeekDay !== this.billingDayOfWeek && todayWeekDay >= 2;
+    }
+
+    public cancel(cancellationReason: CancellationReason, nextOrders: Order[]): void {
+        this.cancellationReason = cancellationReason;
+
+        for (let order of nextOrders) {
+            order.cancel();
+        }
+
+        this.state.toCancelled(this);
     }
 
     /**
@@ -183,10 +194,10 @@ export class Subscription extends Entity<Subscription> {
 
     /**
      * Getter cancellationReason
-     * @return {CancellatioNReason}
+     * @return {CancellatioNReason | undefined}
      */
-    public get cancellationReason(): CancellationReason {
-        return this.cancellationReason;
+    public get cancellationReason(): CancellationReason | undefined {
+        return this._cancellationReason;
     }
 
     /**
@@ -266,6 +277,14 @@ export class Subscription extends Entity<Subscription> {
      */
     public set billingStartDate(value: Date | undefined) {
         this._billingStartDate = value;
+    }
+
+    /**
+     * Setter cancellationReason
+     * @param {CancellationReason | undefined} value
+     */
+    public set cancellationReason(value: CancellationReason | undefined) {
+        this._cancellationReason = value;
     }
 
     /**

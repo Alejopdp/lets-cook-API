@@ -59,6 +59,10 @@ export class Order extends Entity<Order> {
         return this.week.getLabel();
     }
 
+    public cancel(): void {
+        this.state.toCancelled(this);
+    }
+
     /**
      * Getter shippingDate
      * @return {Date}

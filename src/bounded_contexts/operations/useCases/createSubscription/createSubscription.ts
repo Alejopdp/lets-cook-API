@@ -55,7 +55,7 @@ export class CreateSubscription {
 
     public async execute(dto: CreateSubscriptionDto): Promise<void> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const couponId: CouponId | undefined = dto.couponId ? new CouponId(dto.couponId) : undefined;
+        const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
         const customer: Customer | undefined = await this.customerRepository.findById(customerId);
         if (!!!customer) throw new Error("No puedes pedir un nuevo plan");
 

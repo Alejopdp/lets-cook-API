@@ -26,7 +26,7 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
 
     public async findById(subscriptionId: SubscriptionId): Promise<Subscription | undefined> {
         const subscriptionDb = await MongooseSubscription.findById(subscriptionId.value, { deletionFlag: false })
-            .populate("plan")
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("customer");
 
         return subscriptionDb ? subscriptionMapper.toDomain(subscriptionDb) : undefined;
@@ -38,7 +38,7 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
 
     public async findBy(conditions: any, locale: Locale): Promise<Subscription[]> {
         const subscriptionsDb = await MongooseSubscription.find({ ...conditions, deletionFlag: false })
-            .populate("plan")
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("customer");
 
         return subscriptionsDb.map((raw: any) => subscriptionMapper.toDomain(raw, locale));

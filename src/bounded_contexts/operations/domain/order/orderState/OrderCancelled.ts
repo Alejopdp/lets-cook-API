@@ -1,5 +1,6 @@
 import { Order } from "../Order";
 import { IOrderState } from "./IOrderState";
+import { OrderActive } from "./OrderActive";
 
 export class OrderCancelled implements IOrderState {
     title: string;
@@ -12,11 +13,26 @@ export class OrderCancelled implements IOrderState {
         this.color = "red";
     }
 
+    public toCancelled(order: Order): void {
+        order.state = new OrderCancelled();
+    }
+
+    public toActive(order: Order): void {
+        throw new Error("No puede activar una orden cancelada");
+    }
+
     public toSkipped(order: Order): void {
-        throw new Error("No puede saltear una semana cancelada");
+        throw new Error("No puede saltear una orden cancelada");
     }
 
     public isSkipped(): boolean {
+        return false;
+    }
+
+    public isCancelled(): boolean {
+        return true;
+    }
+    public isActive(): boolean {
         return false;
     }
 }

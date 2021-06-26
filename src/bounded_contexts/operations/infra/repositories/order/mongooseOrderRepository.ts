@@ -29,8 +29,16 @@ export class MongooseOrderRepository implements IOrderRepository {
         await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: "ORDER_SKIPPED" });
     }
 
+    public async saveCancelledOrders(orders: Order[]): Promise<void> {
+        const ordersIdToSave = orders.map((order) => order.id.value);
+
+        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: "ORDER_CANCELLED" });
+    }
+
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
-        const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false }).populate("plan").populate("week");
+        const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week");
 
         return orderDb ? orderMapper.toDomain(orderDb, locale) : undefined;
     }
@@ -41,7 +49,7 @@ export class MongooseOrderRepository implements IOrderRepository {
 
     public async findBy(conditions: any, locale?: Locale): Promise<Order[]> {
         const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false })
-            .populate("plan")
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week");
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));

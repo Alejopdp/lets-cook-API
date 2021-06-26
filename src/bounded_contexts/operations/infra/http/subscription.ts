@@ -1,4 +1,5 @@
 import express from "express";
+import { cancelASubscriptionController } from "../../useCases/cancelASubscription";
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getCustomerSusbcriptionsController } from "../../useCases/getCustomerSubscriptions";
 import { getSubscriptionByIdController } from "../../useCases/getSubscriptionById";
@@ -14,6 +15,7 @@ subscriptionRouter.get("/:id", (req, res) => getSubscriptionByIdController.execu
 subscriptionRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
 
 // PUTs
+subscriptionRouter.put("/cancel/:id", (req, res) => cancelASubscriptionController.execute(req, res));
 
 // DELETEs
 

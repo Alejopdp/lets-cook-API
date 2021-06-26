@@ -61,6 +61,18 @@ const SubscriptionSchema = new mongoose.Schema(
             required: true,
         },
 
+        cancellation: {
+            type: {
+                reason: {
+                    type: String,
+                    required: true,
+                },
+                comment: {
+                    type: String,
+                },
+            },
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,
