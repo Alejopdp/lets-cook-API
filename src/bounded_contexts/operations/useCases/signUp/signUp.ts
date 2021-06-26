@@ -18,7 +18,7 @@ export class SignUp {
 
     public async execute(dto: SignUpDto): Promise<void> {
         const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
-        const customer: Customer = Customer.create(dto.email, dto.isEmailVerified, password, dto.state, undefined);
+        const customer: Customer = Customer.create(dto.email, dto.isEmailVerified, undefined, undefined, password, dto.state, undefined);
         // console.log("SignUpUseCase: ", customer);
         await this.signUpRepository.save(customer);
     }
