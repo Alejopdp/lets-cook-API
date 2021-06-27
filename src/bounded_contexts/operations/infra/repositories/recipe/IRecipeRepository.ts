@@ -1,5 +1,6 @@
 import { Recipe } from "../../../domain/recipe/Recipe";
 import { RecipeId } from "../../../domain/recipe/RecipeId";
+import { WeekId } from "../../../domain/week/WeekId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 
 export interface IRecipeRepository {
@@ -10,4 +11,5 @@ export interface IRecipeRepository {
     findById(recipeId: RecipeId): Promise<Recipe | undefined>;
     findBy(conditions: any): Promise<Recipe[]>;
     delete(recipeId: RecipeId): Promise<void>;
+    findByWeekId(weekId: WeekId): Promise<Recipe[]>;
 }

@@ -8,6 +8,7 @@ import { getPlanListController } from "../../useCases/getPlanList";
 import { togglePlanStateController } from "../../useCases/togglePlanState";
 import { updatePlanController } from "../../useCases/updatePlan";
 import { getAdditionalPlansByPlanIdController } from "../../useCases/getAdditionalPlansByPlanId";
+import { getPlanVariantsRecipesByWeekListController } from "../../useCases/getPlanVariantsRecipesByWeek";
 
 const planRouter = express.Router();
 
@@ -20,6 +21,7 @@ planRouter.get("/", (req, res) => getPlanListController.execute(req, res));
 planRouter.get("/additionals", (req, res) => getAdditionalPlanListController.execute(req, res));
 planRouter.get("/:id", (req, res) => getPlanByIdController.execute(req, res));
 planRouter.get("/additionals/:id", (req, res) => getAdditionalPlansByPlanIdController.execute(req, res));
+planRouter.get("/plans/week", (req, res) => getPlanVariantsRecipesByWeekListController.execute(req, res));
 
 // PUT
 planRouter.put("/toggle-state/:id", (req, res) => togglePlanStateController.execute(req, res));

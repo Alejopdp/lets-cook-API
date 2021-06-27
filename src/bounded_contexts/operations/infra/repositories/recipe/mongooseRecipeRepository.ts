@@ -1,6 +1,7 @@
 import { Recipe } from "../../../domain/recipe/Recipe";
 import { Recipe as RecipeModel } from "../../../../../infraestructure/mongoose/models";
 import { RecipeId } from "../../../domain/recipe/RecipeId";
+import { WeekId } from "../../../domain/week/WeekId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { IRecipeRepository } from "./IRecipeRepository";
 import _ from "lodash";
@@ -28,6 +29,10 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         return await this.findBy({});
     }
 
+    public async findByWeekId(weekId: WeekId): Promise<Recipe[]> {
+        return await this.findBy({ availableWeeks: weekId.value });
+    }
+
     public async findAllBackOfficeTags(): Promise<RecipeTag[]> {
         const recipes: Recipe[] = await this.findAll();
 
@@ -51,7 +56,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                 populate: { path: "restrictions" },
             });
 
-        return recipesDb.map((recipe) => recipeMapper.toDomain(recipe));
+        return recipesDb.map((recipe: any) => recipeMapper.toDomain(recipe));
     }
 
     public async delete(recipeId: RecipeId): Promise<void> {
