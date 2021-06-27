@@ -3,6 +3,7 @@ import { Plan } from "../src/bounded_contexts/operations/domain/plan/Plan";
 import { PlanFrequency } from "../src/bounded_contexts/operations/domain/plan/PlanFrequency";
 import { PlanId } from "../src/bounded_contexts/operations/domain/plan/PlanId";
 import { PlanSku } from "../src/bounded_contexts/operations/domain/plan/PlanSku";
+import { PlanSlug } from "../src/bounded_contexts/operations/domain/plan/PlanSlug";
 import { PlanType } from "../src/bounded_contexts/operations/domain/plan/PlanType/PlanType";
 import { PlanVariant } from "../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariantAttribute";
@@ -13,10 +14,16 @@ export const getMockPlans = () => {
     const attr2: PlanVariantAttribute = new PlanVariantAttribute("Key 2", "Value 2");
     const attr3: PlanVariantAttribute = new PlanVariantAttribute("Key 2", "Valu 3");
 
-    const variantWithoutGluten1 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNGL1"), "Familiar 1 sin gluten", 30, 20, [
-        attr1,
-        attr2,
-    ]);
+    const variantWithoutGluten1 = new PlanVariantWithRecipe(
+        2,
+        2,
+        new PlanSku("PLFMLNGL1"),
+        "Familiar 1 sin gluten",
+        30,
+        20,
+        [attr1, attr2],
+        "PLVEGNGL1 Desc"
+    );
     const variantWithoutGlutenAndMilk1 = new PlanVariantWithRecipe(
         2,
         3,
@@ -24,12 +31,19 @@ export const getMockPlans = () => {
         "Familiar 1 sin gluten ni lacteos",
         35,
         25,
-        [attr1, attr3]
+        [attr1, attr3],
+        "PLVEGNGL1 Desc"
     );
-    const variantWithoutGluten1bis = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNGL1"), "Familiar 1 sin gluten bis", 3, 2, [
-        attr1,
-        attr3,
-    ]);
+    const variantWithoutGluten1bis = new PlanVariantWithRecipe(
+        2,
+        2,
+        new PlanSku("PLFMLNGL1"),
+        "Familiar 1 sin gluten bis",
+        3,
+        2,
+        [attr1, attr3],
+        "PLVEGNGL1 Desc"
+    );
     const variantWithoutGlutenAndMilk1bis = new PlanVariantWithRecipe(
         2,
         3,
@@ -37,18 +51,96 @@ export const getMockPlans = () => {
         "Familiar 1 sin gluten ni lacteos bis",
         5,
         3,
-        [attr1, attr2]
+        [attr1, attr2],
+        "PLVEGNGL1 Desc"
     );
-    const variantWithoutGluten2 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLVEGNGL1"), "Vegetariano 1 sin gluten", 30, 20, []);
-    const variantWithoutGluten3 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLCARNGL1"), "Carnívoro 1 sin gluten", 30, 20, []);
-    const variantWithoutGluten4 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLFMLNGL2"), "Familiar 2 sin gluten", 30, 20, []);
-    const variantWithoutGluten5 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLVEGNGL2"), "Vegetariano 2 sin gluten", 30, 20, []);
-    const variantWithoutGluten6 = new PlanVariantWithRecipe(2, 2, new PlanSku("PLCARNGL2"), "Carnívoro 2 sin gluten", 30, 20, []);
-    const variantWithoutGluten7 = new PlanVariant(new PlanSku("PLCER1"), "development/plans/Plan_test/Plan_test.png", 10, [], 8);
-    const variantWithoutGluten8 = new PlanVariant(new PlanSku("PLVIN2"), "development/plans/Plan_test/Plan_test.png", 15, [], 12);
+
+    const variantWithoutGluten2 = new PlanVariantWithRecipe(
+        2,
+        2,
+        new PlanSku("PLVEGNGL1"),
+        "Vegetariano 1 sin gluten",
+        30,
+        20,
+        [],
+        "PLVEGNGL1 Desc"
+    );
+    const variantWithoutGluten3 = new PlanVariantWithRecipe(
+        2,
+        2,
+        new PlanSku("PLCARNGL1"),
+        "Carnívoro 1 sin gluten",
+        30,
+        20,
+        [],
+        "PLCARNGL1 Desc"
+    );
+    const variantWithoutGluten4 = new PlanVariantWithRecipe(
+        2,
+        2,
+        new PlanSku("PLFMLNGL2"),
+        "Familiar 2 sin gluten",
+        30,
+        20,
+        [],
+        "PLFMLNGL2 Desc"
+    );
+    const variantWithoutGluten5 = new PlanVariantWithRecipe(
+        2,
+        2,
+        new PlanSku("PLVEGNGL2"),
+        "Vegetariano 2 sin gluten",
+        30,
+        20,
+        [],
+        "PLVEGNGL2 Desc"
+    );
+
+    const vinoVariant1 = new PlanVariant(new PlanSku("PLVIBLANCO"), "Vino blanco", 10, [new PlanVariantAttribute("Tipo", "Blanco")], "");
+    const vinoVariant2 = new PlanVariant(new PlanSku("PLVITINTO"), "Vino tinto", 10, [new PlanVariantAttribute("Tipo", "Tinto")], "");
+    const desayunoVariant1 = new PlanVariantWithRecipe(1, 1, new PlanSku("PLDES1"), "Desayuno para 1 persona", 30, 20, [], "PLDES1 Desc");
+    const desayunoVariant2 = new PlanVariantWithRecipe(2, 1, new PlanSku("PLDES2"), "Desayuno para 2 personas", 30, 20, [], "PLDES2 Desc");
+
+    const desayunoVariant3 = new PlanVariantWithRecipe(3, 1, new PlanSku("PLDES3"), "Desayuno para 3 personas", 30, 20, [], "PLDES3 Desc");
+
+    const additionalPlan1: Plan = Plan.create(
+        "Plan Vinos",
+        "Plan para acompañar con un vino",
+        new PlanSku("PLVI1"),
+        "development/plans/Plan_test/Plan_test.png",
+        true,
+        PlanType.Adicional,
+        [vinoVariant1, vinoVariant2],
+        [PlanFrequency.PorUnicaVez, PlanFrequency.Semanal],
+        true,
+        [],
+        Locale.es,
+        new PlanSlug("Plan Vinos"),
+        true,
+        "development/plan-familiar.svg",
+        "development/plan-familiar-color.svg"
+    );
+
+    const additionalPlan2: Plan = Plan.create(
+        "Plan Desayuno",
+        "Plan para desayunar",
+        new PlanSku("PLDES"),
+        "development/plans/Plan_test/Plan_test.png",
+        true,
+        PlanType.Adicional,
+        [desayunoVariant1, desayunoVariant2, desayunoVariant3],
+        [PlanFrequency.PorUnicaVez, PlanFrequency.Semanal, PlanFrequency.Quincenal, PlanFrequency.Mensual],
+        true,
+        [],
+        Locale.es,
+        new PlanSlug("Plan Desayuno"),
+        true,
+        "development/plan-familiar.svg",
+        "development/plan-familiar-color.svg"
+    );
 
     const plan1: Plan = Plan.create(
-        "Plan familiar 1",
+        "Plan Familiar",
         "Plan para toda la familia",
         new PlanSku("PLFML1"),
         "development/plans/Plan_test/Plan_test.png",
@@ -57,107 +149,85 @@ export const getMockPlans = () => {
         [variantWithoutGluten1, variantWithoutGlutenAndMilk1, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
         [PlanFrequency.Mensual],
         true,
-        [],
-        Locale.es
+        [additionalPlan1, additionalPlan2],
+        Locale.es,
+        new PlanSlug("Plan Familiar"),
+        true,
+        "development/plan-familiar.svg",
+        "development/plan-familiar-color.svg"
     );
 
     const plan2: Plan = Plan.create(
-        "Plan vegetariano 1",
-        "Plan para vegetarianos",
+        "Plan Gourmet",
+        "Plan gourmet",
         new PlanSku("PLVEG1"),
         "development/plans/Plan_test/Plan_test.png",
         true,
         PlanType.Principal,
-        [variantWithoutGluten2],
+        [variantWithoutGluten2, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
         [PlanFrequency.Semanal, PlanFrequency.Quincenal],
         true,
-        [],
-        Locale.es
+        [additionalPlan1, additionalPlan2],
+        Locale.es,
+        new PlanSlug("Plan Gourmet"),
+        true,
+        "plan-gourmet.svg",
+        "plan-gourmet-color.svg"
     );
 
     const plan3: Plan = Plan.create(
-        "Plan carnívoro 1",
-        "Para los que le gustan los asaditos",
+        "Plan Ahorro",
+        "Plan ahorro",
         new PlanSku("PLCAR1"),
         "development/plans/Plan_test/Plan_test.png",
         true,
         PlanType.Principal,
-        [variantWithoutGluten3],
+        [variantWithoutGluten3, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
         [PlanFrequency.Mensual],
         false,
-        [],
-        Locale.es
+        [additionalPlan1],
+        Locale.es,
+        new PlanSlug("Plan Ahorro"),
+        true,
+        "plan-ahorro.svg",
+        "plan-ahorro-color.svg"
     );
 
     const plan4: Plan = Plan.create(
-        "Plan familiar 2",
-        "Plan para toda la familia",
+        "Plan Vegetariano",
+        "Plan Vegetariano",
         new PlanSku("PLFML2"),
         "development/plans/Plan_test/Plan_test.png",
         true,
         PlanType.Principal,
-        [variantWithoutGluten4],
+        [variantWithoutGluten4, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
         [PlanFrequency.Mensual],
         true,
-        [],
-        Locale.es
+        [additionalPlan1, additionalPlan2],
+        Locale.es,
+        new PlanSlug("Plan vegetariano"),
+        true,
+        "plan-vegetariano.svg",
+        "plan-vegetariano-color.svg"
     );
 
     const plan5: Plan = Plan.create(
-        "Plan vegetariano 2",
-        "Plan para vegetarianos",
-        new PlanSku("PLVEG2"),
+        "Plan Vegano",
+        "Plan Vegano",
+        new PlanSku("PLFML2"),
         "development/plans/Plan_test/Plan_test.png",
         true,
         PlanType.Principal,
-        [variantWithoutGluten5],
-        [PlanFrequency.Semanal, PlanFrequency.Quincenal],
-        true,
-        [],
-        Locale.es
-    );
-
-    const plan6: Plan = Plan.create(
-        "Plan carnívoro 2",
-        "Para los que le gustan los asaditos",
-        new PlanSku("PLCAR2"),
-        "development/plans/Plan_test/Plan_test.png",
-        true,
-        PlanType.Principal,
-        [variantWithoutGluten6],
+        [variantWithoutGluten5, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
         [PlanFrequency.Mensual],
-        false,
-        [],
-        Locale.es
-    );
-
-    const plan7: Plan = Plan.create(
-        "Plan cerveza",
-        "Plan para tomar una cervecita",
-        new PlanSku("PLCER"),
-        "development/plans/Plan_test/Plan_test.png",
         true,
-        PlanType.Adicional,
-        [variantWithoutGluten7],
-        [PlanFrequency.PorUnicaVez],
-        false,
-        [],
-        Locale.es
-    );
-
-    const plan8: Plan = Plan.create(
-        "Plan de Vinos",
-        "Plan para tomar un vino",
-        new PlanSku("PLVIN"),
-        "development/plans/Plan_test/Plan_test.png",
+        [additionalPlan1, additionalPlan2],
+        Locale.es,
+        new PlanSlug("Plan Vegano"),
         true,
-        PlanType.Adicional,
-        [variantWithoutGluten8],
-        [PlanFrequency.PorUnicaVez],
-        false,
-        [],
-        Locale.es
+        "plan-vegano.svg",
+        "plan-vegano-color.svg"
     );
 
-    return [plan1, plan2, plan3, plan4, plan5, plan6, plan7, plan8];
+    return [plan1, plan2, plan3, plan4, plan5, additionalPlan1, additionalPlan2];
 };

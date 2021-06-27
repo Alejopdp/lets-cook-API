@@ -36,6 +36,14 @@ export class CreatePlanController extends BaseController {
                 hasRecipes: JSON.parse(this.req.body.hasRecipes),
                 planVariants: JSON.parse(this.req.body.variants),
                 additionalPlansIds: JSON.parse(this.req.body.additionalPlans),
+                planSlug: this.req.body.planSlug,
+                abilityToChooseRecipes: JSON.parse(this.req.body.abilityToChooseRecipes),
+                //@ts-ignore
+                iconLinealFile: "iconLineal",
+                iconLinealFileName: "iconLineal",
+                //@ts-ignore
+                iconLinealColorFile: "iconLinealFile",
+                iconLinealColorFileName: "iconLinealFile",
                 locale: (<any>Locale)[this.req.query.locale as string],
             };
 

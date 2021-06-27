@@ -29,10 +29,10 @@ export class GetRecipeByIdPresenter {
             }),
             availableMonths: recipe.availableMonths,
             relatedPlans: recipe.relatedPlans.map((planId) => planId.value),
-            recipeVariants: recipe.recipeVaraints.map((variant) => {
+            recipeVariants: recipe.recipeVariants.map((variant) => {
                 return {
                     ingredients: variant.ingredients.map((ing) => ing.name),
-                    restrictions: variant.recipeVariantRestriction.map((r) => {
+                    restrictions: variant.recipeVariantRestrictions.map((r) => {
                         return {
                             id: r.id.value,
                             value: r.value,

@@ -1,4 +1,4 @@
-import { mockRecipeRepository, mongooseRecipeRepository } from "../../infra/repositories/recipe";
+import { mongooseRecipeRepository } from "../../infra/repositories/recipe";
 import { DeleteRecipe } from "./deleteRecipe";
 import { DeleteRecipeController } from "./deleteRecipeController";
 

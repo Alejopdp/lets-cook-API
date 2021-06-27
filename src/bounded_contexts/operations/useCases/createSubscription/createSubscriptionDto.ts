@@ -4,5 +4,5 @@ export interface CreateSubscriptionDto {
     planVariantId: string | number;
     planFrequency: string;
     restrictionComment: string;
-    couponId: string;
+    couponId?: string | number;
 }

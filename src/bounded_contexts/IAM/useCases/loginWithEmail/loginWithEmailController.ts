@@ -35,12 +35,14 @@ export class LoginWithEmailController extends BaseController {
                         return this.fail(error.reason);
                 }
             }
-
             this.res.setHeader(
                 "Set-Cookie",
                 cookie.serialize("auth", result.value.token, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV !== "Development",
+                    domain: process.env.ADMIN_ORIGIN_URL,
+                    sameSite: process.env.NODE_ENV !== "Development" ? "strict" : "none",
+                    maxAge: 3600,
                     path: "/",
                 })
             );

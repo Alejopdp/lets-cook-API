@@ -10,10 +10,8 @@ export class GetAdditionalPlanList {
         this._planRepository = planRepository;
     }
 
-    public async execute(dto: GetAdditionalPlanListDto): Promise<any> {
-        const plans: Plan[] = await this.planRepository.findAdditionalPlanList(dto.locale);
-
-        return GetAdditionalPlanListPresenter.present(plans);
+    public async execute(dto: GetAdditionalPlanListDto): Promise<Plan[]> {
+        return await this.planRepository.findAdditionalPlanList(dto.locale);
     }
 
     /**

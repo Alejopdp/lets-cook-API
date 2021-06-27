@@ -1,36 +1,44 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
 import { CouponId } from "../cupons/CouponId";
-import { CustomerId } from "../customer/CustomerId";
+import { Customer } from "../customer/Customer";
+import { Order } from "../order/Order";
+import { OrderActive } from "../order/orderState/OrderActive";
+import { Plan } from "../plan/Plan";
 import { PlanFrequency } from "../plan/PlanFrequency";
 import { PlanVariant } from "../plan/PlanVariant/PlanVariant";
+import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
+import { ShippingZone } from "../shipping/ShippingZone";
+import { Week } from "../week/Week";
 import { SubscriptionId } from "./SubscriptionId";
 import { ISubscriptionState } from "./subscriptionState/ISubscriptionState";
 
 export class Subscription extends Entity<Subscription> {
-    private _planVariant: PlanVariant;
+    private _planVariantId: PlanVariantId;
+    private _plan: Plan;
     private _frequency: PlanFrequency;
     private _cancellationReason?: CancellationReason;
     private _state: ISubscriptionState;
     private _restrictionComment: string;
     private _restrictions: RecipeVariantRestriction[];
     private _billingDayOfWeek: number;
-    private _customerId: CustomerId;
+    private _customer: Customer;
     private _couponId?: CouponId;
     private _billingStartDate?: Date;
     private _creationDate: Date;
     private _couponChargesQtyApplied: number;
 
     constructor(
-        planVariant: PlanVariant,
+        planVariantId: PlanVariantId,
+        plan: Plan,
         frequency: PlanFrequency,
         state: ISubscriptionState,
         restrictions: RecipeVariantRestriction[],
         restrictionComment: string,
         creationDate: Date,
         couponChargesQtyApplied: number,
-        customerId: CustomerId,
+        customer: Customer,
         couponId?: CouponId,
         billingDayOfWeek?: number,
         billingStartDate?: Date,
@@ -38,25 +46,96 @@ export class Subscription extends Entity<Subscription> {
         subscriptionId?: SubscriptionId
     ) {
         super(subscriptionId);
-        this._planVariant = planVariant;
+        this._planVariantId = planVariantId;
+        this._plan = plan;
         this._frequency = frequency;
         this._state = state;
         this._restrictions = restrictions;
         this._restrictionComment = restrictionComment;
-        this._customerId = customerId;
+        this._customer = customer;
         this._couponId = couponId;
         this._billingStartDate = billingStartDate;
         this._creationDate = creationDate;
         this._couponChargesQtyApplied = couponChargesQtyApplied;
         this._billingDayOfWeek = billingDayOfWeek || 6; // Saturday
+        this._cancellationReason = cancellationReason;
+    }
+
+    public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
+        const orders: Order[] = [];
+        const deliveryDate: Date = this.getFirstOrderShippingDate(2); // Tuesday
+
+        for (let i = 0; i < 12; i++) {
+            deliveryDate.setDate(deliveryDate.getDate() + 7);
+            orders.push(
+                new Order(
+                    new Date(deliveryDate),
+                    new OrderActive(),
+                    new Date(),
+                    orderedWeeks[i],
+                    this.planVariantId,
+                    this.plan,
+                    this.plan.getPlanVariantPrice(this.planVariantId),
+                    this._id,
+                    [],
+                    []
+                )
+            );
+        }
+        return orders;
+    }
+
+    public getFirstOrderShippingDate(shippingDayWeekNumber: number): Date {
+        var today: Date = new Date();
+        // today.setDate(today.getDate() + 5); // Testing days
+        const deliveryDate: Date = new Date(today.getFullYear(), today.getMonth());
+        const differenceInDays = shippingDayWeekNumber - today.getDay();
+
+        deliveryDate.setDate(today.getDate() + differenceInDays); // Delivery day (Tuesday) of this week
+
+        return deliveryDate;
+    }
+
+    public billingStartDayHasToSkipWeeks(): boolean {
+        const todayWeekDay: number = new Date().getDay();
+
+        return todayWeekDay !== this.billingDayOfWeek && todayWeekDay >= 2;
+    }
+
+    public swapPlan(nextOrders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): void {
+        // TO DO: Validations
+        this.plan = newPlan;
+        this.planVariantId = newPlanVariantId;
+
+        for (let order of nextOrders) {
+            order.swapPlan(newPlan, newPlanVariantId);
+        }
+    }
+
+    public cancel(cancellationReason: CancellationReason, nextOrders: Order[]): void {
+        this.cancellationReason = cancellationReason;
+
+        for (let order of nextOrders) {
+            order.cancel();
+        }
+
+        this.state.toCancelled(this);
     }
 
     /**
-     * Getter planVariant
-     * @return {PlanVariant}
+     * Getter planVariantId
+     * @return {PlanVariantId}
      */
-    public get planVariant(): PlanVariant {
-        return this._planVariant;
+    public get planVariantId(): PlanVariantId {
+        return this._planVariantId;
+    }
+
+    /**
+     * Getter plan
+     * @return {Plan}
+     */
+    public get plan(): Plan {
+        return this._plan;
     }
 
     /**
@@ -92,11 +171,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Getter customerId
-     * @return {CustomerId}
+     * Getter customer
+     * @return {Customer}
      */
-    public get customerId(): CustomerId {
-        return this._customerId;
+    public get customer(): Customer {
+        return this._customer;
     }
 
     /**
@@ -125,10 +204,10 @@ export class Subscription extends Entity<Subscription> {
 
     /**
      * Getter cancellationReason
-     * @return {CancellatioNReason}
+     * @return {CancellatioNReason | undefined}
      */
-    public get cancellationReason(): CancellationReason {
-        return this.cancellationReason;
+    public get cancellationReason(): CancellationReason | undefined {
+        return this._cancellationReason;
     }
 
     /**
@@ -148,11 +227,19 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Setter planVariant
-     * @param {PlanVariant} value
+     * Setter planVariantId
+     * @param {PlanVariantId} value
      */
-    public set planVariant(value: PlanVariant) {
-        this._planVariant = value;
+    public set planVariantId(value: PlanVariantId) {
+        this._planVariantId = value;
+    }
+
+    /**
+     * Setter plan
+     * @param {Plan} value
+     */
+    public set plan(value: Plan) {
+        this._plan = value;
     }
 
     /**
@@ -180,11 +267,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Setter customerId
-     * @param {CustomerId} value
+     * Setter customer
+     * @param {Customer} value
      */
-    public set customerId(value: CustomerId) {
-        this._customerId = value;
+    public set customer(value: Customer) {
+        this._customer = value;
     }
 
     /**
@@ -200,6 +287,14 @@ export class Subscription extends Entity<Subscription> {
      */
     public set billingStartDate(value: Date | undefined) {
         this._billingStartDate = value;
+    }
+
+    /**
+     * Setter cancellationReason
+     * @param {CancellationReason | undefined} value
+     */
+    public set cancellationReason(value: CancellationReason | undefined) {
+        this._cancellationReason = value;
     }
 
     /**

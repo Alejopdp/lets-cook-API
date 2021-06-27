@@ -15,5 +15,11 @@ export interface CreatePlanDto {
     availablePlanFrecuencies: PlanFrequency[];
     hasRecipes: boolean;
     additionalPlansIds: string[] | number[];
+    planSlug: string;
+    abilityToChooseRecipes: boolean;
+    iconLinealFile: ReadStream;
+    iconLinealFileName: string;
+    iconLinealColorFile: ReadStream;
+    iconLinealColorFileName: string;
     locale: Locale;
 }

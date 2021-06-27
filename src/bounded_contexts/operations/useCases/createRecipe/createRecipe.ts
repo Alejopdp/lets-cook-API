@@ -60,8 +60,10 @@ export class CreateRecipe {
         const recipeImageTags: RecipeTag[] = dto.imageTags.map((tag: string) => new RecipeTag(tag));
         const recipeBackOfficeTags: RecipeTag[] = dto.backOfficeTags.map((tag: string) => new RecipeTag(tag));
         const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData([]); // TO DO: Get from DTO
+        //@ts-ignore
         const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId: number | string) => new WeekId(weekId));
         const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
+        //@ts-ignore
         const planIds: PlanId[] = dto.planIds.map((id: string | number) => new PlanId(id));
         const recipeVariants: RecipeVariant[] = await this.recipeVariantsCreator.execute(recipeCreatorDto);
         const months: Month[] = dto.availableMonths.map((month) => (<any>Month)[month]);

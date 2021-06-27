@@ -13,7 +13,12 @@ app.use(
 );
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(
+    cors({
+        origin: true,
+        credentials: true,
+    })
+);
 
 app.use("/api/v1", v1Router);
 

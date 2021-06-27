@@ -27,7 +27,7 @@ import {
 import { mongooseWeekRepository } from "../src/bounded_contexts/operations/infra/repositories/week";
 
 export const getMockRecipes = async (): Promise<Recipe[]> => {
-    const weeks: Week[] = await mongooseWeekRepository.findNextEight();
+    const weeks: Week[] = await mongooseWeekRepository.findNextTwelve(false);
     const plans: Plan[] = await mongoosePlanRepository.findAll(Locale.es);
     const restrictions: RecipeVariantRestriction[] = await mongooseRecipeVariantRestrictionRepository.findAll();
 

@@ -4,4 +4,5 @@ export interface CreateShippingZoneDto {
     cost: number;
     state: string;
     radio: any;
+    shippingDayOfWeek: number;
 }

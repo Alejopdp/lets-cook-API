@@ -1,4 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { Week } from "../week/Week";
 import { PaymentOrderId } from "./PaymentOrderId";
 import { IPaymentOrderState } from "./paymentOrderState/IPaymentOrderState";
 
@@ -7,7 +8,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     private _state: IPaymentOrderState;
     private _paymentIntentId: string;
     private _billingDate: Date;
-    private _weekId: Date;
+    private _week: Week;
     private _amount: number;
     private _discountAmount: number;
     private _shippingCost: number;
@@ -17,7 +18,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         state: IPaymentOrderState,
         paymentIntentId: string,
         billingDate: Date,
-        weekId: Date,
+        week: Week,
         amount: number,
         discountAmount: number,
         shippingCost: number,
@@ -28,7 +29,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._state = state;
         this._paymentIntentId = paymentIntentId;
         this._billingDate = billingDate;
-        this._weekId = weekId;
+        this._week = week;
         this._amount = amount;
         this._discountAmount = discountAmount;
         this._shippingCost = shippingCost;
@@ -67,11 +68,11 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     /**
-     * Getter weekId
-     * @return {Date}
+     * Getter week
+     * @return {Week}
      */
-    public get weekId(): Date {
-        return this._weekId;
+    public get week(): Week {
+        return this._week;
     }
 
     /**
@@ -131,11 +132,11 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     /**
-     * Setter weekId
-     * @param {Date} value
+     * Setter week
+     * @param {Week} value
      */
-    public set weekId(value: Date) {
-        this._weekId = value;
+    public set week(value: Week) {
+        this._week = value;
     }
 
     /**

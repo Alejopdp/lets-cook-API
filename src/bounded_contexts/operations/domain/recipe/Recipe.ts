@@ -8,10 +8,12 @@ import * as _ from "lodash";
 import { Month } from "./Months";
 import { Week } from "../week/Week";
 import { PlanId } from "../plan/PlanId";
+import { RecipeVariantId } from "./RecipeVariant/RecipeVariantId";
+import { RecipeVariantRestriction } from "./RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 
 export class Recipe extends Entity<Recipe> {
     private _recipeGeneralData: RecipeGeneralData;
-    private _recipeVaraints: RecipeVariant[];
+    private _recipeVariants: RecipeVariant[];
     private _recipeImageTags: RecipeTag[];
     private _recipeBackOfficeTags: RecipeTag[];
     private _recipeNutritionalData: RecipeNutritionalData;
@@ -22,7 +24,7 @@ export class Recipe extends Entity<Recipe> {
 
     constructor(
         recipeGeneralData: RecipeGeneralData,
-        recipeVaraints: RecipeVariant[],
+        recipeVariants: RecipeVariant[],
         recipeImageTags: RecipeTag[],
         recipeBackOfficeTags: RecipeTag[],
         recipeNutritionalData: RecipeNutritionalData,
@@ -34,7 +36,7 @@ export class Recipe extends Entity<Recipe> {
     ) {
         super(id);
         this._recipeGeneralData = recipeGeneralData;
-        this._recipeVaraints = recipeVaraints;
+        this._recipeVariants = recipeVariants;
         this._recipeImageTags = _.uniqBy(recipeImageTags, (tag) => tag.name);
         this._recipeBackOfficeTags = _.uniqBy(recipeBackOfficeTags, (tag) => tag.name);
         this._recipeNutritionalData = recipeNutritionalData;
@@ -48,6 +50,10 @@ export class Recipe extends Entity<Recipe> {
         this.availableWeeks = weeks;
     }
 
+    public getVariantRestrictions(recipeVariantId: RecipeVariantId): RecipeVariantRestriction[] {
+        return this.recipeVariants.find((variant) => variant.id.equals(recipeVariantId))?.recipeVariantRestrictions || [];
+    }
+
     /**
      * Getter recipeGeneralData
      * @return {RecipeGeneralData}
@@ -57,11 +63,11 @@ export class Recipe extends Entity<Recipe> {
     }
 
     /**
-     * Getter recipeVaraints
+     * Getter recipeVariants
      * @return {RecipeVariant[]}
      */
-    public get recipeVaraints(): RecipeVariant[] {
-        return this._recipeVaraints;
+    public get recipeVariants(): RecipeVariant[] {
+        return this._recipeVariants;
     }
 
     /**
@@ -129,11 +135,11 @@ export class Recipe extends Entity<Recipe> {
     }
 
     /**
-     * Setter recipeVaraints
+     * Setter recipeVariants
      * @param {RecipeVariant[]} value
      */
-    public set recipeVaraints(value: RecipeVariant[]) {
-        this._recipeVaraints = value;
+    public set recipeVariants(value: RecipeVariant[]) {
+        this._recipeVariants = value;
     }
 
     /**

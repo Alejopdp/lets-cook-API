@@ -1,8 +1,15 @@
 import _ from "lodash";
+import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
 
 export class GetPlanByIdPresenter {
-    public static present(plan: Plan): any {
+    private _storageService: IStorageService;
+
+    constructor(storageService: IStorageService) {
+        this._storageService = storageService;
+    }
+
+    public async present(plan: Plan): Promise<any> {
         var attributes = [];
         var attributesAndValues = [];
         var presentedVariants = [];
@@ -64,13 +71,25 @@ export class GetPlanByIdPresenter {
             availablePlanFrecuencies: plan.availablePlanFrecuencies,
             isActive: plan.isActive,
             type: plan.type,
-            imageUrl: plan.imageUrl,
+            imageUrl: plan.imageUrl ? await this.storageService.getPresignedUrlForFile(plan.imageUrl) : "",
             hasRecipes: plan.hasRecipes,
             variants: presentedVariants,
             attributes: [...attributesAndValues, ...attributes],
             additionalPlans: plan.additionalPlans.map((plan) => {
                 return { id: plan.id.value, name: plan.name };
             }),
+            icon: plan.iconLinealUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl) : "",
+            iconWithColor: plan.iconLinealColorUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl) : "",
+            abilityToChooseRecipes: plan.abilityToChooseRecipes,
+            slug: plan.planSlug.slug,
         };
+    }
+
+    /**
+     * Getter storageService
+     * @return {IStorageService}
+     */
+    public get storageService(): IStorageService {
+        return this._storageService;
     }
 }

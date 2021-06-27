@@ -11,6 +11,7 @@ export abstract class BaseController {
     public execute(req: express.Request, res: express.Response): void {
         this.req = req;
         this.res = res;
+        logger.debug(`${this.req.method} ${this.req.protocol}://${this.req.get("host")}${this.req.originalUrl}`);
 
         this.executeImpl();
     }

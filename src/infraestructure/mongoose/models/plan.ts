@@ -15,6 +15,9 @@ const PlanVariantSchema = new mongoose.Schema({
         type: String,
     },
 
+    description: {
+        type: String,
+    },
     price: {
         type: Number,
         required: true,
@@ -22,7 +25,7 @@ const PlanVariantSchema = new mongoose.Schema({
 
     priceWithOffer: {
         type: Number,
-        required: true,
+        // required: true,
     },
 
     numberOfPersons: {
@@ -112,6 +115,24 @@ const PlanSchema = new mongoose.Schema(
         tools: {
             type: [String],
             default: [],
+        },
+
+        slug: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        abilityToChooseRecipes: {
+            type: Boolean,
+            default: true,
+        },
+        iconLinealUrl: {
+            type: String,
+            required: true,
+        },
+        iconLinealColorUrl: {
+            type: String,
+            required: true,
         },
 
         deletionFlag: {

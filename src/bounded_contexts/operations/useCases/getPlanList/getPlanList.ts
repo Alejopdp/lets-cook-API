@@ -14,14 +14,8 @@ export class GetPlanList {
         this._storageService = storageService;
     }
 
-    public async execute(dto: GetPlanListDto): Promise<any> {
-        var plans: Plan[] = await this.planRepository.findAll(dto.locale);
-
-        for (let plan of plans) {
-            plan.imageUrl = await this.storageService.getPresignedUrlForFile(plan.imageUrl);
-        }
-
-        return GetPlanListPresenter.present(plans);
+    public async execute(dto: GetPlanListDto): Promise<Plan[]> {
+        return await this.planRepository.findAll(dto.locale);
     }
 
     /**

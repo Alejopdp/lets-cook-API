@@ -9,5 +9,5 @@ export interface IWeekRepository {
     findById(weekId: WeekId): Promise<Week | undefined>;
     findAllById(weeksIds: WeekId[]): Promise<Week[]>;
     findBy(conditions: any, locale?: Locale): Promise<Week[]>;
-    findNextEight(): Promise<Week[]>;
+    findNextTwelve(skipOneWeek: boolean): Promise<Week[]>;
 }

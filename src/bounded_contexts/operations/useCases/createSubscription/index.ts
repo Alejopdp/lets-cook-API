@@ -1,13 +1,21 @@
 import { awsSesService } from "../../../../shared/notificationService";
 import { stripeService } from "../../application/paymentService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
+import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePlanRepository } from "../../infra/repositories/plan";
+import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
+import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
+import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { CreateSubscription } from "./createSubscription";
 import { CreateSubscriptionController } from "./createSubscriptionController";
 
 export const createSubscription: CreateSubscription = new CreateSubscription(
     mongooseCustomerRepository,
+    mongooseSubscriptionRepository,
+    mongooseShippingZoneRepository,
     mongoosePlanRepository,
+    mongooseWeekRepository,
+    mongooseOrderRepository,
     stripeService,
     awsSesService
 );

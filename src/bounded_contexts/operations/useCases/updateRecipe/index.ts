@@ -1,6 +1,6 @@
 import { s3Service } from "../../application/storageService";
-import { mockRecipeRepository, mongooseRecipeRepository } from "../../infra/repositories/recipe";
-import { mockWeekRepository, mongooseWeekRepository } from "../../infra/repositories/week";
+import { mongooseRecipeRepository } from "../../infra/repositories/recipe";
+import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { recipeVariantCreator } from "../../services/recipeVariantCreator";
 import { UpdateRecipe } from "./updateRecipe";
 import { UpdateRecipeController } from "./updateRecipeController";
