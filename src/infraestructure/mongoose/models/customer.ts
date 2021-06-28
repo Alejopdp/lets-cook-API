@@ -31,6 +31,42 @@ const AddressSchema = new mongoose.Schema({
     },
 });
 
+const PaymentMethodSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: uuid.v4,
+    },
+
+    last4Numbers: {
+        type: String,
+        required: true
+    },
+
+    exp_month: {
+        type: Number,
+        required: true,
+    },
+
+    exp_year: {
+        type: Number,
+        required: true
+    },
+
+    cvc: {
+        type: String
+    },
+
+    stripeId: {
+        type: String,
+        required: true
+    },
+    
+    isDefault: {
+        type: Boolean,
+        required: true,
+    }
+})
+
 const CustomerSchema = new mongoose.Schema(
     {
         _id: {
@@ -44,6 +80,10 @@ const CustomerSchema = new mongoose.Schema(
         },
         isEmailVerified: {
             type: Boolean,
+            required: true,
+        },
+        stripeId: {
+            type: String,
             required: true,
         },
         password: {
@@ -61,6 +101,11 @@ const CustomerSchema = new mongoose.Schema(
         },
         codeToRecoverPassword: {
             type: String,
+        },
+        paymentMethods: {
+            type: [PaymentMethodSchema],
+            required: true,
+            default: []
         },
         deletionFlag: {
             type: Boolean,

@@ -1,5 +1,6 @@
 import { IPaymentService } from "../IPaymentService";
 import { Stripe } from "stripe";
+import { PaymentMethod } from "../../../domain/customer/paymentMethod/PaymentMethod";
 
 export class StripeService implements IPaymentService {
     private _stripe: Stripe;
@@ -15,7 +16,7 @@ export class StripeService implements IPaymentService {
         customerId: string
     ): Promise<Stripe.PaymentIntent> {
         const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
-            amount,
+            amount: amount * 100,
             currency: "eur",
             payment_method_types: ["card"],
             receipt_email: receiptEmail,
@@ -34,6 +35,22 @@ export class StripeService implements IPaymentService {
         const createdCustomer = await this.stripe.customers.create(customerCreateParams);
 
         return createdCustomer.id;
+    }
+
+    public async addPaymentMethodToCustomer(paymentMethodId: string, customerId: string): Promise<PaymentMethod> {
+        const paymentMethod = await this.stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
+
+        return new PaymentMethod(
+            paymentMethod.card?.last4!,
+            paymentMethod.card?.exp_month!,
+            paymentMethod.card?.exp_year!,
+            paymentMethod.card?.checks?.cvc_check!,
+            false,
+            paymentMethod.id
+        );
+    }
+    public async addPaymentMethodToCustomerAndSetAsDefault(paymentMethodId: string, customerId: string): Promise<void> {
+        throw new Error("Method not implemented.");
     }
 
     /**

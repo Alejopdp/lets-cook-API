@@ -5,10 +5,15 @@ import { CustomerId } from "./CustomerId";
 // import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { Address } from "../address/Address";
+import { PaymentMethod } from "./paymentMethod/PaymentMethod";
+import { PaymentMethodId } from "./paymentMethod/PaymentMethodId";
+import { method } from "lodash";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
     private _isEmailVerified: boolean;
+    private _stripeId: string;
+    private _paymentMethods: PaymentMethod[];
     private _shippingAddress?: Address;
     private _billingAddress?: Address;
     private _password?: UserPassword;
@@ -18,6 +23,8 @@ export class Customer extends Entity<Customer> {
     protected constructor(
         email: string,
         isEmailVerified: boolean,
+        stripeId: string,
+        paymentMethods: PaymentMethod[],
         shippingAddress?: Address,
         billingAddress?: Address,
         password?: UserPassword,
@@ -28,6 +35,8 @@ export class Customer extends Entity<Customer> {
         super(id);
         this._email = email;
         this._isEmailVerified = isEmailVerified;
+        this._stripeId = stripeId;
+        this._paymentMethods = paymentMethods;
         this._shippingAddress = shippingAddress;
         this._billingAddress = billingAddress;
         this._password = password;
@@ -38,6 +47,8 @@ export class Customer extends Entity<Customer> {
     public static create(
         email: string,
         isEmailVerified: boolean,
+        stripeId: string,
+        paymentMethods: PaymentMethod[],
         shippingAddress?: Address,
         billingAddress?: Address,
         password?: UserPassword,
@@ -45,11 +56,50 @@ export class Customer extends Entity<Customer> {
         codeToRecoverPassword?: string,
         id?: CustomerId
     ): Customer {
-        return new Customer(email, isEmailVerified, shippingAddress, billingAddress, password, state, codeToRecoverPassword, id);
+        return new Customer(
+            email,
+            isEmailVerified,
+            stripeId,
+            paymentMethods,
+            shippingAddress,
+            billingAddress,
+            password,
+            state,
+            codeToRecoverPassword,
+            id
+        );
     }
 
     public changePassword(newPassword: UserPassword): void {
         this.password = newPassword;
+    }
+
+    public addPaymentMethod(newPaymentMethod: PaymentMethod): void {
+        if (!!!this.hasAtLeastOnePaymentMethod) newPaymentMethod.isDefault = true;
+
+        this.paymentMethods = [...this.paymentMethods, newPaymentMethod];
+    }
+
+    public getDefaultPaymentMethod(): PaymentMethod | undefined {
+        return this.paymentMethods.find((method) => method.isDefault);
+    }
+
+    public setDefaultPaymentMethod(paymentMethodId: PaymentMethodId): void {
+        for (let method of this.paymentMethods) {
+            if (method.id.equals(paymentMethodId)) {
+                method.isDefault = true;
+            } else {
+                method.isDefault = false;
+            }
+        }
+    }
+
+    public hasPaymentMethodByStripeId(stripePaymentMethodId: string): boolean {
+        return this.paymentMethods.some((method) => method.stripeId === stripePaymentMethodId);
+    }
+
+    public hasAtLeastOnePaymentMethod(): boolean {
+        return this.paymentMethods.length > 0;
     }
 
     /**
@@ -109,6 +159,22 @@ export class Customer extends Entity<Customer> {
     }
 
     /**
+     * Getter stripeId
+     * @return {string}
+     */
+    public get stripeId(): string {
+        return this._stripeId;
+    }
+
+    /**
+     * Getter paymentMethods
+     * @return {PaymentMethod[]}
+     */
+    public get paymentMethods(): PaymentMethod[] {
+        return this._paymentMethods;
+    }
+
+    /**
      * Setter email
      * @param {string} value
      */
@@ -162,5 +228,21 @@ export class Customer extends Entity<Customer> {
      */
     public set billingAddress(value: Address | undefined) {
         this._billingAddress = value;
+    }
+
+    /**
+     * Setter stripeId
+     * @param {string} value
+     */
+    public set stripeId(value: string) {
+        this._stripeId = value;
+    }
+
+    /**
+     * Setter paymentMethods
+     * @param {PaymentMethod[]} value
+     */
+    public set paymentMethods(value: PaymentMethod[]) {
+        this._paymentMethods = value;
     }
 }

@@ -23,6 +23,15 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
 
+// [X] TO DO Create orders
+// TO DO Assign orders to orderGroups???
+// [X] TO DO Save customer, subscriptions, order and orderGroups
+// TO DO Pay Stripe
+// TO DO Notify customer
+// TO DO Email templates
+// TO DO Notify admin
+// TO DO Entity SubscriptionCoupon
+
 export class CreateSubscription {
     private _customerRepository: ICustomerRepository;
     private _subscriptionRepository: ISubscriptionRepository;
@@ -89,17 +98,20 @@ export class CreateSubscription {
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
-
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
-        // [X] TO DO Create orders
-        // TO DO Assign orders to orderGroups???
-        // [X] TO DO Save customer, subscriptions, order and orderGroups
-        // TO DO Pay Stripe
-        // TO DO Notify customer
-        // TO DO Email templates
-        // TO DO Notify admin
-        // TO DO Entity SubscriptionCoupon
 
+        if (!!!customer.hasAtLeastOnePaymentMethod() || !customer.hasPaymentMethodByStripeId(dto.stripePaymentMethodId)) {
+            const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
+
+            customer.addPaymentMethod(newPaymentMethod);
+        }
+
+        await this.paymentService.paymentIntent(
+            plan.getPlanVariantPrice(planVariantId),
+            customer.getDefaultPaymentMethod()?.stripeId!,
+            customer.email,
+            customer.stripeId
+        );
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);

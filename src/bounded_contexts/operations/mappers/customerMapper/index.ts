@@ -1,5 +1,5 @@
 import { CustomerMapper } from "./customerMapper";
-// import { PlanVariantMapper } from "./planVariantMapper";
+import { PaymentMethodMapper } from "./paymentMethodMapper";
 
-export const customerMapper: CustomerMapper = new CustomerMapper()
-// export const planVariantMapper: PlanVariantMapper = new PlanVariantMapper()
+export const paymentMethodMapper: PaymentMethodMapper = new PaymentMethodMapper();
+export const customerMapper: CustomerMapper = new CustomerMapper();

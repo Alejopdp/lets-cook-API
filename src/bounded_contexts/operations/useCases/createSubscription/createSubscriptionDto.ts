@@ -4,5 +4,6 @@ export interface CreateSubscriptionDto {
     planVariantId: string | number;
     planFrequency: string;
     restrictionComment: string;
+    stripePaymentMethodId: string;
     couponId?: string | number;
 }

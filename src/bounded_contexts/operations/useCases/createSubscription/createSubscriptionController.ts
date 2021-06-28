@@ -19,6 +19,7 @@ export class CreateSubscriptionController extends BaseController {
                 planVariantId: this.req.body.planVariantId,
                 restrictionComment: this.req.body.restrictionComment,
                 couponId: this.req.body.couponId,
+                stripePaymentMethodId: this.req.body.stripePaymentMethodId
             };
 
             await this.createSubscription.execute(dto);
