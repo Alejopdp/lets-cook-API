@@ -79,6 +79,10 @@ export class Order extends Entity<Order> {
         return MomentTimeService.getDateHumanLabel(this.shippingDate);
     }
 
+    public getHumanBillingDay(): string {
+        return MomentTimeService.getDateHumanLabel(this.billingDate);
+    }
+
     public hasChosenRecipes(): boolean {
         return this.recipes.length > 0;
     }

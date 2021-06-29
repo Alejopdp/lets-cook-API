@@ -39,6 +39,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             raw.createdAt,
             raw.couponChargesQtyApplied,
             customer,
+            raw.price,
             couponId,
             raw.billingDayOfWeek,
             raw.billingStartDate,
@@ -63,6 +64,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             billingStartDate: t.billingStartDate,
             cancellation,
             _id: t.id.value,
+            price: t.price,
         };
     }
 }

@@ -2,6 +2,7 @@ import { Entity } from "../../../../../core/domain/Entity";
 import { PaymentMethodId } from "./PaymentMethodId";
 
 export class PaymentMethod extends Entity<PaymentMethod> {
+    private _brand: string;
     private _last4Numbers: string;
     private _exp_month: number;
     private _exp_year: number;
@@ -10,6 +11,7 @@ export class PaymentMethod extends Entity<PaymentMethod> {
     private _stripeId: string;
 
     constructor(
+        brand: string,
         last4Numbers: string,
         exp_month: number,
         exp_year: number,
@@ -19,12 +21,29 @@ export class PaymentMethod extends Entity<PaymentMethod> {
         id?: PaymentMethodId
     ) {
         super(id);
+        this._brand = brand;
         this._last4Numbers = last4Numbers;
         this._exp_month = exp_month;
         this._exp_year = exp_year;
         this._cvc = cvc;
         this._isDefault = isDefault;
         this._stripeId = stripeId;
+    }
+
+    public getCardLabel(): string {
+        return `${this.brand} terminada en ${this.last4Numbers}`;
+    }
+
+    public getExpirationDate(): string {
+        return `Expira el ${this.exp_month}/${this.exp_year}`;
+    }
+
+    /**
+     * Getter brand
+     * @return {string}
+     */
+    public get brand(): string {
+        return this._brand;
     }
 
     /**
@@ -73,6 +92,14 @@ export class PaymentMethod extends Entity<PaymentMethod> {
      */
     public get stripeId(): string {
         return this._stripeId;
+    }
+
+    /**
+     * Setter brand
+     * @param {string} value
+     */
+    public set brand(value: string) {
+        this._brand = value;
     }
 
     /**

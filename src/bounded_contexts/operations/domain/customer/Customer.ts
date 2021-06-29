@@ -102,6 +102,18 @@ export class Customer extends Entity<Customer> {
         return this.paymentMethods.length > 0;
     }
 
+    public getDefaultPaymentMethodCardLabel(): string {
+        const defaultMethod: PaymentMethod = this.getDefaultPaymentMethod()!;
+
+        return defaultMethod.getCardLabel();
+    }
+
+    public getDefaultPaymentMethodExpirationDateLabel(): string {
+        const defaultMethod: PaymentMethod = this.getDefaultPaymentMethod()!;
+
+        return defaultMethod.getExpirationDate();
+    }
+
     /**
      * Getter email
      * @return {string}

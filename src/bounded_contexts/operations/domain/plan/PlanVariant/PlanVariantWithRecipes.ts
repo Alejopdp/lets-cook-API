@@ -36,6 +36,10 @@ export class PlanVariantWithRecipe extends PlanVariant {
         return `${this.numberOfRecipes} recetas para ${this.numberOfPersons} personas`;
     }
 
+    public getServingsQuantity(): number {
+        return this.numberOfPersons * this.numberOfRecipes;
+    }
+
     /**
      * Getter numberOfPersons
      * @return {number}

@@ -28,6 +28,9 @@ export class MomentTimeService {
     }
 
     public static getHumanWeekRangeLabel(minDay: Date, maxDay: Date): string {
-        return `${moment(minDay).format("DD")} al ${moment(maxDay).format("DD")} de ${moment(maxDay).format("MMMM")}`;
+        const month = moment(maxDay).format("MMMM");
+        const monthWithCapitalLetter = month.charAt(0).toUpperCase() + month.slice(1);
+
+        return `${moment(minDay).format("DD")} al ${moment(maxDay).format("DD")} de ${monthWithCapitalLetter}`;
     }
 }

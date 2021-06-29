@@ -46,7 +46,8 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
-            .populate("week");
+            .populate("week")
+            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return orderDb ? orderMapper.toDomain(orderDb, locale) : undefined;
     }
@@ -58,17 +59,19 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async findBy(conditions: any, locale?: Locale): Promise<Order[]> {
         const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
-            .populate("week");
+            .populate("week")
+            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
 
     private async findByLimited(conditions: any, locale?: Locale): Promise<Order[]> {
-        const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false })
+        const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false, shippingDate: { $gte: new Date() } })
             .sort({ shippingDate: 1 })
             // .limit(12)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
-            .populate("week");
+            .populate("week")
+            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
@@ -78,7 +81,17 @@ export class MongooseOrderRepository implements IOrderRepository {
     }
 
     public async findNextTwelveBySubscription(subscriptionId: SubscriptionId): Promise<Order[]> {
-        return await this.findBy({ subscription: subscriptionId.value });
+        const ordersDb = await MongooseOrder.find({
+            subscription: subscriptionId.value,
+            deletionFlag: false,
+            shippingDate: { $gte: new Date() },
+        })
+            .sort({ shippingDate: 1 })
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week")
+            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+
+        return ordersDb.map((raw: any) => orderMapper.toDomain(raw, Locale.es));
     }
 
     public async findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[]): Promise<Order[]> {

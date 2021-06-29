@@ -6,6 +6,7 @@ import { Locale } from "../../domain/locale/Locale";
 export class PaymentMethodMapper extends Mapper<PaymentMethod> {
     public toDomain(raw: any, locale?: Locale): PaymentMethod {
         return new PaymentMethod(
+            raw.brand,
             raw.last4Numbers,
             raw.exp_month,
             raw.exp_year,
@@ -19,6 +20,7 @@ export class PaymentMethodMapper extends Mapper<PaymentMethod> {
     public toPersistence(t: PaymentMethod, locale?: Locale): any {
         return {
             _id: t.id.value,
+            brand: t.brand,
             last4Numbers: t.last4Numbers,
             exp_month: t.exp_month,
             exp_year: t.exp_year,

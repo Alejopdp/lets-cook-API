@@ -46,7 +46,9 @@ export class MongooseWeekRepository implements IWeekRepository {
         const today = new Date();
 
         if (skipOneWeek) today.setDate(today.getDate() + 7);
-        const weeksDb = await WeekModel.find({ minDay: { $gte: today } }).limit(12);
+        const weeksDb = await WeekModel.find({ minDay: { $gte: today } })
+            .sort({ minDay: 1 })
+            .limit(12);
 
         return weeksDb.map((week: any) => weekMapper.toDomain(week));
     }

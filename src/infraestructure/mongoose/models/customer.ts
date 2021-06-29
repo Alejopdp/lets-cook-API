@@ -37,9 +37,14 @@ const PaymentMethodSchema = new mongoose.Schema({
         default: uuid.v4,
     },
 
+    brand: {
+        type: String,
+        required: true,
+    },
+
     last4Numbers: {
         type: String,
-        required: true
+        required: true,
     },
 
     exp_month: {
@@ -49,23 +54,23 @@ const PaymentMethodSchema = new mongoose.Schema({
 
     exp_year: {
         type: Number,
-        required: true
+        required: true,
     },
 
     cvc: {
-        type: String
+        type: String,
     },
 
     stripeId: {
         type: String,
-        required: true
+        required: true,
     },
-    
+
     isDefault: {
         type: Boolean,
         required: true,
-    }
-})
+    },
+});
 
 const CustomerSchema = new mongoose.Schema(
     {
@@ -105,7 +110,7 @@ const CustomerSchema = new mongoose.Schema(
         paymentMethods: {
             type: [PaymentMethodSchema],
             required: true,
-            default: []
+            default: [],
         },
         deletionFlag: {
             type: Boolean,

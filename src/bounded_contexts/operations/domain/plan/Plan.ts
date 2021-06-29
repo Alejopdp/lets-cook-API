@@ -162,6 +162,14 @@ export class Plan extends Entity<Plan> {
     public isPrincipal(): boolean {
         return this.type === PlanType.Principal;
     }
+
+    public getServingsQuantity(planVariantId: PlanVariantId): number {
+        if (!!!this.hasRecipes) return 0;
+        const planVariant = this.getPlanVariantById(planVariantId);
+        if (!!!planVariant) return 0;
+
+        return planVariant.getServingsQuantity();
+    }
     /**
      * Getter name
      * @return {string}

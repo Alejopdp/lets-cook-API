@@ -28,6 +28,7 @@ export class Subscription extends Entity<Subscription> {
     private _billingStartDate?: Date;
     private _creationDate: Date;
     private _couponChargesQtyApplied: number;
+    private _price: number;
 
     constructor(
         planVariantId: PlanVariantId,
@@ -39,6 +40,7 @@ export class Subscription extends Entity<Subscription> {
         creationDate: Date,
         couponChargesQtyApplied: number,
         customer: Customer,
+        price: number,
         couponId?: CouponId,
         billingDayOfWeek?: number,
         billingStartDate?: Date,
@@ -48,6 +50,7 @@ export class Subscription extends Entity<Subscription> {
         super(subscriptionId);
         this._planVariantId = planVariantId;
         this._plan = plan;
+        this._price = price;
         this._frequency = frequency;
         this._state = state;
         this._restrictions = restrictions;
@@ -130,12 +133,31 @@ export class Subscription extends Entity<Subscription> {
         return orders.find((order) => order.isActive()); // TO DO: It works if orders is sorted ASC
     }
 
+    public getNextSecondActiveOrder(orders: Order[]): Order | undefined {
+        const nextOrder: Order | undefined = this.getNextActiveOrder(orders);
+        if (!!!nextOrder) return undefined;
+
+        return orders.find((order) => order.isActive() && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
+    }
+
     public getNextShipmentLabel(orders: Order[]): string {
         const nextOrder = orders.find((order) => order.isActive());
 
         if (!!!nextOrder) return "No tienes una próxima entrega";
 
         return nextOrder.getHumanShippmentDay();
+    }
+
+    public getServingsLabel(): string {
+        const servingsQty = this.plan.getServingsQuantity(this.planVariantId);
+
+        if (servingsQty === 0) return "";
+
+        return `${servingsQty} raciones a ${this.price / servingsQty} € por ración`;
+    }
+
+    public getPriceByFrequencyLabel(): string {
+        return `Valor total: ${this.price} €/${this.frequency}`;
     }
 
     /**
@@ -192,6 +214,14 @@ export class Subscription extends Entity<Subscription> {
      */
     public get customer(): Customer {
         return this._customer;
+    }
+
+    /**
+     * Getter price
+     * @return {number}
+     */
+    public get price(): number {
+        return this._price;
     }
 
     /**
@@ -343,5 +373,13 @@ export class Subscription extends Entity<Subscription> {
      */
     public set billingDayOfWeek(value: number) {
         this._billingDayOfWeek = value;
+    }
+
+    /**
+     * Setter price
+     * @param {number} value
+     */
+    public set price(value: number) {
+        this._price = value;
     }
 }

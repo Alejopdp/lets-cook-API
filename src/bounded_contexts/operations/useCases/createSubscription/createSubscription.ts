@@ -86,6 +86,7 @@ export class CreateSubscription {
             new Date(),
             0,
             customer,
+            plan.getPlanVariantPrice(planVariantId),
             couponId,
             undefined,
             new Date(), // TO DO: Calculate

@@ -3,6 +3,7 @@ import { Order } from "../../domain/order/Order";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { v4 as uuid } from "uuid";
 import { IStorageService } from "../../application/storageService/IStorageService";
+import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -11,14 +12,8 @@ export class GetSubscriptionByIdPresenter {
         this._storageService = storageService;
     }
 
-    public present(subscription: Subscription, orders: Order[], customer: Customer): any {
-        const presentedPlan = {
-            planName: subscription.plan.name,
-            state: subscription.state.humanTitle,
-            servingsQty: 4, // Recipes * personsQty
-            servingPrice: 3, // Price / servingsQty
-            price: subscription.plan.getPlanVariantById(subscription.planVariantId)?.getPaymentPrice(),
-        };
+    public async present(subscription: Subscription, orders: Order[], customer: Customer): Promise<any> {
+        const presentedPlan = await this.presentPlan(subscription);
 
         const shippingAddress = {
             addressName: customer.shippingAddress?.name,
@@ -32,65 +27,95 @@ export class GetSubscriptionByIdPresenter {
             name: "Alejo Scotti (Hardcoded)",
         };
 
-        const paymentMethods = [
-            {
-                id: uuid(),
-                cardBrand: "Visa (Hardcoded)",
-                last4: "4242 (Hardcoded)",
-                expirationDate: "10/25 (Hardcoded)",
+        const defaultPaymentMethod: PaymentMethod | undefined = customer.getDefaultPaymentMethod();
+        var presentedPaymentMethod = null;
+
+        if (!!defaultPaymentMethod) {
+            presentedPaymentMethod = {
+                id: defaultPaymentMethod.id.value,
+                cardLabel: customer.getDefaultPaymentMethodCardLabel(),
+                expirationDateLabel: customer.getDefaultPaymentMethodExpirationDateLabel(),
                 default: true,
-            },
-            {
-                id: uuid(),
-                cardBrand: "Visa (Hardcoded)",
-                last4: "4242 (Hardcoded)",
-                default: false,
-            },
-        ];
+            };
+        }
+
+        const nextActiveOrder: Order | undefined = subscription.getNextActiveOrder(orders);
+        const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondActiveOrder(orders);
+        const hasChosenRecipesForActualWeek = !!!nextActiveOrder ? false : nextActiveOrder.recipes.length > 0 ? true : false;
+        const hasChosenRecipesForNextWeek = !!!nextSecondActiveOrder ? false : nextSecondActiveOrder.recipes.length > 0 ? true : false; // TO DO: Get 2nd Next Active order
+        const actualWeekOrder = await this.presentWeekRecipes(nextActiveOrder);
+        const nextWeekOrder = await this.presentWeekRecipes(nextSecondActiveOrder); // TO DO: Get 2nd Next Active order
 
         const schedule = {
-            nextDelivery: orders[0].shippingDate,
-            nextPayment: orders[1].billingDate,
+            nextDelivery: !!!nextActiveOrder ? "" : nextActiveOrder.getHumanShippmentDay(),
+            nextPayment: !!!nextSecondActiveOrder ? "" : nextSecondActiveOrder.getHumanBillingDay(),
         };
 
-        const hasChosenRecipesForActualWeek = orders[0].recipes.length > 0;
-        const hasChosenRecipesForNextWeek = orders[1].recipes.length > 0;
-        const actualWeekRecipes = orders[0].recipes.map((recipe) => ({
-            id: recipe.id.value,
-            name: recipe.recipeGeneralData.name,
-            imageUrl: this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl), // TO DO: Presign
-            restrictions: recipe.getVariantRestrictions(
-                orders[0].recipesVariantsIds.filter((variantId) => recipe.recipeVariants.some((variant) => variant.id.equals(variantId)))[0]
-            ),
-        }));
-        const nextWeekRecipes = orders[0].recipes.map((recipe) => ({
-            id: recipe.id.value,
-            name: recipe.recipeGeneralData.name,
-            imageUrl: this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl), // TO DO: Presign
-            restrictions: recipe.getVariantRestrictions(
-                orders[0].recipesVariantsIds.filter((variantId) => recipe.recipeVariants.some((variant) => variant.id.equals(variantId)))[0]
-            ),
-        }));
+        const skippedOrders = this.presentOrders(orders.filter((order) => order.isSkipped()));
 
-        const skippedOrders = orders
-            .filter((order) => order.isSkipped())
-            .map((order) => ({ id: order.id.value, label: order.getWeekLabel() }));
-
-        // const canChooseRecipes = subscription.plan.canChooseRecipes()
-        const canChooseRecipes = true;
+        const canChooseRecipes = subscription.plan.abilityToChooseRecipes;
+        const nextTwelveOrders = this.presentOrders(orders);
 
         return {
             plan: presentedPlan,
             shippingAddress,
-            billingData,
-            paymentMethods,
+            // billingData,
+            paymentMethod: presentedPaymentMethod,
             schedule,
             hasChosenRecipesForActualWeek,
             hasChosenRecipesForNextWeek,
-            actualWeekRecipes,
-            nextWeekRecipes,
+            actualWeekOrder,
+            nextWeekOrder,
             skippedOrders,
             canChooseRecipes,
+            nextTwelveOrders,
+            hasRecipes: subscription.plan.hasRecipes,
+        };
+    }
+
+    private async presentPlan(subscription: Subscription): Promise<any> {
+        return {
+            planName: subscription.plan.name,
+            planVariantDescription: subscription.getPlanVariantLabel(),
+            state: subscription.state.humanTitle,
+            stateTitle: subscription.state.title,
+            stateColor: subscription.state.color,
+            servingsLabel: subscription.getServingsLabel(),
+            price: subscription.price,
+            priceLabel: subscription.getPriceByFrequencyLabel(),
+            icon: await this.storageService.getPresignedUrlForFile(subscription.plan.iconLinealColorUrl),
+        };
+    }
+
+    private presentOrders(orders: Order[]): any {
+        return orders.map((order) => ({
+            id: order.id.value,
+            weekLabel: order.getWeekLabel(),
+            shippingDate: order.getHumanShippmentDay(),
+        }));
+    }
+
+    private async presentWeekRecipes(order: Order | undefined): Promise<any> {
+        if (!!!order) return [];
+        const presentedRecipes = [];
+
+        for (let recipe of order.recipes) {
+            presentedRecipes.push({
+                id: recipe.id.value,
+                name: recipe.recipeGeneralData.name,
+                imageUrl: await this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl), // TO DO: Presign
+                images: [],
+                // restrictions: recipe.getVariantRestrictions(
+                //     order.recipesVariantsIds.filter((variantId) => recipe.recipeVariants.some((variant) => variant.id.equals(variantId)))[0]
+                // ),
+            });
+        }
+
+        return {
+            id: order.id.value,
+            weekLabel: order.getWeekLabel(),
+            weekId: order.week.id.value,
+            recipes: presentedRecipes,
         };
     }
 
