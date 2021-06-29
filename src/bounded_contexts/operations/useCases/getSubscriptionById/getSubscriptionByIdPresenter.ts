@@ -116,6 +116,7 @@ export class GetSubscriptionByIdPresenter {
             weekLabel: order.getWeekLabel(),
             weekId: order.week.id.value,
             recipes: presentedRecipes,
+            shippingDate: order.getHumanShippmentDay(),
         };
     }
 
