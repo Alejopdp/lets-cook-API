@@ -159,6 +159,14 @@ export class Plan extends Entity<Plan> {
         return !!!planVariant ? "" : planVariant.getLabel();
     }
 
+    public getPlanVariantLabelWithPrice(planVariantId: PlanVariantId): string {
+        const variantLabel = this.getPlanVariantLabel(planVariantId);
+
+        if (!!!variantLabel) return "";
+
+        return `${variantLabel} - ${this.getPlanVariantPrice(planVariantId)} €/semana`;
+    }
+
     public isPrincipal(): boolean {
         return this.type === PlanType.Principal;
     }
