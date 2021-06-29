@@ -32,6 +32,10 @@ export class PlanVariantWithRecipe extends PlanVariant {
         return this.numberOfPersons.toString() + this.numberOfRecipes.toString() + super.getConcatenatedAttributesAsString();
     }
 
+    public getLabel(): string {
+        return `${this.numberOfRecipes} recetas para ${this.numberOfPersons} personas`;
+    }
+
     /**
      * Getter numberOfPersons
      * @return {number}

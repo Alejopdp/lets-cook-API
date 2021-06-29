@@ -1,4 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Plan } from "../plan/Plan";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { Recipe } from "../recipe/Recipe";
@@ -47,6 +48,10 @@ export class Order extends Entity<Order> {
         this._recipes = recipes;
     }
 
+    public isActive(): boolean {
+        return this.state.isActive();
+    }
+
     public isSkipped(): boolean {
         return this.state.isSkipped();
     }
@@ -68,6 +73,18 @@ export class Order extends Entity<Order> {
         this.planVariantId = newPlanVariantId;
         this.recipes = [];
         this.recipesVariantsIds = [];
+    }
+
+    public getHumanShippmentDay(): string {
+        return MomentTimeService.getDateHumanLabel(this.shippingDate);
+    }
+
+    public hasChosenRecipes(): boolean {
+        return this.recipes.length > 0;
+    }
+
+    public getPendingRecipeChooseLabel(): string {
+        return `Tienes pendiente elegir las recetas del ${this.plan.name} para la entrega del ${this.getHumanShippmentDay()}`;
     }
 
     /**

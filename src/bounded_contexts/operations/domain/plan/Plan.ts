@@ -152,6 +152,16 @@ export class Plan extends Entity<Plan> {
 
         return planVariant.getPaymentPrice();
     }
+
+    public getPlanVariantLabel(planVariantId: PlanVariantId): string {
+        const planVariant: PlanVariant | undefined = this.getPlanVariantById(planVariantId);
+
+        return !!!planVariant ? "" : planVariant.getLabel();
+    }
+
+    public isPrincipal(): boolean {
+        return this.type === PlanType.Principal;
+    }
     /**
      * Getter name
      * @return {string}

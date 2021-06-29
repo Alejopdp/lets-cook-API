@@ -36,6 +36,13 @@ export class PlanVariant extends Entity<PlanVariant> {
     public getPaymentPrice(): number {
         return this.priceWithOffer || this.price;
     }
+
+    public getLabel(): string {
+        return this.attributes.reduce(
+            (acc: string, attribute: PlanVariantAttribute) => (acc = `${acc} / ${attribute.key} ${attribute.value}`),
+            ""
+        );
+    }
     /**
      * Getter sku
      * @return {PlanSku}

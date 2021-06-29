@@ -100,18 +100,18 @@ export class CreateSubscription {
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
 
-        if (!!!customer.hasAtLeastOnePaymentMethod() || !customer.hasPaymentMethodByStripeId(dto.stripePaymentMethodId)) {
-            const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
+        // if (!!!customer.hasAtLeastOnePaymentMethod() || !customer.hasPaymentMethodByStripeId(dto.stripePaymentMethodId)) {
+        //     const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
 
-            customer.addPaymentMethod(newPaymentMethod);
-        }
+        //     customer.addPaymentMethod(newPaymentMethod);
+        // }
 
-        await this.paymentService.paymentIntent(
-            plan.getPlanVariantPrice(planVariantId),
-            customer.getDefaultPaymentMethod()?.stripeId!,
-            customer.email,
-            customer.stripeId
-        );
+        // await this.paymentService.paymentIntent(
+        //     plan.getPlanVariantPrice(planVariantId),
+        //     customer.getDefaultPaymentMethod()?.stripeId!,
+        //     customer.email,
+        //     customer.stripeId
+        // );
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);

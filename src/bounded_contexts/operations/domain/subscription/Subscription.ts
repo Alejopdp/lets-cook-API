@@ -122,6 +122,22 @@ export class Subscription extends Entity<Subscription> {
         this.state.toCancelled(this);
     }
 
+    public getPlanVariantLabel(): string {
+        return this.plan.getPlanVariantLabel(this.planVariantId);
+    }
+
+    public getNextActiveOrder(orders: Order[]): Order | undefined {
+        return orders.find((order) => order.isActive()); // TO DO: It works if orders is sorted ASC
+    }
+
+    public getNextShipmentLabel(orders: Order[]): string {
+        const nextOrder = orders.find((order) => order.isActive());
+
+        if (!!!nextOrder) return "No tienes una próxima entrega";
+
+        return nextOrder.getHumanShippmentDay();
+    }
+
     /**
      * Getter planVariantId
      * @return {PlanVariantId}

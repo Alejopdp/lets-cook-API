@@ -2,6 +2,8 @@ import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
 import { Order } from "../../../domain/order/Order";
 import { OrderId } from "../../../domain/order/OrderId";
+import { Plan } from "../../../domain/plan/Plan";
+import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { SubscriptionId } from "../../../domain/subscription/SubscriptionId";
 
 export interface IOrderRepository {
@@ -12,6 +14,7 @@ export interface IOrderRepository {
     findBy(conditions: any, locale: Locale): Promise<Order[]>;
     findNextTwelveBySubscription(subscriptionId: SubscriptionId): Promise<Order[]>;
     findByIdList(ordersIds: OrderId[]): Promise<Order[]>;
+    findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[]): Promise<Order[]>;
     saveSkippedOrders(orders: Order[]): Promise<void>;
     saveCancelledOrders(orders: Order[]): Promise<void>;
     saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void>;

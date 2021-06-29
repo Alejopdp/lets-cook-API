@@ -63,12 +63,26 @@ export class MongooseOrderRepository implements IOrderRepository {
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
 
+    private async findByLimited(conditions: any, locale?: Locale): Promise<Order[]> {
+        const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false })
+            .sort({ shippingDate: 1 })
+            // .limit(12)
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week");
+
+        return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
+    }
+
     public async findByIdList(ordersIds: OrderId[]): Promise<Order[]> {
         return await this.findBy({ _id: ordersIds.map((id) => id.value) });
     }
 
     public async findNextTwelveBySubscription(subscriptionId: SubscriptionId): Promise<Order[]> {
         return await this.findBy({ subscription: subscriptionId.value });
+    }
+
+    public async findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[]): Promise<Order[]> {
+        return await this.findByLimited({ subscription: { $in: subscriptionsIds.map((id) => id.value) } });
     }
 
     public async delete(orderId: OrderId): Promise<void> {
