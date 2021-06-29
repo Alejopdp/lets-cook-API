@@ -57,6 +57,7 @@ export class GetSubscriptionByIdPresenter {
         const nextTwelveOrders = this.presentOrders(orders);
 
         return {
+            subscriptionId: subscription.id.value,
             plan: presentedPlan,
             shippingAddress,
             // billingData,
