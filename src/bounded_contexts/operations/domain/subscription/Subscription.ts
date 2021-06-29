@@ -21,7 +21,7 @@ export class Subscription extends Entity<Subscription> {
     private _cancellationReason?: CancellationReason;
     private _state: ISubscriptionState;
     private _restrictionComment: string;
-    private _restrictions: RecipeVariantRestriction[];
+    private _restriction?: RecipeVariantRestriction;
     private _billingDayOfWeek: number;
     private _customer: Customer;
     private _couponId?: CouponId;
@@ -35,12 +35,12 @@ export class Subscription extends Entity<Subscription> {
         plan: Plan,
         frequency: PlanFrequency,
         state: ISubscriptionState,
-        restrictions: RecipeVariantRestriction[],
         restrictionComment: string,
         creationDate: Date,
         couponChargesQtyApplied: number,
         customer: Customer,
         price: number,
+        restriction?: RecipeVariantRestriction,
         couponId?: CouponId,
         billingDayOfWeek?: number,
         billingStartDate?: Date,
@@ -53,7 +53,7 @@ export class Subscription extends Entity<Subscription> {
         this._price = price;
         this._frequency = frequency;
         this._state = state;
-        this._restrictions = restrictions;
+        this._restriction = restriction;
         this._restrictionComment = restrictionComment;
         this._customer = customer;
         this._couponId = couponId;
@@ -193,11 +193,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Getter restrictions
-     * @return {RecipeVariantRestriction[]}
+     * Getter restriction
+     * @return {RecipeVariantRestriction | undefined}
      */
-    public get restrictions(): RecipeVariantRestriction[] {
-        return this._restrictions;
+    public get restriction(): RecipeVariantRestriction | undefined {
+        return this._restriction;
     }
 
     /**
@@ -305,11 +305,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Setter restrictions
-     * @param {RecipeVariantRestriction[]} value
+     * Setter restriction
+     * @param {RecipeVariantRestriction  | undefined} value
      */
-    public set restrictions(value: RecipeVariantRestriction[]) {
-        this._restrictions = value;
+    public set restriction(value: RecipeVariantRestriction | undefined) {
+        this._restriction = value;
     }
 
     /**

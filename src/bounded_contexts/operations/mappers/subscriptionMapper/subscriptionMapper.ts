@@ -18,9 +18,9 @@ import { CancellationReason } from "../../domain/cancellationReason/Cancellation
 export class SubscriptionMapper implements Mapper<Subscription> {
     public toDomain(raw: any, locale?: Locale): Subscription {
         const frequency: PlanFrequency = (<any>PlanFrequency)[raw.frequency];
-        const restrictions: RecipeVariantRestriction[] = raw.restrictions.map((restriction: any) =>
-            recipeRestrictionMapper.toDomain(restriction)
-        );
+        const restriction: RecipeVariantRestriction | undefined = !!raw.restriction
+            ? recipeRestrictionMapper.toDomain(raw.restriction)
+            : undefined;
         const customer: Customer = customerMapper.toDomain(raw.customer);
         const planVariantId: PlanVariantId = new PlanVariantId(raw.planVariant);
         const plan: Plan = planMapper.toDomain(raw.plan, locale || Locale.es);
@@ -34,12 +34,12 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             plan,
             frequency,
             SubscriptionStateFactory.createState(raw.state),
-            restrictions,
             raw.restrictionComment,
             raw.createdAt,
             raw.couponChargesQtyApplied,
             customer,
             raw.price,
+            restriction,
             couponId,
             raw.billingDayOfWeek,
             raw.billingStartDate,
@@ -55,7 +55,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             plan: t.plan.id.value,
             frequency: t.frequency,
             state: t.state.title,
-            restrictions: t.restrictions.map((restriction) => restriction.id.value),
+            restrictions: !!t.restriction ? t.restriction.id.value : null,
             restrictionComment: t.restrictionComment,
             couponChargesQtyApplied: t.couponChargesQtyApplied,
             customer: t.customer.id.value,

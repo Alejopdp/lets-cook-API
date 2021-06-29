@@ -55,10 +55,9 @@ const SubscriptionSchema = new mongoose.Schema(
             required: true,
         },
 
-        restrictions: {
-            type: [String],
+        restriction: {
+            type: String,
             ref: "RecipeRestriction",
-            required: true,
         },
 
         price: {

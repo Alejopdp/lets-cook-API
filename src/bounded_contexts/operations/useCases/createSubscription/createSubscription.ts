@@ -81,12 +81,12 @@ export class CreateSubscription {
             plan,
             planFrequency,
             new SubscriptionActive(),
-            [],
             dto.restrictionComment,
             new Date(),
             0,
             customer,
             plan.getPlanVariantPrice(planVariantId),
+            undefined,
             couponId,
             undefined,
             new Date(), // TO DO: Calculate

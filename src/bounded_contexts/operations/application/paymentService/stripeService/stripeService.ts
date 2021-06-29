@@ -41,6 +41,7 @@ export class StripeService implements IPaymentService {
         const paymentMethod = await this.stripe.paymentMethods.attach(paymentMethodId, { customer: customerId });
 
         return new PaymentMethod(
+            paymentMethod.card?.brand!,
             paymentMethod.card?.last4!,
             paymentMethod.card?.exp_month!,
             paymentMethod.card?.exp_year!,
