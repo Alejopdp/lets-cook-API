@@ -77,9 +77,10 @@ export class GetSubscriptionByIdPresenter {
         return {
             planName: subscription.plan.name,
             planVariantDescription: subscription.getPlanVariantLabel(),
-            state: subscription.state.humanTitle,
-            stateTitle: subscription.state.title,
-            stateColor: subscription.state.color,
+            state: {
+                state: subscription.state.humanTitle,
+                stateTitle: subscription.state.title,
+            },
             servingsLabel: subscription.getServingsLabel(),
             price: subscription.price,
             priceLabel: subscription.getPriceByFrequencyLabel(),
