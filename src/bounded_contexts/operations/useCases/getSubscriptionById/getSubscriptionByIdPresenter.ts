@@ -93,6 +93,7 @@ export class GetSubscriptionByIdPresenter {
             id: order.id.value,
             weekLabel: order.getWeekLabel(),
             shippingDate: order.getHumanShippmentDay(),
+            isSkipped: order.isSkipped(),
         }));
     }
 
