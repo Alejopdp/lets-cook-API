@@ -4,7 +4,6 @@ import { Locale } from "../../domain/locale/Locale";
 import { Customer } from "../../domain/customer/Customer";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { SignUpDto } from "./signUpDto";
-import { shippingRouter } from "../../infra/http/shipping";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 
@@ -19,7 +18,7 @@ export class SignUp {
         this._paymentService = paymentService;
     }
 
-    public async execute(dto: SignUpDto): Promise<void> {
+    public async execute(dto: SignUpDto): Promise<Customer> {
         const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
         const customer: Customer = Customer.create(
             dto.email,
@@ -36,6 +35,8 @@ export class SignUp {
 
         customer.stripeId = stripeCustomerId;
         await this.signUpRepository.save(customer);
+
+        return customer;
     }
 
     /**
