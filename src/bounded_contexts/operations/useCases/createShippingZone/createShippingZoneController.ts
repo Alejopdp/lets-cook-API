@@ -46,6 +46,7 @@ export class CreateShippingZoneController extends BaseController {
                 cost: parseFloat(this.req.body.cost),
                 state: "active",
                 radio: coordinates,
+                shippingDayOfWeek: this.req.body.shippingDayOfWeek || 3,
             };
 
             await this.createShippingZone.execute(dto);

@@ -1,26 +1,28 @@
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { Order } from "../../domain/order/Order";
 import { Plan } from "../../domain/plan/Plan";
 import { Subscription } from "../../domain/subscription/Subscription";
-import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
+import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
+import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { GetCustomerSubscriptionsDto } from "./getCustomerSubscriptionsDto";
-import { GetCustomerSubscriptionPresenter } from "./getCustomerSubscriptionsPresenter";
 
 export class GetCustomerSubscriptions {
     private _subscriptionRepository: ISubscriptionRepository;
-    private _planRepository: IPlanRepository;
+    private _orderRepository: IOrderRepository;
 
-    constructor(subscriptionRepository: ISubscriptionRepository, planRepository: IPlanRepository) {
+    constructor(subscriptionRepository: ISubscriptionRepository, orderRepository: IOrderRepository) {
         this._subscriptionRepository = subscriptionRepository;
-        this._planRepository = planRepository;
+        this._orderRepository = orderRepository;
     }
 
-    public async execute(dto: GetCustomerSubscriptionsDto): Promise<any> {
+    public async execute(dto: GetCustomerSubscriptionsDto): Promise<{ subscriptions: Subscription[]; nextOrders: Order[] }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        // const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
-        // const plan: Plan = await this.planRepository.findByPlanVariantId()
+        const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
+        const subscriptionsIds: SubscriptionId[] = subscriptions.map((subscription) => subscription.id);
+        const nextOrders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(subscriptionsIds);
 
-        return GetCustomerSubscriptionPresenter.present([]);
+        return { subscriptions, nextOrders };
     }
 
     /**
@@ -32,10 +34,10 @@ export class GetCustomerSubscriptions {
     }
 
     /**
-     * Getter planRepository
-     * @return {IPlanRepository}
+     * Getter orderRepository
+     * @return {IOrderRepository}
      */
-    public get planRepository(): IPlanRepository {
-        return this._planRepository;
+    public get orderRepository(): IOrderRepository {
+        return this._orderRepository;
     }
 }

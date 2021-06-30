@@ -37,13 +37,18 @@ export class MongooseWeekRepository implements IWeekRepository {
     }
 
     public async findBy(conditions: any, locale?: Locale): Promise<Week[]> {
-        const weeksDb = await WeekModel.find({ ...conditions, deletionFlag: false });
+        const weeksDb = await WeekModel.find({ ...conditions, deletionFlag: false }).sort(["minDate", "asc"]);
 
         return weeksDb.map((raw: any) => weekMapper.toDomain(raw, locale));
     }
 
-    public async findNextEight(): Promise<Week[]> {
-        const weeksDb = await WeekModel.find({}).limit(8);
+    public async findNextTwelve(skipOneWeek: boolean): Promise<Week[]> {
+        const today = new Date();
+
+        if (skipOneWeek) today.setDate(today.getDate() + 7);
+        const weeksDb = await WeekModel.find({ minDay: { $gte: today } })
+            .sort({ minDay: 1 })
+            .limit(12);
 
         return weeksDb.map((week: any) => weekMapper.toDomain(week));
     }

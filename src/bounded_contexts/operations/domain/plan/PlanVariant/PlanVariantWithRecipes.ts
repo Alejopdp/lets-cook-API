@@ -1,3 +1,4 @@
+import { logger } from "../../../../../../config";
 import { PlanSku } from "../PlanSku";
 import { PlanVariant } from "./PlanVariant";
 import { PlanVariantAttribute } from "./PlanVariantAttribute";
@@ -15,9 +16,10 @@ export class PlanVariantWithRecipe extends PlanVariant {
         price: number,
         priceWithOffer: number,
         attributes: PlanVariantAttribute[],
+        description: string,
         id?: PlanVariantId
     ) {
-        super(sku, name, price, attributes, priceWithOffer, id);
+        super(sku, name, price, attributes, description, priceWithOffer, id);
 
         if (numberOfPersons < 1) throw new Error("Hay que ingresar por lo menos 1 persona");
         if (numberOfRecipes < 1) throw new Error("Hay que ingresar por lo menos 1 receta");
@@ -28,6 +30,14 @@ export class PlanVariantWithRecipe extends PlanVariant {
 
     public getConcatenatedAttributesAsString(): string {
         return this.numberOfPersons.toString() + this.numberOfRecipes.toString() + super.getConcatenatedAttributesAsString();
+    }
+
+    public getLabel(): string {
+        return `${this.numberOfRecipes} recetas para ${this.numberOfPersons} personas`;
+    }
+
+    public getServingsQuantity(): number {
+        return this.numberOfPersons * this.numberOfRecipes;
     }
 
     /**

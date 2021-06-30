@@ -26,6 +26,10 @@ export class Week extends Entity<Week> {
         return new Week(minDay, maxDay, id);
     }
 
+    public getLabel(): string {
+        return MomentTimeService.getHumanWeekRangeLabel(this.minDay, this.maxDay);
+    }
+
     /**
      * Getter minDay
      * @return {Date}

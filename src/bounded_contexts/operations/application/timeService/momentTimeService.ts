@@ -22,4 +22,15 @@ export class MomentTimeService {
     public static getShortenedMonthName(date: Date): string {
         return moment(date).format("MMM");
     }
+
+    public static getDateHumanLabel(date: Date): string {
+        return moment(date).format("dddd Do MMMM");
+    }
+
+    public static getHumanWeekRangeLabel(minDay: Date, maxDay: Date): string {
+        const month = moment(maxDay).format("MMMM");
+        const monthWithCapitalLetter = month.charAt(0).toUpperCase() + month.slice(1);
+
+        return `${moment(minDay).format("DD")} al ${moment(maxDay).format("DD")} de ${monthWithCapitalLetter}`;
+    }
 }

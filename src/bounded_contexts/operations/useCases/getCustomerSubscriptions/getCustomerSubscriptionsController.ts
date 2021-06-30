@@ -2,13 +2,16 @@ import { BaseController } from "../../../../core/infra/BaseController";
 import { Locale } from "../../domain/locale/Locale";
 import { GetCustomerSubscriptions } from "./getCustomerSubscriptions";
 import { GetCustomerSubscriptionsDto } from "./getCustomerSubscriptionsDto";
+import { GetCustomerSubscriptionsPresenter } from "./getCustomerSubscriptionsPresenter";
 
 export class GetCustomersubscriptionsController extends BaseController {
     private _getCustomersubscriptions: GetCustomerSubscriptions;
+    private _getCustomerSubscriptionsPresenter: GetCustomerSubscriptionsPresenter;
 
-    constructor(getCustomersubscriptions: GetCustomerSubscriptions) {
+    constructor(getCustomersubscriptions: GetCustomerSubscriptions, getCustomerSubscriptionsPresenter: GetCustomerSubscriptionsPresenter) {
         super();
         this._getCustomersubscriptions = getCustomersubscriptions;
+        this._getCustomerSubscriptionsPresenter = getCustomerSubscriptionsPresenter;
     }
 
     protected async executeImpl(): Promise<any> {
@@ -18,8 +21,9 @@ export class GetCustomersubscriptionsController extends BaseController {
                 customerId: this.req.params.customerId,
             };
             const result = await this.getCustomersubscriptions.execute(dto);
+            const presentedResult = await this.getCustomerSubscriptionsPresenter.present(result.subscriptions, result.nextOrders);
 
-            return this.ok(this.res, result);
+            return this.ok(this.res, presentedResult);
         } catch (error) {
             return this.fail(error);
         }
@@ -31,5 +35,13 @@ export class GetCustomersubscriptionsController extends BaseController {
      */
     public get getCustomersubscriptions(): GetCustomerSubscriptions {
         return this._getCustomersubscriptions;
+    }
+
+    /**
+     * Getter getCustomerSubscriptionsPresenter
+     * @return {GetCustomerSubscriptionsPresenter}
+     */
+    public get getCustomerSubscriptionsPresenter(): GetCustomerSubscriptionsPresenter {
+        return this._getCustomerSubscriptionsPresenter;
     }
 }

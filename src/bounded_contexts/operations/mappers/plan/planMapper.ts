@@ -30,6 +30,10 @@ export class PlanMapper implements Mapper<Plan> {
             raw.hasRecipes,
             additionalPlans,
             locale,
+            raw.planSlug,
+            raw.abilityToChooseRecipess,
+            raw.iconLinealUrl,
+            raw.iconLinealColorUrl,
             new PlanId(raw._id)
         );
     }

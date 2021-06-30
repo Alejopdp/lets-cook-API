@@ -6,20 +6,35 @@ import { ICustomerRepository } from "../../infra/repositories/customer/ICustomer
 import { SignUpDto } from "./signUpDto";
 import { shippingRouter } from "../../infra/http/shipping";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
+import { IPaymentService } from "../../application/paymentService/IPaymentService";
 
 export class SignUp {
     private _signUpRepository: ICustomerRepository;
     private _storageService: IStorageService;
+    private _paymentService: IPaymentService;
 
-    constructor(signUpRepository: ICustomerRepository, storageService: IStorageService) {
+    constructor(signUpRepository: ICustomerRepository, storageService: IStorageService, paymentService: IPaymentService) {
         this._signUpRepository = signUpRepository;
         this._storageService = storageService;
+        this._paymentService = paymentService;
     }
 
     public async execute(dto: SignUpDto): Promise<void> {
         const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
-        const customer: Customer = Customer.create(dto.email, dto.isEmailVerified, password, dto.state, undefined);
-        // console.log("SignUpUseCase: ", customer);
+        const customer: Customer = Customer.create(
+            dto.email,
+            dto.isEmailVerified,
+            "",
+            [],
+            undefined,
+            undefined,
+            password,
+            dto.state,
+            undefined
+        );
+        const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
+
+        customer.stripeId = stripeCustomerId;
         await this.signUpRepository.save(customer);
     }
 
@@ -37,5 +52,13 @@ export class SignUp {
      */
     public get storageService(): IStorageService {
         return this._storageService;
+    }
+
+    /**
+     * Getter paymentService
+     * @return {IPaymentService}
+     */
+    public get paymentService(): IPaymentService {
+        return this._paymentService;
     }
 }

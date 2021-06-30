@@ -13,6 +13,12 @@ const OrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        plan: {
+            type: String,
+            ref: "Plan",
+            required: true,
+        },
+
         shippingDate: {
             type: Date,
             required: true,
@@ -37,6 +43,22 @@ const OrderSchema = new mongoose.Schema(
         price: {
             type: Number,
             required: true,
+        },
+
+        subscription: {
+            type: String,
+            ref: "Subscription",
+            required: true,
+        },
+
+        recipeVariants: {
+            type: [String],
+            ref: "RecipeVariant",
+        },
+
+        recipes: {
+            type: [String],
+            ref: "Recipe",
         },
 
         deletionFlag: {

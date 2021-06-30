@@ -7,6 +7,8 @@ import { couponRouter } from "../../../bounded_contexts/operations/infra/http/co
 import { shippingRouter } from "../../../bounded_contexts/operations/infra/http/shipping";
 import { subscriptionRouter } from "../../../bounded_contexts/operations/infra/http/subscription";
 import { customerRouter } from "../../../bounded_contexts/operations/infra/http/customer";
+import { orderRouter } from "../../../bounded_contexts/operations/infra/http/order";
+import { recipeRatingRouter } from "../../../bounded_contexts/operations/infra/http/recipeRating";
 
 const v1Router = express.Router();
 
@@ -18,6 +20,8 @@ v1Router.use("/coupon", couponRouter);
 v1Router.use("/shipping", shippingRouter);
 v1Router.use("/subscription", subscriptionRouter);
 v1Router.use("/customer", customerRouter);
+v1Router.use("/order", orderRouter);
+v1Router.use("/recipe-rating", recipeRatingRouter);
 
 // All routes go here
 

@@ -12,6 +12,7 @@ import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitApli
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { CreateShippingZoneDto } from "./createShippingZoneDto";
 import { shippingRouter } from "../../infra/http/shipping";
+import { Day } from "../../domain/day/Day";
 
 export class CreateShippingZone {
     private _shippingRepository: IShippingZoneRepository;
@@ -32,8 +33,9 @@ export class CreateShippingZone {
         });
         const coordinates: ShippingZoneRadio = coordinatesRadio.map((value: any) => new Coordinates(value.latitude, value.longitude));
 
-        const shipping: ShippingZone = ShippingZone.create(dto.name, dto.reference, dto.cost, dto.state, coordinates);
-        console.log("ShippingUseCase: ", shipping);
+        const shippingDay: Day = new Day(dto.shippingDayOfWeek);
+        const shipping: ShippingZone = ShippingZone.create(dto.name, dto.reference, dto.cost, dto.state, coordinates, shippingDay);
+
         await this.shippingRepository.save(shipping);
     }
 

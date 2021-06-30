@@ -1,4 +1,7 @@
+import { AddressMapper } from "./addressMapper";
 import { IngredientMapper } from "./ingredientMapper";
+import { OrderMapper } from "./orderMapper";
+import { PaymentOrderMapper } from "./paymentOrderMapper";
 import { PlanMapper } from "./planMapper";
 import { PlanVariantMapper } from "./planVariantMapper";
 import { RecipeRestrictionsMapper } from "./recipeRestrictionsMapper";
@@ -11,3 +14,6 @@ export const weekMapper: WeekMapper = new WeekMapper();
 export const ingredientMapper: IngredientMapper = new IngredientMapper();
 export const recipeRestrictionMapper: RecipeRestrictionsMapper = new RecipeRestrictionsMapper();
 export const subscriptionMapper: SubscriptionMapper = new SubscriptionMapper();
+export const paymentOrderMapper: PaymentOrderMapper = new PaymentOrderMapper();
+export const orderMapper: OrderMapper = new OrderMapper();
+export const addressMapper: AddressMapper = new AddressMapper();

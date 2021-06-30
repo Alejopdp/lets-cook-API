@@ -23,6 +23,7 @@ export class UpdatePlan {
         const additionalPlans: Plan[] =
             dto.additionalPlansIds.length > 0
                 ? await this.planRepository.findAdditionalPlanListById(
+                      //@ts-ignore
                       dto.additionalPlansIds.map((id: string | number) => new PlanId(id)),
                       dto.locale
                   )
@@ -56,7 +57,9 @@ export class UpdatePlan {
                     "",
                     variant.price,
                     variant.priceWithOffer,
-                    attributes
+                    attributes,
+                    "description"
+                    // variant.description
                 );
                 planVariants.push(variantWithRecipe);
             } else {
@@ -73,6 +76,8 @@ export class UpdatePlan {
                     "",
                     variant.price,
                     attributes,
+                    "description",
+                    // variant.description
                     variant.priceWithOffer
                 );
                 planVariants.push(planVariant);
@@ -84,6 +89,18 @@ export class UpdatePlan {
 
             plan.imageUrl = imageUrl;
         }
+
+        // if (dto.iconLinealFile) {
+        //     const iconLinealUrl = await this.storageService.saveIconLineal(dto.planName, dto.planImageFileName, dto.iconLinealFile);
+
+        //     plan.iconLinealUrl = iconLinealUrl;
+        // }
+
+        // if (dto.iconLinealColorFile) {
+        //     const iconLinealColorUrl = await this.storageService.saveIconLinealColor(dto.planName, dto.iconLinealColorFileName, dto.iconLinealColorFile);
+
+        //     plan.iconLinealColorUrl = iconLinealColorUrl;
+        // }
 
         plan.availablePlanFrecuencies = dto.availablePlanFrecuencies;
         plan.description = dto.planDescription;

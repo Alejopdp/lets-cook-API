@@ -7,18 +7,18 @@ import { RecipeVariantRestriction } from "./recipeVariantResitriction/RecipeVari
 
 export class RecipeVariant extends Entity<RecipeVariant> {
     private _ingredients: Ingredient[];
-    private _recipeVariantRestriction: RecipeVariantRestriction[];
+    private _recipeVariantRestrictions: RecipeVariantRestriction[];
     private _sku: RecipeVariantSku;
 
     constructor(
         ingredients: Ingredient[],
-        recipeVariantRestriction: RecipeVariantRestriction[],
+        recipeVariantRestrictions: RecipeVariantRestriction[],
         sku: RecipeVariantSku,
         id?: RecipeVariantId
     ) {
         super(id);
         this._ingredients = _.uniqBy(ingredients, (ing) => ing.name);
-        this._recipeVariantRestriction = recipeVariantRestriction;
+        this._recipeVariantRestrictions = recipeVariantRestrictions;
         this._sku = sku;
     }
 
@@ -31,11 +31,11 @@ export class RecipeVariant extends Entity<RecipeVariant> {
     }
 
     /**
-     * Getter recipeVariantRestriction
+     * Getter recipeVariantRestrictions
      * @return {RecipeVariantRestriction[]}
      */
-    public get recipeVariantRestriction(): RecipeVariantRestriction[] {
-        return this._recipeVariantRestriction;
+    public get recipeVariantRestrictions(): RecipeVariantRestriction[] {
+        return this._recipeVariantRestrictions;
     }
 
     /**
@@ -55,11 +55,11 @@ export class RecipeVariant extends Entity<RecipeVariant> {
     }
 
     /**
-     * Setter recipeVariantRestriction
+     * Setter recipeVariantRestrictions
      * @param {RecipeVariantRestriction[]} value
      */
-    public set recipeVariantRestriction(value: RecipeVariantRestriction[]) {
-        this._recipeVariantRestriction = value;
+    public set recipeVariantRestrictions(value: RecipeVariantRestriction[]) {
+        this._recipeVariantRestrictions = value;
     }
 
     /**

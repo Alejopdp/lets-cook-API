@@ -2,6 +2,7 @@ import { Locale } from "../../../domain/locale/Locale";
 import { Plan } from "../../../domain/plan/Plan";
 import { PlanId } from "../../../domain/plan/PlanId";
 import { PlanType } from "../../../domain/plan/PlanType/PlanType";
+import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { IPlanRepository } from "./IPlanRepository";
 
 export class MockPlanRepository implements IPlanRepository {
@@ -9,6 +10,10 @@ export class MockPlanRepository implements IPlanRepository {
 
     constructor(database: Plan[]) {
         this._database = database;
+    }
+
+    findByPlanVariantId(planVariantId: PlanVariantId): Promise<Plan | undefined> {
+        throw new Error("Method not implemented.");
     }
 
     public async bulkSave(plans: Plan[]): Promise<void> {
@@ -20,7 +25,7 @@ export class MockPlanRepository implements IPlanRepository {
     }
 
     public async save(plan: Plan): Promise<void> {
-        console.log("Plan: ", plan)
+        console.log("Plan: ", plan);
         const filtered = this.database.filter((p) => !p.equals(plan));
         this.database = [...filtered, plan];
     }
