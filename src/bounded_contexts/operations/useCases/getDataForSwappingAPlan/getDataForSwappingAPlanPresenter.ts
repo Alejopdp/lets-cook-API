@@ -1,7 +1,8 @@
 import { Plan } from "../../domain/plan/Plan";
+import { Subscription } from "../../domain/subscription/Subscription";
 
 export class GetDataForSwappingAPlanPresenter {
-    public present(plans: Plan[]): any {
+    public present(subscription: Subscription, plans: Plan[]): any {
         const presentedPlans = [];
         const presentedVariants = [];
 
@@ -9,7 +10,7 @@ export class GetDataForSwappingAPlanPresenter {
             presentedPlans.push({
                 planId: plan.id.value,
                 name: plan.name,
-                active: plan.isActive,
+                active: subscription.plan.id.equals(plan.id),
             });
 
             for (let variant of plan.planVariants) {
@@ -17,7 +18,7 @@ export class GetDataForSwappingAPlanPresenter {
                     planId: plan.id.value,
                     planVariantId: variant.id.value,
                     variantDescription: plan.getPlanVariantLabelWithPrice(variant.id),
-                    active: plan.isActive,
+                    active: subscription.planVariantId.equals(variant.id),
                 });
             }
         }

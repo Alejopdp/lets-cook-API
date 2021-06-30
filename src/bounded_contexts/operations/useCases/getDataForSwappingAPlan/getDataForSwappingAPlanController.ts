@@ -17,11 +17,12 @@ export class GetDataForSwappingAPlanController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: GetDataForSwappingAPlanDto = {
+                subscriptionId: this.req.params.subscriptionId,
                 locale: (<any>Locale)[this.req.query.locale as string],
             };
 
             const result = await this.getDataForSwappingAPlan.execute(dto);
-            const presented = this.getDataForSwappingAPlanPresenter.present(result);
+            const presented = this.getDataForSwappingAPlanPresenter.present(result.subscription, result.plans);
 
             return this.ok(this.res, presented);
         } catch (error) {

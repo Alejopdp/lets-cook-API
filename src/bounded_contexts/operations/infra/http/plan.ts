@@ -22,7 +22,7 @@ planRouter.get("/", (req, res) => getPlanListController.execute(req, res));
 planRouter.get("/additionals", (req, res) => getAdditionalPlanListController.execute(req, res));
 planRouter.get("/additionals/:id", (req, res) => getAdditionalPlansByPlanIdController.execute(req, res));
 planRouter.get("/plans/week", (req, res) => getPlanVariantsRecipesByWeekListController.execute(req, res));
-planRouter.get("/data-for-swapping", (req, res) => getDataForSwappingAPlanController.execute(req, res));
+planRouter.get("/data-for-swapping/:subscriptionId", (req, res) => getDataForSwappingAPlanController.execute(req, res));
 planRouter.get("/:id", (req, res) => getPlanByIdController.execute(req, res));
 
 // PUT
