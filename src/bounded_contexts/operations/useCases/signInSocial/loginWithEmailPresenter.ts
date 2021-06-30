@@ -5,9 +5,9 @@ export class LoginWithEmailPresenter {
         return {
             userInfo: {
                 email: customer.email,
-                id: customer.id.value,
+                id: customer.id.value
             },
-            token,
+            token
         };
     }
 }

@@ -70,6 +70,7 @@ export class GetPlanListPresenter {
                     Personas: variant.numberOfPersons,
                     //@ts-ignore
                     Recetas: variant.numberOfRecipes,
+                    description: variant.description,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
                 });
             } else {
@@ -81,6 +82,7 @@ export class GetPlanListPresenter {
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
+                    description: variant.description,
                 });
             }
             counter = 0;

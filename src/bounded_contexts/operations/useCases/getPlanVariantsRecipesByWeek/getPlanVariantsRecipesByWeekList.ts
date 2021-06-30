@@ -56,8 +56,9 @@ export class GetPlanVariantsRecipesByWeekList {
             }
         }
         // console.log("Filtered: ", filterPlans);
+        let filterPlansActive = filterPlans.filter((val: any) => val.isActive);
 
-        return GetAdditionalPlanListPresenter.present(filterPlans);
+        return GetAdditionalPlanListPresenter.present(filterPlansActive);
         // return "true"
     }
 

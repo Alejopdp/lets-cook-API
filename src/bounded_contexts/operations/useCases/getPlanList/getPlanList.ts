@@ -15,7 +15,7 @@ export class GetPlanList {
     }
 
     public async execute(dto: GetPlanListDto): Promise<Plan[]> {
-        return await this.planRepository.findAll(dto.locale);
+        return await this.planRepository.findBy(dto.query, dto.locale);
     }
 
     /**

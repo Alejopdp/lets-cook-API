@@ -71,7 +71,11 @@ export class MongoosePlanRepository implements IPlanRepository {
     }
 
     public async findBy(conditions: any, locale: Locale): Promise<Plan[]> {
-        const plansDb = await MongoosePlan.find({ ...conditions, deletionFlag: false }).populate("additionalPlans");
+        const query = { ...conditions };
+
+        if (!conditions.isActive) delete query.isActive;
+
+        const plansDb = await MongoosePlan.find({ ...query, deletionFlag: false }).populate("additionalPlans");
 
         return plansDb.map((raw: any) => planMapper.toDomain(raw, locale));
     }

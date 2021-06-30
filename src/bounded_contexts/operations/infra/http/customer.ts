@@ -9,6 +9,7 @@ import { signUpController } from "../../useCases/signUp";
 import { signInController } from "../../useCases/signIn";
 import { forgotPasswordController } from "../../useCases/forgotPassword";
 import { updatePasswordController } from "../../useCases/updatePassword";
+import { socialNetworkAuthController } from "../../useCases/signInSocial";
 
 const customerRouter = express.Router();
 
@@ -27,6 +28,6 @@ customerRouter.put("/reset-password/:email", (req, res) => updatePasswordControl
 customerRouter.post("/sign-up", (req, res) => signUpController.execute(req, res));
 customerRouter.post("/sign-in", (req, res) => signInController.execute(req, res));
 customerRouter.post("/validation/:code", (req, res) => codeValidationController.execute(req, res));
-// couponRouter.post("/import", multer(options).single("coupons"), (req, res) => createCouponControllerCSV.execute(req, res));
+customerRouter.post("/social-auth/:token", (req, res) => socialNetworkAuthController.execute(req, res));
 
 export { customerRouter as customerRouter };
