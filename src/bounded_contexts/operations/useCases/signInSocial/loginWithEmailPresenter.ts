@@ -5,9 +5,20 @@ export class LoginWithEmailPresenter {
         return {
             userInfo: {
                 email: customer.email,
-                id: customer.id.value
+                id: customer.id.value,
+                shippingAddress: {
+                    addressDetails: customer.shippingAddress.details,
+                    addressName: customer.shippingAddress.name,
+                    latitude: customer.shippingAddress.latitude,
+                    longitude: customer.shippingAddress.longitude,
+                },
+                paymentMethods: customer.paymentMethods.map((method) => ({
+                    id: method.id.value,
+                    label: method.getCardLabel(),
+                    isDefault: method.isDefault,
+                })),
             },
-            token
+            token,
         };
     }
 }

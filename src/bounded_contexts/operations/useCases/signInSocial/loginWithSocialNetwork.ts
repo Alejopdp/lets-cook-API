@@ -44,19 +44,8 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
 
         const customer: Customer | undefined = await this.customerRepository.findByEmail(user.email);
 
-        if (!customer) {
-            const password: UserPassword = UserPassword.create(user.uid, false).hashPassword();
-            const customer: Customer = Customer.create(
-                user.email,
-                user.email_verified,
-                "",
-                [],
-                undefined,
-                undefined,
-                password,
-                "active",
-                undefined
-            );
+        if(!customer) {
+            const customer: Customer = Customer.create(user.email, user.email_verified, '', [], undefined, undefined, undefined, 'active', undefined);
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
 
             customer.stripeId = stripeCustomerId;
@@ -66,11 +55,8 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
                 email: user.email,
             };
 
-            return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer));
-        } else {
-            const incomingPassword: UserPassword = UserPassword.create(user.uid, false);
-            if (!incomingPassword.equals(incomingPassword)) return isFailure(invalidLoginArguments());
-
+            return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), user.email));
+        } else {            
             const tokenPayload = {
                 email: customer.email,
             };

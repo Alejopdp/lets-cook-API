@@ -20,14 +20,13 @@ export class GetPlanVariantsRecipesByWeekList {
     }
 
     public async execute(): Promise<any> {
-        const weeks: Week[] = await this.weekRepository.findAll();
         const date_currently = new Date();
-        let week_filtered = weeks.filter((val: Week) => val.minDay <= date_currently && date_currently <= val.maxDay);
+        const week: Week = await this.weekRepository.findCurrentWeek(date_currently);
 
-        const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week_filtered[0].id);
+        const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week.id);
 
         const plans: Plan[] = await this.planRepository.findAll((<any>Locale)['es' as string] || Locale.es);
-
+        // console.log(plans)
         let filterPlans: any[] = [];
         for(let i = 0; i < recipes.length; i++) {
             for(let j = 0; j < plans.length; j++) {
