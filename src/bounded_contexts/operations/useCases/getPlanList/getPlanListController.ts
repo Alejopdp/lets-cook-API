@@ -19,6 +19,9 @@ export class GetPlanListController extends BaseController {
         try {
             const dto: GetPlanListDto = {
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                query: {
+                    isActive: this.req.query.isActive === "true",
+                },
             };
             const result = await this.getPlanList.execute(dto);
             const presentedResult = await this.getPlanListPresenter.present(result);

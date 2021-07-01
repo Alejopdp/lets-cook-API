@@ -1,21 +1,21 @@
 import { UseCase } from "../../../../core/domain/UseCase";
 import { Either, Failure, isFailure, isSuccess } from "../../../../core/logic/Result";
 import { ITokenService } from "../../../IAM/application/tokenService/ITokenService";
-import { Customer } from "../../domain/customer/Customer"
+import { Customer } from "../../domain/customer/Customer";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { LoginWithSocialMediaDto } from "./loginWithSocialMediaDto";
 import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser } from "./loginWithEmailErrors";
 import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
 var admin = require("firebase-admin");
-const firebaseAdminConfig = require('../../../../../firebase-admin.json');
+const firebaseAdminConfig = require("../../../../../firebase-admin.json");
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
 const app = admin.initializeApp({
-    credential: admin.credential.cert(firebaseAdminConfig)
-  });
+    credential: admin.credential.cert(firebaseAdminConfig),
+});
 
 export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, Promise<Response>> {
     private _customerRepository: ICustomerRepository;
@@ -31,15 +31,16 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
     public async execute(dto: LoginWithSocialMediaDto): Promise<Response> {
         let user: any = null;
         await app
-        .auth()
-        .verifyIdToken(dto.idToken)
-        .then(async (decodedToken: any) => {
-            const uid = decodedToken.uid;
-            user = decodedToken;
-        }).catch(async (error: any) => {
-            console.log(error)
-            // return isFailure(invalidLoginArguments())
-        })
+            .auth()
+            .verifyIdToken(dto.idToken)
+            .then(async (decodedToken: any) => {
+                const uid = decodedToken.uid;
+                user = decodedToken;
+            })
+            .catch(async (error: any) => {
+                console.log(error);
+                // return isFailure(invalidLoginArguments())
+            });
 
         const customer: Customer | undefined = await this.customerRepository.findByEmail(user.email);
 
@@ -48,20 +49,19 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
 
             customer.stripeId = stripeCustomerId;
-            console.log("Customer: ", customer)
             await this.customerRepository.save(customer);
-            
+
             const tokenPayload = {
-                email: user.email
+                email: user.email,
             };
 
             return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), user.email));
         } else {            
             const tokenPayload = {
-                email: customer.email
+                email: customer.email,
             };
 
-            return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer.email));
+            return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer));
         }
     }
 
@@ -85,7 +85,7 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
      * Getter paymentService
      * @return {IPaymentService}
      */
-     public get paymentService(): IPaymentService {
+    public get paymentService(): IPaymentService {
         return this._paymentService;
     }
 }

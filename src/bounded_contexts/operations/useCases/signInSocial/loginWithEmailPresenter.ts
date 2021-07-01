@@ -1,8 +1,11 @@
+import { Customer } from "../../domain/customer/Customer";
+
 export class LoginWithEmailPresenter {
-    public static present(token: string, email: string): any {
+    public static present(token: string, customer: Customer): any {
         return {
             userInfo: {
-                email
+                email: customer.email,
+                id: customer.id.value
             },
             token
         };
