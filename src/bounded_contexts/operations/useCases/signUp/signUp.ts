@@ -18,7 +18,10 @@ export class SignUp {
         this._paymentService = paymentService;
     }
 
-    public async execute(dto: SignUpDto): Promise<Customer> {
+    public async execute(dto: SignUpDto): Promise<any> {
+        const customerInfo: Customer | undefined = await this.signUpRepository.findByEmail(dto.email);
+        if(customerInfo) throw new Error("El usuario ya existe, por favor utiliza otro correo");
+        
         const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
         const customer: Customer = Customer.create(
             dto.email,

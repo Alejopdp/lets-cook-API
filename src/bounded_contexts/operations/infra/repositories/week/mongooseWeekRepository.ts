@@ -52,4 +52,8 @@ export class MongooseWeekRepository implements IWeekRepository {
 
         return weeksDb.map((week: any) => weekMapper.toDomain(week));
     }
+
+    public async findCurrentWeek(date: Date): Promise<Week>{
+        return await WeekModel.findOne({ minDay: { $lte: date.toISOString() }, maxDay: { $gte: date.toISOString() } });
+    }
 }
