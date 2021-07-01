@@ -49,7 +49,7 @@ export class GetAdditionalPlanListPresenter {
                     imageUrl: recipe.recipeGeneralData.imageUrl,
                     weight: recipe.recipeGeneralData.recipeWeight.value(),
                     weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
-                    recipeVariants: recipe.recipeVaraints.map((variant: any) => {
+                    recipeVariants: recipe && recipe.recipeVaraints ? recipe.recipeVaraints.map((variant: any) => {
                         return {
                             ingredients: variant.ingredients.map((ing: any) => ing.name),
                             restrictions: variant.recipeVariantRestriction.map((r: any) => {
@@ -61,7 +61,7 @@ export class GetAdditionalPlanListPresenter {
                             }),
                             sku: variant.sku.code,
                         };
-                    }),
+                    }) : [],
                     imageTags: recipe.recipeImageTags.map((tag: any) => tag.name),
                     backOfficeTags: recipe.recipeBackOfficeTags.map((tag: any) => tag.name),
                     recipeNutritionalData: recipe.recipeNutritionalData.nutritionalItems,

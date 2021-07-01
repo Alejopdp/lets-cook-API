@@ -30,7 +30,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     }
 
     public async findByWeekId(weekId: WeekId): Promise<Recipe[]> {
-        return await this.findBy({ availableWeeks: weekId.value });
+        return await this.findBy({ availableWeeks: weekId });
     }
 
     public async findAllBackOfficeTags(): Promise<RecipeTag[]> {
