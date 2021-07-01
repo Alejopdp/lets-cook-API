@@ -18,6 +18,12 @@ const PaymentOrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        customer: {
+            type: String,
+            ref: "Customer",
+            required: true,
+        },
+
         state: {
             type: String, // Possible an enum
             required: true,

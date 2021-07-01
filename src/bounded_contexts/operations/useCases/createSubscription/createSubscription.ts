@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import { logger } from "../../../../../config";
 import { INotificationService } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
@@ -21,6 +22,8 @@ import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
+import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
+import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
 
 // [X] TO DO Create orders
@@ -41,6 +44,7 @@ export class CreateSubscription {
     private _orderRepository: IOrderRepository;
     private _paymentService: IPaymentService;
     private _notificationService: INotificationService;
+    private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -50,7 +54,8 @@ export class CreateSubscription {
         weekRepository: IWeekRepository,
         orderRepository: IOrderRepository,
         paymentService: IPaymentService,
-        notificationService: INotificationService
+        notificationService: INotificationService,
+        assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -60,9 +65,10 @@ export class CreateSubscription {
         this._orderRepository = orderRepository;
         this._notificationService = notificationService;
         this._paymentService = paymentService;
+        this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
     }
 
-    public async execute(dto: CreateSubscriptionDto): Promise<void> {
+    public async execute(dto: CreateSubscriptionDto): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
         const customer: Customer | undefined = await this.customerRepository.findById(customerId);
@@ -101,22 +107,28 @@ export class CreateSubscription {
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
 
+        // const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = { customerId: customer.id, orders, subscription, weeks: nextTwelveWeeks };
+        // await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
+
         // if (!!!customer.hasAtLeastOnePaymentMethod() || !customer.hasPaymentMethodByStripeId(dto.stripePaymentMethodId)) {
         //     const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
 
         //     customer.addPaymentMethod(newPaymentMethod);
         // }
 
-        // await this.paymentService.paymentIntent(
-        //     plan.getPlanVariantPrice(planVariantId),
-        //     customer.getDefaultPaymentMethod()?.stripeId!,
-        //     customer.email,
-        //     customer.stripeId
-        // );
+        const paymentIntent = await this.paymentService.paymentIntent(
+            plan.getPlanVariantPrice(planVariantId),
+            // customer.getDefaultPaymentMethod()?.stripeId || dto.stripePaymentMethodId,
+            dto.stripePaymentMethodId,
+            customer.email,
+            customer.stripeId
+        );
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
+
+        return { subscription, paymentIntent };
     }
 
     /**
@@ -180,5 +192,13 @@ export class CreateSubscription {
      */
     public get notificationService(): INotificationService {
         return this._notificationService;
+    }
+
+    /**
+     * Getter assignOrdersToPaymentOrder
+     * @return {AssignOrdersToPaymentOrders}
+     */
+    public get assignOrdersToPaymentOrders(): AssignOrdersToPaymentOrders {
+        return this._assignOrdersToPaymentOrderService;
     }
 }

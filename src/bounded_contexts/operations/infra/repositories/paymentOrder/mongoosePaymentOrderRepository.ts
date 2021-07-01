@@ -5,6 +5,7 @@ import { PaymentOrder as MongoosePaymentOrder } from "../../../../../infraestruc
 import { paymentOrderMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
+import { CustomerId } from "../../../domain/customer/CustomerId";
 
 export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async save(paymentOrder: PaymentOrder): Promise<void> {
@@ -26,6 +27,22 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         const paymentOrder = await MongoosePaymentOrder.findById(paymentOrderId.value, { deletionFlag: false }).populate("week");
 
         return paymentOrder ? paymentOrderMapper.toDomain(paymentOrder, locale) : undefined;
+    }
+
+    public async findNextTwelveByCustomer(customerId: CustomerId): Promise<PaymentOrder[]> {
+        const paymentOrdersDb = await MongoosePaymentOrder.find({
+            customerId: customerId.value,
+            deletionFlag: false,
+            shippingDate: { $gte: new Date() },
+        })
+            .sort({ billingDate: 1 })
+            .populate("week");
+
+        return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, Locale.es));
+    }
+
+    public async existsBy(customerId: CustomerId): Promise<boolean> {
+        return await MongoosePaymentOrder.exists({ customer: customerId.value });
     }
 
     public async findAll(locale: Locale): Promise<PaymentOrder[]> {

@@ -6,7 +6,6 @@ import { Order } from "../order/Order";
 import { OrderActive } from "../order/orderState/OrderActive";
 import { Plan } from "../plan/Plan";
 import { PlanFrequency } from "../plan/PlanFrequency";
-import { PlanVariant } from "../plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { ShippingZone } from "../shipping/ShippingZone";

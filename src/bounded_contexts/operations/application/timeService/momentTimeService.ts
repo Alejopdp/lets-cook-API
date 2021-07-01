@@ -33,4 +33,15 @@ export class MomentTimeService {
 
         return `${moment(minDay).format("DD")} al ${moment(maxDay).format("DD")} de ${monthWithCapitalLetter}`;
     }
+
+    public static getDayOfThisWeekByDayNumber(dayNumber: number): Date {
+        var today: Date = new Date();
+        // today.setDate(today.getDate() + 5); // Testing days
+        const date: Date = new Date(today.getFullYear(), today.getMonth());
+        const differenceInDays = dayNumber - today.getDay();
+
+        date.setDate(today.getDate() + differenceInDays);
+
+        return date;
+    }
 }

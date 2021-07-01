@@ -1,5 +1,6 @@
 import { weekMapper } from ".";
 import { Mapper } from "../../../core/infra/Mapper";
+import { CustomerId } from "../domain/customer/CustomerId";
 import { Locale } from "../domain/locale/Locale";
 import { PaymentOrder } from "../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../domain/paymentOrder/PaymentOrderId";
@@ -21,6 +22,7 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             raw.amount,
             raw.discountAmount,
             raw.shippingCost,
+            new CustomerId(raw.customer),
             new PaymentOrderId(raw._id)
         );
     }
@@ -36,6 +38,7 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             discountAmount: t.discountAmount,
             _id: t.id.value,
             state: t.state.title,
+            customer: t.customerId.value,
         };
     }
 }

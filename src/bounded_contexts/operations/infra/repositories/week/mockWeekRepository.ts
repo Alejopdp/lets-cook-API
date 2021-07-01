@@ -10,6 +10,9 @@ export class MockWeekRepository implements IWeekRepository {
     constructor(database: Week[]) {
         this._database = database;
     }
+    findCurrentWeek(date: Date): Promise<Week> {
+        throw new Error("Method not implemented.");
+    }
 
     bulkSave(weeks: Week[]): Promise<void> {
         throw new Error("Method not implemented.");

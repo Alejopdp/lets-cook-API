@@ -1,3 +1,4 @@
+import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
 import { PaymentOrder } from "../../../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../../../domain/paymentOrder/PaymentOrderId";
@@ -8,6 +9,7 @@ export interface IPaymentOrderRepository {
     findAll(locale: Locale): Promise<PaymentOrder[]>;
     findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined>;
     findBy(conditions: any, locale: Locale): Promise<PaymentOrder[]>;
+    findNextTwelveByCustomer(customerId: CustomerId): Promise<PaymentOrder[]>;
+    existsBy(customerId: CustomerId): Promise<boolean>;
     delete(paymentOrderId: PaymentOrderId): Promise<void>;
-    // findPaymentOrderById(paymentOrderId: PaymentOrderId): Promise<PaymentOrder | undefined>;
 }
