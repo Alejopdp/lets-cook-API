@@ -1,7 +1,6 @@
 import { Plan } from "../../domain/plan/Plan";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { GetGetPlanVariantsRecipesByWeekListDto } from "./getPlanVariantsRecipesByWeekListDto";
-import { GetAdditionalPlanListPresenter } from "./getPlanVariantsRecipesByWeekListPresenter";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeRepository";
 import { Week } from "../../domain/week/Week";
@@ -13,7 +12,7 @@ export class GetPlanVariantsRecipesByWeekList {
     private _weekRepository: IWeekRepository;
     private _recipeRepository: IRecipeRepository;
 
-    constructor(planRepository: IPlanRepository, recipeRepository: IRecipeRepository, weekRepository: IWeekRepository,) {
+    constructor(planRepository: IPlanRepository, recipeRepository: IRecipeRepository, weekRepository: IWeekRepository) {
         this._planRepository = planRepository;
         this._recipeRepository = recipeRepository;
         this._weekRepository = weekRepository;
@@ -25,19 +24,18 @@ export class GetPlanVariantsRecipesByWeekList {
 
         const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week.id);
 
-        const plans: Plan[] = await this.planRepository.findAll((<any>Locale)['es' as string] || Locale.es);
-        // console.log(plans)
+        const plans: Plan[] = await this.planRepository.findAll((<any>Locale)["es" as string] || Locale.es);
         let filterPlans: any[] = [];
-        for(let i = 0; i < recipes.length; i++) {
-            for(let j = 0; j < plans.length; j++) {
-                for(let k = 0; k < recipes[i].relatedPlans.length; k++) {
-                    if(recipes[i].relatedPlans[k].value === plans[j].id.value) {
-                        if(filterPlans.length === 0) {
-                            filterPlans = [...filterPlans, plans[j]]
+        for (let i = 0; i < recipes.length; i++) {
+            for (let j = 0; j < plans.length; j++) {
+                for (let k = 0; k < recipes[i].relatedPlans.length; k++) {
+                    if (recipes[i].relatedPlans[k].value === plans[j].id.value) {
+                        if (filterPlans.length === 0) {
+                            filterPlans = [...filterPlans, plans[j]];
                         } else {
                             let planRepeated = filterPlans.filter((val: Plan) => val.id.value === plans[j].id.value);
-                            if(planRepeated.length === 0) {
-                                filterPlans = [...filterPlans, plans[j]]
+                            if (planRepeated.length === 0) {
+                                filterPlans = [...filterPlans, plans[j]];
                             }
                         }
                     }
@@ -45,19 +43,18 @@ export class GetPlanVariantsRecipesByWeekList {
             }
         }
 
-        for(let j = 0; j < filterPlans.length; j++) {
-            for(let i = 0; i < recipes.length; i++) {
-                for(let k = 0; k < recipes[i].relatedPlans.length; k++) {
-                    if(recipes[i].relatedPlans[k].value === filterPlans[j].id.value) {
+        for (let j = 0; j < filterPlans.length; j++) {
+            for (let i = 0; i < recipes.length; i++) {
+                for (let k = 0; k < recipes[i].relatedPlans.length; k++) {
+                    if (recipes[i].relatedPlans[k].value === filterPlans[j].id.value) {
                         filterPlans[j].recipes = filterPlans[j].recipes ? [...filterPlans[j].recipes, recipes[i]] : [recipes[i]];
                     }
                 }
             }
         }
-        // console.log("Filtered: ", filterPlans);
         let filterPlansActive = filterPlans.filter((val: any) => val.isActive);
 
-        return GetAdditionalPlanListPresenter.present(filterPlansActive);
+        return filterPlansActive;
         // return "true"
     }
 
@@ -73,7 +70,7 @@ export class GetPlanVariantsRecipesByWeekList {
      * Getter recipeRepository
      * @return {IRecipeRepository}
      */
-     public get recipeRepository(): IRecipeRepository {
+    public get recipeRepository(): IRecipeRepository {
         return this._recipeRepository;
     }
 
@@ -81,7 +78,7 @@ export class GetPlanVariantsRecipesByWeekList {
      * Getter weekRepository
      * @return {IWeekRepository}
      */
-     public get weekRepository(): IWeekRepository {
+    public get weekRepository(): IWeekRepository {
         return this._weekRepository;
     }
 }

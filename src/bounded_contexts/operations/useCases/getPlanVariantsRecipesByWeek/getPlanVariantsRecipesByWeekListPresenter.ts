@@ -1,9 +1,16 @@
 import { Plan } from "../../domain/plan/Plan";
 import { Week } from "../../domain/week/Week";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { IStorageService } from "../../application/storageService/IStorageService";
 
-export class GetAdditionalPlanListPresenter {
-    public static present(plans: any[]): any {
+export class GetPlanVariantsRecipesByWeekListPresenter {
+    private _storageService: IStorageService;
+
+    constructor(storageService: IStorageService) {
+        this._storageService = storageService;
+    }
+
+    public async present(plans: any[]): Promise<any> {
         const presentedPlans = [];
 
         for (let plan of plans) {
@@ -49,19 +56,22 @@ export class GetAdditionalPlanListPresenter {
                     imageUrl: recipe.recipeGeneralData.imageUrl,
                     weight: recipe.recipeGeneralData.recipeWeight.value(),
                     weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
-                    recipeVariants: recipe && recipe.recipeVaraints ? recipe.recipeVaraints.map((variant: any) => {
-                        return {
-                            ingredients: variant.ingredients.map((ing: any) => ing.name),
-                            restrictions: variant.recipeVariantRestriction.map((r: any) => {
-                                return {
-                                    id: r.id.value,
-                                    value: r.value,
-                                    label: r.label,
-                                };
-                            }),
-                            sku: variant.sku.code,
-                        };
-                    }) : [],
+                    recipeVariants:
+                        recipe && recipe.recipeVaraints
+                            ? recipe.recipeVaraints.map((variant: any) => {
+                                  return {
+                                      ingredients: variant.ingredients.map((ing: any) => ing.name),
+                                      restrictions: variant.recipeVariantRestriction.map((r: any) => {
+                                          return {
+                                              id: r.id.value,
+                                              value: r.value,
+                                              label: r.label,
+                                          };
+                                      }),
+                                      sku: variant.sku.code,
+                                  };
+                              })
+                            : [],
                     imageTags: recipe.recipeImageTags.map((tag: any) => tag.name),
                     backOfficeTags: recipe.recipeBackOfficeTags.map((tag: any) => tag.name),
                     recipeNutritionalData: recipe.recipeNutritionalData.nutritionalItems,
@@ -75,7 +85,7 @@ export class GetAdditionalPlanListPresenter {
                     }),
                     availableMonths: recipe.availableMonths,
                     relatedPlans: recipe.relatedPlans.map((planId: any) => planId.value),
-                    recipeTools: recipe.recipeTools
+                    recipeTools: recipe.recipeTools,
                 });
             }
 
@@ -91,10 +101,22 @@ export class GetAdditionalPlanListPresenter {
                 hasRecipes: plan.hasRecipes,
                 variants: presentedVariants,
                 additionalPlans: plan.additionalPlans.map((plan: Plan) => plan.id.value),
-                recipes: presentedRecipes
+                recipes: presentedRecipes,
+                abilityToChooseRecipes: plan.abilityToChooseRecipes,
+                slug: plan.planSlug.slug,
+                icon: await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl),
+                iconWithColor: await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl),
             });
         }
 
         return presentedPlans;
+    }
+
+    /**
+     * Getter storageService
+     * @return {IStorageService}
+     */
+    public get storageService(): IStorageService {
+        return this._storageService;
     }
 }
