@@ -5,6 +5,7 @@ import { createCouponControllerCSV } from "../../useCases/createCouponFromCSV";
 // import { getAdditionalPlanListController } from "../../useCases/getAdditionalPlanList";
 import { getCouponByIdController } from "../../useCases/getCouponById";
 import { getCouponListController } from "../../useCases/getCouponList";
+import { getCouponValidationController } from "../../useCases/couponValidation";
 import { updateCouponStateController } from "../../useCases/updateCouponState";
 
 const couponRouter = express.Router();
@@ -16,6 +17,7 @@ const options: multer.Options = {
 // // GETs
 couponRouter.get("/", (req, res) => getCouponListController.execute(req, res));
 couponRouter.get("/:id", (req, res) => getCouponByIdController.execute(req, res));
+couponRouter.get("/validation/:code", (req, res) => getCouponValidationController.execute(req, res));
 
 // // PUT
 couponRouter.put("/:id", multer(options).single(""), (req, res) => updateCouponStateController.execute(req, res));
