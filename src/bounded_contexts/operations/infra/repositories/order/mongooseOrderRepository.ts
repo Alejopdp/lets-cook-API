@@ -8,6 +8,8 @@ import { logger } from "../../../../../../config";
 import { SubscriptionId } from "../../../domain/subscription/SubscriptionId";
 import { Plan } from "../../../domain/plan/Plan";
 import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
+import { CustomerId } from "../../../domain/customer/CustomerId";
+import { Week } from "../../../domain/week/Week";
 
 export class MongooseOrderRepository implements IOrderRepository {
     public async save(order: Order): Promise<void> {
@@ -50,6 +52,16 @@ export class MongooseOrderRepository implements IOrderRepository {
             .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return orderDb ? orderMapper.toDomain(orderDb, locale) : undefined;
+    }
+
+    public async findForBilling(subscriptionsIds: SubscriptionId[], week: Week): Promise<Order[]> {
+        const ordersDb = await MongooseOrder.find({
+            subscription: subscriptionsIds.map((id) => id.value),
+            state: "ORDER_ACTIVE",
+            week: week.id.value,
+        });
+
+        return ordersDb.map((order) => orderMapper.toDomain(order));
     }
 
     public async findAll(locale: Locale): Promise<Order[]> {

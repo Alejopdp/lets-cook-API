@@ -1,4 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
 import { CouponId } from "../cupons/CouponId";
 import { Customer } from "../customer/Customer";
@@ -66,14 +67,17 @@ export class Subscription extends Entity<Subscription> {
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
         const orders: Order[] = [];
         const deliveryDate: Date = this.getFirstOrderShippingDate(2); // Tuesday
+        const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
 
         for (let i = 0; i < 12; i++) {
-            deliveryDate.setDate(deliveryDate.getDate() + 7);
+            deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+            if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+
             orders.push(
                 new Order(
                     new Date(deliveryDate),
                     new OrderActive(),
-                    new Date(),
+                    new Date(billingDate),
                     orderedWeeks[i],
                     this.planVariantId,
                     this.plan,

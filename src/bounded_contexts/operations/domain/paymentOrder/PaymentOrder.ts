@@ -1,5 +1,6 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { CustomerId } from "../customer/CustomerId";
+import { Order } from "../order/Order";
 import { Week } from "../week/Week";
 import { PaymentOrderId } from "./PaymentOrderId";
 import { IPaymentOrderState } from "./paymentOrderState/IPaymentOrderState";
@@ -37,6 +38,12 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._discountAmount = discountAmount;
         this._shippingCost = shippingCost;
         this._customerId = customerId;
+    }
+
+    public addOrder(order: Order): void {
+        order.paymentOrderId = this.id;
+        this.amount = this.amount + order.price; // TO DO: Add price with discount
+        // this.discountAmount = this.discountAmount + 1 // TO DO: Add discountAmount
     }
 
     /**

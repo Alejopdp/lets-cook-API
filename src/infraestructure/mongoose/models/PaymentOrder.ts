@@ -10,7 +10,6 @@ const PaymentOrderSchema = new mongoose.Schema(
 
         paymentIntentId: {
             type: String,
-            required: true,
         },
 
         shippingDate: {
@@ -50,7 +49,7 @@ const PaymentOrderSchema = new mongoose.Schema(
             required: true,
         },
 
-        shippingCoste: {
+        shippingCost: {
             type: Number,
             required: true,
         },

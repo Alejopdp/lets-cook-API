@@ -49,6 +49,12 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         return !!customerDb ? customerMapper.toDomain(customerDb) : undefined;
     }
 
+    public async findAll(): Promise<Customer[]> {
+        const customersDb = await MongooseCustomer.find({});
+
+        return customersDb.map((customer) => customerMapper.toDomain(customer));
+    }
+
     // public async findBy(conditions: any): Promise<ShippingZone[]> {
     //     const couponsDb = await MongooseShippingZone.find({ ...conditions, deletionFlag: false });
     //     return couponsDb.map((raw: any) => shippingMapper.toDomain(raw));

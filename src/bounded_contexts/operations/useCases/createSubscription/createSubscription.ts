@@ -104,11 +104,18 @@ export class CreateSubscription {
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) => zone.hasAddressInside());
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
-        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
+        // const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
+        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
 
-        // const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = { customerId: customer.id, orders, subscription, weeks: nextTwelveWeeks };
-        // await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
+        const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
+            customerId: customer.id,
+            orders,
+            subscription,
+            weeks: nextTwelveWeeks,
+            shippingCost: customerShippingZone.cost,
+        };
+        await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
 
         // if (!!!customer.hasAtLeastOnePaymentMethod() || !customer.hasPaymentMethodByStripeId(dto.stripePaymentMethodId)) {
         //     const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);

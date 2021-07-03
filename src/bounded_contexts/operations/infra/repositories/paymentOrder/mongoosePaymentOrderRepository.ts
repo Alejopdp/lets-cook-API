@@ -23,6 +23,13 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         await MongoosePaymentOrder.create(paymentOrdersToSave);
     }
 
+    public async updateMany(paymentOrders: PaymentOrder[]): Promise<void> {
+        for (let order of paymentOrders) {
+            const orderDb = paymentOrderMapper.toPersistence(order);
+            await MongoosePaymentOrder.findOneAndUpdate({ _id: order.id.value }, orderDb);
+        }
+    }
+
     public async findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined> {
         const paymentOrder = await MongoosePaymentOrder.findById(paymentOrderId.value, { deletionFlag: false }).populate("week");
 
@@ -42,7 +49,18 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     }
 
     public async existsBy(customerId: CustomerId): Promise<boolean> {
-        return await MongoosePaymentOrder.exists({ customer: customerId.value });
+        return await MongoosePaymentOrder.exists({ customer: customerId.value, state: "PAYMENT_ORDER_ACTIVE" });
+    }
+
+    public async findActiveByCustomerAndBillingDateList(billingDates: Date[], customerId: CustomerId): Promise<PaymentOrder[]> {
+        return await this.findBy(
+            {
+                billingDate: billingDates,
+                state: "PAYMENT_ORDER_ACTIVE",
+                customer: customerId.value,
+            },
+            Locale.es
+        );
     }
 
     public async findAll(locale: Locale): Promise<PaymentOrder[]> {

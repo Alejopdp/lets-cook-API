@@ -8,4 +8,5 @@ export interface AssignOrdersToPaymentOrdersDto {
     customerId: CustomerId;
     subscription: Subscription;
     weeks: Week[];
+    shippingCost: number;
 }
