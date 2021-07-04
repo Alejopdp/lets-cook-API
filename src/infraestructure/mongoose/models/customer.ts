@@ -29,6 +29,10 @@ const AddressSchema = new mongoose.Schema({
     addressFullName: {
         type: String,
     },
+
+    deliveryTime: {
+        type: String
+    }
 });
 
 const PaymentMethodSchema = new mongoose.Schema({

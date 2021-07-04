@@ -1,8 +1,5 @@
 import express from "express";
 import multer from "multer";
-import { createCouponController } from "../../useCases/createCoupon";
-import { createCouponControllerCSV } from "../../useCases/createCouponFromCSV";
-// import { getAdditionalPlanListController } from "../../useCases/getAdditionalPlanList";
 import { codeValidationController } from "../../useCases/validateCodeToRecoverPassword";
 import { emailValidatedController } from "../../useCases/customerEmailValidation";
 import { signUpController } from "../../useCases/signUp";
@@ -10,6 +7,9 @@ import { signInController } from "../../useCases/signIn";
 import { forgotPasswordController } from "../../useCases/forgotPassword";
 import { updatePasswordController } from "../../useCases/updatePassword";
 import { socialNetworkAuthController } from "../../useCases/signInSocial";
+import { updateCustomerController } from "../../useCases/updateCustomer";
+import { updateCustomerEmailController } from "../../useCases/updateCustomerEmail";
+import { updateShippingCustomerController } from "../../useCases/updateCustomerShipping";
 
 const customerRouter = express.Router();
 
@@ -23,6 +23,10 @@ customerRouter.get("/:email", (req, res) => emailValidatedController.execute(req
 // // PUT
 customerRouter.put("/forgot-password/:email", (req, res) => forgotPasswordController.execute(req, res));
 customerRouter.put("/reset-password/:email", (req, res) => updatePasswordController.execute(req, res));
+customerRouter.put("/update/:id", (req, res) => updateCustomerController.execute(req, res));
+customerRouter.put("/update-customer/:id", (req, res) => updateCustomerController.execute(req, res));
+customerRouter.put("/update-email/:id", (req, res) => updateCustomerEmailController.execute(req, res));
+customerRouter.put("/update-shipping/:id", (req, res) => updateShippingCustomerController.execute(req, res));
 
 // // POSTs
 customerRouter.post("/sign-up", (req, res) => signUpController.execute(req, res));

@@ -7,14 +7,23 @@ export class Address extends Entity<Address> {
     private _name: string;
     private _fullName: string;
     private _details: string;
+    private _deliveryTime?: string;
 
-    constructor(latitude: number, longitude: number, name: string, fullName: string, details: string, addressId?: AddressId) {
+    constructor(
+        latitude: number, 
+        longitude: number, 
+        name: string, 
+        fullName: string, 
+        details: string, 
+        deliveryTime?: string,
+        addressId?: AddressId ) {
         super(addressId);
         this._latitude = latitude;
         this._longitude = longitude;
         this._name = name;
         this._fullName = fullName;
         this._details = details;
+        this._deliveryTime = deliveryTime;
     }
 
     public nameWithDetails(): string {
@@ -65,6 +74,14 @@ export class Address extends Entity<Address> {
     }
 
     /**
+     * Getter deliveryTime
+     * @return {string}
+     */
+     public get detliveryTime(): string | undefined {
+        return this._deliveryTime;
+    }
+
+    /**
      * Setter latitude
      * @param {number} value
      */
@@ -102,5 +119,13 @@ export class Address extends Entity<Address> {
      */
     public set details(value: string) {
         this._details = value;
+    }
+
+    /**
+     * Setter deliveryTime
+     * @param {string} value
+     */
+     public set deliveryTime(value: string | undefined) {
+        this._deliveryTime = value;
     }
 }

@@ -23,9 +23,14 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         password: customerDb.password,
                         state: customerDb.state,
                         codeToRecoverPassword: customerDb.codeToRecoverPassword,
+                        shippingAddress: customerDb.shippingAddress,
+                        billingAddress: customerDb.billingAddress,
+                        paymentMethods: customerDb.paymentMethods
                     },
                 }
             );
+
+            console.log("Result: ", test)
         } else {
             console.log(customerDb);
             await MongooseCustomer.create(customerDb);
