@@ -10,6 +10,7 @@ import { Plan } from "../../../domain/plan/Plan";
 import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Week } from "../../../domain/week/Week";
+import { PaymentOrderId } from "../../../domain/paymentOrder/PaymentOrderId";
 
 export class MongooseOrderRepository implements IOrderRepository {
     public async save(order: Order): Promise<void> {
@@ -24,7 +25,7 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async bulkSave(Orders: Order[]): Promise<void> {
         const ordersToSave = Orders.map((Order) => orderMapper.toPersistence(Order));
 
-        await MongooseOrder.create(ordersToSave);
+        await MongooseOrder.insertMany(ordersToSave);
     }
 
     public async saveSkippedOrders(orders: Order[]): Promise<void> {
@@ -43,6 +44,17 @@ export class MongooseOrderRepository implements IOrderRepository {
         const ordersIdToSave = orders.map((order) => order.id.value);
 
         await MongooseOrder.updateMany({ _id: ordersIdToSave }, { plan: newPlan.id.value, planVariant: newPlanVariantId.value });
+    }
+
+    public async getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[]): Promise<{ [key: string]: number }> {
+        const ordersDb = await MongooseOrder.find({ paymentOrder: paymentOrdersIds.map((id) => id.value), deletionFlag: false });
+        const map: { [key: string]: number } = {};
+
+        for (let orderDb of ordersDb) {
+            map[orderDb.paymentOrder!] = map[orderDb.paymentOrder!] ? map[orderDb.paymentOrder!] + 1 : 1;
+        }
+
+        return map;
     }
 
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {

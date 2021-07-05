@@ -24,6 +24,7 @@ export class AssignOrdersToPaymentOrders {
             dto.subscription.customer.id
         );
 
+        logger.warn(`Las payment orders: ${JSON.stringify(paymentOrders)}`);
         if (paymentOrders.length === 0) {
             const createPaymentOrdersServiceDto: CreatePaymentOrdersDto = {
                 orders: [...dto.orders],
@@ -43,7 +44,9 @@ export class AssignOrdersToPaymentOrders {
 
             for (let order of dto.orders) {
                 for (let paymentOrder of paymentOrders) {
-                    if (order.billingDate === paymentOrder.billingDate) {
+                    if (order.billingDate.getTime() === paymentOrder.billingDate.getTime()) {
+                        logger.info(`Order Billing Date: ${order.billingDate}`);
+                        logger.info(`Payment Order Billing Date: ${paymentOrder.billingDate}`);
                         paymentOrder.addOrder(order);
                         break;
                     }

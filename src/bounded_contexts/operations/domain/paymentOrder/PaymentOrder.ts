@@ -1,4 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CustomerId } from "../customer/CustomerId";
 import { Order } from "../order/Order";
 import { Week } from "../week/Week";
@@ -44,6 +45,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         order.paymentOrderId = this.id;
         this.amount = this.amount + order.price; // TO DO: Add price with discount
         // this.discountAmount = this.discountAmount + 1 // TO DO: Add discountAmount
+    }
+
+    public getHumanBillingDate(): string {
+        return MomentTimeService.getDateHumanLabel(this.billingDate);
     }
 
     /**

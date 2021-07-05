@@ -20,7 +20,7 @@ export class MongooseWeekRepository implements IWeekRepository {
     public async bulkSave(weeks: Week[]): Promise<void> {
         const weeksToSave = weeks.map((week) => weekMapper.toPersistence(week));
 
-        await WeekModel.create(weeksToSave);
+        await WeekModel.insertMany(weeksToSave);
     }
 
     public async findAll(): Promise<Week[]> {

@@ -20,7 +20,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async bulkSave(paymentOrders: PaymentOrder[]): Promise<void> {
         const paymentOrdersToSave = paymentOrders.map((paymentOrder) => paymentOrderMapper.toPersistence(paymentOrder));
 
-        await MongoosePaymentOrder.create(paymentOrdersToSave);
+        await MongoosePaymentOrder.insertMany(paymentOrdersToSave);
     }
 
     public async updateMany(paymentOrders: PaymentOrder[]): Promise<void> {
@@ -61,6 +61,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
             },
             Locale.es
         );
+    }
+
+    public async findByCustomerId(customerId: CustomerId): Promise<PaymentOrder[]> {
+        return await this.findBy({ customer: customerId.value }, Locale.es);
     }
 
     public async findAll(locale: Locale): Promise<PaymentOrder[]> {
