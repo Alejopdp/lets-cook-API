@@ -27,6 +27,11 @@ export class MongooseCouponRepository implements ICouponRepository {
         return couponDb ? couponMapper.toDomain(couponDb) : undefined;
     }
 
+    public async findByCode(couponCode: string): Promise<Coupon | undefined> {
+        const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode, deletionFlag: false });
+        return couponDb ? couponMapper.toDomain(couponDb) : undefined;
+    }
+
     public async findAll(): Promise<Coupon[]> {
         return await this.findBy({});
     }
