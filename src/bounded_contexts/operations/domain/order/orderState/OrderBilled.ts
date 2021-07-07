@@ -1,17 +1,17 @@
 import { Order } from "../Order";
 import { IOrderState } from "./IOrderState";
-import { OrderActive } from "./OrderActive";
-import { OrderBilled } from "./OrderBilled";
+import { OrderCancelled } from "./OrderCancelled";
+import { OrderSkipped } from "./OrderSkipped";
 
-export class OrderCancelled implements IOrderState {
+export class OrderBilled implements IOrderState {
     title: string;
     humanTitle: string;
     color: string;
 
     constructor() {
-        this.title = "ORDER_CANCELLED";
-        this.humanTitle = "Cancelada";
-        this.color = "red";
+        this.title = "ORDER_BILLED";
+        this.humanTitle = "Orden pagada";
+        this.color = "green";
     }
 
     public toCancelled(order: Order): void {
@@ -19,15 +19,15 @@ export class OrderCancelled implements IOrderState {
     }
 
     public toActive(order: Order): void {
-        throw new Error("No puede activar una orden cancelada");
+        order.state = new OrderBilled();
     }
 
     public toSkipped(order: Order): void {
-        throw new Error("No puede saltear una orden cancelada");
+        order.state = new OrderSkipped();
     }
 
     public toBilled(order: Order): void {
-        order.state = new OrderBilled();
+        order.state = new OrderBilled()
     }
 
     public isSkipped(): boolean {
@@ -35,9 +35,10 @@ export class OrderCancelled implements IOrderState {
     }
 
     public isCancelled(): boolean {
-        return true;
-    }
-    public isActive(): boolean {
         return false;
+    }
+
+    public isActive(): boolean {
+        return true;
     }
 }

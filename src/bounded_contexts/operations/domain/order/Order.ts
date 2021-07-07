@@ -69,6 +69,10 @@ export class Order extends Entity<Order> {
         return this.week.getLabel();
     }
 
+    public bill(): void {
+        this.state.toBilled(this);
+    }
+
     public cancel(): void {
         this.state.toCancelled(this);
     }

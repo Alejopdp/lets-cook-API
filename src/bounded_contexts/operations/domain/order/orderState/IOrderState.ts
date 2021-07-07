@@ -7,6 +7,7 @@ export interface IOrderState {
     toSkipped(order: Order): void;
     toCancelled(order: Order): void;
     toActive(order: Order): void;
+    toBilled(order: Order): void;
     isSkipped(): boolean;
     isCancelled(): boolean;
     isActive(): boolean;

@@ -51,6 +51,13 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         return MomentTimeService.getDateHumanLabel(this.billingDate);
     }
 
+    public toBilled(orders: Order[]): void {
+        for (let order of orders) {
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(); // TO DO: Handle this?
+        }
+        this.state.toBilled(this);
+    }
+
     /**
      * Getter shippingDate
      * @return {Date}

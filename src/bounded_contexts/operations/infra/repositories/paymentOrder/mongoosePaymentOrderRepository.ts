@@ -77,6 +77,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
     }
 
+    public async findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
+        return await this.findBy({ billingDate, state: "PAYMENT_ORDER_ACTIVE" }, Locale.es);
+    }
+
     public async delete(paymentOrderId: PaymentOrderId): Promise<void> {
         await MongoosePaymentOrder.updateOne({ _id: paymentOrderId.value }, { deletionFlag: true });
     }

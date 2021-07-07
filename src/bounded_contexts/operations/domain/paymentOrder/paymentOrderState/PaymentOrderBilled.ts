@@ -1,15 +1,15 @@
 import { PaymentOrder } from "../PaymentOrder";
 import { IPaymentOrderState } from "./IPaymentOrderState";
-import { PaymentOrderBilled } from "./PaymentOrderBilled";
+import { PaymentOrderActive } from "./PaymentOrderActive";
 
-export class PaymentOrderActive implements IPaymentOrderState {
+export class PaymentOrderBilled implements IPaymentOrderState {
     title: string;
     humanTitle: string;
     color: string;
 
     constructor() {
-        this.title = "PAYMENT_ORDER_ACTIVE";
-        this.humanTitle = "Activa";
+        this.title = "PAYMENT_ORDER_BILLED";
+        this.humanTitle = "Orden pagada";
         this.color = "green";
     }
 

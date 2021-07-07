@@ -77,7 +77,7 @@ export class Subscription extends Entity<Subscription> {
                 new Order(
                     new Date(deliveryDate),
                     new OrderActive(),
-                    new Date(billingDate),
+                    i === 0 ? new Date() : new Date(billingDate),
                     orderedWeeks[i],
                     this.planVariantId,
                     this.plan,

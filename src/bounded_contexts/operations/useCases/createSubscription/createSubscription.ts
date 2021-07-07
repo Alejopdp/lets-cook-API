@@ -18,6 +18,7 @@ import { SubscriptionActive } from "../../domain/subscription/subscriptionState/
 import { Week } from "../../domain/week/Week";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
+import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
@@ -26,9 +27,6 @@ import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymen
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
 
-// [X] TO DO Create orders
-// TO DO Assign orders to orderGroups???
-// [X] TO DO Save customer, subscriptions, order and orderGroups
 // TO DO Pay Stripe
 // TO DO Notify customer
 // TO DO Email templates
@@ -45,6 +43,7 @@ export class CreateSubscription {
     private _paymentService: IPaymentService;
     private _notificationService: INotificationService;
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
+    private _paymentOrderRepository: IPaymentOrderRepository;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -55,7 +54,8 @@ export class CreateSubscription {
         orderRepository: IOrderRepository,
         paymentService: IPaymentService,
         notificationService: INotificationService,
-        assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders
+        assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
+        paymentOrderRepository: IPaymentOrderRepository
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -66,6 +66,7 @@ export class CreateSubscription {
         this._notificationService = notificationService;
         this._paymentService = paymentService;
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
+        this._paymentOrderRepository = paymentOrderRepository;
     }
 
     public async execute(dto: CreateSubscriptionDto): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent }> {
@@ -115,7 +116,8 @@ export class CreateSubscription {
             weeks: nextTwelveWeeks,
             shippingCost: customerShippingZone.cost,
         };
-        await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
+
+        const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
 
         // if (!!!customer.hasAtLeastOnePaymentMethod() || !customer.hasPaymentMethodByStripeId(dto.stripePaymentMethodId)) {
         //     const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
@@ -130,10 +132,15 @@ export class CreateSubscription {
             customer.email,
             customer.stripeId
         );
+
+        newPaymentOrders[0]?.toBilled(orders.filter((order) => order.paymentOrderId?.equals(newPaymentOrders[0].id))); // TO DO: Handlear 3dSecure rechazado
+
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
+        if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+        if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
         return { subscription, paymentIntent };
     }
@@ -207,5 +214,13 @@ export class CreateSubscription {
      */
     public get assignOrdersToPaymentOrders(): AssignOrdersToPaymentOrders {
         return this._assignOrdersToPaymentOrderService;
+    }
+
+    /**
+     * Getter paymentOrderRepository
+     * @return {IPaymentOrderRepository}
+     */
+    public get paymentOrderRepository(): IPaymentOrderRepository {
+        return this._paymentOrderRepository;
     }
 }

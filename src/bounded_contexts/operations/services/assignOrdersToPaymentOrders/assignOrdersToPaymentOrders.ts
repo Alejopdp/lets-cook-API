@@ -18,36 +18,35 @@ export class AssignOrdersToPaymentOrders {
         this._createPaymentOrdersService = createPaymentOrdersService;
     }
 
-    public async execute(dto: AssignOrdersToPaymentOrdersDto): Promise<void> {
-        var paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findActiveByCustomerAndBillingDateList(
+    public async execute(
+        dto: AssignOrdersToPaymentOrdersDto
+    ): Promise<{ newPaymentOrders: PaymentOrder[]; paymentOrdersToUpdate: PaymentOrder[] }> {
+        var paymentOrdersToUpdate: PaymentOrder[] = await this.paymentOrderRepository.findActiveByCustomerAndBillingDateList(
             dto.orders.map((order) => order.billingDate),
             dto.subscription.customer.id
         );
+        var newPaymentOrders: PaymentOrder[] = [];
 
-        logger.warn(`Las payment orders: ${JSON.stringify(paymentOrders)}`);
-        if (paymentOrders.length === 0) {
+        if (paymentOrdersToUpdate.length === 0) {
             const createPaymentOrdersServiceDto: CreatePaymentOrdersDto = {
                 orders: [...dto.orders],
                 shippingCost: dto.shippingCost,
                 subscription: dto.subscription,
             };
 
-            paymentOrders = this.createPaymentOrdersService.execute(createPaymentOrdersServiceDto);
+            newPaymentOrders = this.createPaymentOrdersService.execute(createPaymentOrdersServiceDto);
 
             for (let order of dto.orders) {
-                order.assignPaymentOrder(paymentOrders);
+                order.assignPaymentOrder(newPaymentOrders);
             }
-
-            await this.paymentOrderRepository.bulkSave(paymentOrders);
         } else {
             const ordersWithoutPaymentOrders = [];
 
             for (let order of dto.orders) {
-                for (let paymentOrder of paymentOrders) {
+                for (let paymentOrder of paymentOrdersToUpdate) {
                     if (order.billingDate.getTime() === paymentOrder.billingDate.getTime()) {
-                        logger.info(`Order Billing Date: ${order.billingDate}`);
-                        logger.info(`Payment Order Billing Date: ${paymentOrder.billingDate}`);
                         paymentOrder.addOrder(order);
+
                         break;
                     }
                 }
@@ -61,14 +60,15 @@ export class AssignOrdersToPaymentOrders {
                     shippingCost: dto.shippingCost,
                     subscription: dto.subscription,
                 };
-                const newPaymentOrders = this.createPaymentOrdersService.execute(createPaymentOrdersServiceDto);
+                newPaymentOrders = this.createPaymentOrdersService.execute(createPaymentOrdersServiceDto);
 
-                await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+                for (let order of ordersWithoutPaymentOrders) {
+                    order.assignPaymentOrder(newPaymentOrders);
+                }
             }
-            await this.paymentOrderRepository.updateMany(paymentOrders);
         }
 
-        // logger.warn(`A ver las payment orders: ${JSON.stringify(paymentOrders)}`);
+        return { newPaymentOrders, paymentOrdersToUpdate };
     }
 
     /**
@@ -87,25 +87,3 @@ export class AssignOrdersToPaymentOrders {
         return this._createPaymentOrdersService;
     }
 }
-
-// if (paymentOrders.length === 0) {
-//     const shippingDate: Date = new Date(); // TO DO: Es necesaria la shipping date en la payment order?
-//     const billingDate: Date = MomentTimeService.getDayOfThisWeekByDayNumber(6); // TO DO: Ubicarlas en sabado y crear por frecuencia
-
-//     for (let i = 0; i <= 11; i++) {
-//         billingDate.setDate(billingDate.getDate() + this.getFrequencyOffset(dto.subscription.frequency)); // TO DO: Create by frequency
-//         const order: Order = dto.orders[i];
-//         paymentOrders.push(
-//             new PaymentOrder(
-//                 shippingDate,
-//                 new PaymentOrderActive(),
-//                 "",
-//                 new Date(billingDate),
-//                 dto.weeks[i],
-//                 order.price,
-//                 0,
-//                 dto.shippingCost,
-//                 dto.customerId
-//             )
-//         );
-//     }
