@@ -4,9 +4,9 @@ import { Customer } from "../../domain/customer/Customer";
 import { Address } from "../../domain/address/Address";
 import { AddressId } from "../../domain/address/AddressId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
-import { UpdateCustomerShippingDto } from "./updateCustomerShippingDto";
+import { UpdateCustomerBillingDto } from "./updateCustomerBillingDto";
 
-export class UpdateCustomerShipping {
+export class UpdateCustomerBilling {
     private _customerRepository: ICustomerRepository;
     private _storageService: IStorageService;
 
@@ -18,13 +18,13 @@ export class UpdateCustomerShipping {
         this._storageService = storageService;
     }
 
-    public async execute(dto: UpdateCustomerShippingDto): Promise<void> {
+    public async execute(dto: UpdateCustomerBillingDto): Promise<void> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer | undefined = await this.customerRepository.findById(customerId);
         
         if (!customer) throw new Error("Error al buscar el cliente");
         
-        customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, dto.deliveryTime)
+        customer.changeBillingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, dto.identification)
 
         await this.customerRepository.save(customer);
     }

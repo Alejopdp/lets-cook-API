@@ -1,12 +1,13 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { Customer } from "../../domain/customer/Customer";
+import { PersonalInfo } from "../../domain/customer/personalInfo/PersonalInfo";
 import { Address } from "../../domain/address/Address";
 import { AddressId } from "../../domain/address/AddressId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
-import { UpdateCustomerShippingDto } from "./updateCustomerShippingDto";
+import { UpdateCustomerInfoDto } from "./updateCustomerInfoDto";
 
-export class UpdateCustomerShipping {
+export class UpdateCustomerInfo {
     private _customerRepository: ICustomerRepository;
     private _storageService: IStorageService;
 
@@ -18,14 +19,14 @@ export class UpdateCustomerShipping {
         this._storageService = storageService;
     }
 
-    public async execute(dto: UpdateCustomerShippingDto): Promise<void> {
+    public async execute(dto: UpdateCustomerInfoDto): Promise<void> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer | undefined = await this.customerRepository.findById(customerId);
         
         if (!customer) throw new Error("Error al buscar el cliente");
-        
-        customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, dto.deliveryTime)
 
+        customer.changePersonalInfo(dto.name, dto.lastName, dto.phone1, dto.phone2, new Date(dto.birthDate), dto.preferredLanguage);
+        
         await this.customerRepository.save(customer);
     }
 

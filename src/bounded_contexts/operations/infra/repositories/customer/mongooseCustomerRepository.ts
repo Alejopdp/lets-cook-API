@@ -25,7 +25,8 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         codeToRecoverPassword: customerDb.codeToRecoverPassword,
                         shippingAddress: customerDb.shippingAddress,
                         billingAddress: customerDb.billingAddress,
-                        paymentMethods: customerDb.paymentMethods
+                        paymentMethods: customerDb.paymentMethods,
+                        personalInfo: customerDb.personalInfo
                     },
                 }
             );
@@ -54,12 +55,21 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         return !!customerDb ? customerMapper.toDomain(customerDb) : undefined;
     }
 
+    public async findAll(): Promise<Customer[]> {
+        return await this.findBy({});
+    }
+
+    public async findBy(conditions: any): Promise<Customer[]> {
+        const customerDb = await MongooseCustomer.find({ ...conditions, deletionFlag: false });
+        return customerDb.map((raw: any) => customerMapper.toDomain(raw));
+    }
+
     // public async findBy(conditions: any): Promise<ShippingZone[]> {
     //     const couponsDb = await MongooseShippingZone.find({ ...conditions, deletionFlag: false });
     //     return couponsDb.map((raw: any) => shippingMapper.toDomain(raw));
     // }
 
-    // public async delete(shippingId: ShippingZoneId): Promise<void> {
-    //     await MongooseShippingZone.updateOne({ _id: shippingId.value }, { $set: { deletionFlag: true } });
-    // }
+    public async delete(customerId: CustomerId): Promise<void> {
+        await MongooseCustomer.updateOne({ _id: customerId.value }, { $set: { deletionFlag: true } });
+    }
 }

@@ -35,6 +35,39 @@ const AddressSchema = new mongoose.Schema({
     }
 });
 
+const PersonalInfoSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: uuid.v4,
+    },
+
+    name: {
+        type: String,
+        required: true,
+    },
+
+    lastName: {
+        type: String,
+        required: true
+    },
+
+    phone1: {
+        type: String,
+    },
+
+    phone2: {
+        type: String,
+    },
+
+    birthDate: {
+        type: String,
+    },
+
+    preferredLanguage: {
+        type: String
+    }
+});
+
 const PaymentMethodSchema = new mongoose.Schema({
     _id: {
         type: String,
@@ -101,6 +134,9 @@ const CustomerSchema = new mongoose.Schema(
         state: {
             type: String,
             required: true,
+        },
+        personalInfo: {
+            type: PersonalInfoSchema
         },
         shippingAddress: {
             type: AddressSchema,

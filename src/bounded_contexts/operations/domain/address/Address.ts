@@ -7,6 +7,7 @@ export class Address extends Entity<Address> {
     private _name: string;
     private _fullName: string;
     private _details: string;
+    private _identification?: string;
     private _deliveryTime?: string;
 
     constructor(
@@ -15,6 +16,7 @@ export class Address extends Entity<Address> {
         name: string, 
         fullName: string, 
         details: string, 
+        identification?: string,
         deliveryTime?: string,
         addressId?: AddressId ) {
         super(addressId);
@@ -23,6 +25,7 @@ export class Address extends Entity<Address> {
         this._name = name;
         this._fullName = fullName;
         this._details = details;
+        this._identification = identification;
         this._deliveryTime = deliveryTime;
     }
 
@@ -32,6 +35,24 @@ export class Address extends Entity<Address> {
 
     public fullNameWithDetails(): string {
         return this.fullName + " " + this.details;
+    }
+
+    public changeInfoBilling(lat: number, long: number, name: string, fullName: string, details: string, identification: string): void {
+        this.latitude = lat;
+        this.longitude = long;
+        this.name = name;
+        this.fullName = fullName;
+        this.details = details;
+        this.identification = identification;
+    }
+
+    public changeInfoShipping(lat: number, long: number, name: string, fullName: string, details: string, deliveryTime: string): void {
+        this.latitude = lat;
+        this.longitude = long;
+        this.name = name;
+        this.fullName = fullName;
+        this.details = details;
+        this.deliveryTime = deliveryTime;
     }
 
     /**
@@ -71,6 +92,14 @@ export class Address extends Entity<Address> {
      */
     public get details(): string {
         return this._details;
+    }
+
+    /**
+     * Getter identification
+     * @return {string}
+     */
+     public get identification(): string | undefined {
+        return this._identification;
     }
 
     /**
@@ -119,6 +148,14 @@ export class Address extends Entity<Address> {
      */
     public set details(value: string) {
         this._details = value;
+    }
+
+    /**
+     * Setter identification
+     * @param {string} value
+     */
+     public set identification(value: string | undefined) {
+        this._identification = value;
     }
 
     /**

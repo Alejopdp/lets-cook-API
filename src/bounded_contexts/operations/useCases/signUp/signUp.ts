@@ -32,6 +32,7 @@ export class SignUp {
             undefined,
             password,
             dto.state,
+            undefined,
             undefined
         );
         const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
