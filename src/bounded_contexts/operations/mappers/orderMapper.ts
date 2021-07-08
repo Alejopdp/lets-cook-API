@@ -18,7 +18,7 @@ export class OrderMapper implements Mapper<Order> {
     public toDomain(raw: any, locale?: Locale): Order {
         const state: IOrderState = OrderStateFactory.createState(raw.state);
         const week: Week = weekMapper.toDomain(raw.week);
-        const planVariantId: PlanVariantId = new PlanVariantId(raw.planVariantId);
+        const planVariantId: PlanVariantId = new PlanVariantId(raw.planVariant);
         const plan: Plan = planMapper.toDomain(raw.plan, Locale.es);
         const subscriptionId: SubscriptionId = new SubscriptionId(raw.subscription);
         const recipeVariantsIds: RecipeVariantId[] = raw.recipeVariants.map((id: string) => new RecipeVariantId(id));

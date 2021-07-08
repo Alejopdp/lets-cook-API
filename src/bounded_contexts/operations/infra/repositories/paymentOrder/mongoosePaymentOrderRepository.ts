@@ -31,9 +31,23 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     }
 
     public async findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined> {
-        const paymentOrder = await MongoosePaymentOrder.findById(paymentOrderId.value, { deletionFlag: false }).populate("week");
+        const paymentOrder = await MongoosePaymentOrder.findById(paymentOrderId.value, { deletionFlag: false })
+            .populate("week")
+            .populate({
+                path: "recipes",
+                populate: { path: "recipeVariants", populate: { path: "restrictions" } },
+            })
+            .populate("plan");
 
         return paymentOrder ? paymentOrderMapper.toDomain(paymentOrder, locale) : undefined;
+    }
+
+    public async findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {
+        const paymentOrder: PaymentOrder | undefined = await this.findById(paymentOrderId);
+
+        if (!!!paymentOrder) throw new Error("La orden de pago ingresada no existe");
+
+        return paymentOrder;
     }
 
     public async findNextTwelveByCustomer(customerId: CustomerId): Promise<PaymentOrder[]> {
