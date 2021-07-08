@@ -40,10 +40,12 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     }
 
     public async findById(recipeId: RecipeId): Promise<Recipe | undefined> {
-        const recipeDb = await RecipeModel.findById(recipeId.value).populate({
-            path: "recipeVariants",
-            populate: { path: "restrictions" },
-        });
+        const recipeDb = await RecipeModel.findById(recipeId.value)
+            .populate("availableWeeks")
+            .populate({
+                path: "recipeVariants",
+                populate: { path: "restrictions" },
+            });
 
         return recipeDb ? recipeMapper.toDomain(recipeDb) : undefined;
     }

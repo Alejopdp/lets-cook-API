@@ -9,11 +9,12 @@ export interface IPaymentOrderRepository {
     updateMany(paymentOrders: PaymentOrder[]): Promise<void>;
     findAll(locale: Locale): Promise<PaymentOrder[]>;
     findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined>;
+    findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder>;
     findBy(conditions: any, locale: Locale): Promise<PaymentOrder[]>;
-    findByCustomerId(customerId: CustomerId): Promise<PaymentOrder[]>
+    findByCustomerId(customerId: CustomerId): Promise<PaymentOrder[]>;
     findNextTwelveByCustomer(customerId: CustomerId): Promise<PaymentOrder[]>;
     findActiveByCustomerAndBillingDateList(billingDates: Date[], customerId: CustomerId): Promise<PaymentOrder[]>;
-    findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]>
+    findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]>;
     existsBy(customerId: CustomerId): Promise<boolean>;
     delete(paymentOrderId: PaymentOrderId): Promise<void>;
 }

@@ -108,6 +108,14 @@ export class Order extends Entity<Order> {
         }
     }
 
+    public getPlanName(): string {
+        return this.plan.name;
+    }
+
+    public getPlanVariantLabel(planVariantId: PlanVariantId): string {
+        return this.plan.getPlanVariantLabel(planVariantId);
+    }
+
     /**
      * Getter shippingDate
      * @return {Date}

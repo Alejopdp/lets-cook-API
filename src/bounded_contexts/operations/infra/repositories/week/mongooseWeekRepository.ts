@@ -38,7 +38,7 @@ export class MongooseWeekRepository implements IWeekRepository {
     }
 
     public async findBy(conditions: any, locale?: Locale): Promise<Week[]> {
-        const weeksDb = await WeekModel.find({ ...conditions, deletionFlag: false }).sort(["minDate", "asc"]);
+        const weeksDb = await WeekModel.find({ ...conditions, deletionFlag: false }).sort({"minDate": "asc"}]);
 
         return weeksDb.map((raw: any) => weekMapper.toDomain(raw, locale));
     }

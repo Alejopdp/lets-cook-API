@@ -46,6 +46,21 @@ export class Recipe extends Entity<Recipe> {
         this._recipeTools = recipeTools;
     }
 
+    public getName(): string {
+        return this.recipeGeneralData.name;
+    }
+
+    public getMainImageUrl(): string {
+        return this.recipeGeneralData.imageUrl;
+    }
+
+    public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]) {
+        const variant: RecipeVariant | undefined = this.recipeVariants.find((variant) => variantIds.some((id) => id.equals(variant.id)));
+        if (!!!variant) return "";
+
+        return variant.sku;
+    }
+
     public updateWeeks(weeks: Week[]): void {
         this.availableWeeks = weeks;
     }

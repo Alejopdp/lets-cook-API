@@ -57,6 +57,9 @@ export class MongooseOrderRepository implements IOrderRepository {
         return map;
     }
 
+    public async findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]> {
+        return await this.findBy({ paymentOrder: paymentOrderId.value });
+    }
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
