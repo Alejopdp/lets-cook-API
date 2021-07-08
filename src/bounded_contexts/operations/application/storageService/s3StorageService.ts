@@ -45,6 +45,26 @@ export class S3StorageService implements IStorageService {
         }
     }
 
+    public async saveIconLinear(planName: string, fileName: string, file?: ReadStream): Promise<string> {
+        if (!file) return "";
+        const planNameWithoutSpaces = planName.replace(/\s/g, "_");
+
+        const objectKey = `${process.env.NODE_ENV}/plans/${planNameWithoutSpaces}/icon-${path.extname(fileName)}`;
+        await this.uploadFile(objectKey, file);
+
+        return objectKey;
+    }
+
+    public async saveIconLinealColor(planName: string, fileName: string, file?: ReadStream): Promise<string> {
+        if (!file) return "";
+        const planNameWithoutSpaces = planName.replace(/\s/g, "_");
+
+        const objectKey = `${process.env.NODE_ENV}/plans/${planNameWithoutSpaces}/icon-with-color${path.extname(fileName)}`;
+        await this.uploadFile(objectKey, file);
+
+        return objectKey;
+    }
+
     public async saveRecipeImage(recipeName: string, fileName: string, file?: ReadStream): Promise<string> {
         try {
             if (!file) return "";

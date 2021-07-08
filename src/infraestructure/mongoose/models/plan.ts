@@ -36,6 +36,11 @@ const PlanVariantSchema = new mongoose.Schema({
         type: Number,
     },
 
+    isDefault: {
+        type: Boolean,
+        required: true,
+    },
+
     attributes: [
         {
             key: String,

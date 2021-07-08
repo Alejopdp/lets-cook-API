@@ -2,15 +2,10 @@ import { IPaymentService } from "../../application/paymentService/IPaymentServic
 import { Customer } from "../../domain/customer/Customer";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
-import { PaymentOrderActive } from "../../domain/paymentOrder/paymentOrderState/PaymentOrderActive";
-import { Subscription } from "../../domain/subscription/Subscription";
-import { Week } from "../../domain/week/Week";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
-import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
-
 export class PayAllSubscriptions {
     private _customerRepository: ICustomerRepository;
     private _orderRepository: IOrderRepository;

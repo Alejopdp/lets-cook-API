@@ -1,9 +1,4 @@
 import schedule from "node-schedule";
-import { Customer } from "../../domain/customer/Customer";
-import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
-import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
-import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
-import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { PayAllSubscriptions } from "../../services/payAllSubscriptions/payAllSubscriptions";
 
 export class BillingJob {

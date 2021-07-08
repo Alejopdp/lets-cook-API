@@ -10,6 +10,7 @@ export class PlanVariant extends Entity<PlanVariant> {
     private _priceWithOffer?: number;
     private _attributes: PlanVariantAttribute[];
     private _description: string;
+    private _isDefault: boolean;
 
     constructor(
         sku: PlanSku,
@@ -17,6 +18,7 @@ export class PlanVariant extends Entity<PlanVariant> {
         price: number,
         attributes: PlanVariantAttribute[],
         description: string,
+        isDefault: boolean,
         priceWithOffer?: number,
         planVariantId?: PlanVariantId
     ) {
@@ -27,6 +29,7 @@ export class PlanVariant extends Entity<PlanVariant> {
         this._priceWithOffer = priceWithOffer;
         this._attributes = attributes;
         this._description = description;
+        this._isDefault = isDefault;
     }
 
     public getConcatenatedAttributesAsString(): string {
@@ -96,6 +99,14 @@ export class PlanVariant extends Entity<PlanVariant> {
     }
 
     /**
+     * Getter isDefault
+     * @return {boolean}
+     */
+    public get isDefault(): boolean {
+        return this._isDefault;
+    }
+
+    /**
      * Setter sku
      * @param {PlanSku} value
      */
@@ -141,5 +152,13 @@ export class PlanVariant extends Entity<PlanVariant> {
      */
     public set description(value: string) {
         this._description = value;
+    }
+
+    /**
+     * Setter isDefault
+     * @param {boolean} value
+     */
+    public set isDefault(value: boolean) {
+        this._isDefault = value;
     }
 }

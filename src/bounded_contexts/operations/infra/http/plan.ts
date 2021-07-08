@@ -30,7 +30,15 @@ planRouter.put("/toggle-state/:id", (req, res) => togglePlanStateController.exec
 planRouter.put("/:id", multer(options).single("planImage"), (req, res) => updatePlanController.execute(req, res));
 
 // POSTs
-planRouter.post("/", multer(options).single("planImage"), (req, res) => createPlanController.execute(req, res));
+planRouter.post(
+    "/",
+    multer(options).fields([
+        { name: "planImage", maxCount: 1 },
+        { name: "icon", maxCount: 1 },
+        { name: "iconWithColor", maxCount: 1 },
+    ]),
+    (req, res) => createPlanController.execute(req, res)
+);
 
 // DELETEs
 planRouter.delete("/:id", (req, res) => deletePlanController.execute(req, res));
