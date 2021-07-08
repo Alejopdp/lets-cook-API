@@ -58,7 +58,8 @@ export class UpdatePlan {
                     variant.price,
                     variant.priceWithOffer,
                     attributes,
-                    "description"
+                    "description",
+                    variant.isDefault
                     // variant.description
                 );
                 planVariants.push(variantWithRecipe);
