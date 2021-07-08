@@ -28,6 +28,7 @@ export class GetPlanVariantsRecipesByWeekList {
 
         const plans: Plan[] = await this.planRepository.findAll((<any>Locale)["es" as string] || Locale.es);
         // console.log(plans)
+
         let filterPlans: any[] = [];
         for (let i = 0; i < recipes.length; i++) {
             for (let j = 0; j < plans.length; j++) {
