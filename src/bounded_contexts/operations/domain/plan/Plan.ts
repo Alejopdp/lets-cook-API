@@ -94,6 +94,7 @@ export class Plan extends Entity<Plan> {
         }
 
         if (planVariants.length < 1) throw new Error("No puede crear un plan sin ninguna variante");
+        if (planVariants.every((variant) => !!!variant.isDefault)) throw new Error("Es necesario seleccionar una variante como default");
         if (availablePlanFrecuencies.length < 1) throw new Error("Hay que ingresar al menos 1 frecuencia disponible para el plan");
         if (type === PlanType.Adicional && additionalPlans.length > 0)
             throw new Error("Un plan adicional no puede tener relacionado otros planes adidiconales");

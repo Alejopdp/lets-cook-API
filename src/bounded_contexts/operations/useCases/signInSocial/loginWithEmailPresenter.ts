@@ -7,10 +7,10 @@ export class LoginWithEmailPresenter {
                 email: customer.email,
                 id: customer.id.value,
                 shippingAddress: {
-                    addressDetails: customer.shippingAddress.details,
-                    addressName: customer.shippingAddress.name,
-                    latitude: customer.shippingAddress.latitude,
-                    longitude: customer.shippingAddress.longitude,
+                    addressDetails: customer.shippingAddress?.details,
+                    addressName: customer.shippingAddress?.name,
+                    latitude: customer.shippingAddress?.latitude,
+                    longitude: customer.shippingAddress?.longitude,
                 },
                 paymentMethods: customer.paymentMethods.map((method) => ({
                     id: method.id.value,

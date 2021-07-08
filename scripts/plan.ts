@@ -22,7 +22,8 @@ export const getMockPlans = () => {
         30,
         20,
         [attr1, attr2],
-        "PLVEGNGL1 Desc"
+        "PLVEGNGL1 Desc",
+        true
     );
     const variantWithoutGlutenAndMilk1 = new PlanVariantWithRecipe(
         2,
@@ -32,7 +33,8 @@ export const getMockPlans = () => {
         35,
         25,
         [attr1, attr3],
-        "PLVEGNGL1 Desc"
+        "PLVEGNGL1 Desc",
+        false
     );
     const variantWithoutGluten1bis = new PlanVariantWithRecipe(
         2,
@@ -42,7 +44,8 @@ export const getMockPlans = () => {
         3,
         2,
         [attr1, attr3],
-        "PLVEGNGL1 Desc"
+        "PLVEGNGL1 Desc",
+        false
     );
     const variantWithoutGlutenAndMilk1bis = new PlanVariantWithRecipe(
         2,
@@ -52,7 +55,8 @@ export const getMockPlans = () => {
         5,
         3,
         [attr1, attr2],
-        "PLVEGNGL1 Desc"
+        "PLVEGNGL1 Desc",
+        false
     );
 
     const variantWithoutGluten2 = new PlanVariantWithRecipe(
@@ -63,7 +67,8 @@ export const getMockPlans = () => {
         30,
         20,
         [],
-        "PLVEGNGL1 Desc"
+        "PLVEGNGL1 Desc",
+        true
     );
     const variantWithoutGluten3 = new PlanVariantWithRecipe(
         2,
@@ -73,7 +78,8 @@ export const getMockPlans = () => {
         30,
         20,
         [],
-        "PLCARNGL1 Desc"
+        "PLCARNGL1 Desc",
+        true
     );
     const variantWithoutGluten4 = new PlanVariantWithRecipe(
         2,
@@ -83,7 +89,8 @@ export const getMockPlans = () => {
         30,
         20,
         [],
-        "PLFMLNGL2 Desc"
+        "PLFMLNGL2 Desc",
+        true
     );
     const variantWithoutGluten5 = new PlanVariantWithRecipe(
         2,
@@ -93,15 +100,60 @@ export const getMockPlans = () => {
         30,
         20,
         [],
-        "PLVEGNGL2 Desc"
+        "PLVEGNGL2 Desc",
+        true
     );
 
-    const vinoVariant1 = new PlanVariant(new PlanSku("PLVIBLANCO"), "Vino blanco", 10, [new PlanVariantAttribute("Tipo", "Blanco")], "");
-    const vinoVariant2 = new PlanVariant(new PlanSku("PLVITINTO"), "Vino tinto", 10, [new PlanVariantAttribute("Tipo", "Tinto")], "");
-    const desayunoVariant1 = new PlanVariantWithRecipe(1, 1, new PlanSku("PLDES1"), "Desayuno para 1 persona", 30, 20, [], "PLDES1 Desc");
-    const desayunoVariant2 = new PlanVariantWithRecipe(2, 1, new PlanSku("PLDES2"), "Desayuno para 2 personas", 30, 20, [], "PLDES2 Desc");
+    const vinoVariant1 = new PlanVariant(
+        new PlanSku("PLVIBLANCO"),
+        "Vino blanco",
+        10,
+        [new PlanVariantAttribute("Tipo", "Blanco")],
+        "",
+        true
+    );
+    const vinoVariant2 = new PlanVariant(
+        new PlanSku("PLVITINTO"),
+        "Vino tinto",
+        10,
+        [new PlanVariantAttribute("Tipo", "Tinto")],
+        "",
+        false
+    );
+    const desayunoVariant1 = new PlanVariantWithRecipe(
+        1,
+        1,
+        new PlanSku("PLDES1"),
+        "Desayuno para 1 persona",
+        30,
+        20,
+        [],
+        "PLDES1 Desc",
+        true
+    );
+    const desayunoVariant2 = new PlanVariantWithRecipe(
+        2,
+        1,
+        new PlanSku("PLDES2"),
+        "Desayuno para 2 personas",
+        30,
+        20,
+        [],
+        "PLDES2 Desc",
+        false
+    );
 
-    const desayunoVariant3 = new PlanVariantWithRecipe(3, 1, new PlanSku("PLDES3"), "Desayuno para 3 personas", 30, 20, [], "PLDES3 Desc");
+    const desayunoVariant3 = new PlanVariantWithRecipe(
+        3,
+        1,
+        new PlanSku("PLDES3"),
+        "Desayuno para 3 personas",
+        30,
+        20,
+        [],
+        "PLDES3 Desc",
+        true
+    );
 
     const additionalPlan1: Plan = Plan.create(
         "Plan Vinos",

@@ -18,11 +18,15 @@ export class GetCustomerSubscriptionsPresenter {
         const orderSubscriptionMap: { [key: string]: Order[] } = {};
         var pendingActions = [];
 
+        // console.log("NExt orders: ", nextOrders);
+        // console.log("SUBSCRIPTIONS: ", subscriptions);
+        // console.log("Orders.length: ", nextOrders.length);
         for (let order of nextOrders) {
             orderSubscriptionMap[order.subscriptionId.value] = Array.isArray(orderSubscriptionMap[order.subscriptionId.value])
                 ? [...orderSubscriptionMap[order.subscriptionId.value], order]
                 : [order];
         }
+        // console.log("ORDERS MAP:_ ", orderSubscriptionMap);
 
         for (let subscription of subscriptions) {
             if (subscription.plan.isPrincipal()) {

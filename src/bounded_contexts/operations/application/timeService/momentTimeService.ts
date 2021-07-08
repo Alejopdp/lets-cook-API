@@ -1,4 +1,5 @@
 import { logger } from "../../../../../config";
+import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 const moment = require("moment");
 
 moment.locale("es");
@@ -32,5 +33,24 @@ export class MomentTimeService {
         const monthWithCapitalLetter = month.charAt(0).toUpperCase() + month.slice(1);
 
         return `${moment(minDay).format("DD")} al ${moment(maxDay).format("DD")} de ${monthWithCapitalLetter}`;
+    }
+
+    public static getDayOfThisWeekByDayNumber(dayNumber: number): Date {
+        var today: Date = new Date();
+        // today.setDate(today.getDate() + 5); // Testing days
+        const date: Date = new Date(today.getFullYear(), today.getMonth());
+        const differenceInDays = dayNumber - today.getDay();
+
+        date.setDate(today.getDate() + differenceInDays);
+
+        return date;
+    }
+
+    public static getFrequencyOffset(frequency: PlanFrequency): number {
+        if (frequency === PlanFrequency.Semanal) return 7;
+        if (frequency === PlanFrequency.Quincenal) return 14;
+        if (frequency === PlanFrequency.Mensual) return 28;
+
+        return 7;
     }
 }

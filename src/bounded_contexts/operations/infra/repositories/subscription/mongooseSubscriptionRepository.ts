@@ -48,6 +48,10 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return await this.findBy({ customer: customerId.value, state: "SUBSCRIPTION_ACTIVE" }, Locale.es);
     }
 
+    public async findActiveSusbcriptionsByCustomerIdList(customersIds: CustomerId[]): Promise<Subscription[]> {
+        return await this.findBy({ customer: customersIds.map((id) => id.value), state: "SUBSCRIPTION_ACTIVE" }, Locale.es);
+    }
+
     public async findByCustomerId(customerId: CustomerId): Promise<Subscription[]> {
         return await this.findBy({ customer: customerId.value }, Locale.es);
     }

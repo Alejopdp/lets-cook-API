@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import { logger } from "../../../../../config";
 import { INotificationService } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
@@ -17,15 +18,15 @@ import { SubscriptionActive } from "../../domain/subscription/subscriptionState/
 import { Week } from "../../domain/week/Week";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
+import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
+import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
+import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
 
-// [X] TO DO Create orders
-// TO DO Assign orders to orderGroups???
-// [X] TO DO Save customer, subscriptions, order and orderGroups
 // TO DO Pay Stripe
 // TO DO Notify customer
 // TO DO Email templates
@@ -41,6 +42,8 @@ export class CreateSubscription {
     private _orderRepository: IOrderRepository;
     private _paymentService: IPaymentService;
     private _notificationService: INotificationService;
+    private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
+    private _paymentOrderRepository: IPaymentOrderRepository;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -50,7 +53,9 @@ export class CreateSubscription {
         weekRepository: IWeekRepository,
         orderRepository: IOrderRepository,
         paymentService: IPaymentService,
-        notificationService: INotificationService
+        notificationService: INotificationService,
+        assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
+        paymentOrderRepository: IPaymentOrderRepository
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -60,9 +65,11 @@ export class CreateSubscription {
         this._orderRepository = orderRepository;
         this._notificationService = notificationService;
         this._paymentService = paymentService;
+        this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
+        this._paymentOrderRepository = paymentOrderRepository;
     }
 
-    public async execute(dto: CreateSubscriptionDto): Promise<void> {
+    public async execute(dto: CreateSubscriptionDto): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
         const customer: Customer | undefined = await this.customerRepository.findById(customerId);
@@ -98,8 +105,19 @@ export class CreateSubscription {
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) => zone.hasAddressInside());
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
-        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
+        // const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
+        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
+
+        const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
+            customerId: customer.id,
+            orders,
+            subscription,
+            weeks: nextTwelveWeeks,
+            shippingCost: customerShippingZone.cost,
+        };
+
+        const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
 
         // if (!!!customer.hasAtLeastOnePaymentMethod() || !customer.hasPaymentMethodByStripeId(dto.stripePaymentMethodId)) {
         //     const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
@@ -107,16 +125,24 @@ export class CreateSubscription {
         //     customer.addPaymentMethod(newPaymentMethod);
         // }
 
-        // await this.paymentService.paymentIntent(
-        //     plan.getPlanVariantPrice(planVariantId),
-        //     customer.getDefaultPaymentMethod()?.stripeId!,
-        //     customer.email,
-        //     customer.stripeId
-        // );
+        const paymentIntent = await this.paymentService.paymentIntent(
+            plan.getPlanVariantPrice(planVariantId),
+            // customer.getDefaultPaymentMethod()?.stripeId || dto.stripePaymentMethodId,
+            dto.stripePaymentMethodId,
+            customer.email,
+            customer.stripeId
+        );
+
+        newPaymentOrders[0]?.toBilled(orders.filter((order) => order.paymentOrderId?.equals(newPaymentOrders[0].id))); // TO DO: Handlear 3dSecure rechazado
+
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
+        if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+        if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+
+        return { subscription, paymentIntent };
     }
 
     /**
@@ -180,5 +206,21 @@ export class CreateSubscription {
      */
     public get notificationService(): INotificationService {
         return this._notificationService;
+    }
+
+    /**
+     * Getter assignOrdersToPaymentOrder
+     * @return {AssignOrdersToPaymentOrders}
+     */
+    public get assignOrdersToPaymentOrders(): AssignOrdersToPaymentOrders {
+        return this._assignOrdersToPaymentOrderService;
+    }
+
+    /**
+     * Getter paymentOrderRepository
+     * @return {IPaymentOrderRepository}
+     */
+    public get paymentOrderRepository(): IPaymentOrderRepository {
+        return this._paymentOrderRepository;
     }
 }

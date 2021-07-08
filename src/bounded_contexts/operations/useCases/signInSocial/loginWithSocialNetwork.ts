@@ -10,6 +10,7 @@ import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
 var admin = require("firebase-admin");
 const firebaseAdminConfig = require("../../../../../firebase-admin.json");
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
+import { logger } from "../../../../../config";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
@@ -30,39 +31,28 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
 
     public async execute(dto: LoginWithSocialMediaDto): Promise<Response> {
         let user: any = null;
-        await app
-            .auth()
-            .verifyIdToken(dto.idToken)
-            .then(async (decodedToken: any) => {
-                const uid = decodedToken.uid;
-                user = decodedToken;
-            })
-            .catch(async (error: any) => {
-                console.log(error);
-                // return isFailure(invalidLoginArguments())
-            });
+        const decodedToken = await app.auth().verifyIdToken(dto.idToken);
+        user = decodedToken;
 
-        const customer: Customer | undefined = await this.customerRepository.findByEmail(user.email);
+        logger.warn(`A ver el decodedToken: ${JSON.stringify(decodedToken)}`);
 
-        if(!customer) {
-            const customer: Customer = Customer.create(user.email, user.email_verified, '', [], undefined, undefined, undefined, 'active', undefined);
+        var customer: Customer | undefined = await this.customerRepository.findByEmail(user.email);
+
+        if (!!!customer) {
+            customer = Customer.create(user.email, user.email_verified, "", [], undefined, undefined, undefined, "active", undefined);
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
 
             customer.stripeId = stripeCustomerId;
             await this.customerRepository.save(customer);
-
-            const tokenPayload = {
-                email: user.email,
-            };
-
-            return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), user.email));
-        } else {            
-            const tokenPayload = {
-                email: customer.email,
-            };
-
-            return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer));
         }
+
+        const tokenPayload = {
+            email: customer.email,
+            id: customer.id.value,
+            // TO DO: Add more info
+        };
+
+        return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer));
     }
 
     /**

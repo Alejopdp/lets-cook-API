@@ -5,6 +5,7 @@ import { Order } from "../domain/order/Order";
 import { OrderId } from "../domain/order/OrderId";
 import { IOrderState } from "../domain/order/orderState/IOrderState";
 import { OrderStateFactory } from "../domain/order/orderState/OrderStateFactory";
+import { PaymentOrderId } from "../domain/paymentOrder/PaymentOrderId";
 import { Plan } from "../domain/plan/Plan";
 import { PlanVariantId } from "../domain/plan/PlanVariant/PlanVariantId";
 import { Recipe } from "../domain/recipe/Recipe";
@@ -22,6 +23,7 @@ export class OrderMapper implements Mapper<Order> {
         const subscriptionId: SubscriptionId = new SubscriptionId(raw.subscription);
         const recipeVariantsIds: RecipeVariantId[] = raw.recipeVariants.map((id: string) => new RecipeVariantId(id));
         const recipes: Recipe[] = raw.recipes.map((recipe: any) => recipeMapper.toDomain(recipe));
+        const paymentOrderId: PaymentOrderId | undefined = raw.paymentOrder ? new PaymentOrderId(raw.paymentOrder) : undefined;
 
         return new Order(
             raw.shippingDate,
@@ -34,6 +36,7 @@ export class OrderMapper implements Mapper<Order> {
             subscriptionId,
             recipeVariantsIds,
             recipes,
+            paymentOrderId,
             new OrderId(raw._id)
         );
     }
@@ -50,6 +53,7 @@ export class OrderMapper implements Mapper<Order> {
             subscription: t.subscriptionId.value,
             recipeVariants: t.recipesVariantsIds.map((id) => id.value),
             recipes: t.recipes.map((recipe) => recipe.id.value),
+            paymentOrder: t.paymentOrderId?.value,
             _id: t.id.value,
         };
     }

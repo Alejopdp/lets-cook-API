@@ -61,6 +61,12 @@ const OrderSchema = new mongoose.Schema(
             ref: "Recipe",
         },
 
+        paymentOrder: {
+            type: String,
+            ref: "PaymentOrder",
+            required: true,
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,

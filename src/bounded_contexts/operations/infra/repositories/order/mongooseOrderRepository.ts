@@ -8,6 +8,9 @@ import { logger } from "../../../../../../config";
 import { SubscriptionId } from "../../../domain/subscription/SubscriptionId";
 import { Plan } from "../../../domain/plan/Plan";
 import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
+import { CustomerId } from "../../../domain/customer/CustomerId";
+import { Week } from "../../../domain/week/Week";
+import { PaymentOrderId } from "../../../domain/paymentOrder/PaymentOrderId";
 
 export class MongooseOrderRepository implements IOrderRepository {
     public async save(order: Order): Promise<void> {
@@ -22,7 +25,7 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async bulkSave(Orders: Order[]): Promise<void> {
         const ordersToSave = Orders.map((Order) => orderMapper.toPersistence(Order));
 
-        await MongooseOrder.create(ordersToSave);
+        await MongooseOrder.insertMany(ordersToSave);
     }
 
     public async saveSkippedOrders(orders: Order[]): Promise<void> {
@@ -43,6 +46,17 @@ export class MongooseOrderRepository implements IOrderRepository {
         await MongooseOrder.updateMany({ _id: ordersIdToSave }, { plan: newPlan.id.value, planVariant: newPlanVariantId.value });
     }
 
+    public async getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[]): Promise<{ [key: string]: number }> {
+        const ordersDb = await MongooseOrder.find({ paymentOrder: paymentOrdersIds.map((id) => id.value), deletionFlag: false });
+        const map: { [key: string]: number } = {};
+
+        for (let orderDb of ordersDb) {
+            map[orderDb.paymentOrder!] = map[orderDb.paymentOrder!] ? map[orderDb.paymentOrder!] + 1 : 1;
+        }
+
+        return map;
+    }
+
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
@@ -50,6 +64,16 @@ export class MongooseOrderRepository implements IOrderRepository {
             .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return orderDb ? orderMapper.toDomain(orderDb, locale) : undefined;
+    }
+
+    public async findForBilling(subscriptionsIds: SubscriptionId[], week: Week): Promise<Order[]> {
+        const ordersDb = await MongooseOrder.find({
+            subscription: subscriptionsIds.map((id) => id.value),
+            state: "ORDER_ACTIVE",
+            week: week.id.value,
+        });
+
+        return ordersDb.map((order) => orderMapper.toDomain(order));
     }
 
     public async findAll(locale: Locale): Promise<Order[]> {

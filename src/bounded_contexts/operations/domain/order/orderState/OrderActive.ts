@@ -1,5 +1,6 @@
 import { Order } from "../Order";
 import { IOrderState } from "./IOrderState";
+import { OrderBilled } from "./OrderBilled";
 import { OrderCancelled } from "./OrderCancelled";
 import { OrderSkipped } from "./OrderSkipped";
 
@@ -24,6 +25,10 @@ export class OrderActive implements IOrderState {
 
     public toSkipped(order: Order): void {
         order.state = new OrderSkipped();
+    }
+
+    public toBilled(order: Order): void {
+        order.state = new OrderBilled();
     }
 
     public isSkipped(): boolean {

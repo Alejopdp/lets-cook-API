@@ -2,6 +2,7 @@ import _ from "lodash";
 import { Recipe } from "../../../domain/recipe/Recipe";
 import { RecipeId } from "../../../domain/recipe/RecipeId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
+import { WeekId } from "../../../domain/week/WeekId";
 import { IRecipeRepository } from "./IRecipeRepository";
 
 export class MockRecipeRepository implements IRecipeRepository {
@@ -9,6 +10,9 @@ export class MockRecipeRepository implements IRecipeRepository {
 
     constructor(database: Recipe[]) {
         this._database = database;
+    }
+    findByWeekId(weekId: WeekId): Promise<Recipe[]> {
+        throw new Error("Method not implemented.");
     }
 
     public async bulkSave(recipes: Recipe[]): Promise<void> {

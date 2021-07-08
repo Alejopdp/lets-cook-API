@@ -12,6 +12,7 @@ export const connectToDatabase = async () => {
             useFindAndModify: false,
             useCreateIndex: true,
         });
+        mongoose.set("debug", true);
 
         await resetDatabase();
         logger.info("Database connected");

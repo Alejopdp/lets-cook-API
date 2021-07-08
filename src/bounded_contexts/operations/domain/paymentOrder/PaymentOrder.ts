@@ -1,4 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { CustomerId } from "../customer/CustomerId";
+import { Order } from "../order/Order";
 import { Week } from "../week/Week";
 import { PaymentOrderId } from "./PaymentOrderId";
 import { IPaymentOrderState } from "./paymentOrderState/IPaymentOrderState";
@@ -12,6 +15,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     private _amount: number;
     private _discountAmount: number;
     private _shippingCost: number;
+    private _customerId: CustomerId;
 
     constructor(
         shippingDate: Date,
@@ -22,6 +26,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         amount: number,
         discountAmount: number,
         shippingCost: number,
+        customerId: CustomerId,
         paymentOrderId?: PaymentOrderId
     ) {
         super(paymentOrderId);
@@ -33,6 +38,24 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._amount = amount;
         this._discountAmount = discountAmount;
         this._shippingCost = shippingCost;
+        this._customerId = customerId;
+    }
+
+    public addOrder(order: Order): void {
+        order.paymentOrderId = this.id;
+        this.amount = this.amount + order.price; // TO DO: Add price with discount
+        // this.discountAmount = this.discountAmount + 1 // TO DO: Add discountAmount
+    }
+
+    public getHumanBillingDate(): string {
+        return MomentTimeService.getDateHumanLabel(this.billingDate);
+    }
+
+    public toBilled(orders: Order[]): void {
+        for (let order of orders) {
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(); // TO DO: Handle this?
+        }
+        this.state.toBilled(this);
     }
 
     /**
@@ -100,6 +123,14 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     /**
+     * Getter customerId
+     * @return {CustomerId}
+     */
+    public get customerId(): CustomerId {
+        return this._customerId;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -161,5 +192,13 @@ export class PaymentOrder extends Entity<PaymentOrder> {
      */
     public set shippingCost(value: number) {
         this._shippingCost = value;
+    }
+
+    /**
+     * Setter customerId
+     * @param {CustomerId} value
+     */
+    public set customerId(value: CustomerId) {
+        this._customerId = value;
     }
 }

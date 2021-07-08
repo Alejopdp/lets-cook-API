@@ -19,6 +19,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
                 raw.priceWithOffer,
                 attributes,
                 raw.description,
+                raw.isDefault,
                 new PlanVariantId(raw._id)
             );
         }
@@ -30,6 +31,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             raw.price,
             attributes,
             raw.description,
+            raw.isDefault,
             raw.priceWithOffer,
             new PlanVariantId(raw._id)
         );
@@ -50,6 +52,7 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             }),
             _id: t.id.value,
             description: t.description,
+            isDefault: t.isDefault,
         };
     }
 }

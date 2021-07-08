@@ -1,5 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { PaymentOrder } from "../paymentOrder/PaymentOrder";
+import { PaymentOrderId } from "../paymentOrder/PaymentOrderId";
 import { Plan } from "../plan/Plan";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { Recipe } from "../recipe/Recipe";
@@ -21,6 +23,7 @@ export class Order extends Entity<Order> {
     private _subscriptionId: SubscriptionId;
     private _recipesVariantsIds: RecipeVariantId[];
     private _recipes: Recipe[];
+    private _paymentOrderId?: PaymentOrderId;
 
     constructor(
         shippingDate: Date,
@@ -33,6 +36,7 @@ export class Order extends Entity<Order> {
         subscriptionId: SubscriptionId,
         recipeVariantsIds: RecipeVariantId[],
         recipes: Recipe[],
+        paymentOrderId?: PaymentOrderId,
         orderId?: OrderId
     ) {
         super(orderId);
@@ -45,6 +49,7 @@ export class Order extends Entity<Order> {
         this._price = price;
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;
+        this._paymentOrderId = paymentOrderId;
         this._recipes = recipes;
     }
 
@@ -62,6 +67,10 @@ export class Order extends Entity<Order> {
 
     public getWeekLabel(): string {
         return this.week.getLabel();
+    }
+
+    public bill(): void {
+        this.state.toBilled(this);
     }
 
     public cancel(): void {
@@ -89,6 +98,14 @@ export class Order extends Entity<Order> {
 
     public getPendingRecipeChooseLabel(): string {
         return `Tienes pendiente elegir las recetas del ${this.plan.name} para la entrega del ${this.getHumanShippmentDay()}`;
+    }
+
+    public assignPaymentOrder(paymentOrders: PaymentOrder[]): void {
+        for (let paymentOrder of paymentOrders) {
+            if (this.week.id.equals(paymentOrder.week.id)) {
+                this.paymentOrderId = paymentOrder.id;
+            }
+        }
     }
 
     /**
@@ -172,6 +189,14 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter paymentOrderId
+     * @return {PaymentOrderId | undefined}
+     */
+    public get paymentOrderId(): PaymentOrderId | undefined {
+        return this._paymentOrderId;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -248,5 +273,13 @@ export class Order extends Entity<Order> {
      */
     public set recipes(value: Recipe[]) {
         this._recipes = value;
+    }
+
+    /**
+     * Setter paymentOrderId
+     * @param {PaymentOrderId | undefined} value
+     */
+    public set paymentOrderId(value: PaymentOrderId | undefined) {
+        this._paymentOrderId = value;
     }
 }

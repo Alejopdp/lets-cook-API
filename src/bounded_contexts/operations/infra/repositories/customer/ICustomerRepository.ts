@@ -8,4 +8,5 @@ export interface ICustomerRepository {
     isEmailVerified(email: string): Promise<boolean>;
     findByEmail(email: string): Promise<Customer | undefined>;
     findById(id: CustomerId): Promise<Customer | undefined>;
+    findAll(): Promise<Customer[]>
 }

@@ -22,7 +22,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     public async bulkSave(recipes: Recipe[]): Promise<void> {
         const recipesToSave = recipes.map((recipe) => recipeMapper.toPersistence(recipe));
 
-        await RecipeModel.create(recipesToSave);
+        await RecipeModel.insertMany(recipesToSave);
     }
 
     public async findAll(): Promise<Recipe[]> {

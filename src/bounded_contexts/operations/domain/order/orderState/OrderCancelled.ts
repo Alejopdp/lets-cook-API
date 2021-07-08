@@ -1,6 +1,7 @@
 import { Order } from "../Order";
 import { IOrderState } from "./IOrderState";
 import { OrderActive } from "./OrderActive";
+import { OrderBilled } from "./OrderBilled";
 
 export class OrderCancelled implements IOrderState {
     title: string;
@@ -23,6 +24,10 @@ export class OrderCancelled implements IOrderState {
 
     public toSkipped(order: Order): void {
         throw new Error("No puede saltear una orden cancelada");
+    }
+
+    public toBilled(order: Order): void {
+        order.state = new OrderBilled();
     }
 
     public isSkipped(): boolean {

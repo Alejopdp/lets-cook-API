@@ -9,6 +9,7 @@ import { subscriptionRouter } from "../../../bounded_contexts/operations/infra/h
 import { customerRouter } from "../../../bounded_contexts/operations/infra/http/customer";
 import { orderRouter } from "../../../bounded_contexts/operations/infra/http/order";
 import { recipeRatingRouter } from "../../../bounded_contexts/operations/infra/http/recipeRating";
+import { paymentOrderRouter } from "../../../bounded_contexts/operations/infra/http/paymentOrder";
 
 const v1Router = express.Router();
 
@@ -22,6 +23,7 @@ v1Router.use("/subscription", subscriptionRouter);
 v1Router.use("/customer", customerRouter);
 v1Router.use("/order", orderRouter);
 v1Router.use("/recipe-rating", recipeRatingRouter);
+v1Router.use("/payment-order", paymentOrderRouter);
 
 // All routes go here
 

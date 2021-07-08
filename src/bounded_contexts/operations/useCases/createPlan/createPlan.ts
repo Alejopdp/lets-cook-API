@@ -58,8 +58,8 @@ export class CreatePlan {
                     variant.price,
                     variant.priceWithOffer,
                     attributes,
-                    "description"
-                    // variant.description
+                    "description",
+                    variant.isDefault
                 );
                 planVariants.push(variantWithRecipe);
             } else {
@@ -103,14 +103,16 @@ export class CreatePlan {
         );
 
         const imageUrl = await this.storageService.savePlanImage(dto.planName, dto.planImageFileName, dto.planImage);
-        // const iconLinealUrl = await this.storageService.saveIconLinear(dto.planName, dto.iconLinealFileName, dto.iconLinealFile);
-        // const iconLinealColorUrl = await this.storageService.saveIconLinealColor(
-        //     dto.planName,
-        //     dto.iconLinealColorFileName,
-        //     dto.iconLinealColorFile
-        // );
+        const iconLinealUrl = await this.storageService.saveIconLinear(dto.planName, dto.iconLinealFileName, dto.iconLinealFile);
+        const iconLinealColorUrl = await this.storageService.saveIconLinealColor(
+            dto.planName,
+            dto.iconLinealColorFileName,
+            dto.iconLinealColorFile
+        );
 
         plan.imageUrl = imageUrl;
+        plan.iconLinealUrl = iconLinealUrl;
+        plan.iconLinealColorUrl = iconLinealColorUrl;
 
         await this.planRepository.save(plan);
     }

@@ -18,9 +18,25 @@ export class CreatePlanController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            if (!this.req.file) throw new Error("No ha ingresado una imagen para el plan");
-            const planImagePath = this.req.file.path;
+            console.log("El Body: ", this.req.body);
+            console.log("Files: ", this.req.files);
+            //@ts-ignore
+            const imageFilesArray = this.req.files["planImage"];
+            //@ts-ignore
+            const iconFilesArray = this.req.files["icon"];
+            //@ts-ignore
+            const iconWithColorArray = this.req.files["iconWithColor"];
+
+            if (imageFilesArray.length === 0) throw new Error("No ha ingresado una imagen para el plan");
+            if (iconFilesArray.length === 0) throw new Error("No ha ingresado un icono para el plan");
+            if (iconWithColorArray.length === 0) throw new Error("No ha ingresado un icono con color para el plan");
+
+            const planImagePath = imageFilesArray[0].path;
             const planImage: ReadStream = fs.createReadStream(planImagePath);
+            const iconPath = iconFilesArray[0].path;
+            const icon: ReadStream = fs.createReadStream(iconPath);
+            const iconWithColorPath = iconWithColorArray[0].path;
+            const iconWithColor: ReadStream = fs.createReadStream(iconWithColorPath);
 
             const dto: CreatePlanDto = {
                 planName: this.req.body.name,
@@ -28,7 +44,7 @@ export class CreatePlanController extends BaseController {
                 planSku: this.req.body.sku,
                 isActive: JSON.parse(this.req.body.isActive),
                 planImage,
-                planImageFileName: this.req.file.originalname,
+                planImageFileName: imageFilesArray[0].originalname,
                 availablePlanFrecuencies: JSON.parse(this.req.body.availablePlanFrecuencies)
                     .map((freq: string) => (<any>PlanFrequency)[freq.toString()])
                     .filter((freq: PlanFrequency) => freq),
@@ -38,18 +54,18 @@ export class CreatePlanController extends BaseController {
                 additionalPlansIds: JSON.parse(this.req.body.additionalPlans),
                 planSlug: this.req.body.planSlug,
                 abilityToChooseRecipes: JSON.parse(this.req.body.abilityToChooseRecipes),
-                //@ts-ignore
-                iconLinealFile: "iconLineal",
-                iconLinealFileName: "iconLineal",
-                //@ts-ignore
-                iconLinealColorFile: "iconLinealFile",
-                iconLinealColorFileName: "iconLinealFile",
+                iconLinealFile: icon,
+                iconLinealFileName: iconFilesArray[0].originalname,
+                iconLinealColorFile: iconWithColor,
+                iconLinealColorFileName: iconWithColorArray[0].originalname,
                 locale: (<any>Locale)[this.req.query.locale as string],
             };
 
             await this.createPlan.execute(dto);
 
             fs.unlinkSync(planImagePath);
+            fs.unlinkSync(iconPath);
+            fs.unlinkSync(iconWithColorPath);
 
             return this.ok(this.res);
         } catch (error) {

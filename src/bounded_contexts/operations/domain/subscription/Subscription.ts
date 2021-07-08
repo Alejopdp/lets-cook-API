@@ -1,4 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
 import { CouponId } from "../cupons/CouponId";
 import { Customer } from "../customer/Customer";
@@ -6,7 +7,6 @@ import { Order } from "../order/Order";
 import { OrderActive } from "../order/orderState/OrderActive";
 import { Plan } from "../plan/Plan";
 import { PlanFrequency } from "../plan/PlanFrequency";
-import { PlanVariant } from "../plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { ShippingZone } from "../shipping/ShippingZone";
@@ -67,14 +67,17 @@ export class Subscription extends Entity<Subscription> {
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
         const orders: Order[] = [];
         const deliveryDate: Date = this.getFirstOrderShippingDate(2); // Tuesday
+        const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
 
         for (let i = 0; i < 12; i++) {
-            deliveryDate.setDate(deliveryDate.getDate() + 7);
+            deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+            if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+
             orders.push(
                 new Order(
                     new Date(deliveryDate),
                     new OrderActive(),
-                    new Date(),
+                    i === 0 ? new Date() : new Date(billingDate),
                     orderedWeeks[i],
                     this.planVariantId,
                     this.plan,
@@ -129,7 +132,7 @@ export class Subscription extends Entity<Subscription> {
         return this.plan.getPlanVariantLabel(this.planVariantId);
     }
 
-    public getNextActiveOrder(orders: Order[]): Order | undefined {
+    public getNextActiveOrder(orders: Order[] = []): Order | undefined {
         return orders.find((order) => order.isActive()); // TO DO: It works if orders is sorted ASC
     }
 
@@ -140,7 +143,7 @@ export class Subscription extends Entity<Subscription> {
         return orders.find((order) => order.isActive() && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
     }
 
-    public getNextShipmentLabel(orders: Order[]): string {
+    public getNextShipmentLabel(orders: Order[] = []): string {
         const nextOrder = orders.find((order) => order.isActive());
 
         if (!!!nextOrder) return "No tienes una próxima entrega";
