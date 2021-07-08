@@ -35,6 +35,42 @@ const AddressSchema = new mongoose.Schema({
     }
 });
 
+const BillingSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: uuid.v4,
+    },
+
+    latitude: {
+        type: Number,
+        required: true,
+    },
+
+    longitude: {
+        type: Number,
+        required: true,
+    },
+
+    addressName: {
+        type: String,
+        required: true,
+    },
+
+    addressDetails: {
+        type: String,
+    },
+
+    customerName: {
+        type: String,
+        required: true
+    },
+
+    identification: {
+        type: String,
+        required: true
+    },
+});
+
 const PersonalInfoSchema = new mongoose.Schema({
     _id: {
         type: String,
@@ -142,7 +178,7 @@ const CustomerSchema = new mongoose.Schema(
             type: AddressSchema,
         },
         billingAddress: {
-            type: AddressSchema,
+            type: BillingSchema,
         },
         codeToRecoverPassword: {
             type: String,

@@ -24,7 +24,7 @@ export class UpdateCustomerBilling {
         
         if (!customer) throw new Error("Error al buscar el cliente");
         
-        customer.changeBillingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, dto.identification)
+        customer.changeBillingAddress(dto.lat, dto.long, dto.addressName, dto.customerName, dto.details, dto.identification)
 
         await this.customerRepository.save(customer);
     }

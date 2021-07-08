@@ -2,9 +2,9 @@ export interface UpdateCustomerBillingDto {
     customerId: string;
     lat: number;
     long: number;
-    name: string;
+    addressName: string;
     details: string;
-    fullName: string;
+    customerName: string;
     billingId: string;
     identification: string;
 }

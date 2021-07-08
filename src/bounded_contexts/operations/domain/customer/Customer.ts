@@ -5,6 +5,7 @@ import { CustomerId } from "./CustomerId";
 // import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { Address } from "../address/Address";
+import { Billing } from "../billing/Billing";
 import { PaymentMethod } from "./paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "./paymentMethod/PaymentMethodId";
 import { PersonalInfo } from "./personalInfo/PersonalInfo";
@@ -16,7 +17,7 @@ export class Customer extends Entity<Customer> {
     private _stripeId: string;
     private _paymentMethods: PaymentMethod[];
     private _shippingAddress?: Address;
-    private _billingAddress?: Address;
+    private _billingAddress?: Billing;
     private _password?: UserPassword;
     private _state?: string;
     private _codeToRecoverPassword?: string;
@@ -28,7 +29,7 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         paymentMethods: PaymentMethod[],
         shippingAddress?: Address,
-        billingAddress?: Address,
+        billingAddress?: Billing,
         password?: UserPassword,
         state?: string,
         codeToRecoverPassword?: string,
@@ -54,7 +55,7 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         paymentMethods: PaymentMethod[],
         shippingAddress?: Address,
-        billingAddress?: Address,
+        billingAddress?: Billing,
         password?: UserPassword,
         state?: string,
         codeToRecoverPassword?: string,
@@ -129,18 +130,18 @@ export class Customer extends Entity<Customer> {
         } 
     }
 
-    public changeBillingAddress(lat: number, long: number, name: string, fullName: string, details: string, identification: string): void {
+    public changeBillingAddress(lat: number, long: number, addressName: string, customerName: string, details: string, identification: string): void {
         if(!this.billingAddress) {
-            const billingAddress: Address = new Address(lat, long, name, fullName, details, identification, undefined);
+            const billingAddress: Billing = new Billing(lat, long, addressName, customerName, details, identification);
             this.billingAddress = billingAddress;
         } else {
-            this.billingAddress?.changeInfoBilling(lat, long, name, fullName, details, identification);
+            this.billingAddress?.changeInfoBilling(lat, long, addressName, customerName, details, identification);
         } 
     }
 
     public changeShippingAddress(lat: number, long: number, name: string, fullName: string, details: string, deliveryTime: string): void {
         if(!this.shippingAddress) {
-            const shippingAddress: Address = new Address(lat, long, name, fullName, details, undefined, deliveryTime);
+            const shippingAddress: Address = new Address(lat, long, name, fullName, details, deliveryTime);
             this.shippingAddress = shippingAddress;
         } else {
             this.shippingAddress?.changeInfoShipping(lat, long, name, fullName, details, deliveryTime);
@@ -223,7 +224,7 @@ export class Customer extends Entity<Customer> {
      * Getter billingAddress
      * @return {Address | undefined}
      */
-    public get billingAddress(): Address | undefined {
+    public get billingAddress(): Billing | undefined {
         return this._billingAddress;
     }
 
@@ -303,7 +304,7 @@ export class Customer extends Entity<Customer> {
      * Setter billingAddress
      * @param {Address | undefined} value
      */
-    public set billingAddress(value: Address | undefined) {
+    public set billingAddress(value: Billing | undefined) {
         this._billingAddress = value;
     }
 

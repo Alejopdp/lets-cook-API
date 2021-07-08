@@ -29,8 +29,8 @@ export class GetCouponListPresenter {
                     id: customer.billingAddress?.id.value,
                     latitude: customer.billingAddress?.latitude,
                     longitude: customer.billingAddress?.longitude,
-                    address: customer.billingAddress?.addressName,
-                    customerName: customer.billingAddress?.customerName,
+                    address: customer.billingAddress?.name,
+                    customerName: customer.billingAddress?.fullName,
                     details: customer.billingAddress?.details,
                     personalIdNumber: customer.billingAddress?.identification
                 },

@@ -1,46 +1,38 @@
 import { Entity } from "../../../../core/domain/Entity";
-import { AddressId } from "./AddressId";
+import { BillingId } from "./BillingId";
 
-export class Address extends Entity<Address> {
+export class Billing extends Entity<Billing> {
     private _latitude: number;
     private _longitude: number;
-    private _name: string;
-    private _fullName: string;
+    private _addressName: string;
+    private _customerName: string;
     private _details: string;
-    private _deliveryTime?: string;
+    private _identification?: string;
 
     constructor(
         latitude: number, 
         longitude: number, 
-        name: string, 
-        fullName: string, 
+        addressName: string, 
+        customerName: string, 
         details: string, 
-        deliveryTime?: string,
-        addressId?: AddressId ) {
+        identification?: string,
+        addressId?: BillingId ) {
         super(addressId);
         this._latitude = latitude;
         this._longitude = longitude;
-        this._name = name;
-        this._fullName = fullName;
+        this._addressName = addressName;
+        this._customerName = customerName;
         this._details = details;
-        this._deliveryTime = deliveryTime;
+        this._identification = identification;
     }
 
-    public nameWithDetails(): string {
-        return this.name + " " + this.details;
-    }
-
-    public fullNameWithDetails(): string {
-        return this.fullName + " " + this.details;
-    }
-
-    public changeInfoShipping(lat: number, long: number, name: string, fullName: string, details: string, deliveryTime: string): void {
+    public changeInfoBilling(lat: number, long: number, addresName: string, customerName: string, details: string, identification: string): void {
         this.latitude = lat;
         this.longitude = long;
-        this.name = name;
-        this.fullName = fullName;
+        this.addressName = addresName;
+        this.customerName = customerName;
         this.details = details;
-        this.deliveryTime = deliveryTime;
+        this.identification = identification;
     }
 
     /**
@@ -62,16 +54,16 @@ export class Address extends Entity<Address> {
      * Getter name
      * @return {string}
      */
-    public get name(): string {
-        return this._name;
+    public get addressName(): string {
+        return this._addressName;
     }
 
     /**
      * Getter fullName
      * @return {string}
      */
-    public get fullName(): string {
-        return this._fullName;
+    public get customerName(): string {
+        return this._customerName;
     }
 
     /**
@@ -83,11 +75,11 @@ export class Address extends Entity<Address> {
     }
 
     /**
-     * Getter deliveryTime
+     * Getter identification
      * @return {string}
      */
-     public get detliveryTime(): string | undefined {
-        return this._deliveryTime;
+     public get identification(): string | undefined {
+        return this._identification;
     }
 
     /**
@@ -110,16 +102,16 @@ export class Address extends Entity<Address> {
      * Setter name
      * @param {string} value
      */
-    public set name(value: string) {
-        this._name = value;
+    public set addressName(value: string) {
+        this._addressName = value;
     }
 
     /**
      * Setter fullName
      * @param {string} value
      */
-    public set fullName(value: string) {
-        this._fullName = value;
+    public set customerName(value: string) {
+        this._customerName = value;
     }
 
     /**
@@ -131,10 +123,10 @@ export class Address extends Entity<Address> {
     }
 
     /**
-     * Setter deliveryTime
+     * Setter identification
      * @param {string} value
      */
-     public set deliveryTime(value: string | undefined) {
-        this._deliveryTime = value;
+     public set identification(value: string | undefined) {
+        this._identification = value;
     }
 }

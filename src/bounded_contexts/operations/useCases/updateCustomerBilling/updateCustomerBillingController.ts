@@ -20,8 +20,8 @@ export class UpdateCustomerBillingController extends BaseController {
                 customerId: this.req.params.id,
                 lat: this.req.body.lat,
                 long: this.req.body.long,
-                name: this.req.body.name,
-                fullName: this.req.body.full_name,
+                addressName: this.req.body.address_name,
+                customerName: this.req.body.customer_name,
                 details: this.req.body.details,
                 billingId: this.req.body.billingId,
                 identification: this.req.body.identification

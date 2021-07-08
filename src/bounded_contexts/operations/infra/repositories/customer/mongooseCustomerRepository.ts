@@ -14,7 +14,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         // console.log("Test: ", shippingDb)
         if (await MongooseCustomer.exists({ _id: customer.id.value })) {
             console.log("Test: ", customer.id.value, customerDb, await MongooseCustomer.exists({ _id: customer.id.value }));
-            let test = await MongooseCustomer.updateOne(
+            await MongooseCustomer.updateOne(
                 { _id: customer.id.value },
                 {
                     $set: {
@@ -30,8 +30,6 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                     },
                 }
             );
-
-            console.log("Result: ", test)
         } else {
             console.log(customerDb);
             await MongooseCustomer.create(customerDb);
@@ -57,6 +55,10 @@ export class MongooseCustomerRepository implements ICustomerRepository {
 
     public async findAll(): Promise<Customer[]> {
         return await this.findBy({});
+    }
+
+    public async findByName(name: string): Promise<Customer[]> {
+        return await this.findBy({ "personalInfo.name": name });
     }
 
     public async findBy(conditions: any): Promise<Customer[]> {

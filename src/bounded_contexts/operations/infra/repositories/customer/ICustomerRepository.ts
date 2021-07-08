@@ -10,4 +10,5 @@ export interface ICustomerRepository {
     findById(id: CustomerId): Promise<Customer | undefined>;
     findAll(): Promise<Customer[]>;
     delete(customerId: CustomerId): void;
+    findByName(name: string): Promise<Customer[]>;
 }

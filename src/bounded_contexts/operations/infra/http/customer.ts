@@ -14,6 +14,7 @@ import { updateCustomerBillingController } from "../../useCases/updateCustomerBi
 import { updateCustomerInfoController } from "../../useCases/updateCustomerInfo";
 import { updatePaymentMethodController } from "../../useCases/updatePaymentMethod";
 import { getCustomerListController } from "../../useCases/getCustomerList";
+import { getCustomerByNameController } from "../../useCases/getCustomerListByName";
 import { deleteCustomerController } from "../../useCases/deleteCustomer";
 
 const customerRouter = express.Router();
@@ -25,6 +26,7 @@ const options: multer.Options = {
 // // GETs
 customerRouter.get("/:email", (req, res) => emailValidatedController.execute(req, res));
 customerRouter.get("/", (req, res) => getCustomerListController.execute(req, res));
+customerRouter.get("/by-name/:name", (req, res) => getCustomerByNameController.execute(req, res));
 
 // // PUT
 customerRouter.put("/forgot-password/:email", (req, res) => forgotPasswordController.execute(req, res));
@@ -37,8 +39,6 @@ customerRouter.put("/update-billing/:id", (req, res) => updateCustomerBillingCon
 customerRouter.put("/update-info/:id", (req, res) => updateCustomerInfoController.execute(req, res));
 customerRouter.put("/update-payment/:id", (req, res) => updatePaymentMethodController.execute(req, res));
 customerRouter.put("/delete/:id", (req, res) => deleteCustomerController.execute(req, res));
-
-
 
 // // POSTs
 customerRouter.post("/sign-up", (req, res) => signUpController.execute(req, res));

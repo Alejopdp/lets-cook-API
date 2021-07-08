@@ -1,4 +1,5 @@
 import { AddressMapper } from "./addressMapper";
+import { BillingMapper } from "./billingMapper";
 import { PersonalInfoMapper } from "./personalInfoMapper";
 import { IngredientMapper } from "./ingredientMapper";
 import { OrderMapper } from "./orderMapper";
@@ -18,4 +19,5 @@ export const subscriptionMapper: SubscriptionMapper = new SubscriptionMapper();
 export const paymentOrderMapper: PaymentOrderMapper = new PaymentOrderMapper();
 export const orderMapper: OrderMapper = new OrderMapper();
 export const addressMapper: AddressMapper = new AddressMapper();
+export const billingMapper: BillingMapper = new BillingMapper();
 export const personalInfoMapper: PersonalInfoMapper = new PersonalInfoMapper();
