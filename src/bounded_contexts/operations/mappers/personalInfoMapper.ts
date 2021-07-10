@@ -4,10 +4,17 @@ import { PersonalInfoId } from "../domain/customer/personalInfo/PersonalInfoId";
 
 export class PersonalInfoMapper implements Mapper<PersonalInfo> {
     public toDomain(raw: any): PersonalInfo {
-        return new PersonalInfo(raw.name, raw.lastName, raw.phone1, raw.phone2, raw.birthDate, raw.preferredLanguage, new PersonalInfoId(raw._id));
+        return new PersonalInfo(
+            raw.name,
+            raw.lastName,
+            raw.phone1,
+            raw.phone2,
+            raw.birthDate ? new Date(raw.birthDate) : undefined,
+            raw.preferredLanguage,
+            new PersonalInfoId(raw._id)
+        );
     }
     public toPersistence(t: PersonalInfo): any {
-        
         return {
             name: t.name,
             lastName: t.lastName,

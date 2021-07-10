@@ -1,11 +1,10 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
-import { CustomerId } from "../../domain/customer/CustomerId";
 import { Customer } from "../../domain/customer/Customer";
-
+import { CustomerId } from "../../domain/customer/CustomerId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
-import { UpdateCustomerInfoDto } from "./updateCustomerInfoDto";
+import { GetCustomerByIdDto } from "./getCustomerByIdDto";
 
-export class UpdateCustomerInfo {
+export class GetCustomerById {
     private _customerRepository: ICustomerRepository;
     private _storageService: IStorageService;
 
@@ -14,15 +13,11 @@ export class UpdateCustomerInfo {
         this._storageService = storageService;
     }
 
-    public async execute(dto: UpdateCustomerInfoDto): Promise<void> {
+    public async execute(dto: GetCustomerByIdDto): Promise<Customer> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const customer: Customer | undefined = await this.customerRepository.findById(customerId);
+        const customer: Customer = await this.customerRepository.findByIdOrThrow(customerId);
 
-        if (!customer) throw new Error("Error al buscar el cliente");
-
-        customer.changePersonalInfo(dto.name, dto.lastName, dto.phone1, dto.phone2, new Date(dto.birthDate), dto.preferredLanguage);
-
-        await this.customerRepository.save(customer);
+        return customer;
     }
 
     /**

@@ -2,6 +2,9 @@ import { Plan } from "../../domain/plan/Plan";
 import { Week } from "../../domain/week/Week";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { IStorageService } from "../../application/storageService/IStorageService";
+import { Recipe } from "../../domain/recipe/Recipe";
+import { PlanId } from "../../domain/plan/PlanId";
+import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 
 export class GetPlanVariantsRecipesByWeekListPresenter {
     private _storageService: IStorageService;
@@ -10,106 +13,166 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
         this._storageService = storageService;
     }
 
-    public async present(plans: any[]): Promise<any> {
+    public async present(plans: Plan[], recipes: Recipe[]): Promise<any> {
         const presentedPlans = [];
+        const planRecipeMap: { [key: string]: any[] } = {};
+        const presentedRecipes = [];
+        const presentedAdditionalPlansMap: { [key: string]: any[] } = {};
+        var uniqAdditionalPlansIds: PlanId[] = [];
 
+        // Recipes
+        for (let recipe of recipes) {
+            const presentedRecipe = await this.presentRecipe(recipe);
+
+            presentedRecipes.push(presentedRecipe);
+
+            for (let planId of recipe.relatedPlans) {
+                const actualArray = planRecipeMap[planId.value] || [];
+                planRecipeMap[planId.value.toString()] = [...actualArray, presentedRecipe];
+            }
+        }
+
+        // Additional plans
         for (let plan of plans) {
-            var presentedVariants = [];
-            var presentedRecipes = [];
+            for (let additionalPlan of plan.additionalPlans) {
+                if (uniqAdditionalPlansIds.length === 0 || !additionalPlan.id.equals(uniqAdditionalPlansIds[0])) {
+                    uniqAdditionalPlansIds = [additionalPlan.id, ...uniqAdditionalPlansIds];
 
-            for (let variant of plan.planVariants) {
-                if (plan.hasRecipes) {
-                    presentedVariants.push({
-                        id: variant.id.value,
-                        sku: variant.sku.code,
-                        name: variant.name,
-                        price: variant.price,
-                        priceWithOffer: variant.priceWithOffer,
-                        //@ts-ignore
-                        numberOfPersons: variant.numberOfPersons,
-                        //@ts-ignore
-                        numberOfRecipes: variant.numberOfRecipes,
-                        attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
-                    });
-                } else {
-                    presentedVariants.push({
-                        id: variant.id.value,
-                        sku: variant.sku.code,
-                        name: variant.name,
-                        price: variant.price,
-                        priceWithOffer: variant.priceWithOffer,
-                        attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
-                    });
+                    var presentedVariants = [];
+
+                    for (let variant of plan.planVariants) {
+                        presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes));
+                    }
+
+                    presentedAdditionalPlansMap[additionalPlan.id.value] = await this.presentPlan(
+                        additionalPlan,
+                        presentedVariants,
+                        planRecipeMap[additionalPlan.id.value],
+                        []
+                    );
                 }
             }
+        }
 
-            for (let recipe of plan.recipes) {
-                presentedRecipes.push({
-                    id: recipe.id.value,
-                    name: recipe.recipeGeneralData.name,
-                    sku: recipe.recipeGeneralData.recipeSku.code,
-                    shortDescription: recipe.recipeGeneralData.recipeDescription.shortDescription,
-                    longDescription: recipe.recipeGeneralData.recipeDescription.longDescription,
-                    cookDuration: recipe.recipeGeneralData.cookDuration.value(),
-                    cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
-                    difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
-                    imageUrl: recipe.recipeGeneralData.imageUrl,
-                    weight: recipe.recipeGeneralData.recipeWeight.value(),
-                    weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
-                    recipeVariants:
-                        recipe && recipe.recipeVaraints
-                            ? recipe.recipeVaraints.map((variant: any) => {
-                                  return {
-                                      ingredients: variant.ingredients.map((ing: any) => ing.name),
-                                      restrictions: variant.recipeVariantRestriction.map((r: any) => {
-                                          return {
-                                              id: r.id.value,
-                                              value: r.value,
-                                              label: r.label,
-                                          };
-                                      }),
-                                      sku: variant.sku.code,
-                                  };
-                              })
-                            : [],
-                    imageTags: recipe.recipeImageTags.map((tag: any) => tag.name),
-                    backOfficeTags: recipe.recipeBackOfficeTags.map((tag: any) => tag.name),
-                    recipeNutritionalData: recipe.recipeNutritionalData.nutritionalItems,
-                    availableWeeks: recipe.availableWeeks.map((week: Week) => {
-                        return {
-                            id: week.id.value,
-                            label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
-                                week.maxDay
-                            )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
-                        };
-                    }),
-                    availableMonths: recipe.availableMonths,
-                    relatedPlans: recipe.relatedPlans.map((planId: any) => planId.value),
-                    recipeTools: recipe.recipeTools,
-                });
+        // Principal plans
+        for (let plan of plans) {
+            if (plan.isPrincipal()) {
+                var presentedVariants = [];
+
+                for (let variant of plan.planVariants) {
+                    presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes));
+                }
+
+                const presentedAdditionalPlans = plan.additionalPlans.map(
+                    (additionalPlan) => presentedAdditionalPlansMap[additionalPlan.id.value]
+                );
+                presentedPlans.push(
+                    await this.presentPlan(plan, presentedVariants, planRecipeMap[plan.id.value], presentedAdditionalPlans)
+                );
             }
-
-            presentedPlans.push({
-                id: plan.id.value,
-                name: plan.name,
-                sku: plan.planSku.code,
-                description: plan.description,
-                availablePlanFrecuencies: plan.availablePlanFrecuencies,
-                isActive: plan.isActive,
-                type: plan.type,
-                imageUrl: plan.imageUrl,
-                hasRecipes: plan.hasRecipes,
-                variants: presentedVariants,
-                additionalPlans: plan.additionalPlans.map((plan: Plan) => plan.id.value),
-                recipes: presentedRecipes,
-                abilityToChooseRecipes: plan.abilityToChooseRecipes,
-                slug: plan.planSlug.slug,
-                icon: await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl),
-                iconWithColor: await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl),
-            });
         }
 
         return presentedPlans;
+    }
+
+    private async presentRecipe(recipe: Recipe): Promise<any> {
+        const recipeUrl = recipe.recipeGeneralData.imageUrl
+            ? await this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
+            : "";
+        return {
+            id: recipe.id.value,
+            name: recipe.recipeGeneralData.name,
+            sku: recipe.recipeGeneralData.recipeSku.code,
+            shortDescription: recipe.recipeGeneralData.recipeDescription.shortDescription,
+            longDescription: recipe.recipeGeneralData.recipeDescription.longDescription,
+            cookDuration: recipe.recipeGeneralData.cookDuration.value(),
+            cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
+            difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
+            imageUrl: recipeUrl,
+            weight: recipe.recipeGeneralData.recipeWeight.value(),
+            weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
+            backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
+            imageTags: recipe.recipeImageTags.map((tag) => tag.name),
+            availableWeeks: recipe.availableWeeks.map((week: Week) => {
+                return {
+                    id: week.id.value,
+                    label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
+                        week.maxDay
+                    )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
+                };
+            }),
+            availableMonths: recipe.availableMonths,
+            relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.value),
+            tools: recipe.recipeTools,
+            recipeVariants: recipe.recipeVariants.map((variant) => {
+                return {
+                    ingredients: variant.ingredients.map((ing) => ing.name),
+                    restrictions: variant.recipeVariantRestrictions.map((r) => {
+                        return {
+                            id: r.id.value,
+                            value: r.value,
+                            label: r.label,
+                        };
+                    }),
+                    sku: variant.sku.code,
+                };
+            }),
+        };
+    }
+
+    private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean): any {
+        if (hasRecipes) {
+            return {
+                id: variant.id.value,
+                sku: variant.sku.code,
+                name: variant.name,
+                price: variant.price,
+                priceWithOffer: variant.priceWithOffer,
+                //@ts-ignore
+                numberOfPersons: variant.numberOfPersons,
+                //@ts-ignore
+                numberOfRecipes: variant.numberOfRecipes,
+                attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
+            };
+        } else {
+            return {
+                id: variant.id.value,
+                sku: variant.sku.code,
+                name: variant.name,
+                price: variant.price,
+                priceWithOffer: variant.priceWithOffer,
+                attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
+            };
+        }
+    }
+
+    private async presentPlan(
+        plan: Plan,
+        presentedVariants: any[],
+        presentedRecipes: any[],
+        presentedAdditionalPlans: any[]
+    ): Promise<any> {
+        const icon = await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl);
+        const iconWithColor = await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl);
+
+        return {
+            id: plan.id.value,
+            name: plan.name,
+            sku: plan.planSku.code,
+            description: plan.description,
+            availablePlanFrecuencies: plan.availablePlanFrecuencies,
+            isActive: plan.isActive,
+            type: plan.type,
+            imageUrl: plan.imageUrl,
+            hasRecipes: plan.hasRecipes,
+            variants: presentedVariants,
+            additionalPlans: presentedAdditionalPlans,
+            recipes: presentedRecipes,
+            abilityToChooseRecipes: plan.abilityToChooseRecipes,
+            slug: plan.planSlug.slug, // TO DO: Get it from aggregate root
+            icon,
+            iconWithColor,
+        };
     }
 
     /**

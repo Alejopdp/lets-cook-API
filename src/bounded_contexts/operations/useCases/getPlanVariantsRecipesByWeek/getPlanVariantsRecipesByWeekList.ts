@@ -18,43 +18,42 @@ export class GetPlanVariantsRecipesByWeekList {
         this._weekRepository = weekRepository;
     }
 
-    public async execute(): Promise<any> {
+    public async execute(): Promise<{ plans: Plan[]; recipes: Recipe[] }> {
         const date_currently = new Date();
         const week: Week = await this.weekRepository.findCurrentWeek(date_currently);
-
         const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week.id);
-
         const plans: Plan[] = await this.planRepository.findAll((<any>Locale)["es" as string] || Locale.es);
-        let filterPlans: any[] = [];
-        for (let i = 0; i < recipes.length; i++) {
-            for (let j = 0; j < plans.length; j++) {
-                for (let k = 0; k < recipes[i].relatedPlans.length; k++) {
-                    if (recipes[i].relatedPlans[k].value === plans[j].id.value) {
-                        if (filterPlans.length === 0) {
-                            filterPlans = [...filterPlans, plans[j]];
-                        } else {
-                            let planRepeated = filterPlans.filter((val: Plan) => val.id.value === plans[j].id.value);
-                            if (planRepeated.length === 0) {
-                                filterPlans = [...filterPlans, plans[j]];
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
-        for (let j = 0; j < filterPlans.length; j++) {
-            for (let i = 0; i < recipes.length; i++) {
-                for (let k = 0; k < recipes[i].relatedPlans.length; k++) {
-                    if (recipes[i].relatedPlans[k].value === filterPlans[j].id.value) {
-                        filterPlans[j].recipes = filterPlans[j].recipes ? [...filterPlans[j].recipes, recipes[i]] : [recipes[i]];
-                    }
-                }
-            }
-        }
-        let filterPlansActive = filterPlans.filter((val: any) => val.isActive);
+        // let filterPlans: any[] = [];
+        // for (let i = 0; i < recipes.length; i++) {
+        //     for (let j = 0; j < plans.length; j++) {
+        //         for (let k = 0; k < recipes[i].relatedPlans.length; k++) {
+        //             if (recipes[i].relatedPlans[k].value === plans[j].id.value) {
+        //                 if (filterPlans.length === 0) {
+        //                     filterPlans = [...filterPlans, plans[j]];
+        //                 } else {
+        //                     let planRepeated = filterPlans.filter((val: Plan) => val.id.value === plans[j].id.value);
+        //                     if (planRepeated.length === 0) {
+        //                         filterPlans = [...filterPlans, plans[j]];
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        return filterPlansActive;
+        // for (let j = 0; j < filterPlans.length; j++) {
+        //     for (let i = 0; i < recipes.length; i++) {
+        //         for (let k = 0; k < recipes[i].relatedPlans.length; k++) {
+        //             if (recipes[i].relatedPlans[k].value === filterPlans[j].id.value) {
+        //                 filterPlans[j].recipes = filterPlans[j].recipes ? [...filterPlans[j].recipes, recipes[i]] : [recipes[i]];
+        //             }
+        //         }
+        //     }
+        // }
+        // let filterPlansActive = filterPlans.filter((val: any) => val.isActive);
+
+        return { plans, recipes };
         // return "true"
     }
 

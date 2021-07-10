@@ -11,9 +11,7 @@ import { CustomerId } from "../../../domain/customer/CustomerId";
 export class MongooseCustomerRepository implements ICustomerRepository {
     public async save(customer: Customer): Promise<void> {
         const customerDb = customerMapper.toPersistence(customer);
-        // console.log("Test: ", shippingDb)
         if (await MongooseCustomer.exists({ _id: customer.id.value })) {
-            console.log("Test: ", customer.id.value, customerDb, await MongooseCustomer.exists({ _id: customer.id.value }));
             await MongooseCustomer.updateOne(
                 { _id: customer.id.value },
                 {
@@ -26,7 +24,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         shippingAddress: customerDb.shippingAddress,
                         billingAddress: customerDb.billingAddress,
                         paymentMethods: customerDb.paymentMethods,
-                        personalInfo: customerDb.personalInfo
+                        personalInfo: customerDb.personalInfo,
                     },
                 }
             );
@@ -66,10 +64,13 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         return customerDb.map((raw: any) => customerMapper.toDomain(raw));
     }
 
-    // public async findBy(conditions: any): Promise<ShippingZone[]> {
-    //     const couponsDb = await MongooseShippingZone.find({ ...conditions, deletionFlag: false });
-    //     return couponsDb.map((raw: any) => shippingMapper.toDomain(raw));
-    // }
+    public async findByIdOrThrow(customerId: CustomerId): Promise<Customer> {
+        const customerDb = await this.findById(customerId);
+
+        if (!!!customerDb) throw new Error("El cliente ingresado no existe");
+
+        return customerMapper.toDomain(customerDb);
+    }
 
     public async delete(customerId: CustomerId): Promise<void> {
         await MongooseCustomer.updateOne({ _id: customerId.value }, { $set: { deletionFlag: true } });
