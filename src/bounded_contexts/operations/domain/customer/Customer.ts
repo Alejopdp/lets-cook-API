@@ -5,9 +5,12 @@ import { CustomerId } from "./CustomerId";
 // import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { Address } from "../address/Address";
+import { Billing } from "../billing/Billing";
 import { PaymentMethod } from "./paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "./paymentMethod/PaymentMethodId";
-import { method } from "lodash";
+import { PersonalInfo } from "./personalInfo/PersonalInfo";
+import { filter, method } from "lodash";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -15,10 +18,11 @@ export class Customer extends Entity<Customer> {
     private _stripeId: string;
     private _paymentMethods: PaymentMethod[];
     private _shippingAddress?: Address;
-    private _billingAddress?: Address;
+    private _billingAddress?: Billing;
     private _password?: UserPassword;
     private _state?: string;
     private _codeToRecoverPassword?: string;
+    private _personalInfo?: PersonalInfo;
 
     protected constructor(
         email: string,
@@ -26,10 +30,11 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         paymentMethods: PaymentMethod[],
         shippingAddress?: Address,
-        billingAddress?: Address,
+        billingAddress?: Billing,
         password?: UserPassword,
         state?: string,
         codeToRecoverPassword?: string,
+        personalInfo?: PersonalInfo,
         id?: CustomerId
     ) {
         super(id);
@@ -42,6 +47,7 @@ export class Customer extends Entity<Customer> {
         this._password = password;
         this._state = state;
         this._codeToRecoverPassword = codeToRecoverPassword;
+        this._personalInfo = personalInfo;
     }
 
     public static create(
@@ -50,10 +56,11 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         paymentMethods: PaymentMethod[],
         shippingAddress?: Address,
-        billingAddress?: Address,
+        billingAddress?: Billing,
         password?: UserPassword,
         state?: string,
         codeToRecoverPassword?: string,
+        personalInfo?: PersonalInfo,
         id?: CustomerId
     ): Customer {
         return new Customer(
@@ -66,6 +73,7 @@ export class Customer extends Entity<Customer> {
             password,
             state,
             codeToRecoverPassword,
+            personalInfo,
             id
         );
     }
@@ -112,6 +120,132 @@ export class Customer extends Entity<Customer> {
         const defaultMethod: PaymentMethod = this.getDefaultPaymentMethod()!;
 
         return defaultMethod.getExpirationDate();
+    }
+
+    public getPersonalInfo(): {
+        name?: string;
+        lastName?: string;
+        fullName?: string;
+        phone1?: string;
+        phone2?: string;
+        birthDate?: string;
+        birthDateValue?: Date;
+        preferredLanguage?: string;
+    } {
+        return {
+            name: this.personalInfo?.name,
+            lastName: this.personalInfo?.lastName,
+            fullName:
+                !!!this.personalInfo?.name && !!!this.personalInfo?.lastName
+                    ? ""
+                    : `${this.personalInfo?.name || ""} ${this.personalInfo?.lastName || ""}`,
+            phone1: this.personalInfo?.phone1,
+            phone2: this.personalInfo?.phone2,
+            birthDate: this.personalInfo?.birthDate?.toDateString(),
+            birthDateValue: this.personalInfo?.birthDate,
+            preferredLanguage: this.personalInfo?.preferredLanguage,
+        };
+    }
+
+    public changePersonalInfo(
+        name: string,
+        lastName: string,
+        phone1: string,
+        phone2: string,
+        birthDate: Date,
+        preferredLanguage: string
+    ): void {
+        if (!this.personalInfo) {
+            const personalInfo: PersonalInfo = new PersonalInfo(name, lastName, phone1, phone2, birthDate, preferredLanguage);
+            this.personalInfo = personalInfo;
+        } else {
+            this.personalInfo?.changeInfo(name, lastName, phone1, phone2, birthDate, preferredLanguage);
+        }
+    }
+
+    public changeBillingAddress(
+        lat: number,
+        long: number,
+        addressName: string,
+        customerName: string,
+        details: string,
+        identification: string
+    ): void {
+        if (!this.billingAddress) {
+            const billingAddress: Billing = new Billing(lat, long, addressName, customerName, details, identification);
+            this.billingAddress = billingAddress;
+        } else {
+            this.billingAddress?.changeInfoBilling(lat, long, addressName, customerName, details, identification);
+        }
+    }
+
+    public getShippingAddress(): { name?: string; details?: string; preferredShippingHour: string } {
+        return {
+            details: this.shippingAddress?.details,
+            name: this.shippingAddress?.name,
+            preferredShippingHour: this.shippingAddress?.deliveryTime || "Sin indicar",
+        };
+    }
+
+    public getBillingData(): {
+        address?: string;
+        addressDetails?: string;
+        fullName?: string;
+        documentNumber?: string;
+        latitude?: number;
+        longitude?: number;
+    } {
+        return {
+            address: this.billingAddress?.addressName,
+            addressDetails: this.billingAddress?.details,
+            fullName: this.billingAddress?.customerName,
+            documentNumber: this.billingAddress?.identification,
+            latitude: this.billingAddress?.latitude,
+            longitude: this.billingAddress?.longitude,
+        };
+    }
+
+    public changeShippingAddress(lat: number, long: number, name: string, fullName: string, details: string, deliveryTime: string): void {
+        if (!this.shippingAddress) {
+            const shippingAddress: Address = new Address(lat, long, name, fullName, details, deliveryTime);
+            this.shippingAddress = shippingAddress;
+        } else {
+            this.shippingAddress?.changeInfoShipping(lat, long, name, fullName, details, deliveryTime);
+        }
+    }
+
+    public changePaymentMethod(
+        paymentId: string,
+        brand: string,
+        last4Numbers: string,
+        exp_month: number,
+        exp_year: number,
+        cvc: string,
+        stripeId: string,
+        isDefault: boolean
+    ): void {
+        const filterPaymentById = this.paymentMethods.filter((payment: PaymentMethod) => payment.id.value === paymentId);
+
+        if (filterPaymentById.length > 0) {
+            if (isDefault) {
+                const filterPaymentsByDiferentId = this.paymentMethods.filter((payment: PaymentMethod) => payment.id.value !== paymentId);
+                if (filterPaymentsByDiferentId.length !== 0) {
+                    filterPaymentsByDiferentId.map((payments: PaymentMethod) => (payments.isDefault = false));
+                }
+            }
+            filterPaymentById[0].changePaymentData(brand, last4Numbers, exp_month, exp_year, cvc, stripeId, isDefault);
+        } else {
+            if (isDefault) {
+                if (this.paymentMethods.length > 0) {
+                    const filterPaymentsByDiferentId = this.paymentMethods.filter(
+                        (payment: PaymentMethod) => payment.id.value !== paymentId
+                    );
+                    filterPaymentsByDiferentId.map((payments: PaymentMethod) => (payments.isDefault = false));
+                }
+            }
+            const paymentMethod: PaymentMethod = new PaymentMethod(brand, last4Numbers, exp_month, exp_year, cvc, isDefault, stripeId);
+            this.paymentMethods = [...this.paymentMethods, paymentMethod];
+        }
     }
 
     /**
@@ -166,7 +300,7 @@ export class Customer extends Entity<Customer> {
      * Getter billingAddress
      * @return {Address | undefined}
      */
-    public get billingAddress(): Address | undefined {
+    public get billingAddress(): Billing | undefined {
         return this._billingAddress;
     }
 
@@ -184,6 +318,14 @@ export class Customer extends Entity<Customer> {
      */
     public get paymentMethods(): PaymentMethod[] {
         return this._paymentMethods;
+    }
+
+    /**
+     * Getter personalInfo
+     * @return {PersonalInfo}
+     */
+    public get personalInfo(): PersonalInfo | undefined {
+        return this._personalInfo;
     }
 
     /**
@@ -238,7 +380,7 @@ export class Customer extends Entity<Customer> {
      * Setter billingAddress
      * @param {Address | undefined} value
      */
-    public set billingAddress(value: Address | undefined) {
+    public set billingAddress(value: Billing | undefined) {
         this._billingAddress = value;
     }
 
@@ -256,5 +398,13 @@ export class Customer extends Entity<Customer> {
      */
     public set paymentMethods(value: PaymentMethod[]) {
         this._paymentMethods = value;
+    }
+
+    /**
+     * Setter personalInfo
+     * @param {PersonalInfo} value
+     */
+    public set personalInfo(value: PersonalInfo | undefined) {
+        this._personalInfo = value;
     }
 }

@@ -38,6 +38,16 @@ export class PaymentMethod extends Entity<PaymentMethod> {
         return `Expira el ${this.exp_month}/${this.exp_year}`;
     }
 
+    public changePaymentData(brand: string, last4Numbers: string, exp_month: number, exp_year: number, cvc: string, stripeId: string, isDefault: boolean): void {
+        this.brand = brand;
+        this.last4Numbers = last4Numbers;
+        this.exp_month = exp_month;
+        this.exp_year = exp_year;
+        this.cvc = cvc;
+        this.stripeId = stripeId;
+        this.isDefault = isDefault;
+    }
+
     /**
      * Getter brand
      * @return {string}

@@ -29,6 +29,79 @@ const AddressSchema = new mongoose.Schema({
     addressFullName: {
         type: String,
     },
+
+    deliveryTime: {
+        type: String
+    }
+});
+
+const BillingSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: uuid.v4,
+    },
+
+    latitude: {
+        type: Number,
+        required: true,
+    },
+
+    longitude: {
+        type: Number,
+        required: true,
+    },
+
+    addressName: {
+        type: String,
+        required: true,
+    },
+
+    addressDetails: {
+        type: String,
+    },
+
+    customerName: {
+        type: String,
+        required: true
+    },
+
+    identification: {
+        type: String,
+        required: true
+    },
+});
+
+const PersonalInfoSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: uuid.v4,
+    },
+
+    name: {
+        type: String,
+        required: true,
+    },
+
+    lastName: {
+        type: String,
+        required: true
+    },
+
+    phone1: {
+        type: String,
+    },
+
+    phone2: {
+        type: String,
+    },
+
+    birthDate: {
+        type: String,
+    },
+
+    preferredLanguage: {
+        type: String
+    }
 });
 
 const PaymentMethodSchema = new mongoose.Schema({
@@ -98,11 +171,14 @@ const CustomerSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        personalInfo: {
+            type: PersonalInfoSchema
+        },
         shippingAddress: {
             type: AddressSchema,
         },
         billingAddress: {
-            type: AddressSchema,
+            type: BillingSchema,
         },
         codeToRecoverPassword: {
             type: String,
