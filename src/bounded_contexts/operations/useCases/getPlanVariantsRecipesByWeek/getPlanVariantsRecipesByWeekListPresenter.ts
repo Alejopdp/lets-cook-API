@@ -35,7 +35,10 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
         // Additional plans
         for (let plan of plans) {
             for (let additionalPlan of plan.additionalPlans) {
-                if (uniqAdditionalPlansIds.length === 0 || !additionalPlan.id.equals(uniqAdditionalPlansIds[0])) {
+                if (
+                    additionalPlan.isActive &&
+                    (uniqAdditionalPlansIds.length === 0 || !additionalPlan.id.equals(uniqAdditionalPlansIds[0]))
+                ) {
                     uniqAdditionalPlansIds = [additionalPlan.id, ...uniqAdditionalPlansIds];
 
                     var presentedVariants = [];
@@ -56,7 +59,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
 
         // Principal plans
         for (let plan of plans) {
-            if (plan.isPrincipal()) {
+            if (plan.isPrincipal() && plan.isActive) {
                 var presentedVariants = [];
 
                 for (let variant of plan.planVariants) {
