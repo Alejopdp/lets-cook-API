@@ -65,11 +65,11 @@ export class MongooseCustomerRepository implements ICustomerRepository {
     }
 
     public async findByIdOrThrow(customerId: CustomerId): Promise<Customer> {
-        const customerDb = await this.findById(customerId);
+        const customer: Customer | undefined = await this.findById(customerId);
 
-        if (!!!customerDb) throw new Error("El cliente ingresado no existe");
+        if (!!!customer) throw new Error("El cliente ingresado no existe");
 
-        return customerMapper.toDomain(customerDb);
+        return customer;
     }
 
     public async delete(customerId: CustomerId): Promise<void> {

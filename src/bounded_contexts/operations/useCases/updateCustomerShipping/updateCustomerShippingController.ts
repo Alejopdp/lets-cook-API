@@ -18,13 +18,13 @@ export class UpdateCustomerShippingController extends BaseController {
         try {
             const dto: UpdateCustomerShippingDto = {
                 customerId: this.req.params.id,
-                lat: this.req.body.lat,
-                long: this.req.body.long,
+                lat: this.req.body.latitude,
+                long: this.req.body.longitude,
                 name: this.req.body.name,
                 fullName: this.req.body.full_name,
                 details: this.req.body.details,
                 addressId: this.req.body.addresId,
-                deliveryTime: this.req.body.delivery_time
+                deliveryTime: this.req.body.delivery_time,
             };
 
             await this.updateCustomer.execute(dto);
