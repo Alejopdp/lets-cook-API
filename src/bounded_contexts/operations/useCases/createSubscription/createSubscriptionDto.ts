@@ -6,4 +6,5 @@ export interface CreateSubscriptionDto {
     restrictionComment: string;
     stripePaymentMethodId: string;
     couponId?: string | number;
+    paymentMethodId: string;
 }

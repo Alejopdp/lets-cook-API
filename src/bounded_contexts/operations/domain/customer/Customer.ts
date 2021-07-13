@@ -122,6 +122,12 @@ export class Customer extends Entity<Customer> {
         return defaultMethod.getExpirationDate();
     }
 
+    public getPaymentMethodStripeId(paymentMethodId: PaymentMethodId): string {
+        const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.equals(paymentMethodId));
+
+        return paymentMethod ? paymentMethod.stripeId : "";
+    }
+
     public getPersonalInfo(): {
         name?: string;
         lastName?: string;

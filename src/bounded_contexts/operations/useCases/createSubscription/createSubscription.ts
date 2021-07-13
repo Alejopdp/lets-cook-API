@@ -5,6 +5,7 @@ import { IPaymentService } from "../../application/paymentService/IPaymentServic
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { Plan } from "../../domain/plan/Plan";
@@ -26,12 +27,6 @@ import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
-
-// TO DO Pay Stripe
-// TO DO Notify customer
-// TO DO Email templates
-// TO DO Notify admin
-// TO DO Entity SubscriptionCoupon
 
 export class CreateSubscription {
     private _customerRepository: ICustomerRepository;
@@ -72,13 +67,9 @@ export class CreateSubscription {
     public async execute(dto: CreateSubscriptionDto): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
-        const customer: Customer | undefined = await this.customerRepository.findById(customerId);
-        if (!!!customer) throw new Error("No puedes pedir un nuevo plan");
-
+        const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const planFrequency: PlanFrequency = (<any>PlanFrequency)[dto.planFrequency];
-        const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.planId), Locale.es);
-        if (!!!plan) throw new Error("El plan ingresado no existe");
-
+        const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
@@ -105,7 +96,6 @@ export class CreateSubscription {
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) => zone.hasAddressInside());
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
-        // const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
 
@@ -125,10 +115,12 @@ export class CreateSubscription {
         //     customer.addPaymentMethod(newPaymentMethod);
         // }
 
+        console.log("DTO: ", dto);
         const paymentIntent = await this.paymentService.paymentIntent(
             plan.getPlanVariantPrice(planVariantId),
-            // customer.getDefaultPaymentMethod()?.stripeId || dto.stripePaymentMethodId,
-            dto.stripePaymentMethodId,
+            dto.stripePaymentMethodId
+                ? dto.stripePaymentMethodId
+                : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
             customer.email,
             customer.stripeId
         );
