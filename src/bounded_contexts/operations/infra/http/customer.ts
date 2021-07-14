@@ -16,6 +16,7 @@ import { updatePaymentMethodController } from "../../useCases/updatePaymentMetho
 import { getCustomerListController } from "../../useCases/getCustomerList";
 import { getCustomerByNameController } from "../../useCases/getCustomerListByName";
 import { deleteCustomerController } from "../../useCases/deleteCustomer";
+import { createCustomerByAdminController } from "../../useCases/createCustomerByAdmin";
 
 const customerRouter = express.Router();
 
@@ -42,6 +43,7 @@ customerRouter.put("/delete/:id", (req, res) => deleteCustomerController.execute
 
 // // POSTs
 customerRouter.post("/sign-up", (req, res) => signUpController.execute(req, res));
+customerRouter.post("/create", (req, res) => createCustomerByAdminController.execute(req, res));
 customerRouter.post("/sign-in", (req, res) => signInController.execute(req, res));
 customerRouter.post("/validation/:code", (req, res) => codeValidationController.execute(req, res));
 customerRouter.post("/social-auth/:token", (req, res) => socialNetworkAuthController.execute(req, res));
