@@ -1,3 +1,5 @@
+import { Locale } from "../../domain/locale/Locale";
+
 export interface CreateSubscriptionDto {
     customerId: string | number;
     planId: string | number;
@@ -7,4 +9,12 @@ export interface CreateSubscriptionDto {
     stripePaymentMethodId: string;
     couponId?: string | number;
     paymentMethodId: string;
+    addressName: string;
+    addressDetails: string;
+    latitude: number;
+    longitude: number;
+    customerFirstName: string;
+    customerLastName: string;
+    phone1: string;
+    locale: Locale;
 }

@@ -19,7 +19,7 @@ export interface IOrderRepository {
     findByIdList(ordersIds: OrderId[]): Promise<Order[]>;
     findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[]): Promise<Order[]>;
     findForBilling(subscriptionsIds: SubscriptionId[], week: Week): Promise<Order[]>;
-    findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>
+    findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>;
     saveSkippedOrders(orders: Order[]): Promise<void>;
     saveCancelledOrders(orders: Order[]): Promise<void>;
     saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void>;

@@ -1,4 +1,3 @@
-import { updateShippingZone } from "./../../useCases/updateShippingZone/index";
 // Principal
 import { Entity } from "../../../../core/domain/Entity";
 import { Guard, GuardArgumentCollection } from "../../../../core/logic/Guard";
@@ -62,8 +61,8 @@ export class ShippingZone extends Entity<ShippingZone> {
         this.state = state;
     }
 
-    public hasAddressInside(): boolean {
-        return true;
+    public hasAddressInside(lat: number, lng: number): boolean {
+        return this.radio.hasPointInside(lat, lng);
     }
 
     /**

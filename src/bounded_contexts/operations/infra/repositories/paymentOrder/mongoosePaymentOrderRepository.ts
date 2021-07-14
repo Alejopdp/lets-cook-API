@@ -62,6 +62,18 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, Locale.es));
     }
 
+    public async findAnActivePaymentOrder(): Promise<PaymentOrder | undefined> {
+        const paymentOrderDb = await MongoosePaymentOrder.findOne({ state: "PAYMENT_ORDER_ACTIVE" })
+            .populate("week")
+            .populate({
+                path: "recipes",
+                populate: { path: "recipeVariants", populate: { path: "restrictions" } },
+            })
+            .populate("plan");
+
+        return paymentOrderDb ? paymentOrderMapper.toDomain(paymentOrderDb) : undefined;
+    }
+
     public async existsBy(customerId: CustomerId): Promise<boolean> {
         return await MongoosePaymentOrder.exists({ customer: customerId.value, state: "PAYMENT_ORDER_ACTIVE" });
     }

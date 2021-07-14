@@ -83,7 +83,7 @@ export class Customer extends Entity<Customer> {
     }
 
     public addPaymentMethod(newPaymentMethod: PaymentMethod): void {
-        if (!!!this.hasAtLeastOnePaymentMethod) newPaymentMethod.isDefault = true;
+        if (!this.hasAtLeastOnePaymentMethod() || this.hasNoDefaultPaymentMethod()) newPaymentMethod.isDefault = true;
 
         this.paymentMethods = [...this.paymentMethods, newPaymentMethod];
     }
@@ -110,6 +110,14 @@ export class Customer extends Entity<Customer> {
         return this.paymentMethods.length > 0;
     }
 
+    public hasNoDefaultPaymentMethod(): boolean {
+        return this.paymentMethods.every((method) => !method.isDefault);
+    }
+
+    public hasDifferentLatAndLngAddress(lat: number, lng: number): boolean {
+        return this.shippingAddress?.latitude !== lat || this.shippingAddress?.longitude !== lng;
+    }
+
     public getDefaultPaymentMethodCardLabel(): string {
         const defaultMethod: PaymentMethod = this.getDefaultPaymentMethod()!;
 
@@ -125,7 +133,7 @@ export class Customer extends Entity<Customer> {
     public getPaymentMethodStripeId(paymentMethodId: PaymentMethodId): string {
         const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.equals(paymentMethodId));
 
-        return paymentMethod ? paymentMethod.stripeId : "";
+        return paymentMethod?.stripeId || "";
     }
 
     public getPersonalInfo(): {

@@ -66,7 +66,7 @@ export class Subscription extends Entity<Subscription> {
 
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
         const orders: Order[] = [];
-        const deliveryDate: Date = this.getFirstOrderShippingDate(2); // Tuesday
+        const deliveryDate: Date = this.getFirstOrderShippingDate(1); // Monday
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
 
         for (let i = 0; i < 12; i++) {
@@ -105,7 +105,7 @@ export class Subscription extends Entity<Subscription> {
     public billingStartDayHasToSkipWeeks(): boolean {
         const todayWeekDay: number = new Date().getDay();
 
-        return todayWeekDay !== this.billingDayOfWeek && todayWeekDay >= 2;
+        return todayWeekDay !== this.billingDayOfWeek && todayWeekDay >= 1;
     }
 
     public swapPlan(nextOrders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): void {

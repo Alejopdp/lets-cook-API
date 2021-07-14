@@ -417,6 +417,11 @@
     "@types/node" "*"
     "@types/pg-types" "*"
 
+"@types/point-in-polygon@^1.0.0":
+  "integrity" "sha512-4jwic3xvYymOk1Dl4L/y0scsC69Vie8f8QhXCAmuXlWY8QzxX9jlp0DXyyfc6Ib2ZfZVzsUz82tUDRwxEOG1lw=="
+  "resolved" "https://registry.npmjs.org/@types/point-in-polygon/-/point-in-polygon-1.0.0.tgz"
+  "version" "1.0.0"
+
 "@types/qs@*":
   "integrity" "sha512-+wYo+L6ZF6BMoEjtf8zB2esQsqdV6WsjRK/GP9WOgLPrq87PbNWgIxS76dS5uvl/QXtHGakZmwTznIfcPXcKlQ=="
   "resolved" "https://registry.npmjs.org/@types/qs/-/qs-6.9.4.tgz"
