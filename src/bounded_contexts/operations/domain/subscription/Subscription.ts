@@ -37,11 +37,11 @@ export class Subscription extends Entity<Subscription> {
         state: ISubscriptionState,
         restrictionComment: string,
         creationDate: Date,
-        couponChargesQtyApplied: number,
         customer: Customer,
         price: number,
         restriction?: RecipeVariantRestriction,
         couponId?: CouponId,
+        couponChargesQtyApplied?: number,
         billingDayOfWeek?: number,
         billingStartDate?: Date,
         cancellationReason?: CancellationReason,
@@ -59,7 +59,7 @@ export class Subscription extends Entity<Subscription> {
         this._couponId = couponId;
         this._billingStartDate = billingStartDate;
         this._creationDate = creationDate;
-        this._couponChargesQtyApplied = couponChargesQtyApplied;
+        this._couponChargesQtyApplied = couponChargesQtyApplied || 0;
         this._billingDayOfWeek = billingDayOfWeek || 6; // Saturday
         this._cancellationReason = cancellationReason;
     }

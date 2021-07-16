@@ -1,4 +1,4 @@
-import { createCoupon } from './index';
+import { createCoupon } from "./index";
 import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CreateCouponDto } from "./createCouponDto";
@@ -26,7 +26,7 @@ export class CreateCouponController extends BaseController {
             // const planImage: ReadStream = fs.createReadStream(planImagePath);
 
             const dto: CreateCouponDto = {
-                couponCode: this.req.body.code,
+                couponCode: this.req.body.couponCode,
                 discountType: this.req.body.discount_type.type,
                 discountValue: this.req.body.discount_type.value,
                 minRequireType: this.req.body.minimum_requirement.type,
@@ -38,7 +38,7 @@ export class CreateCouponController extends BaseController {
                 maxChargeQtyValue: this.req.body.coupons_by_subscription.value,
                 startDate: this.req.body.date_rage.start,
                 endDate: this.req.body.date_rage.expire,
-                state: this.req.body.state
+                state: this.req.body.state,
             };
             // console.log("CreateCouponController: ", dto)
 

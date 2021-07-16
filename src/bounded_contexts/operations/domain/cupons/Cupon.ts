@@ -5,11 +5,10 @@ import { ICouponType } from "./CuponType/ICuponType";
 import { PlanId } from "../plan/PlanId";
 import { CouponId } from "../cupons/CouponId";
 import { ILimitAplication } from "./LimitAplication/ILimitAplication";
-// import { PlanType } from "./PlanType/PlanType";
-// import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { Locale } from "../locale/Locale";
 import { logger } from "../../../../../config";
 import { String } from "aws-sdk/clients/apigateway";
+import { Subscription } from "../subscription/Subscription";
 
 export class Coupon extends Entity<Coupon> {
     private _couponCode: string;
@@ -70,7 +69,6 @@ export class Coupon extends Entity<Coupon> {
         state: string,
         id?: CouponId
     ): Coupon {
-
         return new Coupon(
             couponCode,
             type,
@@ -92,29 +90,18 @@ export class Coupon extends Entity<Coupon> {
         this.state = state;
     }
 
-    // public toggleState(): void {
-    //     // TO DO: Validate existing subscriptions with this plan?
+    public isValid(subscriptions: Subscription[], shippingCost?: number): boolean {
+        if (this.isFreeShippingCoupon() && !shippingCost)
+            throw new Error("Para utilizar un cupón de envío gratis primero debes ingresar una dirección de entrega");
+        const subscriptionWithTheCoupon: Subscription | undefined = subscriptions.find((sub) => sub.couponId?.equals(this.id));
+        if (!!!subscriptionWithTheCoupon) return true;
 
-    //     this.isActive = !this.isActive;
-    // }
+        return this.limites.every((limit) => limit.isValid(subscriptionWithTheCoupon));
+    }
 
-    // public canHaveAdditionalPlans(): boolean {
-    //     return this.type === PlanType.Principal;
-    // }
-
-    // public updateAdditionalPlans(additionalPlans: Plan[]): void {
-    //     if (!this.canHaveAdditionalPlans() && additionalPlans.length > 0)
-    //         throw new Error("Un plan adicional no puede tener relacionado otros planes adidiconales");
-    //     this.additionalPlans = additionalPlans;
-    // }
-
-    // public changeType(newType: PlanType): void {
-    //     if (this.type === PlanType.Principal && newType === PlanType.Adicional && this.additionalPlans.length > 0) {
-    //         throw new Error("Tiene que desasociar los planes adicionales antes de convertirlo en un plan adicional");
-    //     } else {
-    //         this.type = newType;
-    //     }
-    // }
+    public isFreeShippingCoupon(): boolean {
+        return this.type.type === "free";
+    }
 
     /**
      * Getter name
@@ -136,7 +123,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter planSku
      * @return {number}
      */
-     public get minRequireType(): string {
+    public get minRequireType(): string {
         return this._minRequireType;
     }
 
@@ -152,7 +139,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter imageUrl
      * @return {PlanId}
      */
-     public get productsForApplyingType(): string {
+    public get productsForApplyingType(): string {
         return this._productsForApplyingType;
     }
 
@@ -168,7 +155,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter type
      * @return {ILimitAplication}
      */
-     public get limites(): ILimitAplication[] {
+    public get limites(): ILimitAplication[] {
         return this._limites;
     }
 
@@ -176,7 +163,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter isActive
      * @return {number}
      */
-     public get maxChargeQtyType(): string {
+    public get maxChargeQtyType(): string {
         return this._maxChargeQtyType;
     }
 
@@ -200,7 +187,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter planVariants
      * @return {Number}
      */
-     public get endDate(): Date {
+    public get endDate(): Date {
         return this._endDate;
     }
 
@@ -211,7 +198,6 @@ export class Coupon extends Entity<Coupon> {
     public get state(): string {
         return this._state;
     }
-
 
     /**
      * Setter name
@@ -306,7 +292,7 @@ export class Coupon extends Entity<Coupon> {
      * Setter locale
      * @param {string} value
      */
-     public set state(value: string) {
+    public set state(value: string) {
         this._state = value;
     }
 }

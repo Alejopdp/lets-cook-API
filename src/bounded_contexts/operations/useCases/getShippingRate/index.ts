@@ -3,6 +3,5 @@ import { mongooseShippingZoneRepository } from "../../infra/repositories/shippin
 import { GetShippingRate } from "./getShippingRate";
 import { GetShippingRateController } from "./getShippingRateController";
 
-// export const getPlanList = new GetPlanList(mockPlanRepository, s3Service);
 export const getShippingRate = new GetShippingRate(mongooseShippingZoneRepository, s3Service);
 export const getShippingRateController = new GetShippingRateController(getShippingRate);

@@ -8,14 +8,7 @@ export class ShippingZoneRadio {
         this._coordinates = coordinates;
     }
 
-    public isInside(address: number): boolean {
-        throw new Error("Method not implemented.");
-    }
-
     public hasPointInside(lat: number, lng: number): boolean {
-        console.log("LAT: ", lat);
-        console.log("LNG: ", lng);
-        console.log("POLYIGON: ", this.getArrayOfCoordinatesTuple());
         return pointInPolygon([lat, lng], this.getArrayOfCoordinatesTuple());
     }
 

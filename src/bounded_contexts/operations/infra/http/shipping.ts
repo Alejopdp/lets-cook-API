@@ -1,12 +1,12 @@
 import express from "express";
 import multer from "multer";
 import { createShippingZoneController } from "../../useCases/createShippingZone";
-import { getShippingListController } from '../../useCases/getShippingZoneList/index';
+import { getShippingListController } from "../../useCases/getShippingZoneList/index";
 import { getShippingZoneByIdController } from "../../useCases/getShippingZoneById";
 import { deleteShippingZoneController } from "../../useCases/deleteShippingZone";
 import { updateShippingZoneController } from "../../useCases/updateShippingZone";
 import { updateShippingZoneStateController } from "../../useCases/updateShippingZoneState";
-import { getShippingRateController } from '../../useCases/getShippingRate'
+import { getShippingRateController } from "../../useCases/getShippingRate";
 
 const shippingRouter = express.Router();
 
@@ -16,7 +16,8 @@ const options: multer.Options = {
 
 // // GETs
 shippingRouter.get("/", (req, res) => getShippingListController.execute(req, res));
-shippingRouter.get("/shipping-rate", (req, res) => getShippingRateController.execute(req, res));
+shippingRouter.get("/shipping-rate/:latitude/:longitude", (req, res) => getShippingRateController.execute(req, res));
+
 shippingRouter.get("/:id", (req, res) => getShippingZoneByIdController.execute(req, res));
 
 // // PUT

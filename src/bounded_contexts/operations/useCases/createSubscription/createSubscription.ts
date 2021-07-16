@@ -76,7 +76,8 @@ export class CreateSubscription {
         const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
-        const addressIsChanged: boolean = customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
+        const addressIsChanged: boolean =
+            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
         const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
 
@@ -100,18 +101,18 @@ export class CreateSubscription {
             new SubscriptionActive(),
             dto.restrictionComment,
             new Date(),
-            0,
             customer,
             plan.getPlanVariantPrice(planVariantId),
             undefined,
             couponId,
+            undefined, // Validate and use cupón
             undefined,
             new Date() // TO DO: Calculate
         );
 
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
-            zone.hasAddressInside(dto.latitude, dto.longitude)
+            zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)
         );
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 

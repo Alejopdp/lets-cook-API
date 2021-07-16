@@ -1,3 +1,5 @@
 export interface GetCouponValidationDto {
-    coupon: string ;
+    coupon: string;
+    customerId: string;
+    shippingCost: number;
 }

@@ -14,6 +14,7 @@ export class GetCouponValidationController extends BaseController {
         try {
             const dto: GetCouponValidationDto = {
                 coupon: this.req.params.code,
+                customerId: this.req.body.customerId,
             };
             const result = await this.getCouponValidation.execute(dto);
 

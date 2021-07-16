@@ -1,6 +1,8 @@
+import { Subscription } from "../../subscription/Subscription";
+import { CouponId } from "../CouponId";
 import { ILimitAplication } from "./ILimitAplication";
 
-export class OnePerCustomer implements ILimitAplication{
+export class OnePerCustomer implements ILimitAplication {
     public type: string;
     public value: number;
 
@@ -8,8 +10,8 @@ export class OnePerCustomer implements ILimitAplication{
         this.type = type;
         this.value = value;
     }
-    
-    isValid(appliedQty: number): boolean {
-        throw new Error("Method not implemented.");
+
+    public isValid(subscription: Subscription): boolean {
+        return false;
     }
 }

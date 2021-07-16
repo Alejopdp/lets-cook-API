@@ -1,3 +1,4 @@
 export interface GetShippingRateDto {
-    coordinates: number[];
+    latitude: number;
+    longitude: number;
 }

@@ -15,7 +15,8 @@ export class GetShippingRateController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: GetShippingRateDto = {
-                coordinates: this.req.body.coordinates,
+                latitude: parseFloat(this.req.params.latitude),
+                longitude: parseFloat(this.req.params.longitude),
             };
             const result = await this.getShippingRate.execute(dto);
 
