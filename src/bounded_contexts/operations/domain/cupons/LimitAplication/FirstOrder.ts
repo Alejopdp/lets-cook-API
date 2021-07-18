@@ -11,7 +11,8 @@ export class FirstOrder implements ILimitAplication {
         this.value = value;
     }
 
-    public isValid(subscription: Subscription): boolean {
-        return subscription.couponChargesQtyApplied === 0;
+    public isValid(subscriptions: Subscription[]): boolean {
+        if (!!subscriptions[0]) throw new Error("No puedes aplicar el cupón ingresado debido a que solo aplica para primeros pedidos");
+        return true;
     }
 }

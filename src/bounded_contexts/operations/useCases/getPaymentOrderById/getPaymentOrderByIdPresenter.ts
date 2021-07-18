@@ -23,10 +23,10 @@ export class GetPaymentOrderByIdPresenter {
                 shippingDate: order.getHumanShippmentDay(),
                 state: order.state.humanTitle,
                 hasChosenRecipes: order.hasChosenRecipes(),
-                recipes: order.recipes.map((recipe) => ({
-                    id: recipe.id.value,
-                    variantSku: recipe.getVariantSkuByVariantsIds(order.recipesVariantsIds),
-                    imageUrl: recipe.getMainImageUrl(),
+                recipes: order.recipeSelection.map((selection) => ({
+                    id: selection.recipe.id.value,
+                    variantSku: selection.recipe.getVariantSkuByVariantsIds([selection.recipeVariantId]),
+                    imageUrl: selection.recipe.getMainImageUrl(),
                 })),
                 plan: order.getPlanName(),
                 planVariant: order.getPlanVariantLabel(order.planVariantId),

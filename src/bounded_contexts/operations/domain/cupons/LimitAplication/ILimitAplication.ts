@@ -1,7 +1,8 @@
 import { Subscription } from "../../subscription/Subscription";
+import { CouponId } from "../CouponId";
 
 export interface ILimitAplication {
     type: string;
     value: number;
-    isValid(subscription: Subscription): boolean;
+    isValid(subscriptions: Subscription[], couponId: CouponId): boolean;
 }

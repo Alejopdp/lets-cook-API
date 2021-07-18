@@ -64,9 +64,17 @@ export class MongooseOrderRepository implements IOrderRepository {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return orderDb ? orderMapper.toDomain(orderDb, locale) : undefined;
+    }
+
+    public async findByIdOrThrow(orderId: OrderId): Promise<Order> {
+        const order: Order | undefined = await this.findById(orderId, Locale.es);
+
+        if (!!!order) throw new Error("La orden ingresada no existe");
+
+        return order;
     }
 
     public async findForBilling(subscriptionsIds: SubscriptionId[], week: Week): Promise<Order[]> {
@@ -98,7 +106,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             // .limit(12)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
@@ -116,7 +124,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .sort({ shippingDate: 1 })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, Locale.es));
     }

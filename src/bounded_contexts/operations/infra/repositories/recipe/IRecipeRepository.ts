@@ -9,6 +9,7 @@ export interface IRecipeRepository {
     findAll(): Promise<Recipe[]>;
     findAllBackOfficeTags(): Promise<RecipeTag[]>;
     findById(recipeId: RecipeId): Promise<Recipe | undefined>;
+    findByIdList(recipesIds: RecipeId[]): Promise<Recipe[]>;
     findBy(conditions: any): Promise<Recipe[]>;
     delete(recipeId: RecipeId): Promise<void>;
     findByWeekId(weekId: WeekId): Promise<Recipe[]>;

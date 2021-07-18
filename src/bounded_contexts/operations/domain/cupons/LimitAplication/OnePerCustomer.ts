@@ -11,7 +11,7 @@ export class OnePerCustomer implements ILimitAplication {
         this.value = value;
     }
 
-    public isValid(subscription: Subscription): boolean {
-        return false;
+    public isValid(subscriptions: Subscription[]): boolean {
+        throw new Error("Ya has utilizado este cupón de descuento");
     }
 }

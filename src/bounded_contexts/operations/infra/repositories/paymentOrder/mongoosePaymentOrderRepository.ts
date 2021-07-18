@@ -43,7 +43,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     }
 
     public async findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {
-        const paymentOrder: PaymentOrder | undefined = await this.findById(paymentOrderId);
+        const paymentOrder: PaymentOrder | undefined = await this.findById(paymentOrderId, Locale.es);
 
         if (!!!paymentOrder) throw new Error("La orden de pago ingresada no existe");
 

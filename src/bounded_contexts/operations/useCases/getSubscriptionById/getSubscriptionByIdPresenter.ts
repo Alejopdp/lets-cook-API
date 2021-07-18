@@ -22,7 +22,7 @@ export class GetSubscriptionByIdPresenter {
         };
 
         const billingData = {
-            addressName: customer.billingAddress?.name,
+            addressName: customer.billingAddress?.customerName,
             addressDetails: customer.billingAddress?.details,
             name: "Alejo Scotti (Hardcoded)",
         };
@@ -41,8 +41,8 @@ export class GetSubscriptionByIdPresenter {
 
         const nextActiveOrder: Order | undefined = subscription.getNextActiveOrder(orders);
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondActiveOrder(orders);
-        const hasChosenRecipesForActualWeek = !!!nextActiveOrder ? false : nextActiveOrder.recipes.length > 0 ? true : false;
-        const hasChosenRecipesForNextWeek = !!!nextSecondActiveOrder ? false : nextSecondActiveOrder.recipes.length > 0 ? true : false; // TO DO: Get 2nd Next Active order
+        const hasChosenRecipesForActualWeek = !!!nextActiveOrder ? false : nextActiveOrder.hasChosenRecipes();
+        const hasChosenRecipesForNextWeek = !!!nextSecondActiveOrder ? false : nextSecondActiveOrder.hasChosenRecipes();
         const actualWeekOrder = await this.presentWeekRecipes(nextActiveOrder);
         const nextWeekOrder = await this.presentWeekRecipes(nextSecondActiveOrder); // TO DO: Get 2nd Next Active order
 
@@ -102,15 +102,12 @@ export class GetSubscriptionByIdPresenter {
         if (!!!order) return [];
         const presentedRecipes = [];
 
-        for (let recipe of order.recipes) {
+        for (let selection of order.recipeSelection) {
             presentedRecipes.push({
-                id: recipe.id.value,
-                name: recipe.recipeGeneralData.name,
-                imageUrl: await this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl), // TO DO: Presign
+                id: selection.recipe.id.value,
+                name: selection.recipe.recipeGeneralData.name,
+                imageUrl: await this.storageService.getPresignedUrlForFile(selection.recipe.recipeGeneralData.imageUrl),
                 images: [],
-                // restrictions: recipe.getVariantRestrictions(
-                //     order.recipesVariantsIds.filter((variantId) => recipe.recipeVariants.some((variant) => variant.id.equals(variantId)))[0]
-                // ),
             });
         }
 

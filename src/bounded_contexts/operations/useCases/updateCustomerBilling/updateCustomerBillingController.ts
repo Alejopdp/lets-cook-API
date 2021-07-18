@@ -18,13 +18,13 @@ export class UpdateCustomerBillingController extends BaseController {
         try {
             const dto: UpdateCustomerBillingDto = {
                 customerId: this.req.params.id,
-                lat: this.req.body.lat,
-                long: this.req.body.long,
-                addressName: this.req.body.address_name,
-                customerName: this.req.body.customer_name,
+                lat: this.req.body.latitude,
+                long: this.req.body.longitude,
+                addressName: this.req.body.addressName,
+                customerName: this.req.body.customerName,
                 details: this.req.body.details,
                 billingId: this.req.body.billingId,
-                identification: this.req.body.identification
+                identification: this.req.body.identification,
             };
 
             await this.updateCustomer.execute(dto);

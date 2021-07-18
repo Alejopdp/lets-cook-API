@@ -9,6 +9,8 @@ import { Locale } from "../locale/Locale";
 import { logger } from "../../../../../config";
 import { String } from "aws-sdk/clients/apigateway";
 import { Subscription } from "../subscription/Subscription";
+import { Plan } from "../plan/Plan";
+import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 
 export class Coupon extends Entity<Coupon> {
     private _couponCode: string;
@@ -90,13 +92,19 @@ export class Coupon extends Entity<Coupon> {
         this.state = state;
     }
 
-    public isValid(subscriptions: Subscription[], shippingCost?: number): boolean {
+    public isValid(subscriptions: Subscription[], plan: Plan, planVariantId: PlanVariantId, shippingCost?: number): boolean {
+        if (this.isFreeShippingCoupon() && shippingCost === 0)
+            throw new Error("No puedes aplicar un cupón de envío gratis debido a que ya cuentas con envío gratuito");
         if (this.isFreeShippingCoupon() && !shippingCost)
             throw new Error("Para utilizar un cupón de envío gratis primero debes ingresar una dirección de entrega");
-        const subscriptionWithTheCoupon: Subscription | undefined = subscriptions.find((sub) => sub.couponId?.equals(this.id));
-        if (!!!subscriptionWithTheCoupon) return true;
 
-        return this.limites.every((limit) => limit.isValid(subscriptionWithTheCoupon));
+        if (this.minRequireType === "amount" && plan.getPlanVariantPrice(planVariantId) < this.minRequireValue)
+            throw new Error(`El cupón de descuento ingresado solo aplica para ordenes mayores a ${this.minRequireValue} €`);
+
+        if (this.productsForApplyingType !== "all" && this.productsForApplyingValue.every((planId) => !planId.equals(plan.id)))
+            throw new Error("El cupón de descuento no aplica para el plan que estas comprando");
+
+        return this.limites.every((limit) => limit.isValid(subscriptions, this.id));
     }
 
     public isFreeShippingCoupon(): boolean {

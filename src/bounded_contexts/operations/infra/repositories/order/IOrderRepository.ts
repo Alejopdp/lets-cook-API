@@ -18,6 +18,7 @@ export interface IOrderRepository {
     getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[]): Promise<{ [key: string]: number }>;
     findByIdList(ordersIds: OrderId[]): Promise<Order[]>;
     findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[]): Promise<Order[]>;
+    findByIdOrThrow(orderId: OrderId): Promise<Order>;
     findForBilling(subscriptionsIds: SubscriptionId[], week: Week): Promise<Order[]>;
     findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>;
     saveSkippedOrders(orders: Order[]): Promise<void>;

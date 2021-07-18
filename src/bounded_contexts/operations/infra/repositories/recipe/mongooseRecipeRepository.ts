@@ -29,6 +29,12 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         return await this.findBy({});
     }
 
+    public async findByIdList(recipesIds: RecipeId[]): Promise<Recipe[]> {
+        const recipes = await this.findBy({ _id: recipesIds.map((id) => id.value) });
+
+        return recipes;
+    }
+
     public async findByWeekId(weekId: WeekId): Promise<Recipe[]> {
         return await this.findBy({ availableWeeks: weekId });
     }

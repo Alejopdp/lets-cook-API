@@ -68,7 +68,9 @@ export class CreateSubscription {
         this._updatePaymentOrdersShippingCostByCustomer = updatePaymentOrdersShippingCostByCustomer;
     }
 
-    public async execute(dto: CreateSubscriptionDto): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent }> {
+    public async execute(
+        dto: CreateSubscriptionDto
+    ): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent; firstOrder: Order }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
@@ -159,7 +161,7 @@ export class CreateSubscription {
         }
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
-        return { subscription, paymentIntent };
+        return { subscription, paymentIntent, firstOrder: orders[0] };
     }
 
     /**
