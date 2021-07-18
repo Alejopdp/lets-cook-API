@@ -1,8 +1,6 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { Customer } from "../../domain/customer/Customer";
-import { Address } from "../../domain/address/Address";
-import { AddressId } from "../../domain/address/AddressId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { UpdateCustomerBillingDto } from "./updateCustomerBillingDto";
 
