@@ -194,6 +194,7 @@ export class Customer extends Entity<Customer> {
     }
 
     public getShippingAddress(): { name?: string; details?: string; preferredShippingHour: string } {
+        console.log(this.shippingAddress?.name);
         return {
             details: this.shippingAddress?.details,
             name: this.shippingAddress?.name,
@@ -202,18 +203,18 @@ export class Customer extends Entity<Customer> {
     }
 
     public getBillingData(): {
-        address?: string;
-        addressDetails?: string;
-        fullName?: string;
-        documentNumber?: string;
+        addressName?: string;
+        details?: string;
+        customerName?: string;
+        identification?: string;
         latitude?: number;
         longitude?: number;
     } {
         return {
-            address: this.billingAddress?.addressName,
-            addressDetails: this.billingAddress?.details,
-            fullName: this.billingAddress?.customerName,
-            documentNumber: this.billingAddress?.identification,
+            addressName: this.billingAddress?.addressName,
+            details: this.billingAddress?.details,
+            customerName: this.billingAddress?.customerName,
+            identification: this.billingAddress?.identification,
             latitude: this.billingAddress?.latitude,
             longitude: this.billingAddress?.longitude,
         };

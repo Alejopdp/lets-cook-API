@@ -4,7 +4,15 @@ import { AddressId } from "../domain/address/AddressId";
 
 export class AddressMapper implements Mapper<Address> {
     public toDomain(raw: any): Address {
-        return new Address(raw.latitude, raw.longitude, raw.addressName, raw.addressFullName, raw.addressDetails, raw.deliveryTime, new AddressId(raw._id));
+        return new Address(
+            raw.latitude,
+            raw.longitude,
+            raw.addressName,
+            raw.addressFullName,
+            raw.addressDetails,
+            raw.deliveryTime,
+            new AddressId(raw._id)
+        );
     }
     public toPersistence(t: Address): any {
         return {
