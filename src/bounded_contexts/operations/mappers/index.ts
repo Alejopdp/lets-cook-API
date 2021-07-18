@@ -9,6 +9,7 @@ import { PlanVariantMapper } from "./planVariantMapper";
 import { RecipeRestrictionsMapper } from "./recipeRestrictionsMapper";
 import { SubscriptionMapper } from "./subscriptionMapper/subscriptionMapper";
 import { WeekMapper } from "./weekMapper";
+import { RateMapper } from "./rateMapper";
 
 export const planMapper: PlanMapper = new PlanMapper();
 export const planVariantMapper: PlanVariantMapper = new PlanVariantMapper();
@@ -21,3 +22,4 @@ export const orderMapper: OrderMapper = new OrderMapper();
 export const addressMapper: AddressMapper = new AddressMapper();
 export const billingMapper: BillingMapper = new BillingMapper();
 export const personalInfoMapper: PersonalInfoMapper = new PersonalInfoMapper();
+export const rateMapper: RateMapper = new RateMapper();

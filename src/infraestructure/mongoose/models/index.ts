@@ -10,4 +10,5 @@ export * from "./shipping";
 export * from "./customer";
 export * from "./subscription";
 export * from "./order";
-export * from "./paymentOrder";
+export * from "./PaymentOrder";
+export * from "./rate";

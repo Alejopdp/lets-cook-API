@@ -86,7 +86,7 @@ export class Address extends Entity<Address> {
      * Getter deliveryTime
      * @return {string}
      */
-     public get detliveryTime(): string | undefined {
+     public get deliveryTime(): string | undefined {
         return this._deliveryTime;
     }
 
