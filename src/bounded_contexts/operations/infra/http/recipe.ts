@@ -5,6 +5,7 @@ import { createRecipeController } from "../../useCases/createRecipe";
 import { deleteRecipeController } from "../../useCases/deleteRecipe";
 import { getDataForCreatingARecipeController } from "../../useCases/getDataForCreatingARecipe";
 import { getRecipeByIdController } from "../../useCases/getRecipeById";
+import { getRecipesByRestrictionsController } from "../../useCases/getRecipesByRestrictionsAndPlan";
 import { getRecipeFiltersController } from "../../useCases/getRecipeFilters";
 import { getRecipeListController } from "../../useCases/getRecipeList";
 import { updateRecipeController } from "../../useCases/updateRecipe";
@@ -21,6 +22,7 @@ recipeRouter.get("/", (req, res) => getRecipeListController.execute(req, res));
 recipeRouter.get("/get-data-for-creation", (req, res) => getDataForCreatingARecipeController.execute(req, res));
 recipeRouter.get("/filters", (req, res) => getRecipeFiltersController.execute(req, res));
 recipeRouter.get("/:id", (req, res) => getRecipeByIdController.execute(req, res));
+recipeRouter.get("/recipes-list/by-restrictions", (req, res) => getRecipesByRestrictionsController.execute(req, res));
 
 // POSTs
 recipeRouter.post("/", multer(options).single("recipeImage"), (req, res) => createRecipeController.execute(req, res));
