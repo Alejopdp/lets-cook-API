@@ -18,11 +18,8 @@ export class GetRecipesByRestrictions {
 
         const recipes: Recipe[] = await this.recipeRepository.findBy({ relatedPlans: dto.planId });
 
-        console.log("Recipes: ", recipes);
-
         let filterRecipesByrestriction = recipes.filter((val: Recipe) => {
             for(let i = 0; i < val.recipeVariants.length; i++) {
-                console.log("Filtering: ", val.recipeVariants[i].recipeVariantRestrictions)
                 return  val.recipeVariants[i].recipeVariantRestrictions[0]
                     && val.recipeVariants[i].recipeVariantRestrictions[0].id 
                     && val.recipeVariants[i].recipeVariantRestrictions[0].id.value
