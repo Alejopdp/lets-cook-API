@@ -54,7 +54,7 @@ export class MongooseWeekRepository implements IWeekRepository {
         return weeksDb.map((week: any) => weekMapper.toDomain(week));
     }
 
-    public async findNextTwelveByFrequency(frequency: PlanFrequency): Promise<Week[]> {
+    public async findNextTwelveByFrequency(frequency: PlanFrequency, skipWeek?: boolean): Promise<Week[]> {
         const today = new Date();
         const toadyIso = today.toISOString();
         var weeksDb: any[] = [];
@@ -71,8 +71,9 @@ export class MongooseWeekRepository implements IWeekRepository {
                 .sort({ minDay: 1 })
                 .limit(24);
 
-            for (let i = 1; i++; i <= 24) {
-                if (i % 2 == 1) {
+            for (let i = 0; i < 24; i++) {
+                const addWeek = skipWeek ? i % 2 == 1 : i % 2 == 0;
+                if (addWeek) {
                     biWeekly.push(weeksDb[i]);
                 }
             }
@@ -86,7 +87,7 @@ export class MongooseWeekRepository implements IWeekRepository {
                 .sort({ minDay: 1 })
                 .limit(48);
 
-            for (let i = 1; i++; i <= 48) {
+            for (let i = 0; i < 48; i++) {
                 if (i % 4 == 1 || i === 1) {
                     monthly.push(weeksDb[i]);
                 }

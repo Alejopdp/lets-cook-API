@@ -121,8 +121,12 @@ export class Order extends Entity<Order> {
     }
 
     public assignPaymentOrder(paymentOrders: PaymentOrder[]): void {
+        // console.log("ORDER ASSIGNING: WEEK", this.week.id);
+        // console.log("ORDER PLAN: ", this.plan.id.value);
         for (let paymentOrder of paymentOrders) {
+            // console.log("PAYMENT ORDER WEEK: ", paymentOrder.week.id);
             if (this.week.id.equals(paymentOrder.week.id)) {
+                // console.log("**************************** ENCONTRO **************************** ");
                 this.paymentOrderId = paymentOrder.id;
             }
         }

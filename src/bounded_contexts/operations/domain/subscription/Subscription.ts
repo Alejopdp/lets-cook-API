@@ -70,9 +70,6 @@ export class Subscription extends Entity<Subscription> {
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
 
         for (let i = 0; i < 12; i++) {
-            deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
-            if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
-
             orders.push(
                 new Order(
                     new Date(deliveryDate),
@@ -87,6 +84,9 @@ export class Subscription extends Entity<Subscription> {
                     []
                 )
             );
+
+            deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+            if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
         }
         return orders;
     }
@@ -97,9 +97,19 @@ export class Subscription extends Entity<Subscription> {
         const deliveryDate: Date = new Date(today.getFullYear(), today.getMonth());
         const differenceInDays = shippingDayWeekNumber - today.getDay();
 
-        deliveryDate.setDate(today.getDate() + differenceInDays); // Delivery day (Tuesday) of this week
+        deliveryDate.setDate(today.getDate() + differenceInDays); // Delivery day of this week
+
+        if (this.firstShippingDateHasToSkipWeek(shippingDayWeekNumber)) {
+            deliveryDate.setDate(deliveryDate.getDate() + 7); // Delivery day of this week
+        }
 
         return deliveryDate;
+    }
+
+    public firstShippingDateHasToSkipWeek(shippingWeekDayNumber: number): boolean {
+        var today: Date = new Date();
+
+        return today.getDay() >= shippingWeekDayNumber;
     }
 
     public billingStartDayHasToSkipWeeks(): boolean {

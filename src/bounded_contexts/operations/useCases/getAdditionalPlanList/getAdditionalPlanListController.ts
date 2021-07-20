@@ -18,9 +18,10 @@ export class GetAdditionalPlanListController extends BaseController {
         try {
             const dto: GetAdditionalPlanListDto = {
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                planId: this.req.query.planId as string,
             };
             const result = await this.getAdditionalPlanList.execute(dto);
-            const presentedResult = await this.getAdditionalPlanListPresenter.present(result)
+            const presentedResult = await this.getAdditionalPlanListPresenter.present(result);
 
             return this.ok(this.res, presentedResult);
         } catch (error) {

@@ -1,5 +1,6 @@
 import express from "express";
 import { cancelASubscriptionController } from "../../useCases/cancelASubscription";
+import { createManySubscriptionsController } from "../../useCases/createManySubscriptions";
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getCustomerSusbcriptionsController } from "../../useCases/getCustomerSubscriptions";
 import { getSubscriptionByIdController } from "../../useCases/getSubscriptionById";
@@ -14,6 +15,7 @@ subscriptionRouter.get("/:id", (req, res) => getSubscriptionByIdController.execu
 
 // POSTs
 subscriptionRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
+subscriptionRouter.post("/many", (req, res) => createManySubscriptionsController.execute(req, res));
 
 // PUTs
 subscriptionRouter.put("/cancel/:id", (req, res) => cancelASubscriptionController.execute(req, res));
