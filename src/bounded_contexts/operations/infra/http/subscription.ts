@@ -4,6 +4,7 @@ import { createManySubscriptionsController } from "../../useCases/createManySubs
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getCustomerSusbcriptionsController } from "../../useCases/getCustomerSubscriptions";
 import { getSubscriptionByIdController } from "../../useCases/getSubscriptionById";
+import { reorderPlanController } from "../../useCases/reorderPlan";
 import { swapSubscriptionPlanController } from "../../useCases/swapSubscriptionPlan";
 
 const subscriptionRouter = express.Router();
@@ -16,6 +17,7 @@ subscriptionRouter.get("/:id", (req, res) => getSubscriptionByIdController.execu
 // POSTs
 subscriptionRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
 subscriptionRouter.post("/many", (req, res) => createManySubscriptionsController.execute(req, res));
+subscriptionRouter.post("/reorder/:subscriptionId", (req, res) => reorderPlanController.execute(req, res))
 
 // PUTs
 subscriptionRouter.put("/cancel/:id", (req, res) => cancelASubscriptionController.execute(req, res));

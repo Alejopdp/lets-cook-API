@@ -134,6 +134,8 @@ export class CreateManySubscriptions {
 
         const frequencyOrdersMap: { [frequency: string]: Order[] } = {};
 
+        console.log("frequencyOrdersMap: ", frequencyOrdersMap);
+
         const assignOrdersWithDifferentFreqToPaymentOrdersDto: AssignOrdersWithDifferentFreqToPaymentOrdersDto = {
             frequencyOrdersMap,
             orders,
