@@ -28,10 +28,21 @@ export class MongooseOrderRepository implements IOrderRepository {
         await MongooseOrder.insertMany(ordersToSave);
     }
 
-    public async saveSkippedOrders(orders: Order[]): Promise<void> {
+    public async saveSkippedAndActiveOrders(skippedOrders: Order[], activeOrders: Order[]): Promise<void> {
+        if (skippedOrders.length > 0) await this.saveSkippedOrders(skippedOrders);
+        if (activeOrders.length > 0) await this.saveAciveOrders(activeOrders);
+    }
+
+    private async saveSkippedOrders(orders: Order[]): Promise<void> {
         const ordersIdToSave = orders.map((order) => order.id.value);
 
         await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: "ORDER_SKIPPED" });
+    }
+
+    private async saveAciveOrders(orders: Order[]): Promise<void> {
+        const ordersIdToSave = orders.map((order) => order.id.value);
+
+        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: "ORDER_ACTIVE" });
     }
 
     public async saveCancelledOrders(orders: Order[]): Promise<void> {
@@ -84,7 +95,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             week: week.id.value,
         });
 
-        return ordersDb.map((order) => orderMapper.toDomain(order));
+        return ordersDb.map((order: any) => orderMapper.toDomain(order));
     }
 
     public async findAll(locale: Locale): Promise<Order[]> {

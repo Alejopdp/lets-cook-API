@@ -85,6 +85,10 @@ export class Order extends Entity<Order> {
         this.state.toSkipped(this);
     }
 
+    public reactivate(): void {
+        this.state.toActive(this);
+    }
+
     public getWeekLabel(): string {
         return this.week.getLabel();
     }

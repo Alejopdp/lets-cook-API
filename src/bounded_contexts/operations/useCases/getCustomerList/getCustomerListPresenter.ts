@@ -3,15 +3,18 @@ import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod
 
 export class GetCouponListPresenter {
     public static present(customers: Customer[]): any {
-        const presentedCoupons = [];
+        const presentedCustomers = [];
 
         for (let customer of customers) {
-            presentedCoupons.push({
+            presentedCustomers.push({
                 id: customer.id.value,
                 email: customer.email,
                 is_email_verified: customer.isEmailVerified,
                 stripeId: customer.stripeId,
                 state: customer.state,
+                fullName: customer.personalInfo?.name ? `${customer.personalInfo.name} ${customer.personalInfo.lastName}` : "N/A",
+                firstName: customer.personalInfo?.name || "",
+                lastName: customer.personalInfo?.lastName || "",
 
                 payment_methods: customer.paymentMethods.map((payment: PaymentMethod) => {
                     return {
@@ -22,8 +25,8 @@ export class GetCouponListPresenter {
                         exp_year: payment.exp_year,
                         cvc: payment.cvc,
                         stripeId: payment.stripeId,
-                        isDefault: payment.isDefault
-                    }
+                        isDefault: payment.isDefault,
+                    };
                 }),
                 billingData: {
                     id: customer.billingAddress?.id.value,
@@ -32,7 +35,7 @@ export class GetCouponListPresenter {
                     address: customer.billingAddress?.addressName,
                     customerName: customer.billingAddress?.customerName,
                     details: customer.billingAddress?.details,
-                    personalIdNumber: customer.billingAddress?.identification
+                    personalIdNumber: customer.billingAddress?.identification,
                 },
                 shippingData: {
                     id: customer.shippingAddress?.id.value,
@@ -40,7 +43,7 @@ export class GetCouponListPresenter {
                     longitude: customer.shippingAddress?.longitude,
                     address: customer.shippingAddress?.name,
                     details: customer.shippingAddress?.details,
-                    preferredSchedule: customer.shippingAddress?.deliveryTime
+                    preferredSchedule: customer.shippingAddress?.deliveryTime,
                 },
                 personalData: {
                     id: customer.personalInfo?.id.value,
@@ -49,11 +52,11 @@ export class GetCouponListPresenter {
                     phone1: customer.personalInfo?.phone1,
                     phone2: customer.personalInfo?.phone2,
                     birthDate: customer.personalInfo?.birthDate,
-                    preferredLanguage: customer.personalInfo?.preferredLanguage
+                    preferredLanguage: customer.personalInfo?.preferredLanguage,
                 },
             });
         }
 
-        return presentedCoupons;
+        return presentedCustomers;
     }
 }

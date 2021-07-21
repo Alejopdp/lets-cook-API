@@ -14,6 +14,8 @@ export class SkipOrdersController extends BaseController {
         try {
             const dto: SkipOrdersDto = {
                 ordersIds: this.req.body.ordersIds,
+                ordersToSkip: this.req.body.ordersToSkip,
+                ordersToReactivate: this.req.body.ordersToReactivate,
             };
             const result = await this.skipOrders.execute(dto);
 
