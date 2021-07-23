@@ -93,18 +93,40 @@ export class Coupon extends Entity<Coupon> {
     }
 
     public isValid(subscriptions: Subscription[], plan: Plan, planVariantId: PlanVariantId, shippingCost?: number): boolean {
-        if (this.isFreeShippingCoupon() && shippingCost === 0)
-            throw new Error("No puedes aplicar un cupón de envío gratis debido a que ya cuentas con envío gratuito");
-        if (this.isFreeShippingCoupon() && !shippingCost)
+        if (this.isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost))
             throw new Error("Para utilizar un cupón de envío gratis primero debes ingresar una dirección de entrega");
+        if (this.isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost!))
+            throw new Error("No puedes aplicar un cupón de envío gratis debido a que ya cuentas con envío gratuito");
 
-        if (this.minRequireType === "amount" && plan.getPlanVariantPrice(planVariantId) < this.minRequireValue)
+        if (this.isMinimumAmountValid(plan, planVariantId))
             throw new Error(`El cupón de descuento ingresado solo aplica para ordenes mayores a ${this.minRequireValue} €`);
 
-        if (this.productsForApplyingType !== "all" && this.productsForApplyingValue.every((planId) => !planId.equals(plan.id)))
-            throw new Error("El cupón de descuento no aplica para el plan que estas comprando");
+        if (this.isApplyingToRightProducts(plan)) throw new Error("El cupón de descuento no aplica para el plan que estas comprando");
 
         return this.limites.every((limit) => limit.isValid(subscriptions, this.id));
+    }
+
+    private isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost: number): boolean {
+        return this.isFreeShippingCoupon() && shippingCost === 0;
+    }
+
+    private isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost?: number): boolean {
+        return this.isFreeShippingCoupon() && !shippingCost;
+    }
+
+    private isMinimumAmountValid(plan: Plan, planVariantId: PlanVariantId): boolean {
+        return this.minRequireType === "amount" && plan.getPlanVariantPrice(planVariantId) < this.minRequireValue;
+    }
+
+    private isApplyingToRightProducts(plan: Plan): boolean {
+        return this.productsForApplyingType !== "all" && this.productsForApplyingValue.every((planId) => !planId.equals(plan.id));
+    }
+
+    public getDiscount(plan: Plan, planVariantId: PlanVariantId, shippingCost: number): number {
+        const price = plan.getPlanVariantPrice(planVariantId);
+        if (this.type.type === "free") return shippingCost;
+        else if (this.type.type === "percentage") return (price * this.type.value) / 100;
+        else return price - this.type.value;
     }
 
     public isFreeShippingCoupon(): boolean {

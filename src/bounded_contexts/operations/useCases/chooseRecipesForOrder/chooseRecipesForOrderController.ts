@@ -16,7 +16,6 @@ export class ChooseRecipesForOrderController extends BaseController {
             const dto: ChooseRecipesForOrderDto = {
                 orderId: this.req.params.orderId,
                 recipeSelection: this.req.body.recipeSelection,
-                subscriptionId: this.req.body.subscriptionId,
             };
 
             await this.chooseRecipesForOrder.execute(dto);

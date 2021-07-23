@@ -21,7 +21,6 @@ export class ChooseRecipesForOrder {
         const orderId: OrderId = new OrderId(dto.orderId);
         const recipesIds: RecipeId[] = dto.recipeSelection.map((selection) => new RecipeId(selection.recipeId));
         const order: Order = await this.orderRepository.findByIdOrThrow(orderId);
-        console.log("LO PASO");
         const recipes: Recipe[] = await this.recipeRepository.findByIdList(recipesIds);
         const newRecipeSelection: RecipeSelection[] = [];
 

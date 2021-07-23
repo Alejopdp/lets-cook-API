@@ -4,23 +4,35 @@ import { IOrderRepository } from "../../infra/repositories/order/IOrderRepositor
 import { SwapSubscriptionPlanDto } from "./swapSubscriptionPlanDto";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { Subscription } from "../../domain/subscription/Subscription";
-import { Customer } from "../../domain/customer/Customer";
-import { logger } from "../../../../../config";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
 import { PlanId } from "../../domain/plan/PlanId";
 import { Plan } from "../../domain/plan/Plan";
 import { Locale } from "../../domain/locale/Locale";
+import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
+import { Coupon } from "../../domain/cupons/Cupon";
 
 export class SwapSubscriptionPlan {
     private _subscriptionRepository: ISubscriptionRepository;
     private _orderRepository: IOrderRepository;
     private _planRepository: IPlanRepository;
+    private _paymentOrderRepository: IPaymentOrderRepository;
+    private _couponRepository: ICouponRepository;
 
-    constructor(subscriptionRepository: ISubscriptionRepository, orderRepository: IOrderRepository, planRepository: IPlanRepository) {
+    constructor(
+        subscriptionRepository: ISubscriptionRepository,
+        orderRepository: IOrderRepository,
+        planRepository: IPlanRepository,
+        paymentOrderRepository: IPaymentOrderRepository,
+        couponRepository: ICouponRepository
+    ) {
         this._subscriptionRepository = subscriptionRepository;
         this._orderRepository = orderRepository;
         this._planRepository = planRepository;
+        this._paymentOrderRepository = paymentOrderRepository;
+        this._couponRepository = couponRepository;
     }
 
     public async execute(dto: SwapSubscriptionPlanDto): Promise<void> {
@@ -30,12 +42,40 @@ export class SwapSubscriptionPlan {
         const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId);
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");
 
+        const oldSubscriptionPrice = subscription.plan.getPlanVariantPrice(subscription.planVariantId);
+        const oldPlan = subscription.plan;
+        const oldPlanVariantId = subscription.planVariantId;
+
         const newPlan: Plan | undefined = await this.planRepository.findById(newPlanId, Locale.es);
         if (!!!newPlan) throw new Error("El nuevo plan al que te quieres suscribir no existe");
 
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
 
         subscription.swapPlan(orders, newPlan, newPlanVariantId);
+
+        // UPDATE PAYEMNT ORDERS COST
+        if (oldSubscriptionPrice !== subscription.price) {
+            const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByBillingDateList(
+                orders.map((order) => order.billingDate),
+                subscription.customer.id
+            );
+            const coupon: Coupon | undefined = subscription.couponId
+                ? await this.couponRepository.findById(subscription.couponId)
+                : undefined;
+
+            for (let paymentOrder of paymentOrders) {
+                paymentOrder.amount = paymentOrder.amount - oldSubscriptionPrice + subscription.price;
+                if (!!coupon) {
+                    // TO DO: ChECK COUPON VALIDATIONS
+                    paymentOrder.discountAmount =
+                        paymentOrder.discountAmount -
+                        coupon.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) +
+                        coupon.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost);
+                }
+            }
+
+            await this.paymentOrderRepository.updateMany(paymentOrders);
+        }
 
         await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
@@ -63,5 +103,21 @@ export class SwapSubscriptionPlan {
      */
     public get planRepository(): IPlanRepository {
         return this._planRepository;
+    }
+
+    /**
+     * Getter paymentOrderRepository
+     * @return {IPaymentOrderRepository}
+     */
+    public get paymentOrderRepository(): IPaymentOrderRepository {
+        return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter couponRepository
+     * @return {ICouponRepository}
+     */
+    public get couponRepository(): ICouponRepository {
+        return this._couponRepository;
     }
 }

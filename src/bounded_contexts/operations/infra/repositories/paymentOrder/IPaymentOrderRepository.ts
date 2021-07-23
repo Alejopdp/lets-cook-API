@@ -15,6 +15,7 @@ export interface IPaymentOrderRepository {
     findNextTwelveByCustomer(customerId: CustomerId): Promise<PaymentOrder[]>;
     findActiveByCustomerAndBillingDateList(billingDates: Date[], customerId: CustomerId): Promise<PaymentOrder[]>;
     findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]>;
+    findByBillingDateList(billingDateList: Date[], customerId: CustomerId): Promise<PaymentOrder[]>;
     findAnActivePaymentOrder(): Promise<PaymentOrder | undefined>;
     existsBy(customerId: CustomerId): Promise<boolean>;
     delete(paymentOrderId: PaymentOrderId): Promise<void>;

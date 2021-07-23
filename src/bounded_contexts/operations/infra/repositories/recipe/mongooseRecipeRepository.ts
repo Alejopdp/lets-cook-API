@@ -7,6 +7,8 @@ import { IRecipeRepository } from "./IRecipeRepository";
 import _ from "lodash";
 import { logger } from "../../../../../../config";
 import { recipeMapper } from "../../../mappers/recipeMapper";
+import { Order } from "../../../domain/order/Order";
+import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
     public async save(recipe: Recipe): Promise<void> {
@@ -65,6 +67,21 @@ export class MongooseRecipeRepository implements IRecipeRepository {
             });
 
         return recipesDb.map((recipe: any) => recipeMapper.toDomain(recipe));
+    }
+
+    public async findForOrder(order: Order, restrictionId?: RecipeRestrictionId): Promise<Recipe[]> {
+        if (!!restrictionId) {
+            return await this.findBy({
+                relatedPlans: order.plan.id.value,
+                availableWeeks: order.week.id.value,
+                "recipeVariants.restrictions": restrictionId?.value,
+            });
+        } else {
+            return await this.findBy({
+                relatedPlans: order.plan.id.value,
+                availableWeeks: order.week.id.value,
+            });
+        }
     }
 
     public async delete(recipeId: RecipeId): Promise<void> {

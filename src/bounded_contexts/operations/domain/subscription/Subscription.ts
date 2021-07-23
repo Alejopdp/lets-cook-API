@@ -122,6 +122,7 @@ export class Subscription extends Entity<Subscription> {
         // TO DO: Validations
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
+        this.price = this.plan.getPlanVariantPrice(this.planVariantId);
 
         for (let order of nextOrders) {
             order.swapPlan(newPlan, newPlanVariantId);
@@ -159,6 +160,10 @@ export class Subscription extends Entity<Subscription> {
         if (!!!nextOrder) return "No tienes una próxima entrega";
 
         return nextOrder.getHumanShippmentDay();
+    }
+
+    public getServingsQuantity(): number {
+        return this.plan.getServingsQuantity(this.planVariantId);
     }
 
     public getServingsLabel(): string {
