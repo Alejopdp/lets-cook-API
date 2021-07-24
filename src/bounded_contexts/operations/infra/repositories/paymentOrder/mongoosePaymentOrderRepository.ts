@@ -43,7 +43,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     }
 
     public async findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {
-        const paymentOrder: PaymentOrder | undefined = await this.findById(paymentOrderId);
+        const paymentOrder: PaymentOrder | undefined = await this.findById(paymentOrderId, Locale.es);
 
         if (!!!paymentOrder) throw new Error("La orden de pago ingresada no existe");
 
@@ -60,6 +60,22 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
             .populate("week");
 
         return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, Locale.es));
+    }
+
+    public async findByBillingDateList(billingDateList: Date[], customerId: CustomerId): Promise<PaymentOrder[]> {
+        return await this.findBy({ billingDate: billingDateList, customer: customerId.value }, Locale.es);
+    }
+
+    public async findAnActivePaymentOrder(): Promise<PaymentOrder | undefined> {
+        const paymentOrderDb = await MongoosePaymentOrder.findOne({ state: "PAYMENT_ORDER_ACTIVE" })
+            .populate("week")
+            .populate({
+                path: "recipes",
+                populate: { path: "recipeVariants", populate: { path: "restrictions" } },
+            })
+            .populate("plan");
+
+        return paymentOrderDb ? paymentOrderMapper.toDomain(paymentOrderDb) : undefined;
     }
 
     public async existsBy(customerId: CustomerId): Promise<boolean> {
@@ -86,7 +102,13 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     }
 
     public async findBy(conditions: any, locale: Locale): Promise<PaymentOrder[]> {
-        const paymentOrdersDb = await MongoosePaymentOrder.find({ ...conditions, deletionFlag: false }).populate("week");
+        const paymentOrdersDb = await MongoosePaymentOrder.find({ ...conditions, deletionFlag: false })
+            .populate("week")
+            .populate({
+                path: "recipes",
+                populate: { path: "recipeVariants", populate: { path: "restrictions" } },
+            })
+            .populate("plan");
 
         return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
     }

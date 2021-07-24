@@ -32,6 +32,13 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return subscriptionDb ? subscriptionMapper.toDomain(subscriptionDb) : undefined;
     }
 
+    public async findByIdOrThrow(subscriptionId: SubscriptionId): Promise<Subscription> {
+        const subscription = await this.findById(subscriptionId);
+        if (!!!subscription) throw new Error("La suscripción ingresada no existe");
+
+        return subscription;
+    }
+
     public async findAll(locale: Locale): Promise<Subscription[]> {
         return await this.findBy({}, locale);
     }

@@ -7,13 +7,13 @@ moment.locale("es");
 export class MomentTimeService {
     constructor() {}
 
-    private static isTuesday(day: Date): boolean {
-        return moment(day).isoWeekday() === 2;
+    private static isMonday(day: Date): boolean {
+        return moment(day).isoWeekday() === 1;
     }
 
     public static isWeek(minDay: Date, maxDay: Date): boolean {
         // return this.isTuesday(minDay) && this.isTuesday(maxDay);
-        return this.isTuesday(minDay);
+        return this.isMonday(minDay);
     }
 
     public static getNumberOfDayInMonth(date: Date): string {

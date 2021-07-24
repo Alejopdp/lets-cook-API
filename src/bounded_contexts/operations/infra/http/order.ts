@@ -1,4 +1,5 @@
 import express from "express";
+import { chooseRecipesForOrderController } from "../../useCases/chooseRecipesForOrder";
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getNextOrdersBySubscriptionController } from "../../useCases/getNextOrdersBySubscription";
 import { skipOrdersController } from "../../useCases/skipOrders";
@@ -15,6 +16,7 @@ orderRouter.post("/", (req, res) => createSubscriptionController.execute(req, re
 
 // PUTs
 orderRouter.put("/skip", (req, res) => skipOrdersController.execute(req, res));
+orderRouter.put("/update-recipes/:orderId", (req, res) => chooseRecipesForOrderController.execute(req, res));
 
 // DELETEs
 

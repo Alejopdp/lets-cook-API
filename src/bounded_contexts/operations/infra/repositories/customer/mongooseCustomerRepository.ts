@@ -11,10 +11,8 @@ import { CustomerId } from "../../../domain/customer/CustomerId";
 export class MongooseCustomerRepository implements ICustomerRepository {
     public async save(customer: Customer): Promise<void> {
         const customerDb = customerMapper.toPersistence(customer);
-        // console.log("Test: ", shippingDb)
         if (await MongooseCustomer.exists({ _id: customer.id.value })) {
-            console.log("Test: ", customer.id.value, customerDb, await MongooseCustomer.exists({ _id: customer.id.value }));
-            let test = await MongooseCustomer.updateOne(
+            await MongooseCustomer.updateOne(
                 { _id: customer.id.value },
                 {
                     $set: {
@@ -23,6 +21,10 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         password: customerDb.password,
                         state: customerDb.state,
                         codeToRecoverPassword: customerDb.codeToRecoverPassword,
+                        shippingAddress: customerDb.shippingAddress,
+                        billingAddress: customerDb.billingAddress,
+                        paymentMethods: customerDb.paymentMethods,
+                        personalInfo: customerDb.personalInfo,
                     },
                 }
             );
@@ -50,17 +52,27 @@ export class MongooseCustomerRepository implements ICustomerRepository {
     }
 
     public async findAll(): Promise<Customer[]> {
-        const customersDb = await MongooseCustomer.find({});
-
-        return customersDb.map((customer) => customerMapper.toDomain(customer));
+        return await this.findBy({});
     }
 
-    // public async findBy(conditions: any): Promise<ShippingZone[]> {
-    //     const couponsDb = await MongooseShippingZone.find({ ...conditions, deletionFlag: false });
-    //     return couponsDb.map((raw: any) => shippingMapper.toDomain(raw));
-    // }
+    public async findByName(name: string): Promise<Customer[]> {
+        return await this.findBy({ "personalInfo.name": name });
+    }
 
-    // public async delete(shippingId: ShippingZoneId): Promise<void> {
-    //     await MongooseShippingZone.updateOne({ _id: shippingId.value }, { $set: { deletionFlag: true } });
-    // }
+    public async findBy(conditions: any): Promise<Customer[]> {
+        const customerDb = await MongooseCustomer.find({ ...conditions, deletionFlag: false });
+        return customerDb.map((raw: any) => customerMapper.toDomain(raw));
+    }
+
+    public async findByIdOrThrow(customerId: CustomerId): Promise<Customer> {
+        const customer: Customer | undefined = await this.findById(customerId);
+
+        if (!!!customer) throw new Error("El cliente ingresado no existe");
+
+        return customer;
+    }
+
+    public async delete(customerId: CustomerId): Promise<void> {
+        await MongooseCustomer.updateOne({ _id: customerId.value }, { $set: { deletionFlag: true } });
+    }
 }

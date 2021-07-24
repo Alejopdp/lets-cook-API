@@ -4,12 +4,14 @@ export const getArrayOfFutureWeeks = () => {
     const weeks: Week[] = [];
 
     for (let i = 0; i < 1000; i++) {
-        const startDateTuesday = new Date(2021, 5, 16);
-        const endDateMonday = new Date(2021, 5, 22);
+        const startDateMonday = new Date(2021, 6, 12);
+        const endDateSunday = new Date(2021, 6, 19);
 
-        startDateTuesday.setDate(startDateTuesday.getDate() + 7 * i);
-        endDateMonday.setDate(endDateMonday.getDate() + 7 * i);
-        weeks.push(new Week(startDateTuesday, endDateMonday));
+        startDateMonday.setDate(startDateMonday.getDate() + 7 * i);
+        startDateMonday.setHours(2);
+        endDateSunday.setDate(endDateSunday.getDate() + 7 * i);
+        endDateSunday.setHours(1, 59);
+        weeks.push(Week.create(startDateMonday, endDateSunday));
     }
 
     return weeks;

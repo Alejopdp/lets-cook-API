@@ -58,6 +58,13 @@ export class MongoosePlanRepository implements IPlanRepository {
         return planDb ? planMapper.toDomain(planDb, locale) : undefined;
     }
 
+    public async findByIdOrThrow(planId: PlanId, locale: Locale): Promise<Plan> {
+        const plan: Plan | undefined = await this.findById(planId, locale);
+        if (!!!plan) throw new Error("El plan ingresado no existe");
+
+        return plan;
+    }
+
     public async findAll(locale: Locale): Promise<Plan[]> {
         return await this.findBy({}, locale);
     }

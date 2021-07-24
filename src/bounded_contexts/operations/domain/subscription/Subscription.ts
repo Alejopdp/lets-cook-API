@@ -37,11 +37,11 @@ export class Subscription extends Entity<Subscription> {
         state: ISubscriptionState,
         restrictionComment: string,
         creationDate: Date,
-        couponChargesQtyApplied: number,
         customer: Customer,
         price: number,
         restriction?: RecipeVariantRestriction,
         couponId?: CouponId,
+        couponChargesQtyApplied?: number,
         billingDayOfWeek?: number,
         billingStartDate?: Date,
         cancellationReason?: CancellationReason,
@@ -59,20 +59,17 @@ export class Subscription extends Entity<Subscription> {
         this._couponId = couponId;
         this._billingStartDate = billingStartDate;
         this._creationDate = creationDate;
-        this._couponChargesQtyApplied = couponChargesQtyApplied;
+        this._couponChargesQtyApplied = couponChargesQtyApplied || 0;
         this._billingDayOfWeek = billingDayOfWeek || 6; // Saturday
         this._cancellationReason = cancellationReason;
     }
 
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
         const orders: Order[] = [];
-        const deliveryDate: Date = this.getFirstOrderShippingDate(2); // Tuesday
+        const deliveryDate: Date = this.getFirstOrderShippingDate(1); // Monday
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
 
         for (let i = 0; i < 12; i++) {
-            deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
-            if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
-
             orders.push(
                 new Order(
                     new Date(deliveryDate),
@@ -87,6 +84,9 @@ export class Subscription extends Entity<Subscription> {
                     []
                 )
             );
+
+            deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+            if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
         }
         return orders;
     }
@@ -97,21 +97,32 @@ export class Subscription extends Entity<Subscription> {
         const deliveryDate: Date = new Date(today.getFullYear(), today.getMonth());
         const differenceInDays = shippingDayWeekNumber - today.getDay();
 
-        deliveryDate.setDate(today.getDate() + differenceInDays); // Delivery day (Tuesday) of this week
+        deliveryDate.setDate(today.getDate() + differenceInDays); // Delivery day of this week
+
+        if (this.firstShippingDateHasToSkipWeek(shippingDayWeekNumber)) {
+            deliveryDate.setDate(deliveryDate.getDate() + 7); // Delivery day of this week
+        }
 
         return deliveryDate;
+    }
+
+    public firstShippingDateHasToSkipWeek(shippingWeekDayNumber: number): boolean {
+        var today: Date = new Date();
+
+        return today.getDay() >= shippingWeekDayNumber;
     }
 
     public billingStartDayHasToSkipWeeks(): boolean {
         const todayWeekDay: number = new Date().getDay();
 
-        return todayWeekDay !== this.billingDayOfWeek && todayWeekDay >= 2;
+        return todayWeekDay !== this.billingDayOfWeek && todayWeekDay >= 1;
     }
 
     public swapPlan(nextOrders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): void {
         // TO DO: Validations
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
+        this.price = this.plan.getPlanVariantPrice(this.planVariantId);
 
         for (let order of nextOrders) {
             order.swapPlan(newPlan, newPlanVariantId);
@@ -149,6 +160,10 @@ export class Subscription extends Entity<Subscription> {
         if (!!!nextOrder) return "No tienes una próxima entrega";
 
         return nextOrder.getHumanShippmentDay();
+    }
+
+    public getServingsQuantity(): number {
+        return this.plan.getServingsQuantity(this.planVariantId);
     }
 
     public getServingsLabel(): string {

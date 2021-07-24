@@ -12,16 +12,29 @@ export class SkipOrders {
     }
 
     public async execute(dto: SkipOrdersDto): Promise<any> {
-        const ordersIds: OrderId[] = dto.ordersIds.map((id: any) => new OrderId(id));
+        const ordersIds: OrderId[] = [...dto.ordersToReactivate, ...dto.ordersToSkip].map((id: any) => new OrderId(id));
         const orders: Order[] = await this.orderRepository.findByIdList(ordersIds);
+        const ordersMap: { [orderId: string]: Order } = {};
+        const skippedOrdersToSave: Order[] = [];
+        const activeOrdersToSave: Order[] = [];
 
         for (let order of orders) {
-            order.skip();
+            ordersMap[order.id.value] = order;
         }
 
-        console.log(orders);
+        for (let orderId of dto.ordersToSkip) {
+            const order = ordersMap[orderId];
+            order.skip();
+            skippedOrdersToSave.push(order);
+        }
 
-        await this.orderRepository.saveSkippedOrders(orders);
+        for (let orderId of dto.ordersToReactivate) {
+            const order = ordersMap[orderId];
+            order.reactivate();
+            activeOrdersToSave.push(order);
+        }
+
+        await this.orderRepository.saveSkippedAndActiveOrders(skippedOrdersToSave, activeOrdersToSave);
     }
 
     /**

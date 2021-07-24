@@ -56,9 +56,22 @@ const OrderSchema = new mongoose.Schema(
             ref: "RecipeVariant",
         },
 
-        recipes: {
-            type: [String],
-            ref: "Recipe",
+        recipeSelection: {
+            type: [
+                {
+                    recipe: {
+                        type: String,
+                        ref: "Recipe",
+                    },
+                    quantity: {
+                        type: Number,
+                    },
+                    recipeVariantId: {
+                        type: String,
+                    },
+                },
+            ],
+            default: [],
         },
 
         paymentOrder: {

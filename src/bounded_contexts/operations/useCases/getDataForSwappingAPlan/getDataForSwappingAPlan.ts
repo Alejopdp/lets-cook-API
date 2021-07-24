@@ -18,8 +18,11 @@ export class GetDataForSwappingAPlan {
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");
 
         const plans: Plan[] = await this.planRepository.findAll(dto.locale);
+        const plansForSubscription = plans.filter(
+            (plan) => plan.availablePlanFrecuencies.includes(subscription.frequency) && plan.type === subscription.plan.type
+        );
 
-        return { subscription, plans };
+        return { subscription, plans: plansForSubscription };
     }
 
     /**

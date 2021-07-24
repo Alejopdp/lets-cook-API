@@ -165,7 +165,7 @@ export class Plan extends Entity<Plan> {
 
         if (!!!variantLabel) return "";
 
-        return `${variantLabel} - ${this.getPlanVariantPrice(planVariantId)} €/semana`;
+        return `${variantLabel} - ${this.getPlanVariantPrice(planVariantId)}`;
     }
 
     public isPrincipal(): boolean {

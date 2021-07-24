@@ -28,10 +28,21 @@ export class MongooseOrderRepository implements IOrderRepository {
         await MongooseOrder.insertMany(ordersToSave);
     }
 
-    public async saveSkippedOrders(orders: Order[]): Promise<void> {
+    public async saveSkippedAndActiveOrders(skippedOrders: Order[], activeOrders: Order[]): Promise<void> {
+        if (skippedOrders.length > 0) await this.saveSkippedOrders(skippedOrders);
+        if (activeOrders.length > 0) await this.saveAciveOrders(activeOrders);
+    }
+
+    private async saveSkippedOrders(orders: Order[]): Promise<void> {
         const ordersIdToSave = orders.map((order) => order.id.value);
 
         await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: "ORDER_SKIPPED" });
+    }
+
+    private async saveAciveOrders(orders: Order[]): Promise<void> {
+        const ordersIdToSave = orders.map((order) => order.id.value);
+
+        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: "ORDER_ACTIVE" });
     }
 
     public async saveCancelledOrders(orders: Order[]): Promise<void> {
@@ -64,9 +75,17 @@ export class MongooseOrderRepository implements IOrderRepository {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return orderDb ? orderMapper.toDomain(orderDb, locale) : undefined;
+    }
+
+    public async findByIdOrThrow(orderId: OrderId): Promise<Order> {
+        const order: Order | undefined = await this.findById(orderId, Locale.es);
+
+        if (!!!order) throw new Error("La orden ingresada no existe");
+
+        return order;
     }
 
     public async findForBilling(subscriptionsIds: SubscriptionId[], week: Week): Promise<Order[]> {
@@ -76,7 +95,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             week: week.id.value,
         });
 
-        return ordersDb.map((order) => orderMapper.toDomain(order));
+        return ordersDb.map((order: any) => orderMapper.toDomain(order));
     }
 
     public async findAll(locale: Locale): Promise<Order[]> {
@@ -98,7 +117,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             // .limit(12)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
@@ -116,7 +135,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .sort({ shippingDate: 1 })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, Locale.es));
     }
