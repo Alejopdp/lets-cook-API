@@ -1,3 +1,5 @@
 export interface SkipOrdersDto {
-    ordersIds: string[] | number[]
+    ordersIds: string[] | number[];
+    ordersToSkip: string[];
+    ordersToReactivate: string[];
 }

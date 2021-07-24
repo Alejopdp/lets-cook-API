@@ -3,14 +3,14 @@ import { MomentTimeService } from "../../application/timeService/momentTimeServi
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../paymentOrder/PaymentOrderId";
 import { Plan } from "../plan/Plan";
+import { PlanVariant } from "../plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
-import { Recipe } from "../recipe/Recipe";
-import { RecipeId } from "../recipe/RecipeId";
 import { RecipeVariantId } from "../recipe/RecipeVariant/RecipeVariantId";
 import { SubscriptionId } from "../subscription/SubscriptionId";
 import { Week } from "../week/Week";
 import { OrderId } from "./OrderId";
 import { IOrderState } from "./orderState/IOrderState";
+import { RecipeSelection } from "./RecipeSelection";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -22,7 +22,8 @@ export class Order extends Entity<Order> {
     private _price: number;
     private _subscriptionId: SubscriptionId;
     private _recipesVariantsIds: RecipeVariantId[];
-    private _recipes: Recipe[];
+    // private _recipes: Recipe[];
+    private _recipeSelection: RecipeSelection[];
     private _paymentOrderId?: PaymentOrderId;
 
     constructor(
@@ -35,7 +36,8 @@ export class Order extends Entity<Order> {
         price: number,
         subscriptionId: SubscriptionId,
         recipeVariantsIds: RecipeVariantId[],
-        recipes: Recipe[],
+        // recipes: Recipe[],
+        recipeSelection: RecipeSelection[],
         paymentOrderId?: PaymentOrderId,
         orderId?: OrderId
     ) {
@@ -49,8 +51,26 @@ export class Order extends Entity<Order> {
         this._price = price;
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;
+        this._recipeSelection = recipeSelection;
         this._paymentOrderId = paymentOrderId;
-        this._recipes = recipes;
+        // this._recipes = recipes;
+    }
+
+    public updateRecipes(recipeSelection: RecipeSelection[]): void {
+        const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
+        const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
+
+        if (totalIncomingRecipes > planVariant.getServingsQuantity())
+            throw new Error(`No puedes elegir mas de ${planVariant.getServingsQuantity()}`);
+
+        for (let selection of recipeSelection) {
+            if (selection.recipe.availableWeeks.every((week) => !week.id.equals(this.week.id))) {
+                // TO DO: Available weeks could grow too big
+                throw new Error(`La receta ${selection.recipe.getName()} no está disponible en la semana ${this.week.getLabel()}`);
+            }
+        }
+
+        this.recipeSelection = recipeSelection;
     }
 
     public isActive(): boolean {
@@ -63,6 +83,10 @@ export class Order extends Entity<Order> {
 
     public skip(): void {
         this.state.toSkipped(this);
+    }
+
+    public reactivate(): void {
+        this.state.toActive(this);
     }
 
     public getWeekLabel(): string {
@@ -80,7 +104,7 @@ export class Order extends Entity<Order> {
     public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId): void {
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
-        this.recipes = [];
+        this.recipeSelection = [];
         this.recipesVariantsIds = [];
     }
 
@@ -93,7 +117,7 @@ export class Order extends Entity<Order> {
     }
 
     public hasChosenRecipes(): boolean {
-        return this.recipes.length > 0;
+        return this.recipeSelection.length > 0;
     }
 
     public getPendingRecipeChooseLabel(): string {
@@ -101,8 +125,12 @@ export class Order extends Entity<Order> {
     }
 
     public assignPaymentOrder(paymentOrders: PaymentOrder[]): void {
+        // console.log("ORDER ASSIGNING: WEEK", this.week.id);
+        // console.log("ORDER PLAN: ", this.plan.id.value);
         for (let paymentOrder of paymentOrders) {
+            // console.log("PAYMENT ORDER WEEK: ", paymentOrder.week.id);
             if (this.week.id.equals(paymentOrder.week.id)) {
+                // console.log("**************************** ENCONTRO **************************** ");
                 this.paymentOrderId = paymentOrder.id;
             }
         }
@@ -188,12 +216,20 @@ export class Order extends Entity<Order> {
         return this._recipesVariantsIds;
     }
 
+    // /**
+    //  * Getter recipes
+    //  * @return {Recipe[]}
+    //  */
+    // public get recipes(): Recipe[] {
+    //     return this._recipes;
+    // }
+
     /**
-     * Getter recipes
-     * @return {Recipe[]}
+     * Getter recipeSelection
+     * @return {RecipeSelection[]}
      */
-    public get recipes(): Recipe[] {
-        return this._recipes;
+    public get recipeSelection(): RecipeSelection[] {
+        return this._recipeSelection;
     }
 
     /**
@@ -275,12 +311,21 @@ export class Order extends Entity<Order> {
     public set recipesVariantsIds(value: RecipeVariantId[]) {
         this._recipesVariantsIds = value;
     }
+
+    // /**
+    //  * Setter recipes
+    //  * @param {Recipe[]} value
+    //  */
+    // public set recipes(value: Recipe[]) {
+    //     this._recipes = value;
+    // }
+
     /**
-     * Setter recipes
-     * @param {Recipe[]} value
+     * Setter recipeSelection
+     * @param {RecipeSelection[]} value
      */
-    public set recipes(value: Recipe[]) {
-        this._recipes = value;
+    public set recipeSelection(value: RecipeSelection[]) {
+        this._recipeSelection = value;
     }
 
     /**

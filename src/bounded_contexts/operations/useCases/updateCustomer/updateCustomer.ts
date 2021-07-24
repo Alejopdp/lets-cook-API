@@ -23,10 +23,7 @@ export class UpdateCustomer {
     private _customerRepository: ICustomerRepository;
     private _storageService: IStorageService;
 
-    constructor(
-        customerRepository: ICustomerRepository,
-        storageService: IStorageService,
-    ) {
+    constructor(customerRepository: ICustomerRepository, storageService: IStorageService) {
         this._customerRepository = customerRepository;
         this._storageService = storageService;
     }
@@ -42,19 +39,22 @@ export class UpdateCustomer {
         // const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
 
         const billingAddress: Address = new Address(
-            dto.billingAddress.latitude, 
-            dto.billingAddress.longitude, 
-            dto.billingAddress.name, 
+            dto.billingAddress.latitude,
+            dto.billingAddress.longitude,
+            dto.billingAddress.name,
             dto.billingAddress.fullName,
-            dto.billingAddress.details, 
-            dto.billingAddress.id);
+            dto.billingAddress.details,
+            dto.billingAddress.id
+        );
+
         const shippingAddress: Address = new Address(
-            dto.shippingAddress.latitude, 
-            dto.shippingAddress.longitude, 
-            dto.shippingAddress.name, 
+            dto.shippingAddress.latitude,
+            dto.shippingAddress.longitude,
+            dto.shippingAddress.name,
             dto.shippingAddress.fullName,
-            dto.shippingAddress.details, 
-            dto.shippingAddress.id);
+            dto.shippingAddress.details,
+            dto.shippingAddress.id
+        );
         const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
 
         customer.email = dto.email;
@@ -66,7 +66,7 @@ export class UpdateCustomer {
         customer?.changePassword(password);
         customer.state = dto.state;
         customer.codeToRecoverPassword = undefined;
-        customer.paymentMethods = dto.paymentMethods
+        customer.paymentMethods = dto.paymentMethods;
     }
 
     /**

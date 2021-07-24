@@ -5,11 +5,12 @@ import { ICouponType } from "./CuponType/ICuponType";
 import { PlanId } from "../plan/PlanId";
 import { CouponId } from "../cupons/CouponId";
 import { ILimitAplication } from "./LimitAplication/ILimitAplication";
-// import { PlanType } from "./PlanType/PlanType";
-// import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { Locale } from "../locale/Locale";
 import { logger } from "../../../../../config";
 import { String } from "aws-sdk/clients/apigateway";
+import { Subscription } from "../subscription/Subscription";
+import { Plan } from "../plan/Plan";
+import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 
 export class Coupon extends Entity<Coupon> {
     private _couponCode: string;
@@ -70,7 +71,6 @@ export class Coupon extends Entity<Coupon> {
         state: string,
         id?: CouponId
     ): Coupon {
-
         return new Coupon(
             couponCode,
             type,
@@ -92,29 +92,46 @@ export class Coupon extends Entity<Coupon> {
         this.state = state;
     }
 
-    // public toggleState(): void {
-    //     // TO DO: Validate existing subscriptions with this plan?
+    public isValid(subscriptions: Subscription[], plan: Plan, planVariantId: PlanVariantId, shippingCost?: number): boolean {
+        if (this.isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost))
+            throw new Error("Para utilizar un cupón de envío gratis primero debes ingresar una dirección de entrega");
+        if (this.isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost!))
+            throw new Error("No puedes aplicar un cupón de envío gratis debido a que ya cuentas con envío gratuito");
 
-    //     this.isActive = !this.isActive;
-    // }
+        if (this.isMinimumAmountValid(plan, planVariantId))
+            throw new Error(`El cupón de descuento ingresado solo aplica para ordenes mayores a ${this.minRequireValue} €`);
 
-    // public canHaveAdditionalPlans(): boolean {
-    //     return this.type === PlanType.Principal;
-    // }
+        if (this.isApplyingToRightProducts(plan)) throw new Error("El cupón de descuento no aplica para el plan que estas comprando");
 
-    // public updateAdditionalPlans(additionalPlans: Plan[]): void {
-    //     if (!this.canHaveAdditionalPlans() && additionalPlans.length > 0)
-    //         throw new Error("Un plan adicional no puede tener relacionado otros planes adidiconales");
-    //     this.additionalPlans = additionalPlans;
-    // }
+        return this.limites.every((limit) => limit.isValid(subscriptions, this.id));
+    }
 
-    // public changeType(newType: PlanType): void {
-    //     if (this.type === PlanType.Principal && newType === PlanType.Adicional && this.additionalPlans.length > 0) {
-    //         throw new Error("Tiene que desasociar los planes adicionales antes de convertirlo en un plan adicional");
-    //     } else {
-    //         this.type = newType;
-    //     }
-    // }
+    private isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost: number): boolean {
+        return this.isFreeShippingCoupon() && shippingCost === 0;
+    }
+
+    private isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost?: number): boolean {
+        return this.isFreeShippingCoupon() && !shippingCost;
+    }
+
+    private isMinimumAmountValid(plan: Plan, planVariantId: PlanVariantId): boolean {
+        return this.minRequireType === "amount" && plan.getPlanVariantPrice(planVariantId) < this.minRequireValue;
+    }
+
+    private isApplyingToRightProducts(plan: Plan): boolean {
+        return this.productsForApplyingType !== "all" && this.productsForApplyingValue.every((planId) => !planId.equals(plan.id));
+    }
+
+    public getDiscount(plan: Plan, planVariantId: PlanVariantId, shippingCost: number): number {
+        const price = plan.getPlanVariantPrice(planVariantId);
+        if (this.type.type === "free") return shippingCost;
+        else if (this.type.type === "percentage") return (price * this.type.value) / 100;
+        else return price - this.type.value;
+    }
+
+    public isFreeShippingCoupon(): boolean {
+        return this.type.type === "free";
+    }
 
     /**
      * Getter name
@@ -136,7 +153,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter planSku
      * @return {number}
      */
-     public get minRequireType(): string {
+    public get minRequireType(): string {
         return this._minRequireType;
     }
 
@@ -152,7 +169,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter imageUrl
      * @return {PlanId}
      */
-     public get productsForApplyingType(): string {
+    public get productsForApplyingType(): string {
         return this._productsForApplyingType;
     }
 
@@ -168,7 +185,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter type
      * @return {ILimitAplication}
      */
-     public get limites(): ILimitAplication[] {
+    public get limites(): ILimitAplication[] {
         return this._limites;
     }
 
@@ -176,7 +193,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter isActive
      * @return {number}
      */
-     public get maxChargeQtyType(): string {
+    public get maxChargeQtyType(): string {
         return this._maxChargeQtyType;
     }
 
@@ -200,7 +217,7 @@ export class Coupon extends Entity<Coupon> {
      * Getter planVariants
      * @return {Number}
      */
-     public get endDate(): Date {
+    public get endDate(): Date {
         return this._endDate;
     }
 
@@ -211,7 +228,6 @@ export class Coupon extends Entity<Coupon> {
     public get state(): string {
         return this._state;
     }
-
 
     /**
      * Setter name
@@ -306,7 +322,7 @@ export class Coupon extends Entity<Coupon> {
      * Setter locale
      * @param {string} value
      */
-     public set state(value: string) {
+    public set state(value: string) {
         this._state = value;
     }
 }

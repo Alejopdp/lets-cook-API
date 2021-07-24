@@ -83,7 +83,7 @@ export class Customer extends Entity<Customer> {
     }
 
     public addPaymentMethod(newPaymentMethod: PaymentMethod): void {
-        if (!!!this.hasAtLeastOnePaymentMethod) newPaymentMethod.isDefault = true;
+        if (!this.hasAtLeastOnePaymentMethod() || this.hasNoDefaultPaymentMethod()) newPaymentMethod.isDefault = true;
 
         this.paymentMethods = [...this.paymentMethods, newPaymentMethod];
     }
@@ -110,6 +110,14 @@ export class Customer extends Entity<Customer> {
         return this.paymentMethods.length > 0;
     }
 
+    public hasNoDefaultPaymentMethod(): boolean {
+        return this.paymentMethods.every((method) => !method.isDefault);
+    }
+
+    public hasDifferentLatAndLngAddress(lat: number, lng: number): boolean {
+        return this.shippingAddress?.latitude !== lat || this.shippingAddress?.longitude !== lng;
+    }
+
     public getDefaultPaymentMethodCardLabel(): string {
         const defaultMethod: PaymentMethod = this.getDefaultPaymentMethod()!;
 
@@ -120,6 +128,12 @@ export class Customer extends Entity<Customer> {
         const defaultMethod: PaymentMethod = this.getDefaultPaymentMethod()!;
 
         return defaultMethod.getExpirationDate();
+    }
+
+    public getPaymentMethodStripeId(paymentMethodId: PaymentMethodId): string {
+        const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.equals(paymentMethodId));
+
+        return paymentMethod?.stripeId || "";
     }
 
     public getPersonalInfo(): {
@@ -180,6 +194,7 @@ export class Customer extends Entity<Customer> {
     }
 
     public getShippingAddress(): { name?: string; details?: string; preferredShippingHour: string } {
+        console.log(this.shippingAddress?.name);
         return {
             details: this.shippingAddress?.details,
             name: this.shippingAddress?.name,
@@ -188,18 +203,18 @@ export class Customer extends Entity<Customer> {
     }
 
     public getBillingData(): {
-        address?: string;
-        addressDetails?: string;
-        fullName?: string;
-        documentNumber?: string;
+        addressName?: string;
+        details?: string;
+        customerName?: string;
+        identification?: string;
         latitude?: number;
         longitude?: number;
     } {
         return {
-            address: this.billingAddress?.addressName,
-            addressDetails: this.billingAddress?.details,
-            fullName: this.billingAddress?.customerName,
-            documentNumber: this.billingAddress?.identification,
+            addressName: this.billingAddress?.addressName,
+            details: this.billingAddress?.details,
+            customerName: this.billingAddress?.customerName,
+            identification: this.billingAddress?.identification,
             latitude: this.billingAddress?.latitude,
             longitude: this.billingAddress?.longitude,
         };

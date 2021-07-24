@@ -6,6 +6,10 @@ export class LoginWithEmailPresenter {
             userInfo: {
                 email: customer.email,
                 id: customer.id.value,
+                firstName: customer.personalInfo?.name,
+                lastName: customer.personalInfo?.lastName,
+                phone1: customer.personalInfo?.phone1,
+                phone2: customer.personalInfo?.phone2,
                 shippingAddress: {
                     addressDetails: customer.shippingAddress?.details,
                     addressName: customer.shippingAddress?.name,

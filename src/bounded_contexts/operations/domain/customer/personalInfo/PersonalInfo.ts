@@ -31,8 +31,8 @@ export class PersonalInfo extends Entity<PersonalInfoId> {
         this.name = name;
         this.lastName = last_name;
         this.phone1 = phone1;
-        this.phone2 = phone2;
-        this.birthDate = birthDate;
+        if (!!phone2) this.phone2 = phone2; // It will come empty from create subscription form
+        if (!!birthDate) this.birthDate = birthDate; // It will come empty from create subscription form
         this.preferredLanguage = preferredLanguage;
     }
 

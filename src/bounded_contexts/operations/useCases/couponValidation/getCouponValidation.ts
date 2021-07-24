@@ -1,27 +1,43 @@
 import { Coupon } from "../../domain/cupons/Cupon";
-import { CouponId } from "../../domain/cupons/CouponId";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { GetCouponValidationDto } from "./getCouponValidationDto";
-import { GetCouponByIdPresenter } from "./getCouponByIdPresenter";
-
+import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
+import { CustomerId } from "../../domain/customer/CustomerId";
+import { Subscription } from "../../domain/subscription/Subscription";
+import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
+import { PlanId } from "../../domain/plan/PlanId";
+import { Locale } from "../../domain/locale/Locale";
+import { Plan } from "../../domain/plan/Plan";
+import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
 export class GetCouponValidation {
     private _couponRepository: ICouponRepository;
+    private _subscriptionRepository: ISubscriptionRepository;
+    private _planRepository: IPlanRepository;
 
-    constructor(couponRepository: ICouponRepository) {
+    constructor(couponRepository: ICouponRepository, subscriptionRepository: ISubscriptionRepository, planRepository: IPlanRepository) {
         this._couponRepository = couponRepository;
+        this._subscriptionRepository = subscriptionRepository;
+        this._planRepository = planRepository;
     }
 
     public async execute(dto: GetCouponValidationDto): Promise<any> {
-        // const couponId: CouponId = new CouponId(dto.coupon);
         const coupon: Coupon | undefined = await this.couponRepository.findByCode(dto.coupon);
-        console.log(coupon)
+        const customerId: CustomerId = new CustomerId(dto.customerId);
+        const planId: PlanId = new PlanId(dto.planId);
+        const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
+        const plan: Plan = await this.planRepository.findByIdOrThrow(planId, Locale.es);
 
-        if (!coupon) throw new Error("Error al buscar el cupón");
+        if (!coupon) throw new Error("El cupón de descuento ingresado es incorrecto");
 
         let currentDate = new Date();
-        if(currentDate > coupon.endDate) throw new Error("El cupón ha caducado");
+        if (currentDate > coupon.endDate) throw new Error("El cupón de descuento ingresado ha expirado");
 
-        return "Cupón Válido";
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
+
+        if (!coupon.isValid(customerSubscriptions, plan, planVariantId, dto.shippingCost))
+            throw new Error("No puedes aplicar a este cupón");
+
+        return coupon;
     }
 
     /**
@@ -33,10 +49,18 @@ export class GetCouponValidation {
     }
 
     /**
-     * Setter couponRepository
-     * @param {ICouponRepository} value
+     * Getter subscriptionRepository
+     * @return {ISubscriptionRepository}
      */
-    public set couponRepository(value: ICouponRepository) {
-        this._couponRepository = value;
+    public get subscriptionRepository(): ISubscriptionRepository {
+        return this._subscriptionRepository;
+    }
+
+    /**
+     * Getter planRepository
+     * @return {IPlanRepository}
+     */
+    public get planRepository(): IPlanRepository {
+        return this._planRepository;
     }
 }

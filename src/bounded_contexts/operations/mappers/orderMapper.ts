@@ -1,10 +1,11 @@
-import { planMapper, weekMapper } from ".";
+import { planMapper, recipeSelectionMapper, weekMapper } from ".";
 import { Mapper } from "../../../core/infra/Mapper";
 import { Locale } from "../domain/locale/Locale";
 import { Order } from "../domain/order/Order";
 import { OrderId } from "../domain/order/OrderId";
 import { IOrderState } from "../domain/order/orderState/IOrderState";
 import { OrderStateFactory } from "../domain/order/orderState/OrderStateFactory";
+import { RecipeSelection } from "../domain/order/RecipeSelection";
 import { PaymentOrderId } from "../domain/paymentOrder/PaymentOrderId";
 import { Plan } from "../domain/plan/Plan";
 import { PlanVariantId } from "../domain/plan/PlanVariant/PlanVariantId";
@@ -22,7 +23,8 @@ export class OrderMapper implements Mapper<Order> {
         const plan: Plan = planMapper.toDomain(raw.plan, Locale.es);
         const subscriptionId: SubscriptionId = new SubscriptionId(raw.subscription);
         const recipeVariantsIds: RecipeVariantId[] = raw.recipeVariants.map((id: string) => new RecipeVariantId(id));
-        const recipes: Recipe[] = raw.recipes.map((recipe: any) => recipeMapper.toDomain(recipe));
+        // const recipes: Recipe[] = raw.recipes.map((recipe: any) => recipeMapper.toDomain(recipe));
+        const recipeSelection: RecipeSelection[] = raw.recipeSelection.map((selection: any) => recipeSelectionMapper.toDomain(selection));
         const paymentOrderId: PaymentOrderId | undefined = raw.paymentOrder ? new PaymentOrderId(raw.paymentOrder) : undefined;
 
         return new Order(
@@ -35,7 +37,7 @@ export class OrderMapper implements Mapper<Order> {
             raw.price,
             subscriptionId,
             recipeVariantsIds,
-            recipes,
+            recipeSelection,
             paymentOrderId,
             new OrderId(raw._id)
         );
@@ -52,7 +54,7 @@ export class OrderMapper implements Mapper<Order> {
             price: t.price,
             subscription: t.subscriptionId.value,
             recipeVariants: t.recipesVariantsIds.map((id) => id.value),
-            recipes: t.recipes.map((recipe) => recipe.id.value),
+            recipeSelection: t.recipeSelection.map((selection) => ({ recipe: selection.recipe.id.value, quantity: selection.quantity })),
             paymentOrder: t.paymentOrderId?.value,
             _id: t.id.value,
         };

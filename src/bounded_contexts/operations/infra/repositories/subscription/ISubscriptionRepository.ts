@@ -7,7 +7,8 @@ export interface ISubscriptionRepository {
     save(subscription: Subscription): Promise<void>;
     bulkSave(subscriptions: Subscription[]): Promise<void>;
     findAll(locale: Locale): Promise<Subscription[]>;
-    findById(subscriptionId: SubscriptionId, locale?: Locale): Promise<Subscription | undefined>;
+    findById(subscriptionId: SubscriptionId, locale?: Locale): Promise<Subscription>;
+    findByIdOrThrow(subscriptionId: SubscriptionId, locale?: Locale): Promise<Subscription>;
     findBy(conditions: any, locale: Locale): Promise<Subscription[]>;
     findByCustomerId(customerId: CustomerId): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerId(customerId: CustomerId): Promise<Subscription[]>;

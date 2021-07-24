@@ -1,4 +1,5 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { CreateSubscription } from "./createSubscription";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
 import { CreateSubscriptionPresenter } from "./createSubscriptionPresenter";
@@ -23,10 +24,19 @@ export class CreateSubscriptionController extends BaseController {
                 restrictionComment: this.req.body.restrictionComment,
                 couponId: this.req.body.couponId,
                 stripePaymentMethodId: this.req.body.stripePaymentMethodId,
+                paymentMethodId: this.req.body.paymentMethodId,
+                addressDetails: this.req.body.addressDetails,
+                addressName: this.req.body.addressName,
+                customerFirstName: this.req.body.customerFirstName,
+                customerLastName: this.req.body.customerLastName,
+                latitude: this.req.body.latitude,
+                longitude: this.req.body.longitude,
+                phone1: this.req.body.phone1,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             const result = await this.createSubscription.execute(dto);
-            const presented = this.createSubscriptionPresenter.present(result.subscription, result.paymentIntent);
+            const presented = this.createSubscriptionPresenter.present(result.subscription, result.paymentIntent, result.firstOrder);
 
             return this.ok(this.res, presented);
         } catch (error) {

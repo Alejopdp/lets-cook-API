@@ -32,7 +32,7 @@ export class CustomerMapper implements Mapper<Customer> {
     }
     public toPersistence(t: Customer): any {
         const dbPaymentMethods = t.paymentMethods.map((method) => paymentMethodMapper.toPersistence(method));
-        
+
         return {
             email: t.email,
             isEmailVerified: t.isEmailVerified,

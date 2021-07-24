@@ -22,17 +22,17 @@ export class GetCouponListPresenter {
                         exp_year: payment.exp_year,
                         cvc: payment.cvc,
                         stripeId: payment.stripeId,
-                        isDefault: payment.isDefault
-                    }
+                        isDefault: payment.isDefault,
+                    };
                 }),
                 billingData: {
                     id: customer.billingAddress?.id.value,
                     latitude: customer.billingAddress?.latitude,
                     longitude: customer.billingAddress?.longitude,
-                    address: customer.billingAddress?.name,
-                    customerName: customer.billingAddress?.fullName,
+                    address: customer.billingAddress?.addressName,
+                    customerName: customer.billingAddress?.customerName,
                     details: customer.billingAddress?.details,
-                    personalIdNumber: customer.billingAddress?.identification
+                    personalIdNumber: customer.billingAddress?.identification,
                 },
                 shippingData: {
                     id: customer.shippingAddress?.id.value,
@@ -40,7 +40,7 @@ export class GetCouponListPresenter {
                     longitude: customer.shippingAddress?.longitude,
                     address: customer.shippingAddress?.name,
                     details: customer.shippingAddress?.details,
-                    preferredSchedule: customer.shippingAddress?.deliveryTime
+                    preferredSchedule: customer.shippingAddress?.deliveryTime,
                 },
                 personalData: {
                     id: customer.personalInfo?.id.value,
@@ -49,7 +49,7 @@ export class GetCouponListPresenter {
                     phone1: customer.personalInfo?.phone1,
                     phone2: customer.personalInfo?.phone2,
                     birthDate: customer.personalInfo?.birthDate,
-                    preferredLanguage: customer.personalInfo?.preferredLanguage
+                    preferredLanguage: customer.personalInfo?.preferredLanguage,
                 },
             });
         }

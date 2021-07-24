@@ -8,6 +8,6 @@ import { PayAllSubscriptions } from "./payAllSubscriptions";
 export const payAllSubscriptions: PayAllSubscriptions = new PayAllSubscriptions(
     mongooseCustomerRepository,
     mongooseOrderRepository,
-    mongoosePaymentOrderReposiotry
-    stripeService,
+    mongoosePaymentOrderReposiotry,
+    stripeService
 );

@@ -1,12 +1,13 @@
 import Stripe from "stripe";
-import { logger } from "../../../../../config";
 import { INotificationService } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { PlanId } from "../../domain/plan/PlanId";
@@ -25,13 +26,8 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
+import { UpdatePaymentOrdersShippingCostByCustomer } from "../../services/updatePaymentOrdersShippingCostByCustomer/updatePaymentOrdersShippingCostByCustomer";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
-
-// TO DO Pay Stripe
-// TO DO Notify customer
-// TO DO Email templates
-// TO DO Notify admin
-// TO DO Entity SubscriptionCoupon
 
 export class CreateSubscription {
     private _customerRepository: ICustomerRepository;
@@ -44,6 +40,7 @@ export class CreateSubscription {
     private _notificationService: INotificationService;
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
+    private _updatePaymentOrdersShippingCostByCustomer: UpdatePaymentOrdersShippingCostByCustomer;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -55,7 +52,8 @@ export class CreateSubscription {
         paymentService: IPaymentService,
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
-        paymentOrderRepository: IPaymentOrderRepository
+        paymentOrderRepository: IPaymentOrderRepository,
+        updatePaymentOrdersShippingCostByCustomer: UpdatePaymentOrdersShippingCostByCustomer
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -67,21 +65,36 @@ export class CreateSubscription {
         this._paymentService = paymentService;
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
+        this._updatePaymentOrdersShippingCostByCustomer = updatePaymentOrdersShippingCostByCustomer;
     }
 
-    public async execute(dto: CreateSubscriptionDto): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent }> {
+    public async execute(
+        dto: CreateSubscriptionDto
+    ): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent; firstOrder: Order }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
-        const customer: Customer | undefined = await this.customerRepository.findById(customerId);
-        if (!!!customer) throw new Error("No puedes pedir un nuevo plan");
-
+        const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const planFrequency: PlanFrequency = (<any>PlanFrequency)[dto.planFrequency];
-        const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.planId), Locale.es);
-        if (!!!plan) throw new Error("El plan ingresado no existe");
-
+        const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
+        const addressIsChanged: boolean =
+            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
+        const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
+
+        customer.changePersonalInfo(dto.customerFirstName, dto.customerLastName, dto.phone1, "", "", dto.locale);
+        if (addressIsChanged) {
+            customer.changeShippingAddress(dto.latitude, dto.longitude, dto.addressName, dto.addressName, dto.addressDetails, "");
+            customer.changeBillingAddress(
+                dto.latitude,
+                dto.longitude,
+                dto.addressName,
+                customer.billingAddress?.customerName || `${dto.customerFirstName} ${dto.customerLastName}`,
+                dto.addressDetails,
+                customer.billingAddress?.identification || ""
+            );
+        }
 
         const subscription: Subscription = new Subscription(
             planVariantId,
@@ -90,22 +103,21 @@ export class CreateSubscription {
             new SubscriptionActive(),
             dto.restrictionComment,
             new Date(),
-            0,
             customer,
             plan.getPlanVariantPrice(planVariantId),
             undefined,
             couponId,
+            undefined, // Validate and use cupón
             undefined,
-            new Date(), // TO DO: Calculate
-            undefined,
-            undefined
+            new Date() // TO DO: Calculate
         );
 
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
-        const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) => zone.hasAddressInside());
+        const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
+            zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)
+        );
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
-        // const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelve(false); // Skip if it is not Sunday?
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
 
@@ -119,16 +131,17 @@ export class CreateSubscription {
 
         const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
 
-        // if (!!!customer.hasAtLeastOnePaymentMethod() || !customer.hasPaymentMethodByStripeId(dto.stripePaymentMethodId)) {
-        //     const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
+        if (dto.stripePaymentMethodId) {
+            const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
 
-        //     customer.addPaymentMethod(newPaymentMethod);
-        // }
+            customer.addPaymentMethod(newPaymentMethod);
+        }
 
         const paymentIntent = await this.paymentService.paymentIntent(
             plan.getPlanVariantPrice(planVariantId),
-            // customer.getDefaultPaymentMethod()?.stripeId || dto.stripePaymentMethodId,
-            dto.stripePaymentMethodId,
+            dto.stripePaymentMethodId
+                ? dto.stripePaymentMethodId
+                : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
             customer.email,
             customer.stripeId
         );
@@ -139,10 +152,16 @@ export class CreateSubscription {
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
+        await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+        if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
+            for (let paymentOrder of paymentOrdersToUpdate) {
+                paymentOrder.shippingCost = customerShippingZone.cost;
+            }
+        }
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
-        return { subscription, paymentIntent };
+        return { subscription, paymentIntent, firstOrder: orders[0] };
     }
 
     /**
@@ -222,5 +241,13 @@ export class CreateSubscription {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter updatePaymentOrdersShippingCostByCustomer
+     * @return {UpdatePaymentOrdersShippingCostByCustomer}
+     */
+    public get updatePaymentOrdersShippingCostByCustomer(): UpdatePaymentOrdersShippingCostByCustomer {
+        return this._updatePaymentOrdersShippingCostByCustomer;
     }
 }
