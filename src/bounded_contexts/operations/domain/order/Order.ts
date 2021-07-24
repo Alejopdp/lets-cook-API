@@ -57,6 +57,11 @@ export class Order extends Entity<Order> {
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[]): void {
+        console.log("CHOSEN VARIANT: ", this.planVariantId);
+        console.log(
+            "DE PLAMN: ",
+            this.plan.planVariants.map((v) => v.id)
+        );
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
 

@@ -12,6 +12,7 @@ export class SkipOrdersController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
+            console.log("EL BODY: ", this.req.body);
             const dto: SkipOrdersDto = {
                 ordersIds: this.req.body.ordersIds,
                 ordersToSkip: this.req.body.ordersToSkip,
