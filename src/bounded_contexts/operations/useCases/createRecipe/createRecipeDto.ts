@@ -4,7 +4,7 @@ import { RecipeDifficultyLevel } from "../../domain/recipe/RecipeGeneralData/Rec
 
 export interface NewVariant {
     ingredients: string[];
-    restrictions: string[];
+    restriction: string; // Its an ID
     sku: string;
 }
 

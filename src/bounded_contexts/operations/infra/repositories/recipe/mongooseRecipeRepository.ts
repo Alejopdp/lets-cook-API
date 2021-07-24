@@ -52,7 +52,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
             .populate("availableWeeks")
             .populate({
                 path: "recipeVariants",
-                populate: { path: "restrictions" },
+                populate: { path: "restriction" },
             });
 
         return recipeDb ? recipeMapper.toDomain(recipeDb) : undefined;
@@ -63,7 +63,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
             .populate("availableWeeks")
             .populate({
                 path: "recipeVariants",
-                populate: { path: "restrictions" },
+                populate: { path: "restriction" },
             });
 
         return recipesDb.map((recipe: any) => recipeMapper.toDomain(recipe));
@@ -74,7 +74,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
             return await this.findBy({
                 relatedPlans: order.plan.id.value,
                 availableWeeks: order.week.id.value,
-                "recipeVariants.restrictions": restrictionId?.value,
+                "recipeVariants.restriction": restrictionId?.value,
             });
         } else {
             return await this.findBy({

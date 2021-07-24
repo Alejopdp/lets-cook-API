@@ -29,7 +29,7 @@ export class RecipeVariantCreator {
                 v.ingredients.some((ingredientName) => ingredientName === ingredient.name)
             );
             const variantRestriction: RecipeVariantRestriction | undefined = restrictions.find((r) =>
-                v.restrictions.some((value) => r.value === value)
+                r.id.equals(new RecipeRestrictionId(v.restriction))
             );
             const sku: RecipeVariantSku = new RecipeVariantSku(v.sku);
 
