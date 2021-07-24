@@ -8,6 +8,7 @@ import { OrderActive } from "../order/orderState/OrderActive";
 import { Plan } from "../plan/Plan";
 import { PlanFrequency } from "../plan/PlanFrequency";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
+import { RecipeRestrictionId } from "../recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { ShippingZone } from "../shipping/ShippingZone";
 import { Week } from "../week/Week";
@@ -176,6 +177,10 @@ export class Subscription extends Entity<Subscription> {
 
     public getPriceByFrequencyLabel(): string {
         return `Valor total: ${this.price} €/${this.frequency}`;
+    }
+
+    public updateRestriction(newRestrictionId: RecipeVariantRestriction): void {
+        this.restriction = newRestrictionId
     }
 
     /**

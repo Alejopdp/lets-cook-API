@@ -3,6 +3,7 @@ import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/r
 import { RecipeVariantRestriction as RecipeVariantRestrictionModel } from "../../../../../infraestructure/mongoose/models";
 import { recipeRestrictionMapper } from "../../../mappers";
 import { IRecipeRestrictionRepository } from "./IRecipeRestrictionRepository";
+import { Locale } from "../../../domain/locale/Locale";
 
 export class MongooseRecipeVariantRestrictionRepository implements IRecipeRestrictionRepository {
     public async save(recipeVariantRestriction: RecipeVariantRestriction): Promise<void> {
@@ -31,10 +32,17 @@ export class MongooseRecipeVariantRestrictionRepository implements IRecipeRestri
         return await this.findBy({ value });
     }
 
-    public async findById(recipeRestrictionId: RecipeRestrictionId): Promise<RecipeVariantRestriction | undefined> {
+    public async findById(recipeRestrictionId: RecipeRestrictionId, locale: Locale): Promise<RecipeVariantRestriction | undefined> {
         const restrictionDb = await RecipeVariantRestrictionModel.findById(recipeRestrictionId.value);
 
         return restrictionDb ? recipeRestrictionMapper.toDomain(restrictionDb) : undefined;
+    }
+
+    public async findByIdOrThrow(recipeRestrictionId: RecipeRestrictionId, locale: Locale = Locale.es): Promise<RecipeVariantRestriction> {
+        const restriction: RecipeVariantRestriction | undefined = await this.findById(recipeRestrictionId, locale);
+        if (!!!restriction) throw new Error("La restricción ingresada no es válida");
+
+        return restriction;
     }
 
     public async findBy(conditions: any): Promise<RecipeVariantRestriction[]> {

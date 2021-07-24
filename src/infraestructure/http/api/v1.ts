@@ -10,6 +10,7 @@ import { customerRouter } from "../../../bounded_contexts/operations/infra/http/
 import { orderRouter } from "../../../bounded_contexts/operations/infra/http/order";
 import { recipeRatingRouter } from "../../../bounded_contexts/operations/infra/http/recipeRating";
 import { paymentOrderRouter } from "../../../bounded_contexts/operations/infra/http/paymentOrder";
+import { restrictionRouter } from "../../../bounded_contexts/operations/infra/http/restriction";
 
 const v1Router = express.Router();
 
@@ -24,6 +25,7 @@ v1Router.use("/customer", customerRouter);
 v1Router.use("/order", orderRouter);
 v1Router.use("/recipe-rating", recipeRatingRouter);
 v1Router.use("/payment-order", paymentOrderRouter);
+v1Router.use("/restriction", restrictionRouter);
 
 // All routes go here
 
