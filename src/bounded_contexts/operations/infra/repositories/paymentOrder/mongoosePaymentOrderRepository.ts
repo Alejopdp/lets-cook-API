@@ -35,7 +35,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
             .populate("week")
             .populate({
                 path: "recipes",
-                populate: { path: "recipeVariants", populate: { path: "restrictions" } },
+                populate: { path: "recipeVariants", populate: { path: "restriction" } },
             })
             .populate("plan");
 
@@ -71,7 +71,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
             .populate("week")
             .populate({
                 path: "recipes",
-                populate: { path: "recipeVariants", populate: { path: "restrictions" } },
+                populate: { path: "recipeVariants", populate: { path: "restriction" } },
             })
             .populate("plan");
 
@@ -106,7 +106,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
             .populate("week")
             .populate({
                 path: "recipes",
-                populate: { path: "recipeVariants", populate: { path: "restrictions" } },
+                populate: { path: "recipeVariants", populate: { path: "restriction" } },
             })
             .populate("plan");
 

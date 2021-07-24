@@ -75,7 +75,7 @@ export class MongooseOrderRepository implements IOrderRepository {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } });
 
         return orderDb ? orderMapper.toDomain(orderDb, locale) : undefined;
     }
@@ -106,7 +106,7 @@ export class MongooseOrderRepository implements IOrderRepository {
         const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipes", populate: { path: "recipesVariants", populate: { path: "restriction" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
@@ -117,7 +117,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             // .limit(12)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
@@ -135,7 +135,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .sort({ shippingDate: 1 })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
-            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restrictions" } } });
+            .populate({ path: "recipeSelection.recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, Locale.es));
     }
