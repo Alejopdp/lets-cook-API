@@ -9,16 +9,14 @@ import { RecipeVariantSku } from "../../domain/recipe/RecipeVariant/RecipeVarian
 export class RecipeVariantsMapper implements Mapper<RecipeVariant> {
     public toDomain(raw: any, locale?: Locale): RecipeVariant {
         const ingredients: Ingredient[] = raw.ingredients.map((ing: any) => new Ingredient(ing));
-        const recipeRestrictions: RecipeVariantRestriction[] = raw.restrictions.map((restriction: any) =>
-            recipeRestrictionMapper.toDomain(restriction)
-        );
+        const recipeRestrictions: RecipeVariantRestriction = recipeRestrictionMapper.toDomain(raw.restriction);
 
         return new RecipeVariant(ingredients, recipeRestrictions, new RecipeVariantSku(raw.sku));
     }
     public toPersistence(t: RecipeVariant, locale?: Locale) {
         return {
             ingredients: t.ingredients.map((ing) => ing.name),
-            restrictions: t.recipeVariantRestrictions.map((r) => r.id.value),
+            restriction: recipeRestrictionMapper.toPersistence(t.restriction),
             sku: t.sku.code,
         };
     }

@@ -32,13 +32,11 @@ export class GetRecipeByIdPresenter {
             recipeVariants: recipe.recipeVariants.map((variant) => {
                 return {
                     ingredients: variant.ingredients.map((ing) => ing.name),
-                    restrictions: variant.recipeVariantRestrictions.map((r) => {
-                        return {
-                            id: r.id.value,
-                            value: r.value,
-                            label: r.label,
-                        };
-                    }),
+                    restriction: {
+                        id: variant.restriction.id.value,
+                        value: variant.restriction.value,
+                        label: variant.restriction.label,
+                    },
                     sku: variant.sku.code,
                 };
             }),

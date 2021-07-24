@@ -56,12 +56,12 @@ export const getMockRecipes = async (): Promise<Recipe[]> => {
     );
     const carneBurgerVariant1: RecipeVariant = new RecipeVariant(
         [lechuga, tomate, cebolla, carne, pan, queso],
-        [restrictions[0]],
+        restrictions[0],
         new RecipeVariantSku("BRGHCAR")
     );
     const cerdoVariant1: RecipeVariant = new RecipeVariant(
         [lechuga, tomate, cebolla, cerdo, pan, queso],
-        [restrictions[0]],
+        restrictions[0],
         new RecipeVariantSku("BRGHCER")
     );
     const burgerHallouli: Recipe = new Recipe(
@@ -88,13 +88,13 @@ export const getMockRecipes = async (): Promise<Recipe[]> => {
     );
     const simpleArepaVariant: RecipeVariant = new RecipeVariant(
         [pan],
-        [restrictions[0]],
+        restrictions[0],
         new RecipeVariantSku("ARPVEG")
         // burgerRecipeId
     );
     const completaArepaVariant: RecipeVariant = new RecipeVariant(
         [pan, tomate, lechuga, queso, carne],
-        [restrictions[0]],
+        restrictions[0],
         new RecipeVariantSku("ARPCAR")
     );
     const arepasDeCrhistian: Recipe = new Recipe(

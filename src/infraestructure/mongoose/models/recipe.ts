@@ -70,12 +70,10 @@ const RecipeVariant = new mongoose.Schema({
         },
     ],
 
-    restrictions: [
-        {
-            type: String,
-            ref: "RecipeVariantRestriction",
-        },
-    ],
+    restriction: {
+        type: String,
+        ref: "RecipeVariantRestriction",
+    },
 });
 
 const RecipeSchema = new mongoose.Schema(

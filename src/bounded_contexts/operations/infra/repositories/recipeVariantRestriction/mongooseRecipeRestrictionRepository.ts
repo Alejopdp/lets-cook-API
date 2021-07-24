@@ -40,7 +40,7 @@ export class MongooseRecipeVariantRestrictionRepository implements IRecipeRestri
     public async findBy(conditions: any): Promise<RecipeVariantRestriction[]> {
         const restrictionsDb = await RecipeVariantRestrictionModel.find({ ...conditions, deletionFlag: false });
 
-        return restrictionsDb.map((restriction) => recipeRestrictionMapper.toDomain(restriction));
+        return restrictionsDb.map((restriction: any) => recipeRestrictionMapper.toDomain(restriction));
     }
 
     public async delete(recipeId: RecipeRestrictionId): Promise<void> {

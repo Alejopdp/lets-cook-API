@@ -65,8 +65,8 @@ export class Recipe extends Entity<Recipe> {
         this.availableWeeks = weeks;
     }
 
-    public getVariantRestrictions(recipeVariantId: RecipeVariantId): RecipeVariantRestriction[] {
-        return this.recipeVariants.find((variant) => variant.id.equals(recipeVariantId))?.recipeVariantRestrictions || [];
+    public getVariantRestriction(recipeVariantId: RecipeVariantId): RecipeVariantRestriction | undefined {
+        return this.recipeVariants.find((variant) => variant.id.equals(recipeVariantId))?.restriction;
     }
 
     /**

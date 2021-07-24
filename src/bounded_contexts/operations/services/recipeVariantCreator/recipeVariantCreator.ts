@@ -28,12 +28,12 @@ export class RecipeVariantCreator {
             const variantIngredients: Ingredient[] = ingredients.filter((ingredient) =>
                 v.ingredients.some((ingredientName) => ingredientName === ingredient.name)
             );
-            const variantRestrictions: RecipeVariantRestriction = restrictions.find((r) =>
+            const variantRestriction: RecipeVariantRestriction | undefined = restrictions.find((r) =>
                 v.restrictions.some((value) => r.value === value)
             );
-            const sku: RecipeVariantSku = new RecipeVariantSku(v.sku);b
+            const sku: RecipeVariantSku = new RecipeVariantSku(v.sku);
 
-            variants.push(new RecipeVariant(variantIngredients, variantRestrictions, sku));
+            variants.push(new RecipeVariant(variantIngredients, variantRestriction, sku));
         }
 
         return variants;
