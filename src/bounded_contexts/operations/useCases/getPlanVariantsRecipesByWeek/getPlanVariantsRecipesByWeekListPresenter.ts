@@ -110,11 +110,11 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             recipeVariants: recipe.recipeVariants.map((variant) => {
                 return {
                     ingredients: variant.ingredients.map((ing) => ing.name),
-                    restriction:  {
-                            id: variant.restriction.id.value,
-                            value: variant.restriction.value,
-                            label: variant.restriction.label,
-                        };
+                    restriction: {
+                        id: variant.restriction.id.value,
+                        value: variant.restriction.value,
+                        label: variant.restriction.label,
+                    },
                     sku: variant.sku.code,
                 };
             }),

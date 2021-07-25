@@ -20,6 +20,7 @@ export class GetPlanVariantsRecipesByWeekList {
 
     public async execute(): Promise<{ plans: Plan[]; recipes: Recipe[] }> {
         const date_currently = new Date();
+        date_currently.setDate(date_currently.getDate() + 7);
         const week: Week | undefined = await this.weekRepository.findCurrentWeek(date_currently);
         if (!week) throw new Error("Error al obtener las recetas de la semana");
 

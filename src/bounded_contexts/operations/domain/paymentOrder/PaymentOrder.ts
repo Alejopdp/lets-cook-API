@@ -50,6 +50,9 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     public getHumanBillingDate(): string {
         return MomentTimeService.getDateHumanLabel(this.billingDate);
     }
+    public getDdMmYyyyBillingDate(): string {
+        return MomentTimeService.getDdMmYyyy(this.billingDate);
+    }
 
     public toBilled(orders: Order[]): void {
         for (let order of orders) {

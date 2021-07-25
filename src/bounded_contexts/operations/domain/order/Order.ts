@@ -106,6 +106,10 @@ export class Order extends Entity<Order> {
         this.state.toCancelled(this);
     }
 
+    public getTotalPrice(): number {
+        return this.price;
+    }
+
     public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId): void {
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
@@ -113,6 +117,9 @@ export class Order extends Entity<Order> {
         this.recipesVariantsIds = [];
     }
 
+    public getDdMmYyyyShipmentDate(): string {
+        return MomentTimeService.getDdMmYyyy(this.shippingDate);
+    }
     public getHumanShippmentDay(): string {
         return MomentTimeService.getDateHumanLabel(this.shippingDate);
     }

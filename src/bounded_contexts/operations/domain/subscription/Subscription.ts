@@ -179,8 +179,12 @@ export class Subscription extends Entity<Subscription> {
         return `Valor total: ${this.price} €/${this.frequency}`;
     }
 
+    public getPrice(): number {
+        return this.plan.getPlanVariantPrice(this.planVariantId);
+    }
+
     public updateRestriction(newRestrictionId: RecipeVariantRestriction): void {
-        this.restriction = newRestrictionId
+        this.restriction = newRestrictionId;
     }
 
     /**

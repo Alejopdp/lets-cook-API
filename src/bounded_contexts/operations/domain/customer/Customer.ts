@@ -243,13 +243,19 @@ export class Customer extends Entity<Customer> {
 
         if (filterPaymentById.length > 0) {
             if (isDefault) {
-                const filterPaymentsByDiferentId = this.paymentMethods.filter((payment: PaymentMethod) => payment.id.value !== paymentId);
-                if (filterPaymentsByDiferentId.length !== 0) {
-                    filterPaymentsByDiferentId.map((payments: PaymentMethod) => (payments.isDefault = false));
+                for (let paymentMethod of this.paymentMethods) {
+                    console.log("CREADO: ", paymentMethod.id);
+                    console.log("LO QUE M ELLGA: ", paymentId);
+                    if (paymentMethod.id.equals(new PaymentMethodId(paymentId))) {
+                        paymentMethod.isDefault = true;
+                    } else {
+                        paymentMethod.isDefault = false;
+                    }
                 }
             }
-            filterPaymentById[0].changePaymentData(brand, last4Numbers, exp_month, exp_year, cvc, stripeId, isDefault);
+            // filterPaymentById[0].changePaymentData(brand, last4Numbers, exp_month, exp_year, cvc, stripeId, isDefault);
         } else {
+            console.log("ESTA ENTRANDO ACACAC: ");
             if (isDefault) {
                 if (this.paymentMethods.length > 0) {
                     const filterPaymentsByDiferentId = this.paymentMethods.filter(
