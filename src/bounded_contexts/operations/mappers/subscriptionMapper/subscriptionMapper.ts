@@ -55,7 +55,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             plan: t.plan.id.value,
             frequency: t.frequency,
             state: t.state.title,
-            restrictions: !!t.restriction ? t.restriction.id.value : null,
+            restriction: !!t.restriction ? t.restriction.id.value : null,
             restrictionComment: t.restrictionComment,
             couponChargesQtyApplied: t.couponChargesQtyApplied,
             customer: t.customer.id.value,

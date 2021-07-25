@@ -183,8 +183,10 @@ export class Subscription extends Entity<Subscription> {
         return this.plan.getPlanVariantPrice(this.planVariantId);
     }
 
-    public updateRestriction(newRestrictionId: RecipeVariantRestriction): void {
-        this.restriction = newRestrictionId;
+    public updateRestriction(newRestriction: RecipeVariantRestriction, comment?: string): void {
+        this.restriction = newRestriction;
+
+        if (comment) this.restrictionComment = comment;
     }
 
     /**

@@ -23,7 +23,7 @@ export class UpdateSubscriptionRestriction {
 
         // TO DO: QUe pasa si tiene recetas elegidas con otra restricción
 
-        subscription.updateRestriction(restriction);
+        subscription.updateRestriction(restriction, dto.comment);
 
         await this.subscriptionRepository.save(subscription);
     }

@@ -27,7 +27,8 @@ export class GetSubscriptionByIdAsAdminController extends BaseController {
             const presented = await this.getSubscriptionByIdAsAdminPresenterAsAdmin.present(
                 result.subscription,
                 result.orders,
-                result.customer
+                result.customer,
+                result.nextPaymentOrder
             );
 
             return this.ok(this.res, presented);

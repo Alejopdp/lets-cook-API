@@ -4,6 +4,7 @@ import { createManySubscriptionsController } from "../../useCases/createManySubs
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getCustomerSusbcriptionsController } from "../../useCases/getCustomerSubscriptions";
 import { getSubscriptionByIdController } from "../../useCases/getSubscriptionById";
+import { getSubscriptionByIdAsAdminController } from "../../useCases/getSubscriptionByIdAsAdmin";
 import { reorderPlanController } from "../../useCases/reorderPlan";
 import { swapSubscriptionPlanController } from "../../useCases/swapSubscriptionPlan";
 import { updateSubscriptionRestrictionController } from "../../useCases/updateSusbcriptionRestriction";
@@ -12,6 +13,7 @@ const subscriptionRouter = express.Router();
 
 // GETs
 subscriptionRouter.get("/", (req, res) => res.json({}));
+subscriptionRouter.get("/information-as-admin/:id", (req, res) => getSubscriptionByIdAsAdminController.execute(req, res));
 subscriptionRouter.get("/by-customer/:customerId", (req, res) => getCustomerSusbcriptionsController.execute(req, res));
 subscriptionRouter.get("/:id", (req, res) => getSubscriptionByIdController.execute(req, res));
 

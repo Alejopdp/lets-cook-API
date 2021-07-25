@@ -2,6 +2,7 @@ import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
 import { PaymentOrder } from "../../../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../../../domain/paymentOrder/PaymentOrderId";
+import { Subscription } from "../../../domain/subscription/Subscription";
 
 export interface IPaymentOrderRepository {
     save(paymentOrder: PaymentOrder): Promise<void>;

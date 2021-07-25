@@ -18,6 +18,7 @@ export class UpdateSubscriptionRestrictionController extends BaseController {
                 locale: this.req.body.locale,
                 restrictionId: this.req.body.restrictionId,
                 subscriptionId: this.req.params.id,
+                comment: this.req.body.comment,
             };
 
             await this.updateSubscriptionRestriction.execute(dto);

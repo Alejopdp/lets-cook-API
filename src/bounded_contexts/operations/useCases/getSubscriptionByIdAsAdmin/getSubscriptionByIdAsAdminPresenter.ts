@@ -4,6 +4,7 @@ import { Subscription } from "../../domain/subscription/Subscription";
 import { v4 as uuid } from "uuid";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
 export class GetSubscriptionByIdAsAdminPresenter {
     private _storageService: IStorageService;
@@ -12,7 +13,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
         this._storageService = storageService;
     }
 
-    public async present(subscription: Subscription, orders: Order[], customer: Customer): Promise<any> {
+    public async present(subscription: Subscription, orders: Order[], customer: Customer, nextPaymentOrder?: PaymentOrder): Promise<any> {
         const presentedPlan = await this.presentPlan(subscription);
 
         const billingData = {
@@ -53,14 +54,25 @@ export class GetSubscriptionByIdAsAdminPresenter {
         return {
             subscriptionId: subscription.id.value,
             restriction: {
-                label: subscription.restriction?.label,
-                id: subscription.restriction?.id.value
-            }
+                text: subscription.restriction?.label,
+                value: subscription.restriction?.id.value,
+                id: subscription.restriction?.id.value,
+            },
+            state: subscription.state.title,
+            customerName: customer.getPersonalInfo().fullName,
+            restrictionComment: subscription.restrictionComment,
+            amountDetails: {
+                subtotal: nextActiveOrder?.price,
+                shippingCost: nextPaymentOrder?.shippingCost,
+                discount: "add to subscription",
+                taxes: 6,
+                total: nextActiveOrder?.getTotalPrice(),
+            },
             frequency: subscription.frequency,
             plan: presentedPlan,
             shippingAddress: customer.getShippingAddress().name,
             // billingData,
-            paymentMethod: presentedPaymentMethod,
+            paymentMethod: presentedPaymentMethod?.cardLabel,
             schedule,
             nextBillingDate: nextActiveOrder?.getDdMmYyyyShipmentDate(),
             paymentMehod: customer.getDefaultPaymentMethodCardLabel(),

@@ -6,6 +6,7 @@ import { paymentOrderMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
+import { Subscription } from "../../../domain/subscription/Subscription";
 
 export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async save(paymentOrder: PaymentOrder): Promise<void> {

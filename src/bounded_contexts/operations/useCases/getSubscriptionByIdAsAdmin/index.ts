@@ -9,8 +9,8 @@ export const getSubscriptionById: GetSubscriptionByIdAsAdmin = new GetSubscripti
     mongooseSubscriptionRepository,
     mongooseOrderRepository
 );
-export const getSubscriptionByIdPresenterAsADmin: GetSubscriptionByIdAsAdminPresenter = new GetSubscriptionByIdAsAdminPresenter(s3Service);
-export const getSubscriptionByIdControllerAsAdmin: GetSubscriptionByIdAsAdminController = new GetSubscriptionByIdAsAdminController(
+export const getSubscriptionByIdAsAdminPresenter: GetSubscriptionByIdAsAdminPresenter = new GetSubscriptionByIdAsAdminPresenter(s3Service);
+export const getSubscriptionByIdAsAdminController: GetSubscriptionByIdAsAdminController = new GetSubscriptionByIdAsAdminController(
     getSubscriptionById,
-    getSubscriptionByIdPresenterAsADmin
+    getSubscriptionByIdAsAdminPresenter
 );
