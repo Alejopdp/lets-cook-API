@@ -28,6 +28,10 @@ export class MomentTimeService {
         return moment(date).format("dddd Do MMMM");
     }
 
+    public static getDdMmYyyy(date: Date): string {
+        return moment(date).format("DD/MM/YYYY");
+    }
+
     public static getHumanWeekRangeLabel(minDay: Date, maxDay: Date): string {
         const month = moment(maxDay).format("MMMM");
         const monthWithCapitalLetter = month.charAt(0).toUpperCase() + month.slice(1);

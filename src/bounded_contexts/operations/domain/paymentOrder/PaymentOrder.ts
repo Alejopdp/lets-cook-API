@@ -58,6 +58,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this.state.toBilled(this);
     }
 
+    public getTotalAmount(): number {
+        return this.amount + this.shippingCost - this.discountAmount;
+    }
+
     /**
      * Getter shippingDate
      * @return {Date}

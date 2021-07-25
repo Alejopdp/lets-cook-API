@@ -1,5 +1,6 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Order } from "../../domain/order/Order";
+import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
 export class GetPaymentOrderByIdPresenter {
@@ -9,7 +10,9 @@ export class GetPaymentOrderByIdPresenter {
         this._storageService = storageService;
     }
 
-    public present(paymentOrder: PaymentOrder, orders: Order[]): any {
+    public async present(paymentOrder: PaymentOrder, orders: Order[]): Promise<any> {
+        const presentedOrders = await this.presentOrders(orders);
+
         return {
             id: paymentOrder.id.value,
             amount: paymentOrder.amount,
@@ -18,20 +21,49 @@ export class GetPaymentOrderByIdPresenter {
             shippingCost: paymentOrder.shippingCost,
             customer: paymentOrder.customerId.value,
             state: paymentOrder.state.humanTitle,
-            orders: orders.map((order) => ({
+            orders: presentedOrders,
+            totalAmount: paymentOrder.getTotalAmount(),
+        };
+    }
+
+    public async presentOrders(orders: Order[]): Promise<any> {
+        const presentedOrders = [];
+
+        for (let order of orders) {
+            const planIcon = await this.storageService.getPresignedUrlForFile(order.plan.iconLinealColorUrl);
+            const presentedRecipes = await this.presentRecipeSelection(order.recipeSelection);
+
+            presentedOrders.push({
                 id: order.id.value,
                 shippingDate: order.getHumanShippmentDay(),
                 state: order.state.humanTitle,
-                hasChosenRecipes: order.hasChosenRecipes(),
-                recipes: order.recipeSelection.map((selection) => ({
-                    id: selection.recipe.id.value,
-                    variantSku: selection.recipe.getVariantSkuByVariantsIds([selection.recipeVariantId]),
-                    imageUrl: selection.recipe.getMainImageUrl(),
-                })),
-                plan: order.getPlanName(),
+                hasRecipes: order.hasChosenRecipes(),
+                recipes: presentedRecipes,
+                planIcon,
+                planName: order.getPlanName(),
                 planVariant: order.getPlanVariantLabel(order.planVariantId),
-            })),
-        };
+            });
+        }
+
+        return presentedOrders;
+    }
+
+    public async presentRecipeSelection(recipeSelection: RecipeSelection[]): Promise<any> {
+        const presentedSelection = [];
+
+        for (let selection of recipeSelection) {
+            const imageUrl = await this.storageService.getPresignedUrlForFile(selection.recipe.getMainImageUrl());
+
+            presentedSelection.push({
+                id: selection.recipe.id.value,
+                name: selection.recipe.getName(),
+                variantSku: selection.recipe.getVariantSkuByVariantsIds([selection.recipeVariantId]),
+                imageUrl,
+                quantity: selection.quantity,
+            });
+        }
+
+        return presentedSelection;
     }
 
     /**

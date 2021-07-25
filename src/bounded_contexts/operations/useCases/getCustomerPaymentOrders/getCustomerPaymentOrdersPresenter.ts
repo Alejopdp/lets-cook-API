@@ -1,3 +1,4 @@
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
 export class GetCustomerPaymentOrdersPresenter {
@@ -7,9 +8,10 @@ export class GetCustomerPaymentOrdersPresenter {
         for (let order of paymentOrders) {
             presentedOrders.push({
                 id: order.id.value,
-                billingDate: order.getHumanBillingDate(),
+                billingDate: MomentTimeService.getDdMmYyyy(order.billingDate),
                 amount: order.amount,
-                state: order.state.humanTitle,
+                state: order.state.title,
+                humanState: order.state.humanTitle,
                 ordersQty: countMap[order.id.value],
             });
         }
