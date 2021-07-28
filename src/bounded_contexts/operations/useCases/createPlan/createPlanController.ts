@@ -21,6 +21,13 @@ export class CreatePlanController extends BaseController {
             console.log("El Body: ", this.req.body);
             console.log("Files: ", this.req.files);
             //@ts-ignore
+            if (!!!this.req.files["planImage"]) throw new Error("No has ingresado una imagen para el plan");
+            //@ts-ignore
+            if (!!!this.req.files["icon"]) throw new Error("No has ingresado un icono sin color para el plan");
+            //@ts-ignore
+            if (!!!this.req.files["iconWithColor"]) throw new Error("No has ingresado un icono con color para el plan");
+
+            //@ts-ignore
             const imageFilesArray = this.req.files["planImage"];
             //@ts-ignore
             const iconFilesArray = this.req.files["icon"];

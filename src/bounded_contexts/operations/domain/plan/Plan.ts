@@ -9,6 +9,7 @@ import { Locale } from "../locale/Locale";
 import { logger } from "../../../../../config";
 import { PlanVariantId } from "./PlanVariant/PlanVariantId";
 import { PlanSlug } from "./PlanSlug";
+import _ from "lodash";
 
 export class Plan extends Entity<Plan> {
     private _name: string;
@@ -179,6 +180,70 @@ export class Plan extends Entity<Plan> {
 
         return planVariant.getServingsQuantity();
     }
+
+    public getAttirbutesAndValues(): [string, (string | number)[]][] {
+        var attributes: { [key: string]: (string | number)[] } = {};
+        const allAttributesKeyOfVariants = _.uniq(
+            _.flatten(this.planVariants.map((variant) => variant.attributes.map((attr) => attr.key)))
+        );
+
+        for (let key of allAttributesKeyOfVariants) {
+            attributes[key] = [];
+        }
+
+        if (this.isPrincipal()) {
+            attributes["Personas"] = [];
+            attributes["Recetas"] = [];
+
+            for (let variant of this.planVariants) {
+                const personasValues = attributes["Personas"];
+                const recetasValues = attributes["Recetas"];
+
+                //@ts-ignore
+                attributes["Personas"] = personasValues.includes(variant.numberOfPersons)
+                    ? personasValues
+                    : //@ts-ignore
+                      [...personasValues, variant.numberOfPersons];
+                //@ts-ignore
+                attributes["Recetas"] = recetasValues.includes(variant.numberOfRecipes)
+                    ? recetasValues
+                    : //@ts-ignore
+                      [...recetasValues, variant.numberOfRecipes];
+                for (let attr of variant.attributes) {
+                    const actualValues = attributes[attr.key];
+
+                    attributes[attr.key] = actualValues.includes(attr.value) ? actualValues : [...actualValues, attr.value];
+                }
+            }
+        } else if (this.hasRecipes && !this.isPrincipal()) {
+            attributes["Recetas"] = [];
+
+            for (let variant of this.planVariants) {
+                const recetasValues = attributes["Recetas"];
+                //@ts-ignore
+                attributes["Recetas"] = recetasValues.includes(variant.numberOfRecipes)
+                    ? recetasValues
+                    : //@ts-ignore
+                      [...recetasValues, variant.numberOfRecipes];
+                for (let attr of variant.attributes) {
+                    const actualValues = attributes[attr.key];
+
+                    attributes[attr.key] = actualValues.includes(attr.value) ? actualValues : [...actualValues, attr.value];
+                }
+            }
+        } else {
+            for (let variant of this.planVariants) {
+                for (let attr of variant.attributes) {
+                    const actualValues = attributes[attr.key];
+
+                    attributes[attr.key] = actualValues.includes(attr.value) ? actualValues : [...actualValues, attr.value];
+                }
+            }
+        }
+
+        return Object.entries(attributes);
+    }
+
     /**
      * Getter name
      * @return {string}

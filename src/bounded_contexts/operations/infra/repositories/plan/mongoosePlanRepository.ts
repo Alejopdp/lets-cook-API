@@ -27,6 +27,7 @@ export class MongoosePlanRepository implements IPlanRepository {
             $set: {
                 [nameLocaleKey]: name[locale],
                 [descriptionLocaleKey]: description[locale],
+                // variants: planToUpdate.variants,
                 // "variants.$[planVariant].attributes": this.getRawPlanVariantsWithLocaleForUpdatingThem(planDb.variants, locale),
             },
         };

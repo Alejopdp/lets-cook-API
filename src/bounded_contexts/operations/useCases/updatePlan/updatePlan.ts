@@ -5,6 +5,7 @@ import { PlanId } from "../../domain/plan/PlanId";
 import { PlanSku } from "../../domain/plan/PlanSku";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../../domain/plan/PlanVariant/PlanVariantAttribute";
+import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
 import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { UpdatePlanDto } from "./updatePlanDto";
@@ -47,7 +48,12 @@ export class UpdatePlan {
                         attr.key.toLowerCase() !== "id" &&
                         attr.key.toLowerCase() !== "sku" &&
                         attr.key.toLowerCase() !== "price" &&
-                        attr.key.toLowerCase() !== "pricewithoffer"
+                        attr.key.toLowerCase() !== "pricewithoffer" &&
+                        attr.key.toLowerCase() !== "isdefault" &&
+                        attr.key.toLowerCase() !== "isdeleted" &&
+                        attr.key.toLowerCase() !== "deleted" &&
+                        attr.key.toLowerCase() !== "description" &&
+                        attr.key.toLowerCase() !== "attributes"
                 );
 
                 let variantWithRecipe: PlanVariantWithRecipe = new PlanVariantWithRecipe(
@@ -58,8 +64,9 @@ export class UpdatePlan {
                     variant.price,
                     variant.priceWithOffer,
                     attributes,
-                    "description",
-                    variant.isDefault
+                    variant.description,
+                    variant.isDefault,
+                    new PlanVariantId(variant.id)
                     // variant.description
                 );
                 planVariants.push(variantWithRecipe);
@@ -69,7 +76,12 @@ export class UpdatePlan {
                         attr.key.toLowerCase() !== "id" &&
                         attr.key.toLowerCase() !== "sku" &&
                         attr.key.toLowerCase() !== "price" &&
-                        attr.key.toLowerCase() !== "pricewithoffer"
+                        attr.key.toLowerCase() !== "pricewithoffer" &&
+                        attr.key.toLowerCase() !== "isdefault" &&
+                        attr.key.toLowerCase() !== "isdeleted" &&
+                        attr.key.toLowerCase() !== "deleted" &&
+                        attr.key.toLowerCase() !== "description" &&
+                        attr.key.toLowerCase() !== "attributes"
                 );
 
                 let planVariant: PlanVariant = new PlanVariant(
@@ -77,13 +89,16 @@ export class UpdatePlan {
                     "",
                     variant.price,
                     attributes,
-                    "description",
-                    // variant.description
-                    variant.priceWithOffer
+                    variant.description,
+                    variant.isDefault,
+                    variant.priceWithOffer,
+                    new PlanVariantId(variant.id)
                 );
                 planVariants.push(planVariant);
             }
         }
+
+        console.log("DOMAIN PLAN VARIANTS: ", planVariants);
 
         if (dto.planImage) {
             const imageUrl = await this.storageService.savePlanImage(dto.planName, dto.planImageFileName, dto.planImage);

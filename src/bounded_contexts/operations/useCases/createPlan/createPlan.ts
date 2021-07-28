@@ -47,7 +47,11 @@ export class CreatePlan {
                         attr.key.toLowerCase() !== "id" &&
                         attr.key.toLowerCase() !== "sku" &&
                         attr.key.toLowerCase() !== "price" &&
-                        attr.key.toLowerCase() !== "pricewithoffer"
+                        attr.key.toLowerCase() !== "pricewithoffer" &&
+                        attr.key.toLowerCase() !== "isdefault" &&
+                        attr.key.toLowerCase() !== "isdeleted" &&
+                        attr.key.toLowerCase() !== "deleted" &&
+                        attr.key.toLowerCase() !== "description"
                 );
 
                 let variantWithRecipe: PlanVariantWithRecipe = new PlanVariantWithRecipe(
@@ -68,7 +72,11 @@ export class CreatePlan {
                         attr.key.toLowerCase() !== "id" &&
                         attr.key.toLowerCase() !== "sku" &&
                         attr.key.toLowerCase() !== "price" &&
-                        attr.key.toLowerCase() !== "pricewithoffer"
+                        attr.key.toLowerCase() !== "pricewithoffer" &&
+                        attr.key.toLowerCase() !== "isdefault" &&
+                        attr.key.toLowerCase() !== "isdeleted" &&
+                        attr.key.toLowerCase() !== "deleted" &&
+                        attr.key.toLowerCase() !== "description"
                 );
 
                 let planVariant: PlanVariant = new PlanVariant(

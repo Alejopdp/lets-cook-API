@@ -30,12 +30,12 @@ export class GetPlanByIdPresenter {
 
             if (plan.hasRecipes) {
                 presentedVariants.push({
-                    oldId: variant.getConcatenatedAttributesAsString(),
                     id: variant.id.value,
+                    isDefault: variant.isDefault,
                     sku: variant.sku.code,
-                    name: variant.name,
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
+                    description: variant.description,
                     //@ts-ignore
                     Personas: variant.numberOfPersons,
                     //@ts-ignore
@@ -44,10 +44,10 @@ export class GetPlanByIdPresenter {
                 });
             } else {
                 presentedVariants.push({
-                    oldId: variant.getConcatenatedAttributesAsString(),
                     id: variant.id.value,
+                    isDefault: variant.isDefault,
+                    description: variant.description,
                     sku: variant.sku.code,
-                    name: variant.name,
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
@@ -74,7 +74,7 @@ export class GetPlanByIdPresenter {
             imageUrl: plan.imageUrl ? await this.storageService.getPresignedUrlForFile(plan.imageUrl) : "",
             hasRecipes: plan.hasRecipes,
             variants: presentedVariants,
-            attributes: [...attributesAndValues, ...attributes],
+            attributes: plan.getAttirbutesAndValues(),
             additionalPlans: plan.additionalPlans.map((plan) => {
                 return { id: plan.id.value, name: plan.name };
             }),
@@ -82,6 +82,7 @@ export class GetPlanByIdPresenter {
             iconWithColor: plan.iconLinealColorUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl) : "",
             abilityToChooseRecipes: plan.abilityToChooseRecipes,
             slug: plan.planSlug.slug,
+            // newAttributes: plan.getAttirbutesAndValues(),
         };
     }
 

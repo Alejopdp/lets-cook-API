@@ -22,7 +22,6 @@ export class GetRecipesByRestrictionsPresenter {
                     presentedVariants.push({
                         id: variant.id.value,
                         sku: variant.sku.code,
-                        name: variant.name,
                         price: variant.price,
                         priceWithOffer: variant.priceWithOffer,
                         //@ts-ignore
@@ -35,7 +34,6 @@ export class GetRecipesByRestrictionsPresenter {
                     presentedVariants.push({
                         id: variant.id.value,
                         sku: variant.sku.code,
-                        name: variant.name,
                         price: variant.price,
                         priceWithOffer: variant.priceWithOffer,
                         attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),

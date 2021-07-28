@@ -18,7 +18,7 @@ export class GetPlanVariantsRecipesByWeekList {
         this._weekRepository = weekRepository;
     }
 
-    public async execute(): Promise<{ plans: Plan[]; recipes: Recipe[] }> {
+    public async execute(): Promise<{ plans: Plan[]; recipes: Recipe[]; week: Week }> {
         const date_currently = new Date();
         // date_currently.setDate(date_currently.getDate() + 7);
         const week: Week | undefined = await this.weekRepository.findCurrentWeek(date_currently);
@@ -27,7 +27,7 @@ export class GetPlanVariantsRecipesByWeekList {
         const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week.id);
         const plans: Plan[] = await this.planRepository.findAll((<any>Locale)["es" as string] || Locale.es);
 
-        return { plans, recipes };
+        return { plans, recipes, week };
     }
 
     /**

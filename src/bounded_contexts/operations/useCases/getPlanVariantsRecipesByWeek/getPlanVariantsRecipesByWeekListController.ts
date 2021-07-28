@@ -24,7 +24,7 @@ export class GetPlanVariantsRecipesByWeekListController extends BaseController {
             // };
 
             const result = await this.getPlanVariantsRecipesByWeekList.execute();
-            const presented = await this.getPlanVariantsRecipesByWeekListPresenter.present(result.plans, result.recipes);
+            const presented = await this.getPlanVariantsRecipesByWeekListPresenter.present(result.plans, result.recipes, result.week);
 
             return this.ok(this.res, presented);
         } catch (error) {

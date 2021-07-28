@@ -13,7 +13,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
         this._storageService = storageService;
     }
 
-    public async present(plans: Plan[], recipes: Recipe[]): Promise<any> {
+    public async present(plans: Plan[], recipes: Recipe[], week: Week): Promise<any> {
         const presentedPlans = [];
         const planRecipeMap: { [key: string]: any[] } = {};
         const presentedRecipes = [];
@@ -75,7 +75,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             }
         }
 
-        return presentedPlans;
+        return { plans: presentedPlans, weekLabel: week.getLabel() };
     }
 
     private async presentRecipe(recipe: Recipe): Promise<any> {
@@ -126,7 +126,6 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             return {
                 id: variant.id.value,
                 sku: variant.sku.code,
-                name: variant.name,
                 price: variant.price,
                 priceWithOffer: variant.priceWithOffer,
                 //@ts-ignore
@@ -139,7 +138,6 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             return {
                 id: variant.id.value,
                 sku: variant.sku.code,
-                name: variant.name,
                 price: variant.price,
                 priceWithOffer: variant.priceWithOffer,
                 attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),

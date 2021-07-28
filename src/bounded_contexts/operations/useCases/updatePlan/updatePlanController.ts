@@ -33,6 +33,7 @@ export class UpdatePlanController extends BaseController {
                 planImageFileName = this.req.file.originalname;
             }
 
+            console.log("EL BODY QUE ME LLEGA: ", this.req.body);
             const dto: UpdatePlanDto = {
                 id: this.req.params.id,
                 planName: this.req.body.name,
@@ -61,6 +62,14 @@ export class UpdatePlanController extends BaseController {
 
             if (planImagePath) {
                 fs.unlinkSync(planImagePath);
+            }
+
+            if (iconLinealPath) {
+                fs.unlinkSync(iconLinealPath);
+            }
+
+            if (iconLinealColorPath) {
+                fs.unlinkSync(iconLinealColorPath);
             }
 
             return this.ok(this.res);

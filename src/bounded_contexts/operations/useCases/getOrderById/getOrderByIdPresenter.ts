@@ -3,52 +3,46 @@ import { Customer } from "../../domain/customer/Customer";
 import { Order } from "../../domain/order/Order";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { Subscription } from "../../domain/subscription/Subscription";
 
-export class GetPaymentOrderByIdPresenter {
+export class GetOrderByIdPresenter {
     private _storageService: IStorageService;
 
     constructor(storageService: IStorageService) {
         this._storageService = storageService;
     }
 
-    public async present(paymentOrder: PaymentOrder, orders: Order[], customer: Customer): Promise<any> {
-        const presentedOrders = await this.presentOrders(orders);
+    public async present(paymentOrder: PaymentOrder, order: Order, customer: Customer, subscription: Subscription): Promise<any> {
+        const planIcon = await this.storageService.getPresignedUrlForFile(order.plan.iconLinealColorUrl);
+        const presentedRecipes = await this.presentRecipeSelection(order.recipeSelection);
 
         return {
-            id: paymentOrder.id.value,
-            amount: paymentOrder.amount,
-            billingDate: paymentOrder.getHumanBillingDate(),
-            discountAmount: paymentOrder.discountAmount,
-            shippingCost: paymentOrder.shippingCost,
-            customer: paymentOrder.customerId.value,
+            id: order.id.value,
+            shippingDate: order.getHumanShippmentDay(),
+            billingDate: order.getHumanBillingDay(),
+            state: order.state.title,
+            isSkipped: order.isSkipped(),
+            hasRecipes: order.hasChosenRecipes(),
+            recipes: presentedRecipes,
+            planName: order.getPlanName(),
+            planVariant: order.getPlanVariantLabel(order.planVariantId),
+            planIcon,
+            paymentOrderId: paymentOrder.id.value,
+            amount: order.getTotalPrice(),
+            numberOfRecipes: order.plan.getServingsQuantity(order.planVariantId),
             customerName: customer.getPersonalInfo().fullName,
-            state: paymentOrder.state.humanTitle,
-            orders: presentedOrders,
-            totalAmount: paymentOrder.getTotalAmount(),
-        };
-    }
-
-    public async presentOrders(orders: Order[]): Promise<any> {
-        const presentedOrders = [];
-
-        for (let order of orders) {
-            const planIcon = await this.storageService.getPresignedUrlForFile(order.plan.iconLinealColorUrl);
-            const presentedRecipes = await this.presentRecipeSelection(order.recipeSelection);
-
-            presentedOrders.push({
-                id: order.id.value,
-                shippingDate: order.getHumanShippmentDay(),
-                state: order.state.humanTitle,
-                hasRecipes: order.hasChosenRecipes(),
-                recipes: presentedRecipes,
-                planIcon,
+            subscription: {
+                subscriptionId: subscription.id.value,
+                planId: order.plan.id.value,
                 planName: order.getPlanName(),
                 planVariant: order.getPlanVariantLabel(order.planVariantId),
                 amount: order.getTotalPrice(),
-            });
-        }
-
-        return presentedOrders;
+                frequency: subscription.frequency,
+                restrictionId: subscription.restriction?.id.value,
+                restrictionLabel: subscription.restriction?.label,
+            },
+            weekLabel: order.getWeekLabel(),
+        };
     }
 
     public async presentRecipeSelection(recipeSelection: RecipeSelection[]): Promise<any> {

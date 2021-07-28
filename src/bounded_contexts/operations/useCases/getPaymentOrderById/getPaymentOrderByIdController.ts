@@ -21,7 +21,7 @@ export class GetPaymentOrderByIdController extends BaseController {
             };
 
             const result = await this.getPaymentOrderById.execute(dto);
-            const presented = await this.getPaymentOrderByIdPresenter.present(result.paymentOrder, result.orders);
+            const presented = await this.getPaymentOrderByIdPresenter.present(result.paymentOrder, result.orders, result.customer);
 
             return this.ok(this.res, presented);
         } catch (error) {

@@ -51,6 +51,10 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         return !!customerDb ? customerMapper.toDomain(customerDb) : undefined;
     }
 
+    public async findByIdList(ids: CustomerId[]): Promise<Customer[]> {
+        return await this.findBy({ _id: { $in: ids.map((id) => id.value) } });
+    }
+
     public async findAll(): Promise<Customer[]> {
         return await this.findBy({});
     }

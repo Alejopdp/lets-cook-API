@@ -60,10 +60,8 @@ export class GetPlanListPresenter {
 
             if (plan.hasRecipes) {
                 presentedVariants.push({
-                    oldId: variant.getConcatenatedAttributesAsString(),
                     id: variant.id.value,
                     sku: variant.sku.code,
-                    name: variant.name,
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
                     //@ts-ignore
@@ -75,10 +73,8 @@ export class GetPlanListPresenter {
                 });
             } else {
                 presentedVariants.push({
-                    oldId: variant.getConcatenatedAttributesAsString(),
                     id: variant.id.value,
                     sku: variant.sku.code,
-                    name: variant.name,
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),

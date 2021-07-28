@@ -1,34 +1,42 @@
 import { Customer } from "../../domain/customer/Customer";
 import { Order } from "../../domain/order/Order";
+import { OrderId } from "../../domain/order/OrderId";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
-import { PaymentOrderId } from "../../domain/paymentOrder/PaymentOrderId";
+import { Subscription } from "../../domain/subscription/Subscription";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
-import { GetPaymentOrderByIdDto } from "./getPaymentOrderByIdDto";
+import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
+import { GetOrderByIdDto } from "./getOrderByIdDto";
 
-export class GetPaymentOrderById {
+export class GetOrderById {
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _orderRepository: IOrderRepository;
     private _customerRepository: ICustomerRepository;
+    private _subscriptionRepository: ISubscriptionRepository;
 
     constructor(
         paymentOrderRepository: IPaymentOrderRepository,
         orderRepository: IOrderRepository,
-        customerRepository: ICustomerRepository
+        customerRepository: ICustomerRepository,
+        subscriptionRepository: ISubscriptionRepository
     ) {
         this._paymentOrderRepository = paymentOrderRepository;
         this._orderRepository = orderRepository;
         this._customerRepository = customerRepository;
+        this._subscriptionRepository = subscriptionRepository;
     }
 
-    public async execute(dto: GetPaymentOrderByIdDto): Promise<{ paymentOrder: PaymentOrder; orders: Order[]; customer: Customer }> {
-        const paymentOrderId: PaymentOrderId = new PaymentOrderId(dto.paymentOrderId);
-        const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
-        const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId);
+    public async execute(
+        dto: GetOrderByIdDto
+    ): Promise<{ paymentOrder: PaymentOrder; order: Order; customer: Customer; subscription: Subscription }> {
+        const orderId: OrderId = new OrderId(dto.orderId);
+        const order: Order = await this.orderRepository.findByIdOrThrow(orderId);
+        const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(order.paymentOrderId!);
         const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
+        const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId);
 
-        return { paymentOrder, orders, customer };
+        return { paymentOrder, order, customer, subscription };
     }
 
     /**
@@ -53,5 +61,13 @@ export class GetPaymentOrderById {
      */
     public get customerRepository(): ICustomerRepository {
         return this._customerRepository;
+    }
+
+    /**
+     * Getter subscriptionRepository
+     * @return {ISubscriptionRepository}
+     */
+    public get subscriptionRepository(): ISubscriptionRepository {
+        return this._subscriptionRepository;
     }
 }
