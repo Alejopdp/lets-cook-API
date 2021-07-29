@@ -9,6 +9,7 @@ export class CreateSubscriptionPresenter {
             client_secret: paymentIntent.client_secret,
             payment_status: paymentIntent.status,
             firstOrderId: firstOrder.id.value,
+            firstOrderShippingDate: firstOrder.getHumanShippmentDay(),
         };
     }
 }

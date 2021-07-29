@@ -133,6 +133,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                 //@ts-ignore
                 numberOfRecipes: variant.numberOfRecipes,
                 attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
+                label: variant.getLabel(),
             };
         } else {
             return {

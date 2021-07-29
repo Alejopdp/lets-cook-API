@@ -4,6 +4,7 @@ import { Guard, GuardArgumentCollection } from "../../../../core/logic/Guard";
 import { ShippingZoneRadio } from "./ShippingZoneRadio/ShippingZoneRadio";
 import { ShippingZoneId } from "../shipping/ShippingZoneId";
 import { Day } from "../day/Day";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 
 export class ShippingZone extends Entity<ShippingZone> {
     private _name: string;
@@ -63,6 +64,39 @@ export class ShippingZone extends Entity<ShippingZone> {
 
     public hasAddressInside(lat: number, lng: number): boolean {
         return this.radio.hasPointInside(lat, lng);
+    }
+
+    public getDayLabel(): string {
+        return this.shippingDayOfWeek.getDayName();
+    }
+
+    public getDayNumberOfWeek(): number {
+        return this.shippingDayOfWeek.dayNumberOfWeek;
+    }
+
+    public nextShippingDate(): Date {
+        var today: Date = new Date();
+        // today.setDate(today.getDate() + 5); // Testing days
+        const deliveryDate: Date = new Date(today.getFullYear(), today.getMonth());
+        const differenceInDays = this.getDayNumberOfWeek() - today.getDay();
+
+        deliveryDate.setDate(today.getDate() + differenceInDays); // Delivery day of this week
+
+        if (this.shippingDateHasToSkipWeek()) {
+            deliveryDate.setDate(deliveryDate.getDate() + 7); // Delivery day of this week
+        }
+
+        return deliveryDate;
+    }
+
+    public shippingDateHasToSkipWeek(): boolean {
+        var today: Date = new Date();
+
+        return today.getDay() >= this.getDayNumberOfWeek();
+    }
+
+    public getHumanNextShippingDate(): string {
+        return MomentTimeService.getDateHumanLabel(this.nextShippingDate());
     }
 
     /**

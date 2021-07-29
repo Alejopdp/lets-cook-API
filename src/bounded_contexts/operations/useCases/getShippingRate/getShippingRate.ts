@@ -11,7 +11,7 @@ export class GetShippingRate {
         this._shippingRepository = shippingRepository;
     }
 
-    public async execute(dto: GetShippingRateDto): Promise<number> {
+    public async execute(dto: GetShippingRateDto): Promise<ShippingZone> {
         if (!dto.latitude || !dto.longitude) throw new Error("Es necesario ingresar tanto una latitud como una longitud");
         const shippings: ShippingZone[] = await this.shippingRepository.findAll();
         const coordinates: Coordinates = new Coordinates(dto.latitude, dto.longitude);
@@ -22,7 +22,7 @@ export class GetShippingRate {
 
         if (!!!shippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
-        return shippingZone.cost;
+        return shippingZone;
     }
 
     /**
