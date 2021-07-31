@@ -9,6 +9,7 @@ export class GetCustomerByIdPresenter {
             shippingAddress: customer.getShippingAddress(),
             billingData: customer.getBillingData(),
             paymentMethods: customer.paymentMethods.map((method) => ({
+                id: method.id.value,
                 card: method.getCardLabel(),
                 expirationDate: method.getExpirationDate(),
                 isDefault: method.isDefault,
