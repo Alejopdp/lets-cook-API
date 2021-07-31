@@ -31,16 +31,21 @@ export class LoginWithEmailController extends BaseController {
                         return this.clientError(error.reason);
                     case LoginWithEmailErrors.InactiveUser:
                         return this.conflict(error.reason);
+                    case LoginWithEmailErrors.AccountCreatedWithSocialMedia:
+                        return this.clientError(error.reason);
                     default:
                         return this.fail(error.reason);
                 }
             }
 
-            this.res.setHeader('Set-Cookie', cookie.serialize('auth', result.value.token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV !== 'Development',
-                path: '/'
-            }))
+            this.res.setHeader(
+                "Set-Cookie",
+                cookie.serialize("auth", result.value.token, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV !== "Development",
+                    path: "/",
+                })
+            );
             return this.ok(this.res, result.value);
         } catch (err) {
             return this.fail(err);

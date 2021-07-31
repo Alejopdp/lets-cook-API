@@ -9,6 +9,7 @@ import { Billing } from "../../domain/billing/Billing";
 import { paymentMethodMapper } from ".";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PersonalInfo } from "../../domain/customer/personalInfo/PersonalInfo";
+import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 export class CustomerMapper implements Mapper<Customer> {
     public toDomain(raw: any): Customer {
         const shippingAddress: Address | undefined = raw.shippingAddress ? addressMapper.toDomain(raw.shippingAddress) : undefined;
@@ -23,7 +24,7 @@ export class CustomerMapper implements Mapper<Customer> {
             paymentMethods,
             shippingAddress,
             billingAddress,
-            raw.password,
+            UserPassword.create(raw.password, true),
             raw.state,
             raw.codeToRecoverPassword,
             personalInfo,

@@ -19,7 +19,7 @@ export class UserPassword implements IValueObject<UserPassword> {
     }
 
     public equals(aPassword: UserPassword): boolean {
-        if (aPassword.isHashed) throw new Error("No es posible comparar 2 hashes");
+        // if (aPassword.isHashed) throw new Error("No es posible comparar 2 hashes");
 
         return this.isHashed ? bcrypt.compareSync(aPassword.value, this.value) : this.value === aPassword.value;
     }

@@ -6,10 +6,13 @@ import { Customer } from "../../domain/customer/Customer";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { LoginWithEmailDto } from "./loginWithEmailDto";
-import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser } from "./loginWithEmailErrors";
+import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser, accountCreatedWithSocialMedia } from "./loginWithEmailErrors";
 import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
 
-type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
+type Response = Either<
+    Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser | LoginWithEmailErrors.AccountCreatedWithSocialMedia>,
+    any
+>;
 
 export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Response>> {
     private _customerRepository: ICustomerRepository;
@@ -27,9 +30,11 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
 
         if (!customer.state) return isFailure(inactiveUser());
 
+        if (!!!customer.password) return isFailure(accountCreatedWithSocialMedia());
+
         const incomingPassword: UserPassword = UserPassword.create(dto.password, false);
 
-        if (!incomingPassword.equals(incomingPassword)) return isFailure(invalidLoginArguments());
+        if (!customer.password?.equals(incomingPassword)) return isFailure(invalidLoginArguments());
 
         const tokenPayload = {
             email: customer.email,

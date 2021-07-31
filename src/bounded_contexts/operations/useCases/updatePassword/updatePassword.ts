@@ -18,12 +18,13 @@ export class UpdatePassword {
 
     public async execute(dto: UpdatePasswordDto): Promise<void> {
         const customer: Customer | undefined = await this.updatePasswordRepository.findByEmail(dto.email);
+        if (!!!customer) throw new Error("User not found.");
+        if (dto.code !== customer.codeToRecoverPassword) throw new Error("El código para recuperar la contraseña no es correcto");
 
         const newPassword: UserPassword = UserPassword.create(dto.newPassword, false).hashPassword();
 
         customer?.changePassword(newPassword);
-        // const customer: Customer = Customer.create(dto.email, dto.isEmailVerified, password, dto.state, undefined);
-        // console.log("UpdatePassword: ", customer);
+
         await this.updatePasswordRepository.save(customer);
     }
 

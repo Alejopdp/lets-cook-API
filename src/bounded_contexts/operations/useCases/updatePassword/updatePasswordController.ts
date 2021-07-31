@@ -16,7 +16,8 @@ export class UpdatePasswordController extends BaseController {
         try {
             const dto: UpdatePasswordDto = {
                 email: this.req.params.email,
-                newPassword: this.req.body.newPassword
+                newPassword: this.req.body.newPassword,
+                code: this.req.body.code
             };
 
             await this.signUp.execute(dto);
