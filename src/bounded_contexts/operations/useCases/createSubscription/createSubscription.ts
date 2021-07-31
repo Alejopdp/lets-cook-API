@@ -4,6 +4,7 @@ import { IPaymentService } from "../../application/paymentService/IPaymentServic
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
@@ -70,7 +71,12 @@ export class CreateSubscription {
 
     public async execute(
         dto: CreateSubscriptionDto
-    ): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent; firstOrder: Order }> {
+    ): Promise<{
+        subscription: Subscription;
+        paymentIntent: Stripe.PaymentIntent;
+        firstOrder: Order;
+        customerPaymentMethods: PaymentMethod[];
+    }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
@@ -161,7 +167,7 @@ export class CreateSubscription {
         }
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
-        return { subscription, paymentIntent, firstOrder: orders[0] };
+        return { subscription, paymentIntent, firstOrder: orders[0], customerPaymentMethods: customer.paymentMethods };
     }
 
     /**

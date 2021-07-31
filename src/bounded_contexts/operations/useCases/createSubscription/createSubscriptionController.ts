@@ -36,7 +36,12 @@ export class CreateSubscriptionController extends BaseController {
             };
 
             const result = await this.createSubscription.execute(dto);
-            const presented = this.createSubscriptionPresenter.present(result.subscription, result.paymentIntent, result.firstOrder);
+            const presented = this.createSubscriptionPresenter.present(
+                result.subscription,
+                result.paymentIntent,
+                result.firstOrder,
+                result.customerPaymentMethods
+            );
 
             return this.ok(this.res, presented);
         } catch (error) {

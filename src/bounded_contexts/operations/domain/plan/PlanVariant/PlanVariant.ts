@@ -50,6 +50,7 @@ export class PlanVariant extends Entity<PlanVariant> {
     public getServingsQuantity(): number {
         return 0;
     }
+    
     /**
      * Getter sku
      * @return {PlanSku}
