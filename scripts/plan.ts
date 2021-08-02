@@ -223,8 +223,8 @@ export const getMockPlans = () => {
         Locale.es,
         new PlanSlug("Plan Gourmet"),
         true,
-        "plan-gourmet.svg",
-        "plan-gourmet-color.svg"
+        "development/plan-gourmet.svg",
+        "development/plan-gourmet-color.svg"
     );
 
     const plan3: Plan = Plan.create(
@@ -241,8 +241,8 @@ export const getMockPlans = () => {
         Locale.es,
         new PlanSlug("Plan Ahorro"),
         true,
-        "plan-ahorro.svg",
-        "plan-ahorro-color.svg"
+        "development/plan-ahorro.svg",
+        "development/plan-ahorro-color.svg"
     );
 
     const plan4: Plan = Plan.create(
@@ -259,8 +259,8 @@ export const getMockPlans = () => {
         Locale.es,
         new PlanSlug("Plan vegetariano"),
         true,
-        "plan-vegetariano.svg",
-        "plan-vegetariano-color.svg"
+        "development/plan-vegetariano.svg",
+        "development/plan-vegetariano-color.svg"
     );
 
     const plan5: Plan = Plan.create(
@@ -277,8 +277,8 @@ export const getMockPlans = () => {
         Locale.es,
         new PlanSlug("Plan Vegano"),
         true,
-        "plan-vegano.svg",
-        "plan-vegano-color.svg"
+        "development/plan-vegano.svg",
+        "development/plan-vegano-color.svg"
     );
 
     return [plan1, plan2, plan3, plan4, plan5, additionalPlan1, additionalPlan2];
