@@ -44,7 +44,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                     var presentedVariants = [];
 
                     for (let variant of plan.planVariants) {
-                        presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes));
+                        presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes, additionalPlan));
                     }
 
                     presentedAdditionalPlansMap[additionalPlan.id.value] = await this.presentPlan(
@@ -63,7 +63,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                 var presentedVariants = [];
 
                 for (let variant of plan.planVariants) {
-                    presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes));
+                    presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes, plan));
                 }
 
                 const presentedAdditionalPlans = plan.additionalPlans.map(
@@ -121,10 +121,11 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
         };
     }
 
-    private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean): any {
+    private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean, plan: Plan): any {
         if (hasRecipes) {
             return {
                 id: variant.id.value,
+                planId: plan.id.value,
                 sku: variant.sku.code,
                 price: variant.price,
                 priceWithOffer: variant.priceWithOffer,

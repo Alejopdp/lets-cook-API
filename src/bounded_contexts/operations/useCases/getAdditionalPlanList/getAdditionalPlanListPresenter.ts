@@ -26,7 +26,7 @@ export class GetAdditionalPlanListPresenter {
                 icon: plan.iconLinealUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl) : "",
                 iconWithColor: plan.iconLinealColorUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl) : "",
                 abilityToChooseRecipes: plan.abilityToChooseRecipes,
-                variants: plan.planVariants.map((variant) => this.presentPlanVariant(variant, plan.hasRecipes)),
+                variants: plan.planVariants.map((variant) => this.presentPlanVariant(variant, plan.hasRecipes, plan.id.value)),
                 slug: plan.planSlug.slug,
             });
         }
@@ -34,10 +34,11 @@ export class GetAdditionalPlanListPresenter {
         return presentedPlans;
     }
 
-    private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean): any {
+    private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean, planId: string): any {
         if (hasRecipes) {
             return {
                 id: variant.id.value,
+                planId,
                 sku: variant.sku.code,
                 price: variant.price,
                 priceWithOffer: variant.priceWithOffer,
@@ -50,6 +51,7 @@ export class GetAdditionalPlanListPresenter {
         } else {
             return {
                 id: variant.id.value,
+                planId,
                 sku: variant.sku.code,
                 price: variant.price,
                 priceWithOffer: variant.priceWithOffer,

@@ -23,6 +23,7 @@ export class GetRecipesForOrderPresenter {
             recipes: presentedRecipes,
             nextDeliveryLabel: order.getHumanShippmentDay(),
             maxRecipesQty: subscription.getServingsQuantity(),
+            subscriptionId: subscription.id.value
         };
     }
 

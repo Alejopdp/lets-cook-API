@@ -4,6 +4,9 @@ import { Subscription } from "../../domain/subscription/Subscription";
 import { v4 as uuid } from "uuid";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Week } from "../../domain/week/Week";
+import { PlanId } from "../../domain/plan/PlanId";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -108,6 +111,39 @@ export class GetSubscriptionByIdPresenter {
                 name: selection.recipe.recipeGeneralData.name,
                 imageUrl: await this.storageService.getPresignedUrlForFile(selection.recipe.recipeGeneralData.imageUrl),
                 images: [],
+                sku: selection.recipe.recipeGeneralData.recipeSku.code,
+                shortDescription: selection.recipe.recipeGeneralData.recipeDescription.shortDescription,
+                longDescription: selection.recipe.recipeGeneralData.recipeDescription.longDescription,
+                cookDuration: selection.recipe.recipeGeneralData.cookDuration.value(),
+                cookDurationNumberValue: selection.recipe.recipeGeneralData.cookDuration.timeValue,
+                difficultyLevel: selection.recipe.recipeGeneralData.difficultyLevel,
+                weight: selection.recipe.recipeGeneralData.recipeWeight.value(),
+                weightNumberValue: selection.recipe.recipeGeneralData.recipeWeight.weightValue,
+                backOfficeTags: selection.recipe.recipeBackOfficeTags.map((tag) => tag.name),
+                imageTags: selection.recipe.recipeImageTags.map((tag) => tag.name),
+                availableWeeks: selection.recipe.availableWeeks.map((week: Week) => {
+                    return {
+                        id: week.id.value,
+                        label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
+                            week.maxDay
+                        )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
+                    };
+                }),
+
+                availableMonths: selection.recipe.availableMonths,
+                relatedPlans: selection.recipe.relatedPlans.map((planId: PlanId) => planId.value),
+                tools: selection.recipe.recipeTools,
+                recipeVariants: selection.recipe.recipeVariants.map((variant) => {
+                    return {
+                        ingredients: variant.ingredients.map((ing) => ing.name),
+                        restriction: {
+                            id: variant.restriction.id.value,
+                            value: variant.restriction.value,
+                            label: variant.restriction.label,
+                        },
+                        sku: variant.sku.code,
+                    };
+                }),
             });
         }
 

@@ -18,6 +18,7 @@ export class ChooseRecipesForOrderController extends BaseController {
                 recipeSelection: this.req.body.recipeSelection,
             };
 
+            console.log("A VER ESE DTO: ", dto)
             await this.chooseRecipesForOrder.execute(dto);
 
             return this.ok(this.res);

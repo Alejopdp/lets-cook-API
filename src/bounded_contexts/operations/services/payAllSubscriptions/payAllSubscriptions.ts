@@ -27,6 +27,7 @@ export class PayAllSubscriptions {
     public async execute(): Promise<void> {
         const customers: Customer[] = await this.customerRepository.findAll();
         const today: Date = new Date();
+        today.setHours(0, 0, 0, 0);
         const paymentOrdersToBill: PaymentOrder[] = await this.paymentOrderRepository.findActiveByBillingDate(today);
         const customerMap: { [customerId: string]: Customer } = {};
 

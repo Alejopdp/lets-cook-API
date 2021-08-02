@@ -1,3 +1,4 @@
+import { logger } from "../../../../../config";
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
@@ -140,10 +141,15 @@ export class Order extends Entity<Order> {
         // console.log("ORDER ASSIGNING: WEEK", this.week.id);
         // console.log("ORDER PLAN: ", this.plan.id.value);
         for (let paymentOrder of paymentOrders) {
-            // console.log("PAYMENT ORDER WEEK: ", paymentOrder.week.id);
-            if (this.week.id.equals(paymentOrder.week.id)) {
-                // console.log("**************************** ENCONTRO **************************** ");
+            paymentOrder.billingDate.setHours(0, 0, 0, 0);
+            this.billingDate.setHours(0, 0, 0, 0);
+            logger.debug(`PAYMENT ORDER: ${paymentOrder.billingDate}`);
+            logger.debug(`ORDER: ${this.billingDate}`);
+
+            if (this.billingDate.getTime() === paymentOrder.billingDate.getTime()) {
+                console.log("**************************** ENCONTRO **************************** ");
                 this.paymentOrderId = paymentOrder.id;
+                return;
             }
         }
     }
