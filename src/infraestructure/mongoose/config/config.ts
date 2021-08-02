@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 import { logger, restoreDb } from "../../../../config";
 import { loadMockData } from "../../../../scripts/db";
+import { getConfig } from "../../../config/config";
 
 export const connectToDatabase = async () => {
-    const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
+    const mongoUri: string = ((process.env.URLDB as string) + getConfig("NODE_ENV")) as string;
 
     try {
         await mongoose.connect(mongoUri, {
