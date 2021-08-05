@@ -4,6 +4,7 @@ import { v4 as uuid } from "uuid";
 import { Order } from "../../domain/order/Order";
 import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
+import _ from "lodash";
 
 export class GetCustomerSubscriptionsPresenter {
     private _storageService: IStorageService;
@@ -28,7 +29,10 @@ export class GetCustomerSubscriptionsPresenter {
         }
         // console.log("ORDERS MAP:_ ", orderSubscriptionMap);
 
-        for (let subscription of subscriptions) {
+        const subscriptionsWithoutCancelledDuplicates = _.uniqBy(subscriptions, (subscription) =>
+            [subscription.state.title, subscription.plan.id.value].join()
+        );
+        for (let subscription of subscriptionsWithoutCancelledDuplicates) {
             if (subscription.plan.isPrincipal()) {
                 presentedPrincipalSubscriptions.push({
                     id: subscription.id.value,

@@ -1,3 +1,4 @@
+import { QueryOptions } from "mongoose";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
 import { Subscription } from "../../../domain/subscription/Subscription";
@@ -9,7 +10,7 @@ export interface ISubscriptionRepository {
     findAll(locale: Locale): Promise<Subscription[]>;
     findById(subscriptionId: SubscriptionId, locale?: Locale): Promise<Subscription>;
     findByIdOrThrow(subscriptionId: SubscriptionId, locale?: Locale): Promise<Subscription>;
-    findBy(conditions: any, locale: Locale): Promise<Subscription[]>;
+    findBy(conditions: any, locale: Locale, options?: QueryOptions): Promise<Subscription[]>;
     findByCustomerId(customerId: CustomerId): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerId(customerId: CustomerId): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerIdList(customersIds: CustomerId[]): Promise<Subscription[]>;

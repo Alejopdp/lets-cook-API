@@ -6,6 +6,7 @@ import { subscriptionMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
+import { Query, QueryOptions } from "mongoose";
 
 export class MongooseSubscriptionRepository implements ISubscriptionRepository {
     public async save(subscription: Subscription): Promise<void> {
@@ -44,8 +45,8 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return await this.findBy({}, locale);
     }
 
-    public async findBy(conditions: any, locale: Locale): Promise<Subscription[]> {
-        const subscriptionsDb = await MongooseSubscription.find({ ...conditions, deletionFlag: false })
+    public async findBy(conditions: any, locale: Locale, options?: QueryOptions): Promise<Subscription[]> {
+        const subscriptionsDb = await MongooseSubscription.find({ ...conditions, deletionFlag: false }, null, options)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("customer")
             .populate("restriction");
@@ -62,7 +63,12 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
     }
 
     public async findByCustomerId(customerId: CustomerId): Promise<Subscription[]> {
-        return await this.findBy({ customer: customerId.value }, Locale.es);
+        const options: QueryOptions = {
+            sort: {
+                state: 1,
+            },
+        };
+        return await this.findBy({ customer: customerId.value }, Locale.es, options);
     }
 
     public async delete(subscriptionId: SubscriptionId): Promise<void> {
