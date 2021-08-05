@@ -67,7 +67,7 @@ export class Subscription extends Entity<Subscription> {
 
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
         const orders: Order[] = [];
-        const deliveryDate: Date = this.getFirstOrderShippingDate(1); // Monday
+        const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek()); // Monday
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
 
         for (let i = 0; i < 12; i++) {
