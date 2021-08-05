@@ -17,22 +17,31 @@ export class GetCustomerSubscriptionsPresenter {
         const presentedPrincipalSubscriptions = [];
         const presentedAdditionalSubscriptions = [];
         const orderSubscriptionMap: { [key: string]: Order[] } = {};
+        const cancelledSubscriptions: Subscription[] = [];
+        const nonCancelledSubscriptions: Subscription[] = [];
         var pendingActions = [];
 
-        // console.log("NExt orders: ", nextOrders);
-        // console.log("SUBSCRIPTIONS: ", subscriptions);
-        // console.log("Orders.length: ", nextOrders.length);
         for (let order of nextOrders) {
             orderSubscriptionMap[order.subscriptionId.value] = Array.isArray(orderSubscriptionMap[order.subscriptionId.value])
                 ? [...orderSubscriptionMap[order.subscriptionId.value], order]
                 : [order];
         }
-        // console.log("ORDERS MAP:_ ", orderSubscriptionMap);
 
-        const subscriptionsWithoutCancelledDuplicates = _.uniqBy(subscriptions, (subscription) =>
-            [subscription.state.title, subscription.plan.id.value].join()
-        );
-        for (let subscription of subscriptionsWithoutCancelledDuplicates) {
+        for (let subscription of subscriptions) {
+            if (
+                subscription.state.title === "SUBSCRIPTION_CANCELLED" &&
+                !cancelledSubscriptions.some((s) => s.plan.id.equals(subscription.plan.id))
+            ) {
+                cancelledSubscriptions.push(subscription);
+            } else if (subscription.state.title !== "SUBSCRIPTION_CANCELLED") {
+                nonCancelledSubscriptions.push(subscription);
+            }
+        }
+
+        // const subscriptionsWithoutCancelledDuplicates = _.uniqBy(subscriptions, (subscription) =>
+        //     [subscription.state.title, subscription.plan.id.value].join()
+        // );
+        for (let subscription of [...nonCancelledSubscriptions, ...cancelledSubscriptions]) {
             if (subscription.plan.isPrincipal()) {
                 presentedPrincipalSubscriptions.push({
                     id: subscription.id.value,
