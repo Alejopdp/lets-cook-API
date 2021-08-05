@@ -4,6 +4,7 @@ import { ShippingZoneId } from "../../../domain/shipping/ShippingZoneId";
 
 export interface IShippingZoneRepository {
     save(shipping: ShippingZone): Promise<void>;
+    saveBulk(shippingZones: ShippingZone[]): Promise<void>;
     findAll(): Promise<ShippingZone[]>;
     updateState(state: ShippingZone): Promise<void>;
     findById(planId: ShippingZoneId): Promise<ShippingZone | undefined>;

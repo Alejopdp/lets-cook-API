@@ -5,12 +5,14 @@ import { mongooseIngredientRepository } from "../src/bounded_contexts/operations
 import { mongoosePlanRepository } from "../src/bounded_contexts/operations/infra/repositories/plan";
 import { mongooseRecipeRepository } from "../src/bounded_contexts/operations/infra/repositories/recipe";
 import { mongooseRecipeVariantRestrictionRepository } from "../src/bounded_contexts/operations/infra/repositories/recipeVariantRestriction";
+import { mongooseShippingZoneRepository } from "../src/bounded_contexts/operations/infra/repositories/shipping";
 import { mongooseWeekRepository } from "../src/bounded_contexts/operations/infra/repositories/week";
 import { getIngredients } from "./ingredient";
 import { getMockPlans } from "./plan";
 import { getMockRecipes } from "./recipe";
 import { getMockRecipeVartiantRestrictions } from "./recipeVariantRestriction";
 import { adminRole } from "./role";
+import { shippingZones } from "./shippingZones";
 import { adminUser1, adminUser2 } from "./user";
 import { getArrayOfFutureWeeks } from "./week";
 
@@ -31,4 +33,5 @@ export const loadMockData = async () => {
     const mockRecipes = await getMockRecipes();
     await mongooseRecipeRepository.bulkSave(mockRecipes);
     logger.info("Recipes loaded");
+    await mongooseShippingZoneRepository.saveBulk(shippingZones);
 };

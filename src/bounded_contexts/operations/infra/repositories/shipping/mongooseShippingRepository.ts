@@ -30,6 +30,12 @@ export class MongooseShippingRepository implements IShippingZoneRepository {
         }
     }
 
+    public async saveBulk(shippingZones: ShippingZone[]): Promise<void> {
+        const shippingZonesToSave = shippingZones.map((shippingZone) => shippingMapper.toPersistence(shippingZone));
+
+        await MongooseShippingZone.insertMany(shippingZonesToSave);
+    }
+
     public async updateState(shipping: ShippingZone): Promise<void> {
         const shippingDb = shippingMapper.toPersistence(shipping);
         await MongooseShippingZone.updateOne({ _id: shipping.id.value }, { $set: { state: shippingDb.state } });

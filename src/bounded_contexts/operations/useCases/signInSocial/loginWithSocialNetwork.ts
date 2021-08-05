@@ -34,6 +34,8 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
         const decodedToken = await app.auth().verifyIdToken(dto.idToken);
         user = decodedToken;
 
+        console.log("LO QUE ME DEVUELVE FIREBASE: ", user);
+
         var customer: Customer | undefined = await this.customerRepository.findByEmail(user.email);
 
         if (!!!customer) {
