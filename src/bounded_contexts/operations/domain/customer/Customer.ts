@@ -11,6 +11,8 @@ import { PaymentMethodId } from "./paymentMethod/PaymentMethodId";
 import { PersonalInfo } from "./personalInfo/PersonalInfo";
 import { filter, method } from "lodash";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Locale } from "../locale/Locale";
+import { IPreferredDeliveryTime } from "./preferredDeliveryTime/IPreferredDeliveryTime";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -193,12 +195,12 @@ export class Customer extends Entity<Customer> {
         }
     }
 
-    public getShippingAddress(): { name?: string; details?: string; preferredShippingHour: string } {
+    public getShippingAddress(locale: Locale = Locale.es): { name?: string; details?: string; preferredShippingHour: string } {
         console.log(this.shippingAddress?.name);
         return {
             details: this.shippingAddress?.details,
             name: this.shippingAddress?.name,
-            preferredShippingHour: this.shippingAddress?.deliveryTime || "Sin indicar",
+            preferredShippingHour: this.shippingAddress?.deliveryTime?.getLabel(locale) || "Sin indicar",
         };
     }
 
@@ -220,7 +222,14 @@ export class Customer extends Entity<Customer> {
         };
     }
 
-    public changeShippingAddress(lat: number, long: number, name: string, fullName: string, details: string, deliveryTime: string): void {
+    public changeShippingAddress(
+        lat: number,
+        long: number,
+        name: string,
+        fullName: string,
+        details: string,
+        deliveryTime?: IPreferredDeliveryTime
+    ): void {
         if (!this.shippingAddress) {
             const shippingAddress: Address = new Address(lat, long, name, fullName, details, deliveryTime);
             this.shippingAddress = shippingAddress;

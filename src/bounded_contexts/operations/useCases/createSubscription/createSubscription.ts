@@ -69,9 +69,7 @@ export class CreateSubscription {
         this._updatePaymentOrdersShippingCostByCustomer = updatePaymentOrdersShippingCostByCustomer;
     }
 
-    public async execute(
-        dto: CreateSubscriptionDto
-    ): Promise<{
+    public async execute(dto: CreateSubscriptionDto): Promise<{
         subscription: Subscription;
         paymentIntent: Stripe.PaymentIntent;
         firstOrder: Order;
@@ -91,7 +89,14 @@ export class CreateSubscription {
 
         customer.changePersonalInfo(dto.customerFirstName, dto.customerLastName, dto.phone1, "", "", dto.locale);
         if (addressIsChanged) {
-            customer.changeShippingAddress(dto.latitude, dto.longitude, dto.addressName, dto.addressName, dto.addressDetails, "");
+            customer.changeShippingAddress(
+                dto.latitude,
+                dto.longitude,
+                dto.addressName,
+                dto.addressName,
+                dto.addressDetails,
+                customer.shippingAddress?.deliveryTime
+            );
             customer.changeBillingAddress(
                 dto.latitude,
                 dto.longitude,

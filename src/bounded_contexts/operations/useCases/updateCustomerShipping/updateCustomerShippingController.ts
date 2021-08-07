@@ -24,7 +24,7 @@ export class UpdateCustomerShippingController extends BaseController {
                 fullName: this.req.body.full_name,
                 details: this.req.body.details,
                 addressId: this.req.body.addresId,
-                deliveryTime: this.req.body.delivery_time,
+                deliveryTime: this.req.body.preferredShippingHour,
             };
 
             await this.updateCustomer.execute(dto);

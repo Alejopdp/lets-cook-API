@@ -1,4 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { IPreferredDeliveryTime } from "../customer/preferredDeliveryTime/IPreferredDeliveryTime";
 import { AddressId } from "./AddressId";
 
 export class Address extends Entity<Address> {
@@ -7,16 +8,17 @@ export class Address extends Entity<Address> {
     private _name: string;
     private _fullName: string;
     private _details: string;
-    private _deliveryTime?: string;
+    private _deliveryTime?: IPreferredDeliveryTime;
 
     constructor(
-        latitude: number, 
-        longitude: number, 
-        name: string, 
-        fullName: string, 
-        details: string, 
-        deliveryTime?: string,
-        addressId?: AddressId ) {
+        latitude: number,
+        longitude: number,
+        name: string,
+        fullName: string,
+        details: string,
+        deliveryTime?: IPreferredDeliveryTime,
+        addressId?: AddressId
+    ) {
         super(addressId);
         this._latitude = latitude;
         this._longitude = longitude;
@@ -34,7 +36,14 @@ export class Address extends Entity<Address> {
         return this.fullName + " " + this.details;
     }
 
-    public changeInfoShipping(lat: number, long: number, name: string, fullName: string, details: string, deliveryTime: string): void {
+    public changeInfoShipping(
+        lat: number,
+        long: number,
+        name: string,
+        fullName: string,
+        details: string,
+        deliveryTime?: IPreferredDeliveryTime
+    ): void {
         this.latitude = lat;
         this.longitude = long;
         this.name = name;
@@ -84,9 +93,9 @@ export class Address extends Entity<Address> {
 
     /**
      * Getter deliveryTime
-     * @return {string}
+     * @return {IPreferredDeliveryTime}
      */
-     public get deliveryTime(): string | undefined {
+    public get deliveryTime(): IPreferredDeliveryTime | undefined {
         return this._deliveryTime;
     }
 
@@ -132,9 +141,9 @@ export class Address extends Entity<Address> {
 
     /**
      * Setter deliveryTime
-     * @param {string} value
+     * @param {IPreferredDeliveryTime} value
      */
-     public set deliveryTime(value: string | undefined) {
+    public set deliveryTime(value: IPreferredDeliveryTime | undefined) {
         this._deliveryTime = value;
     }
 }

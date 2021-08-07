@@ -5,26 +5,23 @@ import { Address } from "../../domain/address/Address";
 import { AddressId } from "../../domain/address/AddressId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { UpdateCustomerShippingDto } from "./updateCustomerShippingDto";
+import { PreferredDeliveryTimeFactory } from "../../domain/customer/preferredDeliveryTime/preferredDeliveryTimeFactory";
 
 export class UpdateCustomerShipping {
     private _customerRepository: ICustomerRepository;
     private _storageService: IStorageService;
 
-    constructor(
-        customerRepository: ICustomerRepository,
-        storageService: IStorageService,
-    ) {
+    constructor(customerRepository: ICustomerRepository, storageService: IStorageService) {
         this._customerRepository = customerRepository;
         this._storageService = storageService;
     }
 
     public async execute(dto: UpdateCustomerShippingDto): Promise<void> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const customer: Customer | undefined = await this.customerRepository.findById(customerId);
-        
-        if (!customer) throw new Error("Error al buscar el cliente");
-        
-        customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, dto.deliveryTime)
+        const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
+        const preferredDeliveryTime = PreferredDeliveryTimeFactory.createDeliveryTime(dto.deliveryTime);
+
+        customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, preferredDeliveryTime);
 
         await this.customerRepository.save(customer);
     }

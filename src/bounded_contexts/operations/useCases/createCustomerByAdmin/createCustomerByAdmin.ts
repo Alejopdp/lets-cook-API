@@ -9,6 +9,7 @@ import { ICustomerRepository } from "../../infra/repositories/customer/ICustomer
 import { createCustomerDto } from "./createCustomerByAdminDto";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
+import { PreferredDeliveryTimeFactory } from "../../domain/customer/preferredDeliveryTime/preferredDeliveryTimeFactory";
 
 export class CreateCustomerByAdmin {
     private _signUpRepository: ICustomerRepository;
@@ -23,11 +24,33 @@ export class CreateCustomerByAdmin {
 
     public async execute(dto: createCustomerDto): Promise<any> {
         const customerInfo: Customer | undefined = await this.signUpRepository.findByEmail(dto.email);
-        if(customerInfo) throw new Error("El usuario ya existe, por favor utiliza otro correo");
-        
-        const address: Address = new Address(dto.latShipping, dto.longShipping, dto.address, dto.address, dto.addressDetails, dto.addressPreferredSchedule);
-        const billing: Billing = new Billing(dto.latBilling, dto.longBilling, dto.billingAddressName, dto.customerName, dto.billingDetails, dto.identification);
-        const personalInfo: PersonalInfo = new PersonalInfo(dto.name, dto.lastName, dto.phone1, dto.phone2, new Date(dto.birthDate), dto.preferredLanguage);
+        if (customerInfo) throw new Error("El usuario ya existe, por favor utiliza otro correo");
+
+        const preferedDeliveryTime = PreferredDeliveryTimeFactory.createDeliveryTime(dto.addressPreferredSchedule);
+        const address: Address = new Address(
+            dto.latShipping,
+            dto.longShipping,
+            dto.address,
+            dto.address,
+            dto.addressDetails,
+            preferedDeliveryTime
+        );
+        const billing: Billing = new Billing(
+            dto.latBilling,
+            dto.longBilling,
+            dto.billingAddressName,
+            dto.customerName,
+            dto.billingDetails,
+            dto.identification
+        );
+        const personalInfo: PersonalInfo = new PersonalInfo(
+            dto.name,
+            dto.lastName,
+            dto.phone1,
+            dto.phone2,
+            new Date(dto.birthDate),
+            dto.preferredLanguage
+        );
         // const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
         const customer: Customer = Customer.create(
             dto.email,

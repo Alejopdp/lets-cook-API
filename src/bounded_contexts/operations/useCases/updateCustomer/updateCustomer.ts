@@ -30,43 +30,42 @@ export class UpdateCustomer {
 
     public async execute(dto: UpdateCustomerDto): Promise<void> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const customer: Customer | undefined = await this.customerRepository.findById(customerId);
+        const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
 
-        if (!customer) throw new Error("Error al buscar el cliente");
         // const variants: RecipeVariant[] = await this.recipeVariantCreator.execute(variantCreatorDto);
         // //@ts-ignore
         // const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId) => new WeekId(weekId));
         // const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
 
-        const billingAddress: Address = new Address(
-            dto.billingAddress.latitude,
-            dto.billingAddress.longitude,
-            dto.billingAddress.name,
-            dto.billingAddress.fullName,
-            dto.billingAddress.details,
-            dto.billingAddress.id
-        );
+        // const billingAddress: Address = new Address(
+        //     dto.billingAddress.latitude,
+        //     dto.billingAddress.longitude,
+        //     dto.billingAddress.name,
+        //     dto.billingAddress.fullName,
+        //     dto.billingAddress.details,
+        //     dto.billingAddress.id
+        // );
 
-        const shippingAddress: Address = new Address(
-            dto.shippingAddress.latitude,
-            dto.shippingAddress.longitude,
-            dto.shippingAddress.name,
-            dto.shippingAddress.fullName,
-            dto.shippingAddress.details,
-            dto.shippingAddress.id
-        );
-        const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
+        // const shippingAddress: Address = new Address(
+        //     dto.shippingAddress.latitude,
+        //     dto.shippingAddress.longitude,
+        //     dto.shippingAddress.name,
+        //     dto.shippingAddress.fullName,
+        //     dto.shippingAddress.details,
+        //     dto.shippingAddress.id
+        // );
+        // const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
 
-        customer.email = dto.email;
-        customer.isEmailVerified = dto.isEmailVerified;
-        customer.stripeId = dto.stripeId;
-        //@ts-ignore
-        customer.shippingAddress = shippingAddress;
-        customer.billingAddress = billingAddress;
-        customer?.changePassword(password);
-        customer.state = dto.state;
-        customer.codeToRecoverPassword = undefined;
-        customer.paymentMethods = dto.paymentMethods;
+        // customer.email = dto.email;
+        // customer.isEmailVerified = dto.isEmailVerified;
+        // customer.stripeId = dto.stripeId;
+        // //@ts-ignore
+        // customer.shippingAddress = shippingAddress;
+        // customer.billingAddress = billingAddress;
+        // customer?.changePassword(password);
+        // customer.state = dto.state;
+        // customer.codeToRecoverPassword = undefined;
+        // customer.paymentMethods = dto.paymentMethods;
     }
 
     /**
