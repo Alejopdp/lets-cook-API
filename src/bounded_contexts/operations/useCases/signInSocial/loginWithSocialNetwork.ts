@@ -30,14 +30,16 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
     }
 
     public async execute(dto: LoginWithSocialMediaDto): Promise<Response> {
-        let user: any = null;
+        var user: any = null;
+        var userEmail: string = "";
         const decodedToken = await app.auth().verifyIdToken(dto.idToken);
-        user = decodedToken;
+        user = await app.auth().getUser(decodedToken.uid);
+        userEmail = user.email || user.providerData[0]?.email || "";
 
-        var customer: Customer | undefined = await this.customerRepository.findByEmail(user.email);
+        var customer: Customer | undefined = await this.customerRepository.findByEmail(userEmail);
 
         if (!!!customer) {
-            customer = Customer.create(user.email, user.email_verified, "", [], undefined, undefined, undefined, "active", undefined);
+            customer = Customer.create(userEmail, true, "", [], undefined, undefined, undefined, "active", undefined);
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
 
             customer.stripeId = stripeCustomerId;
