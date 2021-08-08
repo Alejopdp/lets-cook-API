@@ -57,18 +57,24 @@ export class MongooseWeekRepository implements IWeekRepository {
 
     public async findNextTwelveByFrequency(frequency: IPlanFrequency, skipWeek?: boolean): Promise<Week[]> {
         const today = new Date();
-        const toadyIso = today.toISOString();
+        const todayIso = today.toISOString();
         var weeksDb: any[] = [];
 
+        if (frequency.isOneTime()) {
+            weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
+                .sort({ minDay: 1 })
+                .limit(12);
+        }
+
         if (frequency.isWeekly()) {
-            weeksDb = await WeekModel.find({ minDay: { $gte: toadyIso } })
+            weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
                 .limit(12);
         }
 
         if (frequency.isBiweekly()) {
             const biWeekly = [];
-            weeksDb = await WeekModel.find({ minDay: { $gte: toadyIso } })
+            weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
                 .limit(24);
 
@@ -84,7 +90,7 @@ export class MongooseWeekRepository implements IWeekRepository {
 
         if (frequency.isMonthly()) {
             const monthly = [];
-            weeksDb = await WeekModel.find({ minDay: { $gte: toadyIso } })
+            weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
                 .limit(48);
 

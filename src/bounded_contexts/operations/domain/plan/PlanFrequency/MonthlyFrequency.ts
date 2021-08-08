@@ -6,7 +6,7 @@ export class MonthlyFrequency implements IPlanFrequency {
         return aPlanFrequency.value() === this.value();
     }
 
-    public getLabel(locale: Locale): string {
+    public getLabel(locale: Locale = Locale.es): string {
         switch (locale) {
             case Locale.es:
                 return "Cada mes";

@@ -132,7 +132,6 @@ export class CreateSubscription {
 
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
-
         const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
             customerId: customer.id,
             orders,

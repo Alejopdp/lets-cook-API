@@ -66,16 +66,16 @@ export class Subscription extends Entity<Subscription> {
 
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
         const orders: Order[] = [];
-        const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek()); // Monday
+        const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek());
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
 
-        for (let i = 0; i < 12; i++) {
+        if (this.frequency.isOneTime()) {
             orders.push(
                 new Order(
                     new Date(deliveryDate),
                     new OrderActive(),
-                    i === 0 ? new Date() : new Date(billingDate),
-                    orderedWeeks[i],
+                    new Date(),
+                    orderedWeeks[0],
                     this.planVariantId,
                     this.plan,
                     this.plan.getPlanVariantPrice(this.planVariantId),
@@ -85,10 +85,29 @@ export class Subscription extends Entity<Subscription> {
                 )
             );
 
-            deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
-            if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+            return orders;
+        } else {
+            for (let i = 0; i < 12; i++) {
+                orders.push(
+                    new Order(
+                        new Date(deliveryDate),
+                        new OrderActive(),
+                        i === 0 ? new Date() : new Date(billingDate),
+                        orderedWeeks[i],
+                        this.planVariantId,
+                        this.plan,
+                        this.plan.getPlanVariantPrice(this.planVariantId),
+                        this._id,
+                        [],
+                        []
+                    )
+                );
+
+                deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+                if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+            }
+            return orders;
         }
-        return orders;
     }
 
     public getFirstOrderShippingDate(shippingDayWeekNumber: number): Date {
@@ -175,7 +194,7 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getPriceByFrequencyLabel(): string {
-        return `Valor total: ${this.price} €/${this.frequency}`;
+        return `Valor total: ${this.price} €/ ${this.frequency.getLabel()}`;
     }
 
     public getPrice(): number {
