@@ -10,6 +10,7 @@ import { logger } from "../../../../../config";
 import { PlanVariantId } from "./PlanVariant/PlanVariantId";
 import { PlanSlug } from "./PlanSlug";
 import _ from "lodash";
+import { IPlanFrequency } from "./PlanFrequency/IPlanFrequency";
 
 export class Plan extends Entity<Plan> {
     private _name: string;
@@ -19,7 +20,7 @@ export class Plan extends Entity<Plan> {
     private _isActive: boolean;
     private _type: PlanType;
     private _planVariants: PlanVariant[];
-    private _availablePlanFrecuencies: PlanFrequency[];
+    private _availablePlanFrecuencies: IPlanFrequency[];
     private _hasRecipes: boolean;
     private _additionalPlans: Plan[];
     private _locale: Locale;
@@ -36,7 +37,7 @@ export class Plan extends Entity<Plan> {
         isActive: boolean,
         type: PlanType,
         planVariants: PlanVariant[],
-        availablePlanFrecuencies: PlanFrequency[],
+        availablePlanFrecuencies: IPlanFrequency[],
         hasRecipes: boolean,
         additionalPlans: Plan[],
         locale: Locale,
@@ -72,7 +73,7 @@ export class Plan extends Entity<Plan> {
         isActive: boolean,
         type: PlanType,
         planVariants: PlanVariant[],
-        availablePlanFrecuencies: PlanFrequency[],
+        availablePlanFrecuencies: IPlanFrequency[],
         hasRecipes: boolean,
         additionalPlans: Plan[],
         locale: Locale,
@@ -302,9 +303,9 @@ export class Plan extends Entity<Plan> {
 
     /**
      * Getter availablePlanFrecuencies
-     * @return {PlanFrequency[]}
+     * @return {IPlanFrequency[]}
      */
-    public get availablePlanFrecuencies(): PlanFrequency[] {
+    public get availablePlanFrecuencies(): IPlanFrequency[] {
         return this._availablePlanFrecuencies;
     }
 
@@ -424,9 +425,9 @@ export class Plan extends Entity<Plan> {
 
     /**
      * Setter availablePlanFrecuencies
-     * @param {PlanFrequency[]} value
+     * @param {IPlanFrequency[]} value
      */
-    public set availablePlanFrecuencies(value: PlanFrequency[]) {
+    public set availablePlanFrecuencies(value: IPlanFrequency[]) {
         this._availablePlanFrecuencies = value;
     }
 

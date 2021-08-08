@@ -1,7 +1,4 @@
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
-import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { UpdateCoupon } from "./updateCouponState";
 import { UpdateCuponStateDto } from "./updateCouponStateDto";
 import fs from "fs";
@@ -19,7 +16,7 @@ export class UpdateCouponStateController extends BaseController {
         try {
             const dto: UpdateCuponStateDto = {
                 id: this.req.params.id,
-                state: this.req.body.state
+                state: this.req.body.state,
             };
 
             await this.updateCouponState.execute(dto);

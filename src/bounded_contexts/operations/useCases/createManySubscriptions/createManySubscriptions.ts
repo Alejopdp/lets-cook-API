@@ -11,6 +11,8 @@ import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
+import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
+import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
@@ -91,8 +93,8 @@ export class CreateManySubscriptions {
             const domainPlan: Plan = plansMap[plan.planId];
 
             const planVariantId: PlanVariantId = new PlanVariantId(plan.variant.id);
-            const frequency: PlanFrequency = (<any>PlanFrequency)[plan.frequency];
-            const actualKey = frequencySubscriptionMap[frequency];
+            const frequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(plan.frequency);
+            const actualKey = frequencySubscriptionMap[frequency.value()];
             const subscription: Subscription = new Subscription(
                 planVariantId,
                 domainPlan,
@@ -109,7 +111,7 @@ export class CreateManySubscriptions {
                 new Date() // TO DO: Calculate
             );
 
-            frequencySubscriptionMap[frequency] = Array.isArray(actualKey) ? [...actualKey, subscription] : [subscription];
+            frequencySubscriptionMap[frequency.value()] = Array.isArray(actualKey) ? [...actualKey, subscription] : [subscription];
         }
 
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
@@ -122,7 +124,7 @@ export class CreateManySubscriptions {
         const frequencySusbcriptionEntries = Object.entries(frequencySubscriptionMap);
 
         for (let entry of frequencySusbcriptionEntries) {
-            const frequency: PlanFrequency = (<any>PlanFrequency)[entry[0]];
+            const frequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(entry[0]);
             const weeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(frequency);
 
             for (let subscription of entry[1]) {

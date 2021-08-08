@@ -1,14 +1,8 @@
-import { createCoupon } from "./index";
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CreateCouponDto } from "./createCouponDto";
 import fs from "fs";
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
-import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { CreateCoupon } from "./createCoupon";
-import { logger } from "../../../../../config";
 import { Locale } from "../../domain/locale/Locale";
-import { PlanId } from "../../domain/plan/PlanId";
 
 export class CreateCouponController extends BaseController {
     private _createCoupon: CreateCoupon;
@@ -20,11 +14,6 @@ export class CreateCouponController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            // console.log("Body: ",this.req.body)
-            // if (!this.req.file) throw new Error("No ha ingresado una imagen para el plan");
-            // const planImagePath = this.req.file.path;
-            // const planImage: ReadStream = fs.createReadStream(planImagePath);
-
             const dto: CreateCouponDto = {
                 couponCode: this.req.body.couponCode,
                 discountType: this.req.body.discount_type.type,
@@ -44,7 +33,7 @@ export class CreateCouponController extends BaseController {
 
             await this.createCoupon.execute(dto);
 
-            // fs.unlinkSync(planImagePath);
+            // fs.unlinkSync(planImaePath);
 
             return this.ok(this.res);
         } catch (error) {

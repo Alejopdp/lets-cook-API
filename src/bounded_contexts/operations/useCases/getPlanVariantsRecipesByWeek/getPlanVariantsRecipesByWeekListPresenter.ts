@@ -155,6 +155,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
     ): Promise<any> {
         const icon = await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl);
         const iconWithColor = await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl);
+        const imageUrl = await this.storageService.getPresignedUrlForFile(plan.imageUrl);
 
         return {
             id: plan.id.value,
@@ -164,7 +165,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             availablePlanFrecuencies: plan.availablePlanFrecuencies,
             isActive: plan.isActive,
             type: plan.type,
-            imageUrl: plan.imageUrl,
+            imageUrl,
             hasRecipes: plan.hasRecipes,
             variants: presentedVariants,
             additionalPlans: presentedAdditionalPlans,

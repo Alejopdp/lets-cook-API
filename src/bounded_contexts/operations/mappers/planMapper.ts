@@ -4,6 +4,8 @@ import { Mapper } from "../../../core/infra/Mapper";
 import { Locale } from "../domain/locale/Locale";
 import { Plan } from "../domain/plan/Plan";
 import { PlanFrequency } from "../domain/plan/PlanFrequency";
+import { IPlanFrequency } from "../domain/plan/PlanFrequency/IPlanFrequency";
+import { PlanFrequencyFactory } from "../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../domain/plan/PlanId";
 import { PlanSku } from "../domain/plan/PlanSku";
 import { PlanSlug } from "../domain/plan/PlanSlug";
@@ -14,7 +16,9 @@ export class PlanMapper implements Mapper<Plan> {
     public toDomain(raw: any, locale: Locale): Plan {
         const sku: PlanSku = new PlanSku(raw.sku);
         const type: PlanType = (<any>PlanType)[raw.type];
-        const frequencies: PlanFrequency[] = raw.availableFrequencies.map((freq: string) => (<any>PlanFrequency)[freq]);
+        const frequencies: IPlanFrequency[] = raw.availableFrequencies.map((freq: string) =>
+            PlanFrequencyFactory.createPlanFrequency(freq)
+        );
         const variants: PlanVariant[] = raw.variants.map((variant: any) => planVariantMapper.toDomain(variant));
         const additionalPlans: Plan[] = raw.additionalPlans.map((plan: any) => this.toDomain(plan, locale));
         const planSlug: PlanSlug = new PlanSlug(raw.slug);
@@ -51,7 +55,7 @@ export class PlanMapper implements Mapper<Plan> {
             type: t.type,
             variants,
             hasRecipes: t.hasRecipes,
-            availableFrequencies: t.availablePlanFrecuencies,
+            availableFrequencies: t.availablePlanFrecuencies.map((freq) => freq.value()),
             additionalPlans: t.additionalPlans.map((plan: Plan) => plan.id.value),
             slug: t.planSlug.slug,
             abilityToChooseRecipes: t.abilityToChooseRecipes,

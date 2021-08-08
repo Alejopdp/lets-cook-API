@@ -14,10 +14,12 @@ import { Plan } from "../../domain/plan/Plan";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
 import { logger } from "../../../../../config";
 import { CancellationReason } from "../../domain/cancellationReason/CancellationReason";
+import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
+import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
 
 export class SubscriptionMapper implements Mapper<Subscription> {
     public toDomain(raw: any, locale?: Locale): Subscription {
-        const frequency: PlanFrequency = (<any>PlanFrequency)[raw.frequency];
+        const frequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(raw.frequency);
         const restriction: RecipeVariantRestriction | undefined = !!raw.restriction
             ? recipeRestrictionMapper.toDomain(raw.restriction)
             : undefined;
@@ -53,7 +55,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
         return {
             planVariant: t.planVariantId.value,
             plan: t.plan.id.value,
-            frequency: t.frequency,
+            frequency: t.frequency.value(),
             state: t.state.title,
             restriction: !!t.restriction ? t.restriction.id.value : null,
             restrictionComment: t.restrictionComment,

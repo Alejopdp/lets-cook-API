@@ -17,7 +17,7 @@ export class GetAdditionalPlansByPlanIdPresenter {
                 name: plan.name,
                 description: plan.description,
                 type: plan.type,
-                availableFrequencies: plan.availablePlanFrecuencies,
+                availableFrequencies: plan.availablePlanFrecuencies.map((freq) => freq.value()),
                 hasRecipes: plan.hasRecipes,
                 imageUrl: plan.imageUrl,
                 isActive: plan.isActive,

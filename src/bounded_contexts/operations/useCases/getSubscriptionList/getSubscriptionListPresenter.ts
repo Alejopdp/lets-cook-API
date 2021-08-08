@@ -11,7 +11,7 @@ export class GetSubscriptionListPresenter {
                 customerId: subscription.customer.id.value,
                 plan: subscription.plan.name,
                 planVariant: subscription.getPlanVariantLabel(),
-                frequency: subscription.frequency,
+                frequency: subscription.frequency.value(),
                 amount: subscription.getPrice(),
                 state: subscription.state.title,
             });

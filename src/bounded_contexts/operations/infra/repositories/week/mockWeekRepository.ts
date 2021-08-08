@@ -1,6 +1,7 @@
 import { logger } from "../../../../../../config";
 import { Locale } from "../../../domain/locale/Locale";
 import { PlanFrequency } from "../../../domain/plan/PlanFrequency";
+import { IPlanFrequency } from "../../../domain/plan/PlanFrequency/IPlanFrequency";
 import { Week } from "../../../domain/week/Week";
 import { WeekId } from "../../../domain/week/WeekId";
 import { IWeekRepository } from "./IWeekRepository";
@@ -11,7 +12,7 @@ export class MockWeekRepository implements IWeekRepository {
     constructor(database: Week[]) {
         this._database = database;
     }
-    findNextTwelveByFrequency(frequency: PlanFrequency): Promise<Week[]> {
+    findNextTwelveByFrequency(frequency: IPlanFrequency): Promise<Week[]> {
         throw new Error("Method not implemented.");
     }
     findNextWeek(): Promise<Week | undefined> {

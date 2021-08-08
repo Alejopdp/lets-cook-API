@@ -18,7 +18,7 @@ export class GetAdditionalPlanListPresenter {
                 name: plan.name,
                 description: plan.description,
                 type: plan.type,
-                availableFrequencies: plan.availablePlanFrecuencies,
+                availableFrequencies: plan.availablePlanFrecuencies.map((freq) => freq.value()),
                 hasRecipes: plan.hasRecipes,
                 imageUrl: plan.imageUrl ? await this.storageService.getPresignedUrlForFile(plan.imageUrl) : "",
                 isActive: plan.isActive,
@@ -26,7 +26,7 @@ export class GetAdditionalPlanListPresenter {
                 icon: plan.iconLinealUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl) : "",
                 iconWithColor: plan.iconLinealColorUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl) : "",
                 abilityToChooseRecipes: plan.abilityToChooseRecipes,
-                variants: plan.planVariants.map((variant) => this.presentPlanVariant(variant, plan.hasRecipes, plan.id.value)),
+                variants: plan.planVariants.map((variant) => this.presentPlanVariant(variant, plan.hasRecipes, plan.id.value as string)),
                 slug: plan.planSlug.slug,
             });
         }

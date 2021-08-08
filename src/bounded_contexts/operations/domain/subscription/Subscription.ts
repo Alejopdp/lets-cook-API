@@ -6,9 +6,8 @@ import { Customer } from "../customer/Customer";
 import { Order } from "../order/Order";
 import { OrderActive } from "../order/orderState/OrderActive";
 import { Plan } from "../plan/Plan";
-import { PlanFrequency } from "../plan/PlanFrequency";
+import { IPlanFrequency } from "../plan/PlanFrequency/IPlanFrequency";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
-import { RecipeRestrictionId } from "../recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { ShippingZone } from "../shipping/ShippingZone";
 import { Week } from "../week/Week";
@@ -18,7 +17,7 @@ import { ISubscriptionState } from "./subscriptionState/ISubscriptionState";
 export class Subscription extends Entity<Subscription> {
     private _planVariantId: PlanVariantId;
     private _plan: Plan;
-    private _frequency: PlanFrequency;
+    private _frequency: IPlanFrequency;
     private _cancellationReason?: CancellationReason;
     private _state: ISubscriptionState;
     private _restrictionComment: string;
@@ -34,7 +33,7 @@ export class Subscription extends Entity<Subscription> {
     constructor(
         planVariantId: PlanVariantId,
         plan: Plan,
-        frequency: PlanFrequency,
+        frequency: IPlanFrequency,
         state: ISubscriptionState,
         restrictionComment: string,
         creationDate: Date,
@@ -207,9 +206,9 @@ export class Subscription extends Entity<Subscription> {
 
     /**
      * Getter frequency
-     * @return {PlanFrequency}
+     * @return {IPlanFrequency}
      */
-    public get frequency(): PlanFrequency {
+    public get frequency(): IPlanFrequency {
         return this._frequency;
     }
 
@@ -319,9 +318,9 @@ export class Subscription extends Entity<Subscription> {
 
     /**
      * Setter frequency
-     * @param {PlanFrequency} value
+     * @param {IPlanFrequency} value
      */
-    public set frequency(value: PlanFrequency) {
+    public set frequency(value: IPlanFrequency) {
         this._frequency = value;
     }
 

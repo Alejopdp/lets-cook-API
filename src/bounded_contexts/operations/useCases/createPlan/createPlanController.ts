@@ -2,7 +2,6 @@ import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CreatePlanDto } from "./createPlanDto";
 import fs from "fs";
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { CreatePlan } from "./createPlan";
 import { logger } from "../../../../../config";
@@ -52,9 +51,7 @@ export class CreatePlanController extends BaseController {
                 isActive: JSON.parse(this.req.body.isActive),
                 planImage,
                 planImageFileName: imageFilesArray[0].originalname,
-                availablePlanFrecuencies: JSON.parse(this.req.body.availablePlanFrecuencies)
-                    .map((freq: string) => (<any>PlanFrequency)[freq.toString()])
-                    .filter((freq: PlanFrequency) => freq),
+                availablePlanFrecuencies: JSON.parse(this.req.body.availablePlanFrecuencies),
                 planType: (<any>PlanType)[this.req.body.type],
                 hasRecipes: JSON.parse(this.req.body.hasRecipes),
                 planVariants: JSON.parse(this.req.body.variants),

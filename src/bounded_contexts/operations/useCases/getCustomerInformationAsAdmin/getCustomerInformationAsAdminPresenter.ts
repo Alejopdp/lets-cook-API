@@ -41,7 +41,7 @@ export class GetCustomerInformationAsAdminPresenter {
             plan: subscription.plan.name,
             variant: subscription.getPlanVariantLabel(),
             price: subscription.getPriceByFrequencyLabel(),
-            frequency: subscription.frequency,
+            frequency: subscription.frequency.value(),
             status: subscription.state.title,
         }));
     }

@@ -1,5 +1,5 @@
 import { Locale } from "../../../domain/locale/Locale";
-import { PlanFrequency } from "../../../domain/plan/PlanFrequency";
+import { IPlanFrequency } from "../../../domain/plan/PlanFrequency/IPlanFrequency";
 import { Week } from "../../../domain/week/Week";
 import { WeekId } from "../../../domain/week/WeekId";
 
@@ -11,7 +11,7 @@ export interface IWeekRepository {
     findAllById(weeksIds: WeekId[]): Promise<Week[]>;
     findBy(conditions: any, locale?: Locale): Promise<Week[]>;
     findNextTwelve(skipOneWeek: boolean): Promise<Week[]>;
-    findNextTwelveByFrequency(frequency: PlanFrequency): Promise<Week[]>;
+    findNextTwelveByFrequency(frequency: IPlanFrequency, skipWeek?: boolean): Promise<Week[]>;
     findCurrentWeek(date: Date): Promise<Week | undefined>;
     findNextWeek(): Promise<Week | undefined>;
 }

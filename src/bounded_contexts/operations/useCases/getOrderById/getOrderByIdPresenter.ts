@@ -37,7 +37,7 @@ export class GetOrderByIdPresenter {
                 planName: order.getPlanName(),
                 planVariant: order.getPlanVariantLabel(order.planVariantId),
                 amount: order.getTotalPrice(),
-                frequency: subscription.frequency,
+                frequency: subscription.frequency.value(),
                 restrictionId: subscription.restriction?.id.value,
                 restrictionLabel: subscription.restriction?.label,
             },

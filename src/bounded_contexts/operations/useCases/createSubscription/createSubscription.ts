@@ -10,7 +10,8 @@ import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Plan } from "../../domain/plan/Plan";
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
+import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
+import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
@@ -78,7 +79,7 @@ export class CreateSubscription {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
-        const planFrequency: PlanFrequency = (<any>PlanFrequency)[dto.planFrequency];
+        const planFrequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(dto.planFrequency);
         const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));

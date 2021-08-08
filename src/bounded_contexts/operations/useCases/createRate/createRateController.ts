@@ -1,14 +1,8 @@
-import { createRate } from "./index";
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CreateRateDto } from "./createRateDto";
-import fs from "fs";
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
-import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { CreateRate } from "./createRate";
 import { logger } from "../../../../../config";
 import { Locale } from "../../domain/locale/Locale";
-import { PlanId } from "../../domain/plan/PlanId";
 
 export class CreateRateController extends BaseController {
     private _createRate: CreateRate;
@@ -22,12 +16,10 @@ export class CreateRateController extends BaseController {
         try {
             const dto: CreateRateDto = {
                 customer: this.req.body.customer,
-                recipe: this.req.body.recipe
+                recipe: this.req.body.recipe,
             };
 
             await this.createRate.execute(dto);
-
-            // fs.unlinkSync(planImagePath);
 
             return this.ok(this.res);
         } catch (error) {

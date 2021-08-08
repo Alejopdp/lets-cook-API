@@ -1,5 +1,6 @@
 import { logger } from "../../../../../config";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
+import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
 const moment = require("moment");
 
 moment.locale("es");
@@ -50,10 +51,10 @@ export class MomentTimeService {
         return date;
     }
 
-    public static getFrequencyOffset(frequency: PlanFrequency): number {
-        if (frequency === PlanFrequency.Semanal) return 7;
-        if (frequency === PlanFrequency.Quincenal) return 14;
-        if (frequency === PlanFrequency.Mensual) return 28;
+    public static getFrequencyOffset(frequency: IPlanFrequency): number {
+        if (frequency.isWeekly()) return 7;
+        if (frequency.isBiweekly()) return 14;
+        if (frequency.isMonthly()) return 28;
 
         return 7;
     }

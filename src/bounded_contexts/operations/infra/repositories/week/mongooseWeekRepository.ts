@@ -5,6 +5,7 @@ import { IWeekRepository } from "./IWeekRepository";
 import { weekMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 import { PlanFrequency } from "../../../domain/plan/PlanFrequency";
+import { IPlanFrequency } from "../../../domain/plan/PlanFrequency/IPlanFrequency";
 
 export class MongooseWeekRepository implements IWeekRepository {
     public async save(week: Week): Promise<void> {
@@ -54,18 +55,18 @@ export class MongooseWeekRepository implements IWeekRepository {
         return weeksDb.map((week: any) => weekMapper.toDomain(week));
     }
 
-    public async findNextTwelveByFrequency(frequency: PlanFrequency, skipWeek?: boolean): Promise<Week[]> {
+    public async findNextTwelveByFrequency(frequency: IPlanFrequency, skipWeek?: boolean): Promise<Week[]> {
         const today = new Date();
         const toadyIso = today.toISOString();
         var weeksDb: any[] = [];
 
-        if (frequency === PlanFrequency.Semanal) {
+        if (frequency.isWeekly()) {
             weeksDb = await WeekModel.find({ minDay: { $gte: toadyIso } })
                 .sort({ minDay: 1 })
                 .limit(12);
         }
 
-        if (frequency === PlanFrequency.Quincenal) {
+        if (frequency.isBiweekly()) {
             const biWeekly = [];
             weeksDb = await WeekModel.find({ minDay: { $gte: toadyIso } })
                 .sort({ minDay: 1 })
@@ -81,7 +82,7 @@ export class MongooseWeekRepository implements IWeekRepository {
             weeksDb = [...biWeekly];
         }
 
-        if (frequency === PlanFrequency.Mensual) {
+        if (frequency.isMonthly()) {
             const monthly = [];
             weeksDb = await WeekModel.find({ minDay: { $gte: toadyIso } })
                 .sort({ minDay: 1 })

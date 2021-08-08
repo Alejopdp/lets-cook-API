@@ -68,7 +68,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
                 taxes: 6,
                 total: nextActiveOrder?.getTotalPrice(),
             },
-            frequency: subscription.frequency,
+            frequency: subscription.frequency.value(),
             plan: presentedPlan,
             shippingAddress: customer.getShippingAddress().name,
             // billingData,

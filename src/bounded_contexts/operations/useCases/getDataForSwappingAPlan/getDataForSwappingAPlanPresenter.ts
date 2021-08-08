@@ -17,7 +17,7 @@ export class GetDataForSwappingAPlanPresenter {
                 presentedVariants.push({
                     planId: plan.id.value,
                     planVariantId: variant.id.value,
-                    variantDescription: `${plan.getPlanVariantLabelWithPrice(variant.id)} €/${subscription.frequency}`,
+                    variantDescription: `${plan.getPlanVariantLabelWithPrice(variant.id)} €/${subscription.frequency.value()}`,
                     active: subscription.planVariantId.equals(variant.id),
                 });
             }

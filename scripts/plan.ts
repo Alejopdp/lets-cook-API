@@ -1,6 +1,7 @@
 import { Locale } from "../src/bounded_contexts/operations/domain/locale/Locale";
 import { Plan } from "../src/bounded_contexts/operations/domain/plan/Plan";
 import { PlanFrequency } from "../src/bounded_contexts/operations/domain/plan/PlanFrequency";
+import { PlanFrequencyFactory } from "../src/bounded_contexts/operations/domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../src/bounded_contexts/operations/domain/plan/PlanId";
 import { PlanSku } from "../src/bounded_contexts/operations/domain/plan/PlanSku";
 import { PlanSlug } from "../src/bounded_contexts/operations/domain/plan/PlanSlug";
@@ -163,7 +164,7 @@ export const getMockPlans = () => {
         true,
         PlanType.Adicional,
         [vinoVariant1, vinoVariant2],
-        [PlanFrequency.PorUnicaVez, PlanFrequency.Semanal],
+        [PlanFrequencyFactory.createPlanFrequency("one_time"), PlanFrequencyFactory.createPlanFrequency("weekly")],
         true,
         [],
         Locale.es,
@@ -181,7 +182,12 @@ export const getMockPlans = () => {
         true,
         PlanType.Adicional,
         [desayunoVariant1, desayunoVariant2, desayunoVariant3],
-        [PlanFrequency.PorUnicaVez, PlanFrequency.Semanal, PlanFrequency.Quincenal, PlanFrequency.Mensual],
+        [
+            PlanFrequencyFactory.createPlanFrequency("one_time"),
+            PlanFrequencyFactory.createPlanFrequency("weekly"),
+            PlanFrequencyFactory.createPlanFrequency("biweekly"),
+            PlanFrequencyFactory.createPlanFrequency("monthly"),
+        ],
         true,
         [],
         Locale.es,
@@ -199,7 +205,7 @@ export const getMockPlans = () => {
         true,
         PlanType.Principal,
         [variantWithoutGluten1, variantWithoutGlutenAndMilk1, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-        [PlanFrequency.Mensual],
+        [PlanFrequencyFactory.createPlanFrequency("monthly")],
         true,
         [additionalPlan1, additionalPlan2],
         Locale.es,
@@ -217,7 +223,7 @@ export const getMockPlans = () => {
         true,
         PlanType.Principal,
         [variantWithoutGluten2, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-        [PlanFrequency.Semanal, PlanFrequency.Quincenal],
+        [PlanFrequencyFactory.createPlanFrequency("weekly"), PlanFrequencyFactory.createPlanFrequency("biweekly")],
         true,
         [additionalPlan1, additionalPlan2],
         Locale.es,
@@ -235,7 +241,7 @@ export const getMockPlans = () => {
         true,
         PlanType.Principal,
         [variantWithoutGluten3, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-        [PlanFrequency.Mensual],
+        [PlanFrequencyFactory.createPlanFrequency("monthly")],
         false,
         [additionalPlan1],
         Locale.es,
@@ -253,7 +259,7 @@ export const getMockPlans = () => {
         true,
         PlanType.Principal,
         [variantWithoutGluten4, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-        [PlanFrequency.Mensual],
+        [PlanFrequencyFactory.createPlanFrequency("monthly")],
         true,
         [additionalPlan1, additionalPlan2],
         Locale.es,
@@ -271,7 +277,7 @@ export const getMockPlans = () => {
         true,
         PlanType.Principal,
         [variantWithoutGluten5, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-        [PlanFrequency.Mensual],
+        [PlanFrequencyFactory.createPlanFrequency("monthly")],
         true,
         [additionalPlan1, additionalPlan2],
         Locale.es,

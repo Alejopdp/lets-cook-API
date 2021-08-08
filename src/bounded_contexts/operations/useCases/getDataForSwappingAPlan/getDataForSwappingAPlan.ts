@@ -19,7 +19,8 @@ export class GetDataForSwappingAPlan {
 
         const plans: Plan[] = await this.planRepository.findAll(dto.locale);
         const plansForSubscription = plans.filter(
-            (plan) => plan.availablePlanFrecuencies.includes(subscription.frequency) && plan.type === subscription.plan.type
+            (plan) =>
+                plan.availablePlanFrecuencies.some((freq) => freq.equals(subscription.frequency)) && plan.type === subscription.plan.type
         );
 
         return { subscription, plans: plansForSubscription };

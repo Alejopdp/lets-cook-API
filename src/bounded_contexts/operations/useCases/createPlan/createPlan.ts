@@ -2,6 +2,7 @@ import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Locale } from "../../domain/locale/Locale";
 import { Plan } from "../../domain/plan/Plan";
+import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanSku } from "../../domain/plan/PlanSku";
 import { PlanSlug } from "../../domain/plan/PlanSlug";
@@ -100,7 +101,7 @@ export class CreatePlan {
             dto.isActive,
             dto.planType,
             planVariants,
-            dto.availablePlanFrecuencies,
+            dto.availablePlanFrecuencies.map((freq) => PlanFrequencyFactory.createPlanFrequency(freq)),
             dto.hasRecipes,
             additionalPlans,
             locale,
