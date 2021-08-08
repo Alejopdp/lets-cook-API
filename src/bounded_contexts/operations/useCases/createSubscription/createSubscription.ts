@@ -157,7 +157,9 @@ export class CreateSubscription {
             customer.stripeId
         );
 
-        console.log("Payment status: ", paymentIntent.status);
+        console.log("PAYMENT INTENT: ", paymentIntent);
+        // if (paymentIntent.status === "canceled")
+
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
         } else {

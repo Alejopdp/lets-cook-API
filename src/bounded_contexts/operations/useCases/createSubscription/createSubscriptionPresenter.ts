@@ -16,6 +16,7 @@ export class CreateSubscriptionPresenter {
             payment_status: paymentIntent.status,
             firstOrderId: firstOrder.id.value,
             firstOrderShippingDate: firstOrder.getHumanShippmentDay(),
+            paymentOrderId: firstOrder.paymentOrderId?.value,
             customerPaymentMethods: customerPaymentMethods.map((pm) => ({
                 id: pm.id.value,
                 card: pm.getCardLabel(),

@@ -1,6 +1,7 @@
 import { IPaymentOrderState } from "./IPaymentOrderState";
 import { PaymentOrderActive } from "./PaymentOrderActive";
 import { PaymentOrderBilled } from "./PaymentOrderBilled";
+import { PaymentOrderCancelled } from "./PaymentOrderCancelled";
 import { PaymentOrderPendingConfirmation } from "./PaymentOrderPendingConfirmation";
 import { PaymentOrderRejected } from "./PaymentOrderRejected";
 
@@ -15,6 +16,8 @@ export class PaymentOrderStateFactory {
                 return new PaymentOrderPendingConfirmation();
             case "PAYMENT_ORDER_REJECTED":
                 return new PaymentOrderRejected();
+            case "PAYMENT_ORDER_CANCELLED":
+                return new PaymentOrderCancelled();
             default:
                 throw new Error("Wrong payment order state");
         }

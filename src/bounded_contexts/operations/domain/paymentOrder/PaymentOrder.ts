@@ -48,6 +48,11 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         // this.discountAmount = this.discountAmount + 1 // TO DO: Add discountAmount
     }
 
+    public discountOrderAmount(order: Order): void {
+        this.amount -= order.getTotalPrice();
+        // TO DO: this.discountAmount -= order.discountAmount
+    }
+
     public updateState(newState: string, orders: Order[]): void {
         const newPaymentOrderState: IPaymentOrderState = PaymentOrderStateFactory.createState(newState);
 
@@ -78,6 +83,14 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         }
 
         this.state.toActive(this);
+    }
+
+    public toCancelled(orders: Order[]): void {
+        for (let order of orders) {
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.cancel(); // TO DO: Handle this?
+        }
+
+        this.state.toCancelled(this);
     }
 
     public toPendingConfirmation(orders: Order[]): void {

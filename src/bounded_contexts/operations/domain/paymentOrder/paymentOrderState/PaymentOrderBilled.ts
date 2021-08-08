@@ -1,6 +1,7 @@
 import { PaymentOrder } from "../PaymentOrder";
 import { IPaymentOrderState } from "./IPaymentOrderState";
 import { PaymentOrderActive } from "./PaymentOrderActive";
+import { PaymentOrderCancelled } from "./PaymentOrderCancelled";
 import { PaymentOrderPendingConfirmation } from "./PaymentOrderPendingConfirmation";
 import { PaymentOrderRejected } from "./PaymentOrderRejected";
 
@@ -30,6 +31,10 @@ export class PaymentOrderBilled implements IPaymentOrderState {
         paymentOrder.state = new PaymentOrderBilled();
     }
 
+    public toCancelled(paymentOrder: PaymentOrder): void {
+        paymentOrder.state = new PaymentOrderCancelled();
+    }
+
     public isActive(): boolean {
         return false;
     }
@@ -44,5 +49,9 @@ export class PaymentOrderBilled implements IPaymentOrderState {
 
     public isRejected(): boolean {
         return false;
+    }
+
+    public isCancelled(): boolean {
+        return true;
     }
 }

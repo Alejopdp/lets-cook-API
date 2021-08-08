@@ -8,8 +8,10 @@ export interface IPaymentOrderState {
     toBilled(paymentOrder: PaymentOrder): void;
     toPendingConfirmation(paymentOrder: PaymentOrder): void;
     toRejected(paymentOrder: PaymentOrder): void;
+    toCancelled(paymentOrder: PaymentOrder): void
     isActive(): boolean;
     isBilled(): boolean;
     isPendingConfirmation(): boolean;
     isRejected(): boolean;
+    isCancelled(): boolean
 }
