@@ -132,11 +132,7 @@ export class CreateManySubscriptions {
             }
         }
 
-        // console.log("CREATED_ORDERS_FROM_SUBSCRIPTIONS: ", orders);
-
         const frequencyOrdersMap: { [frequency: string]: Order[] } = {};
-
-        console.log("frequencyOrdersMap: ", frequencyOrdersMap);
 
         const assignOrdersWithDifferentFreqToPaymentOrdersDto: AssignOrdersWithDifferentFreqToPaymentOrdersDto = {
             frequencyOrdersMap,
@@ -148,15 +144,6 @@ export class CreateManySubscriptions {
 
         const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersWithDifferentFreqToPaymentOrders.execute(
             assignOrdersWithDifferentFreqToPaymentOrdersDto
-        );
-
-        // console.log("New payment orders: ", newPaymentOrders);
-        // console.log("Payment orders to update: ", paymentOrdersToUpdate);
-        // console.log("New Payment orders qty: ", newPaymentOrders.length);
-        // console.log("Payment orders to update QTY: ", paymentOrdersToUpdate.length);
-        console.log(
-            "ORDERS: ",
-            orders.filter((order) => !order.paymentOrderId)
         );
 
         // const paymentIntent = await this.paymentService.paymentIntent(
