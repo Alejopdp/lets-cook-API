@@ -5,6 +5,7 @@ import { Order } from "../order/Order";
 import { Week } from "../week/Week";
 import { PaymentOrderId } from "./PaymentOrderId";
 import { IPaymentOrderState } from "./paymentOrderState/IPaymentOrderState";
+import { PaymentOrderStateFactory } from "./paymentOrderState/PaymentOrderFactory";
 
 export class PaymentOrder extends Entity<PaymentOrder> {
     private _shippingDate: Date;
@@ -47,6 +48,15 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         // this.discountAmount = this.discountAmount + 1 // TO DO: Add discountAmount
     }
 
+    public updateState(newState: string, orders: Order[]): void {
+        const newPaymentOrderState: IPaymentOrderState = PaymentOrderStateFactory.createState(newState);
+
+        if (newPaymentOrderState.isActive()) this.toActive(orders);
+        if (newPaymentOrderState.isBilled()) this.toBilled(orders);
+        if (newPaymentOrderState.isPendingConfirmation()) this.toPendingConfirmation(orders);
+        if (newPaymentOrderState.isRejected()) this.toRejected(orders);
+    }
+
     public getHumanBillingDate(): string {
         return MomentTimeService.getDateHumanLabel(this.billingDate);
     }
@@ -58,7 +68,32 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         for (let order of orders) {
             if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(); // TO DO: Handle this?
         }
+
         this.state.toBilled(this);
+    }
+
+    public toActive(orders: Order[]): void {
+        for (let order of orders) {
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(); // TO DO: Handle this?
+        }
+
+        this.state.toActive(this);
+    }
+
+    public toPendingConfirmation(orders: Order[]): void {
+        for (let order of orders) {
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.toPaymentPending(); // TO DO: Handle this?
+        }
+
+        this.state.toPendingConfirmation(this);
+    }
+
+    public toRejected(orders: Order[]): void {
+        for (let order of orders) {
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.toPaymentRejected(); // TO DO: Handle this?
+        }
+
+        this.state.toRejected(this);
     }
 
     public getTotalAmount(): number {

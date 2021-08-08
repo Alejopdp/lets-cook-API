@@ -3,6 +3,8 @@ import { createSubscriptionController } from "../../useCases/createSubscription"
 import { getCustomerPaymentOrdersController } from "../../useCases/getCustomerPaymentOrders";
 import { getPaymentOrderByIdController } from "../../useCases/getPaymentOrderById";
 import { getPaymentOrdersAsAdminController } from "../../useCases/getPaymentOrdersAsAdmin";
+import { updatePaymentOrderAndOrdersStateController } from "../../useCases/updatePaymentOrderAndOrdersState";
+import { UpdatePaymentOrderAndOrdersStateController } from "../../useCases/updatePaymentOrderAndOrdersState/updatePaymentOrderAndOrdersStateController";
 
 const paymentOrderRouter = express.Router();
 
@@ -13,6 +15,9 @@ paymentOrderRouter.get("/:id", (req, res) => getPaymentOrderByIdController.execu
 
 // POSTs
 paymentOrderRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
+
+// PUTs
+paymentOrderRouter.put("/update-state/:id", (req, res) => updatePaymentOrderAndOrdersStateController.execute(req, res));
 
 // DELETEs
 

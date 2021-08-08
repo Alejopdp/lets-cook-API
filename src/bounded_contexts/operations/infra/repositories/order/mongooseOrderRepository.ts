@@ -28,6 +28,12 @@ export class MongooseOrderRepository implements IOrderRepository {
         await MongooseOrder.insertMany(ordersToSave);
     }
 
+    public async saveOrdersWithNewState(orders: Order[]): Promise<void> {
+        const ordersIdToSave = orders.map((order) => order.id.value);
+
+        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: orders[0].state.title });
+    }
+
     public async saveSkippedAndActiveOrders(skippedOrders: Order[], activeOrders: Order[]): Promise<void> {
         if (skippedOrders.length > 0) await this.saveSkippedOrders(skippedOrders);
         if (activeOrders.length > 0) await this.saveAciveOrders(activeOrders);

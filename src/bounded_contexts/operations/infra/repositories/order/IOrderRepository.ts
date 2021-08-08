@@ -25,5 +25,6 @@ export interface IOrderRepository {
     saveCancelledOrders(orders: Order[]): Promise<void>;
     saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void>;
     saveSkippedAndActiveOrders(skippedOrders: Order[], activeOrders: Order[]): Promise<void>;
+    saveOrdersWithNewState(orders: Order[]): Promise<void>;
     delete(orderId: OrderId): Promise<void>;
 }

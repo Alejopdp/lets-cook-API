@@ -1,18 +1,19 @@
 import { Order } from "../Order";
 import { IOrderState } from "./IOrderState";
+import { OrderActive } from "./OrderActive";
+import { OrderBilled } from "./OrderBilled";
 import { OrderCancelled } from "./OrderCancelled";
 import { OrderPendingPayment } from "./OrderPendingPayment";
-import { OrderRejectedPayment } from "./OrderRejectedPayment";
 import { OrderSkipped } from "./OrderSkipped";
 
-export class OrderBilled implements IOrderState {
+export class OrderRejectedPayment implements IOrderState {
     title: string;
     humanTitle: string;
     color: string;
 
     constructor() {
-        this.title = "ORDER_BILLED";
-        this.humanTitle = "Orden pagada";
+        this.title = "ORDER_REJECTED_PAYMENT";
+        this.humanTitle = "Pago rechazado";
         this.color = "green";
     }
 
@@ -21,7 +22,7 @@ export class OrderBilled implements IOrderState {
     }
 
     public toActive(order: Order): void {
-        order.state = new OrderBilled();
+        order.state = new OrderActive();
     }
 
     public toSkipped(order: Order): void {
@@ -45,7 +46,7 @@ export class OrderBilled implements IOrderState {
     }
 
     public isPaymentRejected(): boolean {
-        return false;
+        return true;
     }
 
     public isSkipped(): boolean {
@@ -57,6 +58,6 @@ export class OrderBilled implements IOrderState {
     }
 
     public isActive(): boolean {
-        return true;
+        return false;
     }
 }

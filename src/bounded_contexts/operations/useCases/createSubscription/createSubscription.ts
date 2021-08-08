@@ -157,7 +157,12 @@ export class CreateSubscription {
             customer.stripeId
         );
 
-        newPaymentOrders[0]?.toBilled(orders.filter((order) => order.paymentOrderId?.equals(newPaymentOrders[0].id))); // TO DO: Handlear 3dSecure rechazado
+        console.log("Payment status: ", paymentIntent.status);
+        if (paymentIntent.status === "requires_action") {
+            newPaymentOrders[0].toPendingConfirmation(orders);
+        } else {
+            newPaymentOrders[0]?.toBilled(orders);
+        }
 
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();

@@ -6,4 +6,10 @@ export interface IPaymentOrderState {
     color: string;
     toActive(paymentOrder: PaymentOrder): void;
     toBilled(paymentOrder: PaymentOrder): void;
+    toPendingConfirmation(paymentOrder: PaymentOrder): void;
+    toRejected(paymentOrder: PaymentOrder): void;
+    isActive(): boolean;
+    isBilled(): boolean;
+    isPendingConfirmation(): boolean;
+    isRejected(): boolean;
 }

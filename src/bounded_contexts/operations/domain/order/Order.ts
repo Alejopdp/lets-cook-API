@@ -58,11 +58,6 @@ export class Order extends Entity<Order> {
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[]): void {
-        console.log("CHOSEN VARIANT: ", this.planVariantId);
-        console.log(
-            "DE PLAMN: ",
-            this.plan.planVariants.map((v) => v.id)
-        );
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
 
@@ -86,6 +81,13 @@ export class Order extends Entity<Order> {
     public isSkipped(): boolean {
         return this.state.isSkipped();
     }
+    public isPaymentPending(): boolean {
+        return this.state.isPendingPayment();
+    }
+
+    public isPaymentRejected(): boolean {
+        return this.state.isPaymentRejected();
+    }
 
     public skip(): void {
         this.state.toSkipped(this);
@@ -93,6 +95,14 @@ export class Order extends Entity<Order> {
 
     public reactivate(): void {
         this.state.toActive(this);
+    }
+
+    public toPaymentPending(): void {
+        this.state.toPaymentPending(this);
+    }
+
+    public toPaymentRejected(): void {
+        this.state.toPaymentRejected(this);
     }
 
     public getWeekLabel(): string {

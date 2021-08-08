@@ -2,6 +2,8 @@ import { Order } from "../Order";
 import { IOrderState } from "./IOrderState";
 import { OrderActive } from "./OrderActive";
 import { OrderBilled } from "./OrderBilled";
+import { OrderPendingPayment } from "./OrderPendingPayment";
+import { OrderRejectedPayment } from "./OrderRejectedPayment";
 
 export class OrderCancelled implements IOrderState {
     title: string;
@@ -28,6 +30,22 @@ export class OrderCancelled implements IOrderState {
 
     public toBilled(order: Order): void {
         order.state = new OrderBilled();
+    }
+
+    public toPaymentPending(order: Order): void {
+        order.state = new OrderPendingPayment();
+    }
+
+    public toPaymentRejected(order: Order): void {
+        order.state = new OrderRejectedPayment();
+    }
+
+    public isPendingPayment(): boolean {
+        return false;
+    }
+
+    public isPaymentRejected(): boolean {
+        return false;
     }
 
     public isSkipped(): boolean {

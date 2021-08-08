@@ -8,7 +8,11 @@ export interface IOrderState {
     toCancelled(order: Order): void;
     toActive(order: Order): void;
     toBilled(order: Order): void;
+    toPaymentPending(order: Order): void;
+    toPaymentRejected(order: Order): void;
     isSkipped(): boolean;
     isCancelled(): boolean;
     isActive(): boolean;
+    isPendingPayment(): boolean;
+    isPaymentRejected(): boolean;
 }
