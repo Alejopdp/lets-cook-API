@@ -26,7 +26,8 @@ export class CreateManySubscriptionsController extends BaseController {
             const presented = this.CreateManySubscriptionsPresenter.present(
                 result.subscriptions,
                 result.paymentIntent,
-                result.paymentOrder
+                result.paymentOrder,
+                result.paymentMethodId
             );
 
             return this.ok(this.res, presented);
