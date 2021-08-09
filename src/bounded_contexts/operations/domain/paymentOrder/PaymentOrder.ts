@@ -53,6 +53,13 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         // TO DO: this.discountAmount -= order.discountAmount
     }
 
+    public discountOrdersAmount(orders: Order[]): void {
+        for (let order of orders) {
+            this.amount -= order.getTotalPrice();
+        }
+        // TO DO: this.discountAmount -= order.discountAmount
+    }
+
     public updateState(newState: string, orders: Order[]): void {
         const newPaymentOrderState: IPaymentOrderState = PaymentOrderStateFactory.createState(newState);
 

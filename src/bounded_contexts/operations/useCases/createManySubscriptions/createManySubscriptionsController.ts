@@ -23,10 +23,14 @@ export class CreateManySubscriptionsController extends BaseController {
             };
 
             const result = await this.CreateManySubscriptions.execute(dto);
-            // const presented = this.CreateManySubscriptionsPresenter.present(result.subscription, result.paymentIntent, result.firstOrder);
+            const presented = this.CreateManySubscriptionsPresenter.present(
+                result.subscriptions,
+                result.paymentIntent,
+                result.paymentOrder
+            );
 
-            // return this.ok(this.res, presented);
-            return this.ok(this.res);
+            return this.ok(this.res, presented);
+            // return this.ok(this.res);
         } catch (error) {
             return this.fail(error);
         }

@@ -25,13 +25,23 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         await MongooseSubscription.create(subscriptionsToSave);
     }
 
-    public async findById(subscriptionId: SubscriptionId): Promise<Subscription | undefined> {
+    public async saveCancelledSubscriptions(subscriptions: Subscription[]): Promise<void> {
+        const subscriptionsToSave = subscriptions.map((subscription) => subscriptionMapper.toPersistence(subscription));
+
+        await MongooseSubscription.updateMany({ _id: subscriptions.map((sub) => sub.id.value) }, { state: "SUBSCRIPTION_CANCELLED" }); // TO DO: Save cancellation reason
+    }
+
+    public async findById(subscriptionId: SubscriptionId, locale: Locale = Locale.es): Promise<Subscription | undefined> {
         const subscriptionDb = await MongooseSubscription.findById(subscriptionId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("customer")
             .populate("restriction");
 
         return subscriptionDb ? subscriptionMapper.toDomain(subscriptionDb) : undefined;
+    }
+
+    public async findByIdList(subscriptionsIds: SubscriptionId[]): Promise<Subscription[]> {
+        return await this.findBy({ _id: subscriptionsIds.map((id) => id.value) });
     }
 
     public async findByIdOrThrow(subscriptionId: SubscriptionId): Promise<Subscription> {
@@ -45,7 +55,7 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return await this.findBy({}, locale);
     }
 
-    public async findBy(conditions: any, locale: Locale, options?: QueryOptions): Promise<Subscription[]> {
+    public async findBy(conditions: any, locale: Locale = Locale.es, options?: QueryOptions): Promise<Subscription[]> {
         const subscriptionsDb = await MongooseSubscription.find({ ...conditions, deletionFlag: false }, null, options)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("customer")

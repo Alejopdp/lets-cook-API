@@ -1,14 +1,16 @@
 import Stripe from "stripe";
 import { Order } from "../../domain/order/Order";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Subscription } from "../../domain/subscription/Subscription";
 
 export class CreateManySubscriptionsPresenter {
-    public present(subscription: Subscription, paymentIntent: Stripe.PaymentIntent, firstOrder: Order): any {
+    public present(subscriptions: Subscription[], paymentIntent: Stripe.PaymentIntent, paymentOrder: PaymentOrder): any {
+        console.log("Subscriptions: ", subscriptions);
         return {
-            subscriptionId: subscription.id.value,
+            subscriptionsIds: subscriptions.map((sub) => sub.id.value),
             client_secret: paymentIntent.client_secret,
             payment_status: paymentIntent.status,
-            firstOrderId: firstOrder.id.value,
+            paymentOrderId: paymentOrder.id.value,
         };
     }
 }

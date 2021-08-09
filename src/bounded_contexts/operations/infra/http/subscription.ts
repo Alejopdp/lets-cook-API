@@ -7,6 +7,7 @@ import { getSubscriptionByIdController } from "../../useCases/getSubscriptionByI
 import { getSubscriptionByIdAsAdminController } from "../../useCases/getSubscriptionByIdAsAdmin";
 import { getSubscriptionListController } from "../../useCases/getSubscriptionList";
 import { handle3dSecureFailureController } from "../../useCases/handle3dSecureFailure";
+import { handle3dSecureFailureForManySubscriptionsController } from "../../useCases/handle3dSecureFailureForManySubscriptions";
 import { reorderPlanController } from "../../useCases/reorderPlan";
 import { swapSubscriptionPlanController } from "../../useCases/swapSubscriptionPlan";
 import { updateSubscriptionRestrictionController } from "../../useCases/updateSusbcriptionRestriction";
@@ -29,6 +30,9 @@ subscriptionRouter.put("/cancel/:id", (req, res) => cancelASubscriptionControlle
 subscriptionRouter.put("/swap-plan/:id", (req, res) => swapSubscriptionPlanController.execute(req, res));
 subscriptionRouter.put("/update-restriction/:id", (req, res) => updateSubscriptionRestrictionController.execute(req, res));
 subscriptionRouter.put("/handle-3dsecure-failure/:id", (req, res) => handle3dSecureFailureController.execute(req, res));
+subscriptionRouter.put("/handle-3dsecure-failure-for-many-subscriptions", (req, res) =>
+    handle3dSecureFailureForManySubscriptionsController.execute(req, res)
+);
 
 // DELETEs
 

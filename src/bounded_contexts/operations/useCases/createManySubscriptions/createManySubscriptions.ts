@@ -5,6 +5,7 @@ import { IPaymentService } from "../../application/paymentService/IPaymentServic
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
@@ -75,12 +76,19 @@ export class CreateManySubscriptions {
 
     public async execute(
         dto: CreateManySubscriptionsDto
-    ): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent; firstOrder: Order }> {
+    ): Promise<{
+        subscriptions: Subscription[];
+        paymentMethodId: string | undefined;
+        paymentIntent: Stripe.PaymentIntent;
+        paymentOrder: PaymentOrder;
+    }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const plansIds: PlanId[] = dto.plans.map((plan) => new PlanId(plan.planId));
         const plans: Plan[] = await this.planRepository.findAdditionalPlanListById(plansIds, dto.locale);
         const plansMap: { [planId: string]: Plan } = {};
+        const plansDtoPlanVariantMap: { [planId: string]: PlanVariant } = {};
+        var totalPrice: number = 0;
         const frequencySubscriptionMap: { [frequency: string]: Subscription[] } = {};
         const frequencyWeekMap: { [frequency: string]: Week[] } = {};
         const orders: Order[] = [];
@@ -91,10 +99,10 @@ export class CreateManySubscriptions {
 
         for (let plan of dto.plans) {
             const domainPlan: Plan = plansMap[plan.planId];
-
             const planVariantId: PlanVariantId = new PlanVariantId(plan.variant.id);
             const frequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(plan.frequency);
             const actualKey = frequencySubscriptionMap[frequency.value()];
+
             const subscription: Subscription = new Subscription(
                 planVariantId,
                 domainPlan,
@@ -112,6 +120,8 @@ export class CreateManySubscriptions {
             );
 
             frequencySubscriptionMap[frequency.value()] = Array.isArray(actualKey) ? [...actualKey, subscription] : [subscription];
+            plansDtoPlanVariantMap[domainPlan.id.value] = domainPlan.getPlanVariantById(planVariantId)!;
+            totalPrice += domainPlan.getPlanVariantPrice(planVariantId);
         }
 
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
@@ -146,27 +156,34 @@ export class CreateManySubscriptions {
             assignOrdersWithDifferentFreqToPaymentOrdersDto
         );
 
-        // const paymentIntent = await this.paymentService.paymentIntent(
-        //     plan.getPlanVariantPrice(planVariantId),
-        //     dto.stripePaymentMethodId
-        //         ? dto.stripePaymentMethodId
-        //         : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
-        //     customer.email,
-        //     customer.stripeId
-        // );
+        const customerDefaultPaymentMethod: PaymentMethod | undefined = customer.getDefaultPaymentMethod();
 
-        // newPaymentOrders[0]?.toBilled(orders.filter((order) => order.paymentOrderId?.equals(newPaymentOrders[0].id))); // TO DO: Handlear 3dSecure rechazado
+        if (!!!customerDefaultPaymentMethod && !!!dto.stripePaymentMethodId) throw new Error("Es necesario ingresar un método de pago");
+
+        const paymentIntent = await this.paymentService.paymentIntent(
+            totalPrice,
+            dto.stripePaymentMethodId ? dto.stripePaymentMethodId : customer.getDefaultPaymentMethod()?.stripeId!,
+            customer.email,
+            customer.stripeId
+        );
+
+        if (paymentIntent.status === "requires_action") {
+            newPaymentOrders[0].toPendingConfirmation(orders);
+        } else {
+            newPaymentOrders[0]?.toBilled(orders);
+        }
+
+        const subscriptions: Subscription[] = _.flatten(frequencySusbcriptionEntries.map((entry) => entry[1]));
 
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
-        await this.subscriptionRepository.bulkSave(_.flatten(frequencySusbcriptionEntries.map((entry) => entry[1])));
+        await this.subscriptionRepository.bulkSave(subscriptions);
         await this.orderRepository.bulkSave(orders);
         // await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
-        return;
-        // return { subscription, paymentIntent, firstOrder: orders[0] };
+        return { subscriptions, paymentMethodId: customerDefaultPaymentMethod?.stripeId, paymentIntent, paymentOrder: newPaymentOrders[0] };
     }
 
     /**

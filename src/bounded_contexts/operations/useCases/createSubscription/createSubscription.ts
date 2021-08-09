@@ -88,7 +88,14 @@ export class CreateSubscription {
         const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
 
-        customer.changePersonalInfo(dto.customerFirstName, dto.customerLastName, dto.phone1, "", "", dto.locale);
+        customer.changePersonalInfo(
+            dto.customerFirstName,
+            dto.customerLastName,
+            dto.phone1,
+            "",
+            customer.personalInfo?.birthDate,
+            dto.locale
+        );
         if (addressIsChanged) {
             customer.changeShippingAddress(
                 dto.latitude,
@@ -156,9 +163,6 @@ export class CreateSubscription {
             customer.email,
             customer.stripeId
         );
-
-        console.log("PAYMENT INTENT: ", paymentIntent);
-        // if (paymentIntent.status === "canceled")
 
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
