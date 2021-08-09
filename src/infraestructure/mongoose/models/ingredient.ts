@@ -10,8 +10,8 @@ const IngredientSchema = new mongoose.Schema(
 
         deletionFlag: {
             type: Boolean,
-            default: false
-        }
+            default: false,
+        },
     },
     { collection: "Ingredient", timestamps: true }
 );
