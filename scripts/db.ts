@@ -34,4 +34,5 @@ export const loadMockData = async () => {
     await mongooseRecipeRepository.bulkSave(mockRecipes);
     logger.info("Recipes loaded");
     await mongooseShippingZoneRepository.saveBulk(shippingZones);
+    logger.info("Shipping zones loaded");
 };
