@@ -9,6 +9,7 @@ import { getSubscriptionListController } from "../../useCases/getSubscriptionLis
 import { handle3dSecureFailureController } from "../../useCases/handle3dSecureFailure";
 import { handle3dSecureFailureForManySubscriptionsController } from "../../useCases/handle3dSecureFailureForManySubscriptions";
 import { reorderPlanController } from "../../useCases/reorderPlan";
+import { sendNewSubscriptionEmailController } from "../../useCases/sendNewSubscriptionEmail";
 import { swapSubscriptionPlanController } from "../../useCases/swapSubscriptionPlan";
 import { updateSubscriptionRestrictionController } from "../../useCases/updateSusbcriptionRestriction";
 
@@ -24,6 +25,7 @@ subscriptionRouter.get("/:id", (req, res) => getSubscriptionByIdController.execu
 subscriptionRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
 subscriptionRouter.post("/many", (req, res) => createManySubscriptionsController.execute(req, res));
 subscriptionRouter.post("/reorder/:subscriptionId", (req, res) => reorderPlanController.execute(req, res));
+subscriptionRouter.post("/notify-new-subscription/:subscriptionId", (req, res) => sendNewSubscriptionEmailController.execute(req, res));
 
 // PUTs
 subscriptionRouter.put("/cancel/:id", (req, res) => cancelASubscriptionController.execute(req, res));

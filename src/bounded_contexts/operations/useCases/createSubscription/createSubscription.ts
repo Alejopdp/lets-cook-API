@@ -170,8 +170,8 @@ export class CreateSubscription {
             newPaymentOrders[0]?.toBilled(orders);
         }
 
-        await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
-        await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
+        // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
+        // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
         await this.customerRepository.save(customer);
