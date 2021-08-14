@@ -35,7 +35,8 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         const subscriptionDb = await MongooseSubscription.findById(subscriptionId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("customer")
-            .populate("restriction");
+            .populate("restriction")
+            .populate("coupon");
 
         return subscriptionDb ? subscriptionMapper.toDomain(subscriptionDb) : undefined;
     }
@@ -59,7 +60,8 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         const subscriptionsDb = await MongooseSubscription.find({ ...conditions, deletionFlag: false }, null, options)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("customer")
-            .populate("restriction");
+            .populate("restriction")
+            .populate("coupon");
 
         return subscriptionsDb.map((raw: any) => subscriptionMapper.toDomain(raw, locale));
     }

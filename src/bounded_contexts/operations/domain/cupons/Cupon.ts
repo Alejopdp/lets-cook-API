@@ -125,7 +125,7 @@ export class Coupon extends Entity<Coupon> {
     public getDiscount(plan: Plan, planVariantId: PlanVariantId, shippingCost: number): number {
         const price = plan.getPlanVariantPrice(planVariantId);
         if (this.type.type === "free") return shippingCost;
-        else if (this.type.type === "percentage") return (price * this.type.value) / 100;
+        else if (this.type.type === "percent") return (price * this.type.value) / 100;
         else return price - this.type.value;
     }
 

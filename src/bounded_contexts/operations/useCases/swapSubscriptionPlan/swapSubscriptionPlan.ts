@@ -59,8 +59,8 @@ export class SwapSubscriptionPlan {
                 orders.map((order) => order.billingDate),
                 subscription.customer.id
             );
-            const coupon: Coupon | undefined = subscription.couponId
-                ? await this.couponRepository.findById(subscription.couponId)
+            const coupon: Coupon | undefined = subscription.coupon
+                ? await this.couponRepository.findById(subscription.coupon.id)
                 : undefined;
 
             for (let paymentOrder of paymentOrders) {

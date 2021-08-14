@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { INotificationService } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { CouponId } from "../../domain/cupons/CouponId";
+import { Coupon } from "../../domain/cupons/Cupon";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
@@ -19,6 +20,7 @@ import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionActive } from "../../domain/subscription/subscriptionState/SubscriptionActive";
 import { Week } from "../../domain/week/Week";
+import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
@@ -38,11 +40,11 @@ export class CreateSubscription {
     private _planRepository: IPlanRepository;
     private _weekRepository: IWeekRepository;
     private _orderRepository: IOrderRepository;
+    private _couponRepository: ICouponRepository;
     private _paymentService: IPaymentService;
     private _notificationService: INotificationService;
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
-    private _updatePaymentOrdersShippingCostByCustomer: UpdatePaymentOrdersShippingCostByCustomer;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -51,11 +53,11 @@ export class CreateSubscription {
         planRepository: IPlanRepository,
         weekRepository: IWeekRepository,
         orderRepository: IOrderRepository,
+        couponRepository: ICouponRepository,
         paymentService: IPaymentService,
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
-        paymentOrderRepository: IPaymentOrderRepository,
-        updatePaymentOrdersShippingCostByCustomer: UpdatePaymentOrdersShippingCostByCustomer
+        paymentOrderRepository: IPaymentOrderRepository
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -63,11 +65,11 @@ export class CreateSubscription {
         this._planRepository = planRepository;
         this._weekRepository = weekRepository;
         this._orderRepository = orderRepository;
+        this._couponRepository = couponRepository;
         this._notificationService = notificationService;
         this._paymentService = paymentService;
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
-        this._updatePaymentOrdersShippingCostByCustomer = updatePaymentOrdersShippingCostByCustomer;
     }
 
     public async execute(dto: CreateSubscriptionDto): Promise<{
@@ -77,7 +79,8 @@ export class CreateSubscription {
         customerPaymentMethods: PaymentMethod[];
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const couponId: CouponId | undefined = !!dto.couponId ? new CouponId(dto.couponId) : undefined;
+        const coupon: Coupon | undefined = !!dto.couponId ? await this.couponRepository.findById(new CouponId(dto.couponId)) : undefined;
+        console.log("DA COUPON: ", coupon);
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const planFrequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(dto.planFrequency);
         const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
@@ -125,7 +128,7 @@ export class CreateSubscription {
             customer,
             plan.getPlanVariantPrice(planVariantId),
             undefined,
-            couponId,
+            coupon,
             undefined, // Validate and use cupón
             undefined,
             new Date() // TO DO: Calculate
@@ -156,7 +159,7 @@ export class CreateSubscription {
         }
 
         const paymentIntent = await this.paymentService.paymentIntent(
-            plan.getPlanVariantPrice(planVariantId),
+            subscription.getPriceWithDiscount(customerShippingZone.cost), // TO DO: Use coupon
             dto.stripePaymentMethodId
                 ? dto.stripePaymentMethodId
                 : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
@@ -170,8 +173,8 @@ export class CreateSubscription {
             newPaymentOrders[0]?.toBilled(orders);
         }
 
-        await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
-        await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
+        // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
+        // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
         await this.customerRepository.save(customer);
@@ -234,6 +237,22 @@ export class CreateSubscription {
     }
 
     /**
+     * Getter couponRepository
+     * @return {ICouponRepository}
+     */
+    public get couponRepository(): ICouponRepository {
+        return this._couponRepository;
+    }
+
+    /**
+     * Getter assignOrdersToPaymentOrderService
+     * @return {AssignOrdersToPaymentOrders}
+     */
+    public get assignOrdersToPaymentOrderService(): AssignOrdersToPaymentOrders {
+        return this._assignOrdersToPaymentOrderService;
+    }
+
+    /**
      * Getter paymentService
      * @return {IPaymentService}
      */
@@ -263,13 +282,5 @@ export class CreateSubscription {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
-    }
-
-    /**
-     * Getter updatePaymentOrdersShippingCostByCustomer
-     * @return {UpdatePaymentOrdersShippingCostByCustomer}
-     */
-    public get updatePaymentOrdersShippingCostByCustomer(): UpdatePaymentOrdersShippingCostByCustomer {
-        return this._updatePaymentOrdersShippingCostByCustomer;
     }
 }
