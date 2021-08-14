@@ -123,4 +123,31 @@ export class MongooseWeekRepository implements IWeekRepository {
 
         return weekDb ? weekMapper.toDomain(weekDb) : undefined;
     }
+
+    public async findWeekTwelveWeeksLater(): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date();
+        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 7 * 12);
+
+        const weekDb = await WeekModel.findOne({ minDay: { $lte: dayInTwelveWeeks }, maxDay: { $gte: dayInTwelveWeeks } });
+
+        return weekDb ? weekMapper.toDomain(weekDb) : undefined;
+    }
+
+    public async findWeekTwelveBiweeksLater(): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date();
+        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 14 * 12);
+
+        const weekDb = await WeekModel.findOne({ minDay: { $lte: dayInTwelveWeeks }, maxDay: { $gte: dayInTwelveWeeks } });
+
+        return weekDb ? weekMapper.toDomain(weekDb) : undefined;
+    }
+
+    public async findWeekTwelveMonthsLater(): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date();
+        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 28 * 12);
+
+        const weekDb = await WeekModel.findOne({ minDay: { $lte: dayInTwelveWeeks }, maxDay: { $gte: dayInTwelveWeeks } });
+
+        return weekDb ? weekMapper.toDomain(weekDb) : undefined;
+    }
 }

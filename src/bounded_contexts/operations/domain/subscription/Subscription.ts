@@ -110,6 +110,35 @@ export class Subscription extends Entity<Subscription> {
         }
     }
 
+    public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week): Order {
+        const newBillingDate: Date = this.getNewOrderDateFrom(billedOrder.billingDate);
+        const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
+
+        return new Order(
+            newShippingDate,
+            new OrderActive(),
+            newBillingDate,
+            newOrderWeek,
+            this.planVariantId,
+            this.plan,
+            this.plan.getPlanVariantPrice(this.planVariantId),
+            this.id,
+            [],
+            []
+        );
+    }
+
+    public getNewOrderDateFrom(date: Date): Date {
+        const newDate = new Date(date);
+        if (this.frequency.isWeekly()) newDate.setDate(newDate.getDate() + 11 * 7);
+
+        if (this.frequency.isBiweekly()) newDate.setDate(newDate.getDate() + 11 * 14);
+
+        if (this.frequency.isMonthly()) newDate.setDate(newDate.getDate() + 11 * 28);
+
+        return newDate;
+    }
+
     public getFirstOrderShippingDate(shippingDayWeekNumber: number): Date {
         var today: Date = new Date();
         // today.setDate(today.getDate() + 5); // Testing days

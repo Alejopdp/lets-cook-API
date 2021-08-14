@@ -9,6 +9,10 @@ export class AwsSesService implements INotificationService {
         this._ses = ses;
     }
 
+    public async sendErrorEmail(errorMessage: string): Promise<void> {
+        this.sendMail(["alejo@novolabs.xyz"], "Lets cook - Error", errorMessage, "");
+    }
+
     private async sendMail(toAddresses: string[], subject: string, textBody: string, htmlBody: string): Promise<void> {
         // console.log('Send Mail: ', toAddresses, subject, textBody, htmlBody)
         const mailParams: SendEmailRequest = {
@@ -21,13 +25,12 @@ export class AwsSesService implements INotificationService {
                     Data: subject,
                 },
                 Body: {
-                    Text: { Data: 'Code' },
+                    Text: { Data: "Code" },
                     Html: { Data: htmlBody },
                 },
             },
         };
-        console.log(mailParams)
-
+        console.log(mailParams);
 
         await this.ses.sendEmail(mailParams).promise();
     }

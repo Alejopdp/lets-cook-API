@@ -4,4 +4,5 @@ export interface INotificationService {
     notifyNewBackOfficeUserToRecoverPassword(email: string, redirectUrl: string): Promise<void>;
     notifyCustomerAboutNewSubscriptionSuccessfullyCreated(): Promise<void>;
     notifyAdminsAboutNewSubscriptionSuccessfullyCreated(): Promise<void>;
+    sendErrorEmail(errorMessage: string): Promise<void>;
 }

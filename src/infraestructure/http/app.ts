@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
 import { v1Router } from "./api/v1";
+import { billingJob } from "../../bounded_contexts/operations/application/billingJob";
 
 const app = express();
 
@@ -21,6 +22,8 @@ app.use(
 );
 
 app.use("/api/v1", v1Router);
+
+billingJob.initialize();
 
 // New api versions can go here
 

@@ -22,8 +22,8 @@ export class MongooseOrderRepository implements IOrderRepository {
         }
     }
 
-    public async bulkSave(Orders: Order[]): Promise<void> {
-        const ordersToSave = Orders.map((Order) => orderMapper.toPersistence(Order));
+    public async bulkSave(orders: Order[]): Promise<void> {
+        const ordersToSave = orders.map((order) => orderMapper.toPersistence(order));
 
         await MongooseOrder.insertMany(ordersToSave);
     }
@@ -31,7 +31,7 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async saveOrdersWithNewState(orders: Order[]): Promise<void> {
         const ordersIdToSave = orders.map((order) => order.id.value);
 
-        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: orders[0].state.title });
+        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { state: orders[0].state.title }); // All orders should have the same State
     }
 
     public async saveSkippedAndActiveOrders(skippedOrders: Order[], activeOrders: Order[]): Promise<void> {
@@ -77,6 +77,10 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]> {
         return await this.findBy({ paymentOrder: paymentOrderId.value });
     }
+    public async findByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]> {
+        return await this.findBy({ paymentOrder: paymentOrdersIds.map((id) => id.value) });
+    }
+
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
