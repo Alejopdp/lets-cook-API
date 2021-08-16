@@ -160,8 +160,9 @@ export class CreateSubscription {
         }
 
         const hasFreeShipping =
-            (coupon?.type.type !== "free" && customerSubscriptions.some((sub) => sub.coupon?.type.type === "free")) || // !== free because in subscription.getPriceWithDiscount it's taken into account
-            customerSubscriptions.length > 0;
+            coupon?.type.type !== "free" &&
+            (customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
+                customerSubscriptions.length > 0);
 
         const paymentIntent = await this.paymentService.paymentIntent(
             hasFreeShipping
