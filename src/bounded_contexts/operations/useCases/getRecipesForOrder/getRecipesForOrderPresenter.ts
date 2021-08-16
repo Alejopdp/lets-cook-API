@@ -23,7 +23,7 @@ export class GetRecipesForOrderPresenter {
             recipes: presentedRecipes,
             nextDeliveryLabel: order.getHumanShippmentDay(),
             maxRecipesQty: subscription.getServingsQuantity(),
-            subscriptionId: subscription.id.value
+            subscriptionId: subscription.id.value,
         };
     }
 
@@ -59,10 +59,7 @@ export class GetRecipesForOrderPresenter {
             recipeVariants: recipe.recipeVariants.map((variant) => {
                 return {
                     ingredients: variant.ingredients.map((ing) => ing.name),
-                    restriction: {id: variant.restriction.id.value,
-                            value: variant.restriction.value,
-                            label: variant.restriction.label,
-                        };
+                    restriction: { id: variant.restriction.id.value, value: variant.restriction.value, label: variant.restriction.label },
                     sku: variant.sku.code,
                 };
             }),

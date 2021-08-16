@@ -18,7 +18,7 @@ export class CreateCoupon {
 
     public async execute(dto: CreateCouponDto): Promise<void> {
         const type: ICouponType =
-            dto.discountType === "fixed"
+            dto.discountType === "fix"
                 ? new FixedPrice(dto.discountType, dto.discountValue)
                 : dto.discountType === "free"
                 ? new FreeShipping(dto.discountType, dto.discountValue)

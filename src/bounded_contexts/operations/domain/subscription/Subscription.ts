@@ -1,7 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
-import { CouponId } from "../cupons/CouponId";
+import { Coupon } from "../cupons/Cupon";
 import { Customer } from "../customer/Customer";
 import { Order } from "../order/Order";
 import { OrderActive } from "../order/orderState/OrderActive";
@@ -24,7 +24,7 @@ export class Subscription extends Entity<Subscription> {
     private _restriction?: RecipeVariantRestriction;
     private _billingDayOfWeek: number;
     private _customer: Customer;
-    private _couponId?: CouponId;
+    private _coupon?: Coupon;
     private _billingStartDate?: Date;
     private _creationDate: Date;
     private _couponChargesQtyApplied: number;
@@ -40,7 +40,7 @@ export class Subscription extends Entity<Subscription> {
         customer: Customer,
         price: number,
         restriction?: RecipeVariantRestriction,
-        couponId?: CouponId,
+        coupon?: Coupon,
         couponChargesQtyApplied?: number,
         billingDayOfWeek?: number,
         billingStartDate?: Date,
@@ -56,7 +56,7 @@ export class Subscription extends Entity<Subscription> {
         this._restriction = restriction;
         this._restrictionComment = restrictionComment;
         this._customer = customer;
-        this._couponId = couponId;
+        this._coupon = coupon;
         this._billingStartDate = billingStartDate;
         this._creationDate = creationDate;
         this._couponChargesQtyApplied = couponChargesQtyApplied || 0;
@@ -68,6 +68,9 @@ export class Subscription extends Entity<Subscription> {
         const orders: Order[] = [];
         const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek());
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
+        const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
+
+        if (!this.firstShippingDateHasToSkipWeek(shippingZone.getDayNumberOfWeek())) billingDate.setDate(billingDate.getDate() - 7);
 
         if (this.frequency.isOneTime()) {
             orders.push(
@@ -79,15 +82,21 @@ export class Subscription extends Entity<Subscription> {
                     this.planVariantId,
                     this.plan,
                     this.plan.getPlanVariantPrice(this.planVariantId),
+                    hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+                    hasFreeShipping,
                     this._id,
                     [],
                     []
                 )
             );
 
+            if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
+
             return orders;
         } else {
             for (let i = 0; i < 12; i++) {
+                if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+
                 orders.push(
                     new Order(
                         new Date(deliveryDate),
@@ -97,22 +106,33 @@ export class Subscription extends Entity<Subscription> {
                         this.planVariantId,
                         this.plan,
                         this.plan.getPlanVariantPrice(this.planVariantId),
+                        hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+                        hasFreeShipping,
                         this._id,
                         [],
                         []
                     )
                 );
 
+                if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
                 deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
-                if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
             }
             return orders;
         }
     }
 
-    public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week): Order {
+    public getCouponDiscount(shippingCost: number): number {
+        if (!!!this.coupon) return 0;
+        if (this.coupon.maxChargeQtyType !== "all_fee" && this.couponChargesQtyApplied >= this.coupon.maxChargeQtyValue) return 0;
+        return this.coupon.getDiscount(this.plan, this.planVariantId, shippingCost);
+    }
+
+    public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week, shippingZone: ShippingZone): Order {
         const newBillingDate: Date = this.getNewOrderDateFrom(billedOrder.billingDate);
         const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
+        const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
+
+        if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
 
         return new Order(
             newShippingDate,
@@ -122,6 +142,8 @@ export class Subscription extends Entity<Subscription> {
             this.planVariantId,
             this.plan,
             this.plan.getPlanVariantPrice(this.planVariantId),
+            hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+            hasFreeShipping,
             this.id,
             [],
             []
@@ -230,6 +252,10 @@ export class Subscription extends Entity<Subscription> {
         return this.plan.getPlanVariantPrice(this.planVariantId);
     }
 
+    public getPriceWithDiscount(shippingCost: number): number {
+        return this.getPrice() - this.getCouponDiscount(shippingCost) + shippingCost;
+    }
+
     public updateRestriction(newRestriction: RecipeVariantRestriction, comment?: string): void {
         this.restriction = newRestriction;
 
@@ -301,11 +327,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Getter couponId
-     * @return {CouponId | undefined}
+     * Getter coupon
+     * @return {Coupon | undefined}
      */
-    public get couponId(): CouponId | undefined {
-        return this._couponId;
+    public get coupon(): Coupon | undefined {
+        return this._coupon;
     }
 
     /**
@@ -397,11 +423,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Setter couponId
-     * @param {CouponId | undefined} value
+     * Setter coupon
+     * @param {Coupon | undefined} value
      */
-    public set couponId(value: CouponId | undefined) {
-        this._couponId = value;
+    public set coupon(value: Coupon | undefined) {
+        this._coupon = value;
     }
     /**
      * Setter billingStartDate

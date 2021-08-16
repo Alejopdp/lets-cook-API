@@ -16,6 +16,8 @@ import { logger } from "../../../../../config";
 import { CancellationReason } from "../../domain/cancellationReason/CancellationReason";
 import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
+import { couponMapper } from "../couponMapper";
+import { Coupon } from "../../domain/cupons/Cupon";
 
 export class SubscriptionMapper implements Mapper<Subscription> {
     public toDomain(raw: any, locale?: Locale): Subscription {
@@ -26,7 +28,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
         const customer: Customer = customerMapper.toDomain(raw.customer);
         const planVariantId: PlanVariantId = new PlanVariantId(raw.planVariant);
         const plan: Plan = planMapper.toDomain(raw.plan, locale || Locale.es);
-        const couponId: CouponId | undefined = !!raw.coupon ? new CouponId(raw.coupon) : undefined;
+        const coupon: Coupon | undefined = !!raw.coupon ? couponMapper.toDomain(raw.coupon) : undefined;
         const cancellation: CancellationReason | undefined = raw.cancellation
             ? new CancellationReason(raw.cancellation.reason, raw.cancellation.comment)
             : undefined;
@@ -41,7 +43,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             customer,
             raw.price,
             restriction,
-            couponId,
+            coupon,
             raw.couponChargesQtyApplied,
             raw.billingDayOfWeek,
             raw.billingStartDate,
@@ -61,7 +63,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             restrictionComment: t.restrictionComment,
             couponChargesQtyApplied: t.couponChargesQtyApplied,
             customer: t.customer.id.value,
-            coupon: t.couponId ? t.couponId.value : null,
+            coupon: t.coupon ? t.coupon.id.value : null,
             billingDayOfWeek: t.billingDayOfWeek,
             billingStartDate: t.billingStartDate,
             cancellation,

@@ -45,6 +45,17 @@ const OrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        discountAmount: {
+            type: Number,
+            required: true,
+        },
+
+        hasFreeShipping: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+
         subscription: {
             type: String,
             ref: "Subscription",

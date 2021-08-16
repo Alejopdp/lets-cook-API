@@ -12,7 +12,7 @@ export class LimitQty implements ILimitAplication {
     }
 
     public isValid(subscriptions: Subscription[], couponId: CouponId): boolean {
-        const subscriptionWithTheCoupon: Subscription | undefined = subscriptions.find((sub) => sub.couponId?.equals(couponId));
+        const subscriptionWithTheCoupon: Subscription | undefined = subscriptions.find((sub) => sub.coupon?.id.equals(couponId));
         if (!subscriptionWithTheCoupon) return true;
 
         return subscriptionWithTheCoupon?.couponChargesQtyApplied < this.value;

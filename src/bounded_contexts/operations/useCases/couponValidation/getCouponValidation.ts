@@ -28,6 +28,7 @@ export class GetCouponValidation {
         const plan: Plan = await this.planRepository.findByIdOrThrow(planId, Locale.es);
 
         if (!coupon) throw new Error("El cupón de descuento ingresado es incorrecto");
+        if (coupon.getDiscount(plan, planVariantId, dto.shippingCost) <= 0) throw new Error("El cupón no es aplicable al monto del plan");
 
         let currentDate = new Date();
         if (currentDate > coupon.endDate) throw new Error("El cupón de descuento ingresado ha expirado");

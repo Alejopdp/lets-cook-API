@@ -1,6 +1,8 @@
 import { SES } from "aws-sdk";
 import { SendEmailRequest } from "aws-sdk/clients/ses";
-import { INotificationService } from "./INotificationService";
+import { Customer } from "../../bounded_contexts/operations/domain/customer/Customer";
+import { welcomeTemplate } from "../../emailTemplates/emailTemplates";
+import { INotificationService, NewSubscriptionNotificationDto } from "./INotificationService";
 
 export class AwsSesService implements INotificationService {
     private _ses: SES;
@@ -48,7 +50,23 @@ export class AwsSesService implements INotificationService {
         await this.sendMail([email], "Tu usuario fue creado", redirectUrl, redirectUrl);
     }
 
-    public async notifyCustomerAboutNewSubscriptionSuccessfullyCreated(): Promise<void> {}
+    public async notifyCustomerAboutNewSubscriptionSuccessfullyCreated(dto: NewSubscriptionNotificationDto): Promise<void> {
+        await this.sendMail(
+            [dto.customerEmail],
+            `Hola ${dto.customerFirstName}, bienvenid@ a Let's cook!`,
+            "",
+            welcomeTemplate(
+                dto.customerFirstName,
+                dto.recipeSelection,
+                dto.planName,
+                !!dto.hasIndicatedRestrictions,
+                dto.shippingCost,
+                dto.firstOrderId,
+                dto.shippingDay,
+                dto.isPlanAhorro
+            )
+        );
+    }
 
     public async notifyAdminsAboutNewSubscriptionSuccessfullyCreated(): Promise<void> {}
 
