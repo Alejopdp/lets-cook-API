@@ -21,9 +21,10 @@ export class Order extends Entity<Order> {
     private _planVariantId: PlanVariantId;
     private _plan: Plan;
     private _price: number;
+    private _discountAmount: number;
+    private _hasFreeShipping: boolean;
     private _subscriptionId: SubscriptionId;
     private _recipesVariantsIds: RecipeVariantId[];
-    // private _recipes: Recipe[];
     private _recipeSelection: RecipeSelection[];
     private _paymentOrderId?: PaymentOrderId;
 
@@ -35,9 +36,10 @@ export class Order extends Entity<Order> {
         planVariantId: PlanVariantId,
         plan: Plan,
         price: number,
+        discountAmount: number,
+        hasFreeShipping: boolean,
         subscriptionId: SubscriptionId,
         recipeVariantsIds: RecipeVariantId[],
-        // recipes: Recipe[],
         recipeSelection: RecipeSelection[],
         paymentOrderId?: PaymentOrderId,
         orderId?: OrderId
@@ -50,11 +52,12 @@ export class Order extends Entity<Order> {
         this._planVariantId = planVariantId;
         this._plan = plan;
         this._price = price;
+        this._discountAmount = discountAmount;
+        this._hasFreeShipping = hasFreeShipping;
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;
         this._recipeSelection = recipeSelection;
         this._paymentOrderId = paymentOrderId;
-        // this._recipes = recipes;
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[]): void {
@@ -148,16 +151,11 @@ export class Order extends Entity<Order> {
     }
 
     public assignPaymentOrder(paymentOrders: PaymentOrder[]): void {
-        // console.log("ORDER ASSIGNING: WEEK", this.week.id);
-        // console.log("ORDER PLAN: ", this.plan.id.value);
         for (let paymentOrder of paymentOrders) {
             paymentOrder.billingDate.setHours(0, 0, 0, 0);
             this.billingDate.setHours(0, 0, 0, 0);
-            logger.debug(`PAYMENT ORDER: ${paymentOrder.billingDate}`);
-            logger.debug(`ORDER: ${this.billingDate}`);
 
             if (this.billingDate.getTime() === paymentOrder.billingDate.getTime()) {
-                console.log("**************************** ENCONTRO **************************** ");
                 this.paymentOrderId = paymentOrder.id;
                 return;
             }
@@ -229,6 +227,22 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter discountAmount
+     * @return {number}
+     */
+    public get discountAmount(): number {
+        return this._discountAmount;
+    }
+
+    /**
+     * Getter hasFreeShipping
+     * @return {boolean}
+     */
+    public get hasFreeShipping(): boolean {
+        return this._hasFreeShipping;
+    }
+
+    /**
      * Getter subscriptionId
      * @return {SubscriptionId}
      */
@@ -243,14 +257,6 @@ export class Order extends Entity<Order> {
     public get recipesVariantsIds(): RecipeVariantId[] {
         return this._recipesVariantsIds;
     }
-
-    // /**
-    //  * Getter recipes
-    //  * @return {Recipe[]}
-    //  */
-    // public get recipes(): Recipe[] {
-    //     return this._recipes;
-    // }
 
     /**
      * Getter recipeSelection
@@ -325,6 +331,22 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Setter discountAmount
+     * @param {number} value
+     */
+    public set discountAmount(value: number) {
+        this._discountAmount = value;
+    }
+
+    /**
+     * Setter hasFreeShipping
+     * @param {boolean} value
+     */
+    public set hasFreeShipping(value: boolean) {
+        this._hasFreeShipping = value;
+    }
+
+    /**
      * Setter subscriptionId
      * @param {SubscriptionId} value
      */
@@ -339,14 +361,6 @@ export class Order extends Entity<Order> {
     public set recipesVariantsIds(value: RecipeVariantId[]) {
         this._recipesVariantsIds = value;
     }
-
-    // /**
-    //  * Setter recipes
-    //  * @param {Recipe[]} value
-    //  */
-    // public set recipes(value: Recipe[]) {
-    //     this._recipes = value;
-    // }
 
     /**
      * Setter recipeSelection

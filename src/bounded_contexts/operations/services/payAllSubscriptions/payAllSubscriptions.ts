@@ -41,7 +41,7 @@ export class PayAllSubscriptions {
     }
 
     public async execute(): Promise<void> {
-        const today: Date = new Date(2021, 7, 14);
+        const today: Date = new Date(2021, 7, 28);
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const activeSusbcriptions = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerIdList(
@@ -101,8 +101,14 @@ export class PayAllSubscriptions {
             const paymentOrderId: string = paymentOrderToBill.id.value as string;
             try {
                 const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
+                const shippingCost = customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost || 0;
+                const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some((order) => order.hasFreeShipping);
+                const totalAmount = customerHasFreeShipping
+                    ? paymentOrderToBill.amount - paymentOrderToBill.discountAmount
+                    : paymentOrderToBill.amount - paymentOrderToBill.discountAmount + shippingCost;
+
                 const paymentIntent = await this.paymentService.paymentIntent(
-                    paymentOrderToBill.amount,
+                    totalAmount,
                     paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
                     paymentOrderCustomer.email,
                     paymentOrderCustomer.stripeId as string
@@ -131,7 +137,8 @@ export class PayAllSubscriptions {
             } else {
                 const newOrder = subscription.getNewOrderAfterBilling(
                     subscriptionOrderMap[subscriptionIdValue],
-                    frequencyWeekMap[subscription.frequency.value()]
+                    frequencyWeekMap[subscription.frequency.value()],
+                    customerShippingZoneMap[subscription.customer.id.value]!
                 );
 
                 customerNewOrdersMap[customerId] = Array.isArray(customerNewOrdersMap[customerId])
@@ -158,7 +165,7 @@ export class PayAllSubscriptions {
 
             for (let billingDateAndOrders of Object.entries(billingDateOrdersMap)) {
                 const ordersAmount = billingDateAndOrders[1].reduce((acc, order) => acc + order.getTotalPrice(), 0); // TO DO: Use coupons, probably need to pass orders to a subscription
-                // const ordersDiscount = billingDateAndOrders[1].reduce((acc, order) => acc + order.getDiscount(), 0) // TO DO: Use coupons, probably need to pass orders to a subscription
+                const ordersDiscount = billingDateAndOrders[1].reduce((acc, order) => acc + order.discountAmount, 0); // TO DO: Use coupons, probably need to pass orders to a subscription
 
                 const newPaymentOrder = new PaymentOrder(
                     new Date(),
@@ -167,7 +174,7 @@ export class PayAllSubscriptions {
                     new Date(billingDateAndOrders[0]),
                     weeklyOrdersWeek, // TO DO: Week is unnecessary in payment orders
                     ordersAmount,
-                    0,
+                    ordersDiscount,
                     customerShippingZoneMap[customerAndNewOrders[0]]?.cost!,
                     new CustomerId(customerAndNewOrders[0])
                 );

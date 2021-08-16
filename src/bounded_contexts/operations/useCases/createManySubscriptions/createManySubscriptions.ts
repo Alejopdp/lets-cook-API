@@ -28,11 +28,8 @@ import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
-import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
-import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
 import { AssignOrdersWithDifferentFreqToPaymentOrders } from "../../services/assignOrdersWithDifferentFreqToPaymentOrders/assignOrdersWithDifferentFreqToPaymentOrders";
 import { AssignOrdersWithDifferentFreqToPaymentOrdersDto } from "../../services/assignOrdersWithDifferentFreqToPaymentOrders/assignOrdersWithDifferentFreqToPaymentOrdersDto";
-import { UpdatePaymentOrdersShippingCostByCustomer } from "../../services/updatePaymentOrdersShippingCostByCustomer/updatePaymentOrdersShippingCostByCustomer";
 import { CreateManySubscriptionsDto } from "./createManySubscriptionsDto";
 
 export class CreateManySubscriptions {
@@ -46,7 +43,6 @@ export class CreateManySubscriptions {
     private _notificationService: INotificationService;
     private _assignOrdersWithDifferentFreqToPaymentOrders: AssignOrdersWithDifferentFreqToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
-    private _updatePaymentOrdersShippingCostByCustomer: UpdatePaymentOrdersShippingCostByCustomer;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -58,8 +54,7 @@ export class CreateManySubscriptions {
         paymentService: IPaymentService,
         notificationService: INotificationService,
         AasignOrdersWithDifferentFreqToPaymentOrders: AssignOrdersWithDifferentFreqToPaymentOrders,
-        paymentOrderRepository: IPaymentOrderRepository,
-        updatePaymentOrdersShippingCostByCustomer: UpdatePaymentOrdersShippingCostByCustomer
+        paymentOrderRepository: IPaymentOrderRepository
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -71,12 +66,9 @@ export class CreateManySubscriptions {
         this._paymentService = paymentService;
         this._assignOrdersWithDifferentFreqToPaymentOrders = AasignOrdersWithDifferentFreqToPaymentOrders;
         this._paymentOrderRepository = paymentOrderRepository;
-        this._updatePaymentOrdersShippingCostByCustomer = updatePaymentOrdersShippingCostByCustomer;
     }
 
-    public async execute(
-        dto: CreateManySubscriptionsDto
-    ): Promise<{
+    public async execute(dto: CreateManySubscriptionsDto): Promise<{
         subscriptions: Subscription[];
         paymentMethodId: string | undefined;
         paymentIntent: Stripe.PaymentIntent;
@@ -263,13 +255,5 @@ export class CreateManySubscriptions {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
-    }
-
-    /**
-     * Getter updatePaymentOrdersShippingCostByCustomer
-     * @return {UpdatePaymentOrdersShippingCostByCustomer}
-     */
-    public get updatePaymentOrdersShippingCostByCustomer(): UpdatePaymentOrdersShippingCostByCustomer {
-        return this._updatePaymentOrdersShippingCostByCustomer;
     }
 }

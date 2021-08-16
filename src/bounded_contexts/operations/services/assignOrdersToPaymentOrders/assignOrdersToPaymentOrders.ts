@@ -35,10 +35,6 @@ export class AssignOrdersToPaymentOrders {
             };
 
             newPaymentOrders = this.createPaymentOrdersService.execute(createPaymentOrdersServiceDto);
-
-            for (let order of dto.orders) {
-                order.assignPaymentOrder(newPaymentOrders);
-            }
         } else {
             const ordersWithoutPaymentOrders = [];
 
@@ -62,9 +58,9 @@ export class AssignOrdersToPaymentOrders {
                 };
                 newPaymentOrders = this.createPaymentOrdersService.execute(createPaymentOrdersServiceDto);
 
-                for (let order of ordersWithoutPaymentOrders) {
-                    order.assignPaymentOrder(newPaymentOrders);
-                }
+                // for (let order of ordersWithoutPaymentOrders) {
+                //     order.assignPaymentOrder(newPaymentOrders);
+                // }
             }
         }
 

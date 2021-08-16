@@ -126,14 +126,6 @@ export class ReorderPlan {
     }
 
     /**
-     * Getter planRepository
-     * @return {IPlanRepository}
-     */
-    public get planRepository(): IPlanRepository {
-        return this._planRepository;
-    }
-
-    /**
      * Getter weekRepository
      * @return {IWeekRepository}
      */

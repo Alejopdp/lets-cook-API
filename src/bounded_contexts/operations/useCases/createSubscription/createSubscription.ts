@@ -79,8 +79,8 @@ export class CreateSubscription {
         customerPaymentMethods: PaymentMethod[];
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(customerId);
         const coupon: Coupon | undefined = !!dto.couponId ? await this.couponRepository.findById(new CouponId(dto.couponId)) : undefined;
-        console.log("DA COUPON: ", coupon);
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const planFrequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(dto.planFrequency);
         const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
@@ -142,6 +142,7 @@ export class CreateSubscription {
 
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
+
         const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
             customerId: customer.id,
             orders,
@@ -158,8 +159,14 @@ export class CreateSubscription {
             customer.addPaymentMethod(newPaymentMethod);
         }
 
+        const hasFreeShipping =
+            (coupon?.type.type !== "free" && customerSubscriptions.some((sub) => sub.coupon?.type.type === "free")) || // !== free because in subscription.getPriceWithDiscount it's taken into account
+            customerSubscriptions.length > 0;
+
         const paymentIntent = await this.paymentService.paymentIntent(
-            subscription.getPriceWithDiscount(customerShippingZone.cost), // TO DO: Use coupon
+            hasFreeShipping
+                ? subscription.getPriceWithDiscount(customerShippingZone.cost) - customerShippingZone.cost
+                : subscription.getPriceWithDiscount(customerShippingZone.cost),
             dto.stripePaymentMethodId
                 ? dto.stripePaymentMethodId
                 : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
@@ -181,6 +188,7 @@ export class CreateSubscription {
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
             for (let paymentOrder of paymentOrdersToUpdate) {
+                // TO DO: Update Orders shipping cost too
                 paymentOrder.shippingCost = customerShippingZone.cost;
             }
         }

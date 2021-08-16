@@ -68,6 +68,7 @@ export class Subscription extends Entity<Subscription> {
         const orders: Order[] = [];
         const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek());
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
+        const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
 
         if (this.frequency.isOneTime()) {
             orders.push(
@@ -79,11 +80,15 @@ export class Subscription extends Entity<Subscription> {
                     this.planVariantId,
                     this.plan,
                     this.plan.getPlanVariantPrice(this.planVariantId),
+                    hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+                    hasFreeShipping,
                     this._id,
                     [],
                     []
                 )
             );
+
+            if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
 
             return orders;
         } else {
@@ -97,14 +102,17 @@ export class Subscription extends Entity<Subscription> {
                         this.planVariantId,
                         this.plan,
                         this.plan.getPlanVariantPrice(this.planVariantId),
+                        hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+                        hasFreeShipping,
                         this._id,
                         [],
                         []
                     )
                 );
 
+                if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
                 deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
-                if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+                billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
             }
             return orders;
         }
@@ -116,9 +124,12 @@ export class Subscription extends Entity<Subscription> {
         return this.coupon.getDiscount(this.plan, this.planVariantId, shippingCost);
     }
 
-    public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week): Order {
+    public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week, shippingZone: ShippingZone): Order {
         const newBillingDate: Date = this.getNewOrderDateFrom(billedOrder.billingDate);
         const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
+        const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
+
+        if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
 
         return new Order(
             newShippingDate,
@@ -128,6 +139,8 @@ export class Subscription extends Entity<Subscription> {
             this.planVariantId,
             this.plan,
             this.plan.getPlanVariantPrice(this.planVariantId),
+            hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+            hasFreeShipping,
             this.id,
             [],
             []
