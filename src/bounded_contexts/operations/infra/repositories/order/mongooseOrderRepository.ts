@@ -74,6 +74,19 @@ export class MongooseOrderRepository implements IOrderRepository {
         return map;
     }
 
+    public async getFirstOrderOfSubscription(subscriptionId: SubscriptionId): Promise<Order | undefined> {
+        const orderDb = await MongooseOrder.findOne({ subscription: subscriptionId.value })
+            .sort({ shippingDate: 1 })
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week")
+            .populate({
+                path: "recipeSelection",
+                populate: { path: "recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } },
+            });
+
+        return orderDb ? orderMapper.toDomain(orderDb) : undefined;
+    }
+
     public async findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]> {
         return await this.findBy({ paymentOrder: paymentOrderId.value });
     }
