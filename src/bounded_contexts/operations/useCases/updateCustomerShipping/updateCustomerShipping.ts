@@ -22,6 +22,7 @@ export class UpdateCustomerShipping {
         const preferredDeliveryTime = PreferredDeliveryTimeFactory.createDeliveryTime(dto.deliveryTime);
 
         customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, preferredDeliveryTime);
+        // TO DO: Update every order date
 
         await this.customerRepository.save(customer);
     }

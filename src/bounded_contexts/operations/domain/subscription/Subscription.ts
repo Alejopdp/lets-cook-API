@@ -179,7 +179,7 @@ export class Subscription extends Entity<Subscription> {
     public firstShippingDateHasToSkipWeek(shippingWeekDayNumber: number): boolean {
         var today: Date = new Date();
 
-        return today.getDay() >= shippingWeekDayNumber;
+        return today.getDay() >= shippingWeekDayNumber || shippingWeekDayNumber - today.getDay() <= 2;
     }
 
     public billingStartDayHasToSkipWeeks(): boolean {
