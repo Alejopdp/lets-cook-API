@@ -174,6 +174,7 @@ export class CreateSubscription {
             customer.email,
             customer.stripeId
         );
+        newPaymentOrders[0].paymentIntentId = paymentIntent.id;
 
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);

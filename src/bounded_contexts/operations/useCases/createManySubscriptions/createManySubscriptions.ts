@@ -159,6 +159,8 @@ export class CreateManySubscriptions {
             customer.stripeId
         );
 
+        newPaymentOrders[0].paymentIntentId = paymentIntent.id;
+
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
         } else {
@@ -168,7 +170,7 @@ export class CreateManySubscriptions {
         const subscriptions: Subscription[] = _.flatten(frequencySusbcriptionEntries.map((entry) => entry[1]));
 
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
-        await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
+        // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.bulkSave(subscriptions);
         await this.orderRepository.bulkSave(orders);
         // await this.customerRepository.save(customer);

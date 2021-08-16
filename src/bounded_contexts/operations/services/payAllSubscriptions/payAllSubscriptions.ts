@@ -121,6 +121,8 @@ export class PayAllSubscriptions {
                 } else {
                     paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
                 }
+
+                paymentOrderToBill.paymentIntentId = paymentIntent.id;
             } catch (error) {
                 ordersWithError.push();
             }
