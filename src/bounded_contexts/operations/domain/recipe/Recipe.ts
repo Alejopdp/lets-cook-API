@@ -69,6 +69,10 @@ export class Recipe extends Entity<Recipe> {
         return this.recipeVariants.find((variant) => variant.id.equals(recipeVariantId))?.restriction;
     }
 
+    public getPresentedNutritionalInfo(): { key: string; value: string }[] {
+        return this.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
+    }
+
     /**
      * Getter recipeGeneralData
      * @return {RecipeGeneralData}

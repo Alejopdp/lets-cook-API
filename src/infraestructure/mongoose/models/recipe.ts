@@ -90,6 +90,18 @@ const RecipeSchema = new mongoose.Schema(
                 type: String,
             },
         ],
+        nutritionalInfo: [
+            {
+                key: {
+                    type: String,
+                    required: true,
+                },
+                value: {
+                    type: String,
+                    required: true,
+                },
+            },
+        ],
 
         backOfficeTags: [
             {

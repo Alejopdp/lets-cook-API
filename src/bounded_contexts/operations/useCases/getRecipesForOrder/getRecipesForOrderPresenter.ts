@@ -39,6 +39,7 @@ export class GetRecipesForOrderPresenter {
             longDescription: recipe.recipeGeneralData.recipeDescription.longDescription,
             cookDuration: recipe.recipeGeneralData.cookDuration.value(),
             cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
+            nutritionalInfo: recipe.getPresentedNutritionalInfo(),
             difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
             imageUrl: recipeUrl,
             weight: recipe.recipeGeneralData.recipeWeight.value(),

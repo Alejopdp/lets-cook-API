@@ -12,6 +12,7 @@ export class GetRecipeByIdPresenter {
             longDescription: recipe.recipeGeneralData.recipeDescription.longDescription,
             cookDuration: recipe.recipeGeneralData.cookDuration.value(),
             cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
+            nutritionalInfo: recipe.getPresentedNutritionalInfo(),
             difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
             imageUrl: recipe.recipeGeneralData.imageUrl,
             weight: recipe.recipeGeneralData.recipeWeight.value(),
