@@ -7,6 +7,7 @@ export const getMockRecipeVartiantRestrictions = () => {
     const vegano = new RecipeVariantRestriction("Apto vegano", "vegano");
     const aptoVeganoSinGluten = new RecipeVariantRestriction("Apto vegano sin gluten", "Apto vegano sin gluten");
     const sinGlutenSinLactosa = new RecipeVariantRestriction("Sin gluten y lactosa", "Sin gluten y lactosa");
+    const aptoTodo = new RecipeVariantRestriction("Apto todo", "apto_todo");
 
-    return [sinGluten, sinLactosa, vegano, aptoVeganoSinGluten, sinGlutenSinLactosa];
+    return [sinGluten, sinLactosa, vegano, aptoVeganoSinGluten, sinGlutenSinLactosa, aptoTodo];
 };
