@@ -8,6 +8,7 @@ import { RecipeSku } from "../../domain/recipe/RecipeGeneralData/RecipeSku";
 import { RecipeWeight } from "../../domain/recipe/RecipeGeneralData/RecipeWeight";
 import { WeightUnit } from "../../domain/recipe/RecipeGeneralData/WeightUnit";
 import { RecipeId } from "../../domain/recipe/RecipeId";
+import { NutritionalItem } from "../../domain/recipe/RecipeNutritionalData/NutritionalItem";
 import { RecipeNutritionalData } from "../../domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
 import { RecipeTag } from "../../domain/recipe/RecipeTag";
 import { RecipeVariant } from "../../domain/recipe/RecipeVariant/RecipeVariant";
@@ -68,7 +69,8 @@ export class UpdateRecipe {
         );
         const recipeImageTags: RecipeTag[] = dto.imageTags.map((tag: string) => new RecipeTag(tag));
         const recipeBackOfficeTags: RecipeTag[] = dto.backOfficeTags.map((tag: string) => new RecipeTag(tag));
-        const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData([]); // TO DO: Get from DTO
+        const nutritionalItems: NutritionalItem[] = dto.nutritionalInfo.map((item) => new NutritionalItem(item.key, item.value));
+        const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData(nutritionalItems);
 
         if (!recipe.recipeGeneralData.equals(recipeGeneralData)) recipe.recipeGeneralData = recipeGeneralData;
 

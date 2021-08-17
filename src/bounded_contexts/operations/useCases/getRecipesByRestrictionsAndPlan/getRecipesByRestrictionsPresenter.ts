@@ -72,7 +72,7 @@ export class GetRecipesByRestrictionsPresenter {
                             : [],
                     imageTags: recipe.recipeImageTags.map((tag: any) => tag.name),
                     backOfficeTags: recipe.recipeBackOfficeTags.map((tag: any) => tag.name),
-                    recipeNutritionalData: recipe.recipeNutritionalData.nutritionalItems,
+                    nutritionalInfo: recipe.getPresentedNutritionalInfo(),
                     availableWeeks: recipe.availableWeeks.map((week: Week) => {
                         return {
                             id: week.id.value,

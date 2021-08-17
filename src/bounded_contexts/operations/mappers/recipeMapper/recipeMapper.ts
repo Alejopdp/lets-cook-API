@@ -7,6 +7,7 @@ import { Month } from "../../domain/recipe/Months";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { RecipeGeneralData } from "../../domain/recipe/RecipeGeneralData/RecipeGeneralData";
 import { RecipeId } from "../../domain/recipe/RecipeId";
+import { NutritionalItem } from "../../domain/recipe/RecipeNutritionalData/NutritionalItem";
 import { RecipeNutritionalData } from "../../domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
 import { RecipeTag } from "../../domain/recipe/RecipeTag";
 import { RecipeVariant } from "../../domain/recipe/RecipeVariant/RecipeVariant";
@@ -22,7 +23,10 @@ export class RecipeMapper implements Mapper<Recipe> {
         const availableMonths: Month[] = raw.availableMonths.map((month: any) => (<any>Month)[month]);
         const relatedPlansIds: PlanId[] = raw.relatedPlans.map((id: string) => new PlanId(id));
         const recipeTools: string[] = raw.tools;
-        const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData([]);
+        const nutritionalItems: NutritionalItem[] = raw.nutritionalInfo.map(
+            (item: { key: string; value: string }) => new NutritionalItem(item.key, item.value)
+        );
+        const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData(nutritionalItems);
 
         return new Recipe(
             recipeGeneralData,
@@ -44,6 +48,7 @@ export class RecipeMapper implements Mapper<Recipe> {
         const availableWeeks = t.availableWeeks.map((week) => week.id.value);
         const backOfficeTags = t.recipeBackOfficeTags.map((tag) => tag.name);
         const relatedPlans = t.relatedPlans.map((planId) => planId.value);
+        const nutritionalInfo = t.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
         const imageTags = t.recipeImageTags.map((tag) => tag.name);
 
         return {
@@ -53,6 +58,7 @@ export class RecipeMapper implements Mapper<Recipe> {
             availableMonths: t.availableMonths,
             availableWeeks,
             relatedPlans,
+            nutritionalInfo,
             backOfficeTags,
             imageTags,
         };

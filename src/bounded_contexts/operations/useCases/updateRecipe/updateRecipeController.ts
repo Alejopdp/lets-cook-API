@@ -27,8 +27,6 @@ export class UpdateRecipeController extends BaseController {
                 recipeImageFileName = this.req.file.originalname;
             }
 
-            console.log("EL VODY: ", this.req.body);
-
             const dto: UpdateRecipeDto = {
                 recipeId: this.req.params.id,
                 availableMonths: JSON.parse(this.req.body.availableMonths)
@@ -43,7 +41,7 @@ export class UpdateRecipeController extends BaseController {
                 shortDescription: this.req.body.shortDescription,
                 longDescription: this.req.body.longDescription,
                 name: this.req.body.name,
-                nutritionalInfo: [],
+                nutritionalInfo: JSON.parse(this.req.body.nutritionalInfo),
                 relatedPlans: JSON.parse(this.req.body.planIds),
                 sku: this.req.body.sku,
                 weight: this.req.body.weight,

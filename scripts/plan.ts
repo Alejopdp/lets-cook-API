@@ -199,9 +199,9 @@ export const getMockPlans = () => {
 
     const plan1: Plan = Plan.create(
         "Plan Familiar",
-        "Plan para toda la familia",
+        "Compuesto por recetas deliciosas aprobadas por los niños y que los adultos aman. Cuenta con total libertad para elegir platos equilibrados",
         new PlanSku("PLFML1"),
-        "development/plan-test-image.jpg",
+        "development/plan-familiar.webp",
         true,
         PlanType.Principal,
         [variantWithoutGluten1, variantWithoutGlutenAndMilk1, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
@@ -217,9 +217,9 @@ export const getMockPlans = () => {
 
     const plan2: Plan = Plan.create(
         "Plan Gourmet",
-        "Plan gourmet",
+        "Compuesto por la mejor selección de platos de la cocina nacional e internacional, con total libertad para elegir platos sabrosos y saludables.",
         new PlanSku("PLVEG1"),
-        "development/plan-test-image.jpg",
+        "development/plan-gourmet.webp",
         true,
         PlanType.Principal,
         [variantWithoutGluten2, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
@@ -235,9 +235,9 @@ export const getMockPlans = () => {
 
     const plan3: Plan = Plan.create(
         "Plan Ahorro",
-        "Plan ahorro",
+        "Cuidamos tu bolsillo decidiendo por ti en base a los gustos e intolerancias que avises a la hora de darte de alta.",
         new PlanSku("PLCAR1"),
-        "development/plan-test-image.jpg",
+        "development/plan-ahorro.webp",
         true,
         PlanType.Principal,
         [variantWithoutGluten3, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
@@ -253,9 +253,9 @@ export const getMockPlans = () => {
 
     const plan4: Plan = Plan.create(
         "Plan Vegetariano",
-        "Plan Vegetariano",
+        "Incluye una gran diversidad de platos vegetarianos cada semana para poder seguir una dieta rica y variada.",
         new PlanSku("PLFML2"),
-        "development/plan-test-image.jpg",
+        "development/plan-vegetariano.webp",
         true,
         PlanType.Principal,
         [variantWithoutGluten4, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
@@ -271,9 +271,9 @@ export const getMockPlans = () => {
 
     const plan5: Plan = Plan.create(
         "Plan Vegano",
-        "Plan Vegano",
+        "Adaptamos las recetas para que puedas tener una dieta 100% a base de plantas, eligiendo cada semana platos ricos y sanos.",
         new PlanSku("PLFML2"),
-        "development/plan-test-image.jpg",
+        "development/plan-vegano.webp",
         true,
         PlanType.Principal,
         [variantWithoutGluten5, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],

@@ -19,7 +19,7 @@ export interface CreateRecipeDto {
     recipeImage: ReadStream;
     recipeImageExtension: string;
     imageTags: string[];
-    nutritionalInfo: string[];
+    nutritionalInfo: { key: string; value: string }[];
     availableWeeksIds: number[] | string[];
     availableMonths: Month[];
     backOfficeTags: string[];
