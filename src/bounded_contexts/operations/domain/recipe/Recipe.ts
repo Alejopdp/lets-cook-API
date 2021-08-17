@@ -34,6 +34,8 @@ export class Recipe extends Entity<Recipe> {
         recipeTools: string[],
         id?: RecipeId
     ) {
+        if (!Array.isArray(recipeVariants) || recipeVariants.length === 0)
+            throw new Error("Es necesario agregar al menos una variante a la receta");
         super(id);
         this._recipeGeneralData = recipeGeneralData;
         this._recipeVariants = recipeVariants;
