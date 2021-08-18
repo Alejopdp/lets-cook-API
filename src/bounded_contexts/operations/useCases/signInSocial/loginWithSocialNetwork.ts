@@ -36,6 +36,9 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
         user = await app.auth().getUser(decodedToken.uid);
         userEmail = user.email || user.providerData[0]?.email || "";
 
+        console.log("DECODED TOKEN: ", decodedToken);
+        console.log("USER: ", user);
+
         var customer: Customer | undefined = await this.customerRepository.findByEmail(userEmail);
 
         if (!!!customer) {
