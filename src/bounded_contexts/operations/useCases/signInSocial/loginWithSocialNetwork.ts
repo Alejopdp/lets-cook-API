@@ -7,15 +7,16 @@ import { ICustomerRepository } from "../../infra/repositories/customer/ICustomer
 import { LoginWithSocialMediaDto } from "./loginWithSocialMediaDto";
 import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser } from "./loginWithEmailErrors";
 import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
-var admin = require("firebase-admin");
+import { initializeApp, credential } from "firebase-admin";
+// var admin = require("firebase-admin");
 const firebaseAdminConfig = require("../../../../../firebase-admin.json");
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { logger } from "../../../../../config";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
-const app = admin.initializeApp({
-    credential: admin.credential.cert(firebaseAdminConfig),
+const app = initializeApp({
+    credential: credential.cert(firebaseAdminConfig),
 });
 
 export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, Promise<Response>> {
@@ -34,7 +35,7 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
         var userEmail: string = "";
         const decodedToken = await app.auth().verifyIdToken(dto.idToken);
         user = await app.auth().getUser(decodedToken.uid);
-        userEmail = user.email || user.providerData[0]?.email || "";
+        userEmail = user.email || user.providerData[0]?.email || dto.email || "";
 
         var customer: Customer | undefined = await this.customerRepository.findByEmail(userEmail);
 

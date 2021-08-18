@@ -195,12 +195,20 @@ export class Customer extends Entity<Customer> {
         }
     }
 
-    public getShippingAddress(locale: Locale = Locale.es): { name?: string; details?: string; preferredShippingHour: string } {
+    public getShippingAddress(locale: Locale = Locale.es): {
+        name?: string;
+        details?: string;
+        preferredShippingHour: string;
+        latitude?: number;
+        longitude?: number;
+    } {
         console.log(this.shippingAddress?.name);
         return {
             details: this.shippingAddress?.details,
             name: this.shippingAddress?.name,
             preferredShippingHour: this.shippingAddress?.deliveryTime?.getLabel(locale) || "Sin indicar",
+            latitude: this.shippingAddress?.latitude,
+            longitude: this.shippingAddress?.longitude,
         };
     }
 

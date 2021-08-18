@@ -1,3 +1,4 @@
 export interface LoginWithSocialMediaDto {
-    idToken: string
+    idToken: string;
+    email: string;
 }

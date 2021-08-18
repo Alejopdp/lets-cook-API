@@ -27,7 +27,7 @@ export class AddressMapper implements Mapper<Address> {
             addressName: t.name,
             addressFullName: t.fullName,
             addressDetails: t.details,
-            deliveryTime: t.deliveryTime?.value,
+            deliveryTime: t.deliveryTime?.value(),
             _id: t.id.value,
         };
     }

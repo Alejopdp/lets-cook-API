@@ -2,12 +2,6 @@ import { Locale } from "../../locale/Locale";
 import { IPreferredDeliveryTime } from "./IPreferredDeliveryTime";
 
 export class From8To12 implements IPreferredDeliveryTime {
-    private _value: string;
-
-    constructor(value: string) {
-        this._value = value;
-    }
-
     public getLabel(locale: Locale): string {
         switch (locale) {
             case Locale.es:
@@ -21,11 +15,7 @@ export class From8To12 implements IPreferredDeliveryTime {
         }
     }
 
-    /**
-     * Getter value
-     * @return {string}
-     */
-    public get value(): string {
-        return this._value;
+    public value(): string {
+        return "8 - 12";
     }
 }

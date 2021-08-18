@@ -43,6 +43,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         return paymentOrder ? paymentOrderMapper.toDomain(paymentOrder, locale) : undefined;
     }
 
+    public async findFutureOrdersByCustomer(customerId: CustomerId): Promise<PaymentOrder[]> {
+        return await this.findBy({ billingDate: { $gte: new Date() }, customer: customerId.value });
+    }
+
     public async findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {
         const paymentOrder: PaymentOrder | undefined = await this.findById(paymentOrderId, Locale.es);
 

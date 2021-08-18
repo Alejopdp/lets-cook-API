@@ -24,7 +24,6 @@ export class GetRecipeListPresenter {
                 weight: recipe.recipeGeneralData.recipeWeight.value(),
                 weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
                 backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
-                nutritionalInfo: recipe.getPresentedNutritionalInfo(),
                 imageTags: recipe.recipeImageTags.map((tag) => tag.name),
                 availableWeeks: recipe.availableWeeks.map((week: Week) => {
                     return {

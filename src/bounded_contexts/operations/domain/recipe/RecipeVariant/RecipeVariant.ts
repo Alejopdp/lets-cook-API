@@ -12,6 +12,7 @@ export class RecipeVariant extends Entity<RecipeVariant> {
 
     constructor(ingredients: Ingredient[], restriction: RecipeVariantRestriction, sku: RecipeVariantSku, id?: RecipeVariantId) {
         super(id);
+        if (!!!restriction) throw new Error("Es obligatorio indicar una restricción a todas las variantes");
         this._ingredients = _.uniqBy(ingredients, (ing) => ing.name);
         this._restriction = restriction;
         this._sku = sku;

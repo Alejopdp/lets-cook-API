@@ -68,7 +68,7 @@ export class GetPlanByIdPresenter {
             name: plan.name,
             sku: plan.planSku.code,
             description: plan.description,
-            availablePlanFrecuencies: plan.availablePlanFrecuencies,
+            availablePlanFrecuencies: plan.availablePlanFrecuencies.map((freq) => ({ value: freq.value(), label: freq.getLabel() })),
             isActive: plan.isActive,
             type: plan.type,
             imageUrl: plan.imageUrl ? await this.storageService.getPresignedUrlForFile(plan.imageUrl) : "",
