@@ -7,15 +7,16 @@ import { ICustomerRepository } from "../../infra/repositories/customer/ICustomer
 import { LoginWithSocialMediaDto } from "./loginWithSocialMediaDto";
 import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser } from "./loginWithEmailErrors";
 import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
-var admin = require("firebase-admin");
+import { initializeApp, credential } from "firebase-admin";
+// var admin = require("firebase-admin");
 const firebaseAdminConfig = require("../../../../../firebase-admin.json");
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { logger } from "../../../../../config";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
-const app = admin.initializeApp({
-    credential: admin.credential.cert(firebaseAdminConfig),
+const app = initializeApp({
+    credential: credential.cert(firebaseAdminConfig),
 });
 
 export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, Promise<Response>> {
