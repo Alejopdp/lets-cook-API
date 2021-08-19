@@ -1,11 +1,23 @@
 import mongoose from "mongoose";
+import * as uuid from "uuid";
 
 const IngredientSchema = new mongoose.Schema(
     {
-        name: {
+        _id: {
             type: String,
-            required: true,
-            unique: true,
+            default: uuid.v4(),
+        },
+        name: {
+            es: {
+                type: String,
+                required: true,
+                unique: true,
+            },
+            en: {
+                type: String,
+                // required: true,
+                unique: true,
+            },
         },
 
         deletionFlag: {

@@ -1,10 +1,13 @@
 import { IValueObject } from "../../../../core/domain/ValueObject";
+import { IngredientId } from "./ingredientId";
 
 export class Ingredient implements IValueObject<Ingredient> {
     private _name: string;
+    private _id: IngredientId;
 
-    constructor(name: string) {
+    constructor(name: string, id?: IngredientId) {
         this._name = name;
+        this._id = id ? id : new IngredientId();
     }
 
     public equals(anIngredient: Ingredient): boolean {
@@ -17,5 +20,13 @@ export class Ingredient implements IValueObject<Ingredient> {
      */
     public get name(): string {
         return this._name;
+    }
+
+    /**
+     * Getter id
+     * @return {IngredientId}
+     */
+    public get id(): IngredientId {
+        return this._id;
     }
 }
