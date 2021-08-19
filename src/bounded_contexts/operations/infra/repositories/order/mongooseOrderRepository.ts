@@ -81,7 +81,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .populate("week")
             .populate({
                 path: "recipeSelection",
-                populate: { path: "recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } },
+                populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
             });
 
         return orderDb ? orderMapper.toDomain(orderDb) : undefined;
@@ -100,7 +100,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .populate("week")
             .populate({
                 path: "recipeSelection",
-                populate: { path: "recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } },
+                populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
             });
 
         return orderDb ? orderMapper.toDomain(orderDb, locale) : undefined;
@@ -134,7 +134,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .populate("week")
             .populate({
                 path: "recipeSelection",
-                populate: { path: "recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } },
+                populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
             });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
@@ -148,7 +148,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .populate("week")
             .populate({
                 path: "recipeSelection",
-                populate: { path: "recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } },
+                populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
             });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
@@ -169,7 +169,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .populate("week")
             .populate({
                 path: "recipeSelection",
-                populate: { path: "recipe", populate: { path: "recipesVariants", populate: { path: "restriction" } } },
+                populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
             });
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, Locale.es));
