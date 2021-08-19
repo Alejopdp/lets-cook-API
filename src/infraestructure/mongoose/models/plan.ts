@@ -41,6 +41,11 @@ const PlanVariantSchema = new mongoose.Schema({
         required: true,
     },
 
+    isDeleted: {
+        type: Boolean,
+        default: false,
+        required: true,
+    },
     attributes: [
         {
             key: String,

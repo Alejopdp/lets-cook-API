@@ -7,6 +7,7 @@ import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Query, QueryOptions } from "mongoose";
+import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 
 export class MongooseSubscriptionRepository implements ISubscriptionRepository {
     public async save(subscription: Subscription): Promise<void> {
@@ -72,6 +73,10 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
 
     public async findActiveSusbcriptionsByCustomerIdList(customersIds: CustomerId[]): Promise<Subscription[]> {
         return await this.findBy({ customer: customersIds.map((id) => id.value), state: "SUBSCRIPTION_ACTIVE" }, Locale.es);
+    }
+
+    public async findActiveSubscriptionByPlanVariantsIds(planVariantsIds: PlanVariantId[]): Promise<Subscription[]> {
+        return await this.findBy({ planVariant: planVariantsIds.map((id) => id.value), state: "SUBSCRIPTION_ACTIVE" });
     }
 
     public async findByCustomerId(customerId: CustomerId): Promise<Subscription[]> {

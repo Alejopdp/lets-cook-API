@@ -63,7 +63,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                 var presentedVariants = [];
 
                 for (let variant of plan.planVariants) {
-                    presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes, plan));
+                    if (!variant.isDeleted) presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes, plan));
                 }
 
                 const presentedAdditionalPlans = plan.additionalPlans.map(
