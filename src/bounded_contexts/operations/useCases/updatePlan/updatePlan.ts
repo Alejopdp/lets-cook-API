@@ -9,19 +9,24 @@ import { PlanVariantAttribute } from "../../domain/plan/PlanVariant/PlanVariantA
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
 import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
+import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { UpdatePlanDto } from "./updatePlanDto";
 
 export class UpdatePlan {
     private _planRepository: IPlanRepository;
+    private _subscriptionRepository: ISubscriptionRepository;
     private _storageService: IStorageService;
 
-    constructor(planRepository: IPlanRepository, storageService: IStorageService) {
+    constructor(planRepository: IPlanRepository, subscriptionRepository: ISubscriptionRepository, storageService: IStorageService) {
         this._planRepository = planRepository;
+        this._subscriptionRepository = subscriptionRepository;
         this._storageService = storageService;
     }
 
     public async execute(dto: UpdatePlanDto): Promise<void> {
         const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.id), dto.locale);
+        if (!plan) throw new Error("El plan ingresado no existe");
+
         const additionalPlans: Plan[] =
             dto.additionalPlansIds.length > 0
                 ? await this.planRepository.findAdditionalPlanListById(
@@ -30,8 +35,6 @@ export class UpdatePlan {
                       dto.locale
                   )
                 : [];
-
-        if (!plan) throw new Error("El plan ingresado no existe");
 
         const planSku: PlanSku = new PlanSku(dto.planSku);
         const planVariants: PlanVariant[] = [];
@@ -54,7 +57,9 @@ export class UpdatePlan {
                         attr.key.toLowerCase() !== "isdeleted" &&
                         attr.key.toLowerCase() !== "deleted" &&
                         attr.key.toLowerCase() !== "description" &&
-                        attr.key.toLowerCase() !== "attributes"
+                        attr.key.toLowerCase() !== "attributes" &&
+                        attr.key.toLowerCase() !== "auxid" &&
+                        attr.key.toLowerCase() !== "oldid"
                 );
 
                 let variantWithRecipe: PlanVariantWithRecipe = new PlanVariantWithRecipe(
@@ -67,7 +72,8 @@ export class UpdatePlan {
                     attributes,
                     variant.description,
                     variant.isDefault,
-                    new PlanVariantId(variant.id)
+                    variant.isDeleted,
+                    new PlanVariantId(variant.oldId)
                     // variant.description
                 );
                 planVariants.push(variantWithRecipe);
@@ -92,6 +98,7 @@ export class UpdatePlan {
                     attributes,
                     variant.description,
                     variant.isDefault,
+                    variant.isDeleted,
                     variant.priceWithOffer,
                     new PlanVariantId(variant.id)
                 );
@@ -99,7 +106,16 @@ export class UpdatePlan {
             }
         }
 
-        console.log("DOMAIN PLAN VARIANTS: ", planVariants);
+        const planVariantsIds: PlanVariantId[] = planVariants.reduce(
+            (acc: PlanVariantId[], planVariant) => (planVariant.isDeleted ? [...acc, planVariant.id] : acc),
+            []
+        );
+        const subscriptionsWithOneOfThePlanVariants = await this.subscriptionRepository.findActiveSubscriptionByPlanVariantsIds(
+            planVariantsIds
+        );
+
+        if (subscriptionsWithOneOfThePlanVariants.length > 0)
+            throw new Error("No puedes borrar una variante que está relacionada a una suscripción activa");
 
         if (dto.planImage) {
             const imageUrl = await this.storageService.savePlanImage(dto.planName, dto.planImageFileName, dto.planImage);
@@ -152,5 +168,13 @@ export class UpdatePlan {
      */
     public get storageService(): IStorageService {
         return this._storageService;
+    }
+
+    /**
+     * Getter subscriptionRepository
+     * @return {ISubscriptionRepository}
+     */
+    public get subscriptionRepository(): ISubscriptionRepository {
+        return this._subscriptionRepository;
     }
 }

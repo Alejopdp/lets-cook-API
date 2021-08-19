@@ -11,6 +11,7 @@ export class PlanVariant extends Entity<PlanVariant> {
     private _attributes: PlanVariantAttribute[];
     private _description: string;
     private _isDefault: boolean;
+    private _isDeleted: boolean;
 
     constructor(
         sku: PlanSku,
@@ -19,6 +20,7 @@ export class PlanVariant extends Entity<PlanVariant> {
         attributes: PlanVariantAttribute[],
         description: string,
         isDefault: boolean,
+        isDeleted: boolean,
         priceWithOffer?: number,
         planVariantId?: PlanVariantId
     ) {
@@ -30,6 +32,7 @@ export class PlanVariant extends Entity<PlanVariant> {
         this._attributes = attributes;
         this._description = description;
         this._isDefault = isDefault;
+        this._isDeleted = isDeleted;
     }
 
     public getConcatenatedAttributesAsString(): string {
@@ -50,7 +53,11 @@ export class PlanVariant extends Entity<PlanVariant> {
     public getServingsQuantity(): number {
         return 0;
     }
-    
+
+    public getAuxIdFromAttributes(): string {
+        return "";
+    }
+
     /**
      * Getter sku
      * @return {PlanSku}
@@ -108,6 +115,14 @@ export class PlanVariant extends Entity<PlanVariant> {
     }
 
     /**
+     * Getter isDeleted
+     * @return {boolean}
+     */
+    public get isDeleted(): boolean {
+        return this._isDeleted;
+    }
+
+    /**
      * Setter sku
      * @param {PlanSku} value
      */
@@ -161,5 +176,13 @@ export class PlanVariant extends Entity<PlanVariant> {
      */
     public set isDefault(value: boolean) {
         this._isDefault = value;
+    }
+
+    /**
+     * Setter isDeleted
+     * @param {boolean} value
+     */
+    public set isDeleted(value: boolean) {
+        this._isDeleted = value;
     }
 }

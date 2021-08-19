@@ -63,8 +63,9 @@ export class CreatePlan {
                     variant.price,
                     variant.priceWithOffer,
                     attributes,
-                    "description",
-                    variant.isDefault
+                    variant.description,
+                    variant.isDefault,
+                    variant.isDeleted
                 );
                 planVariants.push(variantWithRecipe);
             } else {
@@ -85,8 +86,9 @@ export class CreatePlan {
                     "",
                     variant.price,
                     attributes,
-                    "description",
-                    // variant.description
+                    variant.description,
+                    variant.isDefault,
+                    variant.isDeleted,
                     variant.priceWithOffer
                 );
                 planVariants.push(planVariant);

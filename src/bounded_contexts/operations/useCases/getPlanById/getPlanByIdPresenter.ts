@@ -31,16 +31,24 @@ export class GetPlanByIdPresenter {
             if (plan.hasRecipes) {
                 presentedVariants.push({
                     id: variant.id.value,
+                    oldId: variant.id.value,
                     isDefault: variant.isDefault,
                     sku: variant.sku.code,
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
                     description: variant.description,
+                    isDeleted: variant.isDeleted,
                     //@ts-ignore
                     Personas: variant.numberOfPersons,
                     //@ts-ignore
                     Recetas: variant.numberOfRecipes,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
+                    auxId:
+                        variant.attributes.reduce((acc, attribute) => acc + attribute.value, "") +
+                        //@ts-ignore
+                        (variant.numberOfPersons?.toString() || "") +
+                        //@ts-ignore
+                        (variant.numberOfRecipes?.toString() || ""),
                 });
             } else {
                 presentedVariants.push({
@@ -51,6 +59,7 @@ export class GetPlanByIdPresenter {
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
+                    isDeleted: variant.isDeleted,
                 });
             }
             counter = 0;

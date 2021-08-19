@@ -217,9 +217,19 @@ export class Plan extends Entity<Plan> {
                 }
             }
         } else if (this.hasRecipes && !this.isPrincipal()) {
-            attributes["Recetas"] = [];
-
             for (let variant of this.planVariants) {
+                //@ts-ignore
+                if (variant.numberOfPersons) {
+                    if (!Array.isArray(attributes["Personas"])) attributes["Personas"] = [];
+                    const numberOfPersonsValues = attributes["Personas"];
+                    //@ts-ignore
+                    attributes["Personas"] = numberOfPersonsValues.includes(variant.numberOfPersons)
+                        ? numberOfPersonsValues
+                        : //@ts-ignore
+                          [...numberOfPersonsValues, variant.numberOfPersons];
+                }
+
+                if (!Array.isArray(attributes["Recetas"])) attributes["Recetas"] = [];
                 const recetasValues = attributes["Recetas"];
                 //@ts-ignore
                 attributes["Recetas"] = recetasValues.includes(variant.numberOfRecipes)
