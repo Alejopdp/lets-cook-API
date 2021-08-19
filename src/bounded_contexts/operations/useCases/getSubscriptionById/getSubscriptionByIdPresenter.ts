@@ -44,10 +44,15 @@ export class GetSubscriptionByIdPresenter {
 
         const nextActiveOrder: Order | undefined = subscription.getNextActiveOrder(orders);
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondActiveOrder(orders);
-        const hasChosenRecipesForActualWeek = !!!nextActiveOrder ? false : nextActiveOrder.hasChosenRecipes();
-        const hasChosenRecipesForNextWeek = !!!nextSecondActiveOrder ? false : nextSecondActiveOrder.hasChosenRecipes();
-        const actualWeekOrder = await this.presentWeekRecipes(nextActiveOrder);
-        const nextWeekOrder = await this.presentWeekRecipes(nextSecondActiveOrder); // TO DO: Get 2nd Next Active order
+        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? await this.presentWeekRecipes(nextActiveOrder) : null;
+        const nextWeekOrder =
+            nextActiveOrder && nextActiveOrder.isNextWeek()
+                ? nextActiveOrder
+                : nextSecondActiveOrder && nextSecondActiveOrder.isNextWeek()
+                ? nextSecondActiveOrder
+                : null; // TO DO: Get 2nd Next Active order
+        const hasChosenRecipesForActualWeek = !!!actualWeekOrder ? false : actualWeekOrder.hasChosenRecipes();
+        const hasChosenRecipesForNextWeek = !!!nextWeekOrder ? false : nextWeekOrder.hasChosenRecipes();
 
         const schedule = {
             nextDelivery: !!!nextActiveOrder ? "" : nextActiveOrder.getHumanShippmentDay(),
@@ -68,8 +73,9 @@ export class GetSubscriptionByIdPresenter {
             schedule,
             hasChosenRecipesForActualWeek,
             hasChosenRecipesForNextWeek,
-            actualWeekOrder,
-            nextWeekOrder,
+            actualWeekOrder: actualWeekOrder ? await this.presentWeekRecipes(actualWeekOrder) : null,
+            nextWeekOrder: nextWeekOrder ? await this.presentWeekRecipes(nextWeekOrder) : null,
+            canChooseRecipesForNextWeekOrder: nextWeekOrder && nextWeekOrder.isInTimeToChooseRecipes(),
             skippedOrders,
             canChooseRecipes,
             nextTwelveOrders,

@@ -5,11 +5,19 @@ import { ingredientMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
 
 export class MongooseIngredientRepository implements IIngredientRepository {
-    public async save(ingredient: Ingredient): Promise<void> {
+    public async save(ingredient: Ingredient, locale: Locale = Locale.es): Promise<void> {
         const ingredientToSave = ingredientMapper.toPersistence(ingredient);
+        if (await IngredientModel.exists({ _id: ingredient.id.value })) {
+            const nameLocaleKey = `name.${locale}`;
 
-        if (await IngredientModel.exists({ name: ingredient.name })) {
-            await IngredientModel.updateOne({ name: ingredient.name }, ingredientToSave);
+            await IngredientModel.updateOne(
+                { _id: ingredient.id.value },
+                {
+                    $set: {
+                        [nameLocaleKey]: ingredientToSave.name[locale],
+                    },
+                }
+            );
         } else {
             await IngredientModel.create(ingredientToSave);
         }
@@ -21,16 +29,28 @@ export class MongooseIngredientRepository implements IIngredientRepository {
         await IngredientModel.create(ingredientsToSave);
     }
 
+    public async updateMany(ingredients: Ingredient[], locale: Locale = Locale.es): Promise<void> {
+        // const ingredientsToSave = ingredients.map((ingredient) => ingredientMapper.toPersistence(ingredient));
+        // const nameLocaleKey = `name.${locale}`;
+        // for (let ingredient of )
+        // await IngredientModel.updateMany({$set: {
+        //     [nameLocaleKey]: name[locale],
+        // },})
+    }
+
     public async findAll(): Promise<Ingredient[]> {
         return await this.findBy({});
     }
 
-    public async findAllByName(names: string[]): Promise<Ingredient[]> {
-        return await this.findBy({ name: names });
+    public async findAllByName(names: string[], locale: Locale = Locale.es): Promise<Ingredient[]> {
+        const nameLocaleKey = `name.${locale}`;
+
+        return await this.findBy({ [nameLocaleKey]: names });
     }
 
-    public async findByName(name: string): Promise<Ingredient | undefined> {
-        const ingredientDb = await IngredientModel.findOne({ name });
+    public async findByName(name: string, locale: Locale = Locale.es): Promise<Ingredient | undefined> {
+        const nameLocaleKey = `name.${locale}`;
+        const ingredientDb = await IngredientModel.findOne({ [nameLocaleKey]: name });
 
         return ingredientDb ? ingredientMapper.toDomain(ingredientDb) : undefined;
     }

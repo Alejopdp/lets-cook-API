@@ -170,6 +170,29 @@ export class Order extends Entity<Order> {
         return this.plan.getPlanVariantLabel(planVariantId);
     }
 
+    public isActualWeek(): boolean {
+        const date: Date = new Date();
+
+        return date >= this.week.minDay && date <= this.week.maxDay;
+    }
+
+    public isInTimeToChooseRecipes(): boolean {
+        const today = new Date();
+        const fridayAt2359: Date = new Date(today.getFullYear(), today.getMonth());
+        const differenceInDays = 5 - today.getDay();
+
+        fridayAt2359.setDate(today.getDate() + differenceInDays); // Delivery day of this week
+        fridayAt2359.setHours(23, 59, 59);
+
+        return today < fridayAt2359 && today < this.week.minDay;
+    }
+
+    public isNextWeek(): boolean {
+        const date: Date = new Date();
+        const minDayDifferenceInDays = (this.week.minDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
+
+        return minDayDifferenceInDays < 7 && date <= this.week.minDay;
+    }
     /**
      * Getter shippingDate
      * @return {Date}
