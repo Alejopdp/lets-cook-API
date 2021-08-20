@@ -255,6 +255,12 @@ export class Plan extends Entity<Plan> {
         return Object.entries(attributes);
     }
 
+    public getMinimumVariantPrice(): number {
+        return this.planVariants.reduce(
+            (acc, variant) => (variant.getPaymentPrice() < acc || acc === 0 ? variant.getPaymentPrice() : acc),
+            0
+        );
+    }
     /**
      * Getter name
      * @return {string}

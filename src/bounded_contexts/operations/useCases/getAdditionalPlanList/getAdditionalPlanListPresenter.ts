@@ -28,6 +28,7 @@ export class GetAdditionalPlanListPresenter {
                 abilityToChooseRecipes: plan.abilityToChooseRecipes,
                 variants: plan.planVariants.map((variant) => this.presentPlanVariant(variant, plan.hasRecipes, plan.id.value as string)),
                 slug: plan.planSlug.slug,
+                minimumVariantPrice: plan.getMinimumVariantPrice(),
             });
         }
 
