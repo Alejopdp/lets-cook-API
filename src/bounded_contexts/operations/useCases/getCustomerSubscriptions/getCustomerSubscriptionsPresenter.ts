@@ -82,8 +82,8 @@ export class GetCustomerSubscriptionsPresenter {
 
         pendingActions = [
             ...pendingActions,
-            { type: "rate_recipes" },
-            { type: "invite_code", couponCode: "ALEJOAMIGOS", discountValue: "5%" },
+            // { type: "rate_recipes" },
+            // { type: "invite_code", couponCode: "ALEJOAMIGOS", discountValue: "5%" },
         ];
 
         return {
