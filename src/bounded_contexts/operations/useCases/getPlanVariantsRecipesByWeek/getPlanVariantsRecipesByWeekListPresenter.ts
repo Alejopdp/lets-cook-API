@@ -175,6 +175,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             slug: plan.planSlug.slug, // TO DO: Get it from aggregate root
             icon,
             iconWithColor,
+            minimumVariantPrice: plan.getMinimumVariantPrice(),
         };
     }
 
