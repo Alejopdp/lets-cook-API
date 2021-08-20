@@ -256,6 +256,10 @@ export class Subscription extends Entity<Subscription> {
         return this.getPrice() - this.getCouponDiscount(shippingCost) + shippingCost;
     }
 
+    public getMaxRecipesQty(): number {
+        return this.plan.getPlanVariantById(this.planVariantId)?.numberOfRecipes || 0;
+    }
+
     public updateRestriction(newRestriction: RecipeVariantRestriction, comment?: string): void {
         this.restriction = newRestriction;
 
