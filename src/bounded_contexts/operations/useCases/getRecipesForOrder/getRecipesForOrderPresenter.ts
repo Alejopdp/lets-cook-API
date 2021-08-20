@@ -16,18 +16,18 @@ export class GetRecipesForOrderPresenter {
         const presentedRecipes = [];
 
         for (let recipe of recipes) {
-            presentedRecipes.push(await this.presentRecipe(recipe));
+            presentedRecipes.push(await this.presentRecipe(recipe, subscription));
         }
 
         return {
             recipes: presentedRecipes,
             nextDeliveryLabel: order.getHumanShippmentDay(),
-            maxRecipesQty: subscription.getServingsQuantity(),
+            maxRecipesQty: subscription.getMaxRecipesQty(),
             subscriptionId: subscription.id.value,
         };
     }
 
-    private async presentRecipe(recipe: Recipe): Promise<any> {
+    private async presentRecipe(recipe: Recipe, subscription: Subscription): Promise<any> {
         const recipeUrl = recipe.recipeGeneralData.imageUrl
             ? await this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
             : "";
@@ -57,13 +57,19 @@ export class GetRecipesForOrderPresenter {
             availableMonths: recipe.availableMonths,
             relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.value),
             tools: recipe.recipeTools,
-            recipeVariants: recipe.recipeVariants.map((variant) => {
-                return {
-                    ingredients: variant.ingredients.map((ing) => ing.name),
-                    restriction: { id: variant.restriction.id.value, value: variant.restriction.value, label: variant.restriction.label },
-                    sku: variant.sku.code,
-                };
-            }),
+            recipeVariants: recipe.recipeVariants
+                .filter((variant) => variant.restriction.id.equals(subscription.restriction?.id) || !!!subscription.restriction)
+                .map((variant) => {
+                    return {
+                        ingredients: variant.ingredients.map((ing) => ing.name),
+                        restriction: {
+                            id: variant.restriction.id.value,
+                            value: variant.restriction.value,
+                            label: variant.restriction.label,
+                        },
+                        sku: variant.sku.code,
+                    };
+                }),
         };
     }
 
