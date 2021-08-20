@@ -84,6 +84,10 @@ export class Order extends Entity<Order> {
     public isSkipped(): boolean {
         return this.state.isSkipped();
     }
+
+    public isCancelled(): boolean {
+        return this.state.isCancelled();
+    }
     public isPaymentPending(): boolean {
         return this.state.isPendingPayment();
     }
@@ -116,7 +120,13 @@ export class Order extends Entity<Order> {
         this.state.toBilled(this);
     }
 
-    public cancel(): void {
+    public cancel(paymentOrder?: PaymentOrder): void {
+        if (paymentOrder && !this.isCancelled()) {
+            paymentOrder.discountOrderAmount(this);
+        }
+
+        if (paymentOrder && paymentOrder.amount === 0) paymentOrder.toCancelled([]);
+
         this.state.toCancelled(this);
     }
 
