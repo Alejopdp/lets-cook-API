@@ -5,6 +5,7 @@ import { Coupon } from "../cupons/Cupon";
 import { Customer } from "../customer/Customer";
 import { Order } from "../order/Order";
 import { OrderActive } from "../order/orderState/OrderActive";
+import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { Plan } from "../plan/Plan";
 import { IPlanFrequency } from "../plan/PlanFrequency/IPlanFrequency";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
@@ -199,11 +200,11 @@ export class Subscription extends Entity<Subscription> {
         }
     }
 
-    public cancel(cancellationReason: CancellationReason, nextOrders: Order[]): void {
+    public cancel(cancellationReason: CancellationReason, nextOrders: Order[], paymentOrders: PaymentOrder[]): void {
         this.cancellationReason = cancellationReason;
 
         for (let order of nextOrders) {
-            order.cancel();
+            order.cancel(paymentOrders.find((paymentOrder) => paymentOrder.id.equals(order.paymentOrderId)));
         }
 
         this.state.toCancelled(this);
@@ -254,6 +255,10 @@ export class Subscription extends Entity<Subscription> {
 
     public getPriceWithDiscount(shippingCost: number): number {
         return this.getPrice() - this.getCouponDiscount(shippingCost) + shippingCost;
+    }
+
+    public getMaxRecipesQty(): number {
+        return this.plan.getPlanVariantById(this.planVariantId)?.numberOfRecipes || 0;
     }
 
     public updateRestriction(newRestriction: RecipeVariantRestriction, comment?: string): void {
