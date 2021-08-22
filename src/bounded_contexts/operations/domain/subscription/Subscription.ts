@@ -124,8 +124,15 @@ export class Subscription extends Entity<Subscription> {
 
     public getCouponDiscount(shippingCost: number): number {
         if (!!!this.coupon) return 0;
-        if (this.coupon.maxChargeQtyType !== "all_fee" && this.couponChargesQtyApplied >= this.coupon.maxChargeQtyValue) return 0;
+        if (!!!this.isCouponApplyable()) return 0;
+
         return this.coupon.getDiscount(this.plan, this.planVariantId, shippingCost);
+    }
+
+    private isCouponApplyable(): boolean {
+        return (
+            !!!this.coupon || (this.coupon.maxChargeQtyType !== "all_fee" && this.couponChargesQtyApplied <= this.coupon.maxChargeQtyValue)
+        );
     }
 
     public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week, shippingZone: ShippingZone): Order {

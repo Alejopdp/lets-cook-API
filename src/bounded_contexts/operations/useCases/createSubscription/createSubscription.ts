@@ -165,9 +165,7 @@ export class CreateSubscription {
                 customerSubscriptions.length > 0);
 
         const paymentIntent = await this.paymentService.paymentIntent(
-            hasFreeShipping
-                ? subscription.getPriceWithDiscount(customerShippingZone.cost) - customerShippingZone.cost
-                : subscription.getPriceWithDiscount(customerShippingZone.cost),
+            hasFreeShipping ? newPaymentOrders[0].getTotalAmount() - customerShippingZone.cost : newPaymentOrders[0].getTotalAmount(),
             dto.stripePaymentMethodId
                 ? dto.stripePaymentMethodId
                 : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
@@ -183,7 +181,6 @@ export class CreateSubscription {
         }
 
         // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
-        // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
         await this.customerRepository.save(customer);
