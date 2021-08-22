@@ -71,6 +71,7 @@ export class Coupon extends Entity<Coupon> {
         state: string,
         id?: CouponId
     ): Coupon {
+        const maxChargesQty = maxChargeQtyType === "only_fee" ? 1 : maxChargeQtyValue;
         return new Coupon(
             couponCode,
             type,
@@ -80,7 +81,7 @@ export class Coupon extends Entity<Coupon> {
             productsForApplyingValue,
             limites,
             maxChargeQtyType,
-            maxChargeQtyValue,
+            maxChargesQty,
             startDate,
             endDate,
             state,
@@ -125,14 +126,20 @@ export class Coupon extends Entity<Coupon> {
     public getDiscount(plan: Plan, planVariantId: PlanVariantId, shippingCost: number): number {
         const price = plan.getPlanVariantPrice(planVariantId);
         if (this.type.type === "free") return shippingCost;
-        else if (this.type.type === "percent") return (price * this.type.value) / 100;
-        else return price - this.type.value;
+        else if (this.type.type === "percent") {
+            return (price * this.type.value) / 100;
+        } else {
+            return price - this.type.value;
+        }
     }
 
     public isFreeShippingCoupon(): boolean {
         return this.type.type === "free";
     }
 
+    public isExpiredByEndDate(): boolean {
+        return !!this.endDate && new Date() < this.endDate;
+    }
     /**
      * Getter name
      * @return {string}
