@@ -57,10 +57,6 @@ export class AssignOrdersToPaymentOrders {
                     subscription: dto.subscription,
                 };
                 newPaymentOrders = this.createPaymentOrdersService.execute(createPaymentOrdersServiceDto);
-
-                // for (let order of ordersWithoutPaymentOrders) {
-                //     order.assignPaymentOrder(newPaymentOrders);
-                // }
             }
         }
 
