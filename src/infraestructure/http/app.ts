@@ -2,6 +2,9 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
+import * as Sentry from "@sentry/node";
+import * as Tracing from "@sentry/tracing";
+import * as http from "http";
 import { v1Router } from "./api/v1";
 import { billingJob } from "../../bounded_contexts/operations/application/billingJob";
 
@@ -21,7 +24,31 @@ app.use(
     })
 );
 
+Sentry.init({
+    dsn: "https://9b2a5dd18dc3451fb38e9050b13df102@o968175.ingest.sentry.io/5919601",
+    integrations: [
+        // enable HTTP calls tracing
+        new Sentry.Integrations.Http({ tracing: true }),
+        // enable Express.js middleware tracing
+        new Tracing.Integrations.Express({
+            // to trace all requests to the default router
+            app,
+            // alternatively, you can specify the routes you want to trace:
+            // router: someRouter,
+        }),
+    ],
+    debug: true,
+    tracesSampleRate: 1.0,
+});
+
 app.use("/api/v1", v1Router);
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
+
+// the rest of your app
+
+app.use(Sentry.Handlers.errorHandler());
 
 billingJob.initialize();
 

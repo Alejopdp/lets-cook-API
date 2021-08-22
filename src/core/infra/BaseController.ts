@@ -1,5 +1,6 @@
 import * as express from "express";
 import { logger } from "../../../config";
+import { sentryService } from "../../shared/monitoring";
 
 export abstract class BaseController {
     // or even private
@@ -8,12 +9,22 @@ export abstract class BaseController {
 
     protected abstract executeImpl(): Promise<void | any>;
 
-    public execute(req: express.Request, res: express.Response): void {
+    public async execute(req: express.Request, res: express.Response): Promise<void> {
         this.req = req;
         this.res = res;
-        logger.debug(`${this.req.method} ${this.req.protocol}://${this.req.get("host")}${this.req.originalUrl}`);
+        const service = `${this.req.method} ${this.req.protocol}://${this.req.get("host")}${this.req.originalUrl}`;
+        logger.debug(service);
 
-        this.executeImpl();
+        const sentryTransaction = sentryService.createTransaction(this.req.method, this.req.originalUrl);
+        try {
+            await this.executeImpl();
+        } catch (error) {
+            sentryService.catchException(error);
+        } finally {
+            sentryService.endTransaction(sentryTransaction);
+        }
+
+        // this.executeImpl();
     }
 
     public static jsonResponse(res: express.Response, code: number, message: string) {
