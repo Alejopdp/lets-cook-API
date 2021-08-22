@@ -1,10 +1,9 @@
 import * as dotenv from "dotenv";
-// import * as admin from "firebase-admin";
 import winston from "winston";
 
 dotenv.config();
 
-const enviroment = process.env.NODE_ENV || "Development";
+// const enviroment = process.env.NODE_ENV || "Development";
 const port = process.env.PORT || "3001";
 
 // Logging
@@ -42,10 +41,4 @@ process.env.CADUCIDAD_TOKEN = "30d";
 
 var restoreDb = process.env.DB_RESTORE === "true" || false;
 
-// Conecto con Firebase
-
-// admin.initializeApp({
-//   credential: admin.credential.applicationDefault(),
-// });
-
-export { restoreDb, logger, enviroment };
+export { restoreDb, logger };
