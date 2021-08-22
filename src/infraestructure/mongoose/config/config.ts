@@ -6,6 +6,7 @@ import { getConfig } from "../../../config/config";
 export const connectToDatabase = async () => {
     const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
     // const mongoUri: string = ((process.env.URLDB as string) + "staging") as string;
+    logger.info(`AMBIENTE: ${process.env.NODE_ENV}`);
 
     try {
         await mongoose.connect(mongoUri, {
