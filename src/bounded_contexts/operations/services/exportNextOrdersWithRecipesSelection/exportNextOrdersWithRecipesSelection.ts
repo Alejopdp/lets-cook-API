@@ -26,7 +26,8 @@ export class ExportNextOrdersWithRecipesSelection {
 
     public async execute(): Promise<void> {
         const date = new Date();
-        date.setDate(date.getDate() + 7);
+        if (date.getDay() === 5 || date.getDay() === 6) date.setDate(date.getDate() + 7);
+
         const actualWeek: Week | undefined = await this.weekRepository.findCurrentWeek(date);
         if (!!!actualWeek) throw new Error("Está queriendo exportar ordenes de una semana no registrada en la base de datos");
         const orders: Order[] = await this.orderRepository.findByWeek(actualWeek.id);
