@@ -78,8 +78,10 @@ async function migrateOrders() {
 
 async function migrate() {
     // En teoría acá sólo debería haber aggregate roots.
-    await migrateCustomers();
-    await migrateOrders();
+    Promise.all([
+        migrateCustomers(),
+        migrateOrders()
+    ]);
 }
 
 migrate();
