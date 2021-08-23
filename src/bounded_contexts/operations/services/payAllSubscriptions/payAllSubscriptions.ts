@@ -187,13 +187,13 @@ export class PayAllSubscriptions {
             }
         }
 
-        logger.info(`New Payment orders: ${JSON.stringify(newPaymentOrders)}`);
-        logger.info(`orders: ${JSON.stringify(newOrders)}`);
-        logger.info(`BILLED ORDERS: ${JSON.stringify(ordersToBill)}`);
+        // logger.info(`New Payment orders: ${JSON.stringify(newPaymentOrders)}`);
+        // logger.info(`orders: ${JSON.stringify(newOrders)}`);
+        // logger.info(`BILLED ORDERS: ${JSON.stringify(ordersToBill)}`);
 
-        // await this.orderRepository.saveOrdersWithNewState(ordersToBill);
-        // await this.orderRepository.bulkSave(newOrders);
-        // await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+        await this.orderRepository.saveOrdersWithNewState(ordersToBill);
+        await this.orderRepository.bulkSave(newOrders);
+        await this.paymentOrderRepository.bulkSave(newPaymentOrders);
     }
 
     /**

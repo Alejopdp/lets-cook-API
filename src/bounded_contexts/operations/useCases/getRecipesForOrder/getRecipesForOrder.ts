@@ -22,6 +22,14 @@ export class GetRecipesForOrder {
         const order: Order = await this.orderRepository.findByIdOrThrow(orderId);
         const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId);
         const recipes: Recipe[] = await this.recipeRepository.findForOrder(order, subscription.restriction?.id);
+        recipes.forEach(
+            (recipe) =>
+                (recipe.recipeVariants = recipe.recipeVariants.filter((variant) =>
+                    subscription.restriction
+                        ? variant.restriction.equals(subscription.restriction)
+                        : variant.restriction.value === "apto_todo"
+                ))
+        );
 
         return { recipes, order, subscription };
     }

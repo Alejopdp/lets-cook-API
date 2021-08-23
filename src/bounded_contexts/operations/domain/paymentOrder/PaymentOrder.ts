@@ -45,7 +45,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     public addOrder(order: Order): void {
         order.paymentOrderId = this.id;
         this.amount = this.amount + order.price; // TO DO: Add price with discount
-        this.discountAmount = this.discountAmount + order.discountAmount; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+        this.discountAmount += order.discountAmount; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
     }
 
     public discountOrderAmount(order: Order): void {

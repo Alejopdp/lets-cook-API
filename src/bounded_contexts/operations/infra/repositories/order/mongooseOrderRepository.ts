@@ -11,6 +11,7 @@ import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Week } from "../../../domain/week/Week";
 import { PaymentOrderId } from "../../../domain/paymentOrder/PaymentOrderId";
+import { WeekId } from "../../../domain/week/WeekId";
 
 export class MongooseOrderRepository implements IOrderRepository {
     public async save(order: Order): Promise<void> {
@@ -177,6 +178,18 @@ export class MongooseOrderRepository implements IOrderRepository {
 
     public async findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[]): Promise<Order[]> {
         return await this.findByLimited({ subscription: { $in: subscriptionsIds.map((id) => id.value) } });
+    }
+
+    public async findByWeek(weekId: WeekId): Promise<Order[]> {
+        return await this.findBy({ week: weekId.value });
+    }
+
+    public async findPastOrdersByCustomerIdList(subscriptionsIds: SubscriptionId[]): Promise<Order[]> {
+        return await this.findBy({
+            state: "ORDER_BILLED",
+            subscription: subscriptionsIds.map((id) => id.value),
+            shippingDate: { $lte: new Date() },
+        });
     }
 
     public async delete(orderId: OrderId): Promise<void> {
