@@ -8,8 +8,6 @@ dotenv.config();
 export const connectToDatabase = async () => {
     const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
     // const mongoUri: string = ((process.env.URLDB as string) + "staging") as string;
-    logger.info(`AMBIENTE: ${process.env.NODE_ENV}`);
-    logger.info(`TESTSATSTST: ${process.env.STRIPE_PUBLIC_KEY}`);
 
     try {
         await mongoose.connect(mongoUri, {

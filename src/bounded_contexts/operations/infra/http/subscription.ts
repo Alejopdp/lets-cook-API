@@ -1,4 +1,5 @@
 import express from "express";
+import { exportSubscriptionsController } from "../../services/exportSubscriptions";
 import { cancelASubscriptionController } from "../../useCases/cancelASubscription";
 import { createManySubscriptionsController } from "../../useCases/createManySubscriptions";
 import { createSubscriptionController } from "../../useCases/createSubscription";
@@ -19,6 +20,7 @@ const subscriptionRouter = express.Router();
 subscriptionRouter.get("/", (req, res) => getSubscriptionListController.execute(req, res));
 subscriptionRouter.get("/information-as-admin/:id", (req, res) => getSubscriptionByIdAsAdminController.execute(req, res));
 subscriptionRouter.get("/by-customer/:customerId", (req, res) => getCustomerSusbcriptionsController.execute(req, res));
+subscriptionRouter.get("/export", (req, res) => exportSubscriptionsController.execute(req, res));
 subscriptionRouter.get("/:id", (req, res) => getSubscriptionByIdController.execute(req, res));
 
 // POSTs

@@ -7,6 +7,7 @@ import { Plan } from "../../../domain/plan/Plan";
 import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { SubscriptionId } from "../../../domain/subscription/SubscriptionId";
 import { Week } from "../../../domain/week/Week";
+import { WeekId } from "../../../domain/week/WeekId";
 
 export interface IOrderRepository {
     save(order: Order): Promise<void>;
@@ -20,8 +21,10 @@ export interface IOrderRepository {
     findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[]): Promise<Order[]>;
     findByIdOrThrow(orderId: OrderId): Promise<Order>;
     findForBilling(subscriptionsIds: SubscriptionId[], week: Week): Promise<Order[]>;
+    findByWeek(weekId: WeekId): Promise<Order[]>;
     findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>;
     findByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]>;
+    findPastOrdersByCustomerIdList(subscriptionsIds: SubscriptionId[]): Promise<Order[]>;
     getFirstOrderOfSubscription(subscriptionId: SubscriptionId): Promise<Order | undefined>;
     saveCancelledOrders(orders: Order[]): Promise<void>;
     saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void>;

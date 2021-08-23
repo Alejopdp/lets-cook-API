@@ -8,6 +8,7 @@ import { OrderActive } from "../order/orderState/OrderActive";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { Plan } from "../plan/Plan";
 import { IPlanFrequency } from "../plan/PlanFrequency/IPlanFrequency";
+import { PlanSku } from "../plan/PlanSku";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { ShippingZone } from "../shipping/ShippingZone";
@@ -221,6 +222,11 @@ export class Subscription extends Entity<Subscription> {
         return this.plan.getPlanVariantLabel(this.planVariantId);
     }
 
+    public getPlanVariantSku(): PlanSku | undefined {
+        const planVariant = this.plan.getPlanVariantById(this.planVariantId);
+
+        return planVariant?.sku;
+    }
     public getNextActiveOrder(orders: Order[] = []): Order | undefined {
         return orders.find((order) => order.isActive()); // TO DO: It works if orders is sorted ASC
     }
