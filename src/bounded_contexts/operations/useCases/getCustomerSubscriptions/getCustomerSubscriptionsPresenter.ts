@@ -70,7 +70,7 @@ export class GetCustomerSubscriptionsPresenter {
 
             const nextOrder = subscription.getNextActiveOrder(orderSubscriptionMap[subscription.id.value]);
 
-            if (!!nextOrder && !nextOrder.hasChosenRecipes() && nextOrder.plan.abilityToChooseRecipes) {
+            if (!!nextOrder && !nextOrder.hasChosenRecipes() && nextOrder.plan.abilityToChooseRecipes && !!!nextOrder.isActualWeek()) {
                 pendingActions.push({
                     type: "choose_recipes",
                     planName: nextOrder.plan.name,
@@ -82,8 +82,8 @@ export class GetCustomerSubscriptionsPresenter {
 
         pendingActions = [
             ...pendingActions,
-            { type: "rate_recipes" },
-            { type: "invite_code", couponCode: "ALEJOAMIGOS", discountValue: "5%" },
+            // { type: "rate_recipes" },
+            // { type: "invite_code", couponCode: "ALEJOAMIGOS", discountValue: "5%" },
         ];
 
         return {
