@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { logger, restoreDb } from "../../../../config";
-import { loadMockData } from "../../../../scripts/db";
+// import { loadMockData } from "../../../../scripts/db";
 import { getConfig } from "../../../config/config";
 import * as dotenv from "dotenv";
 
@@ -18,7 +18,7 @@ export const connectToDatabase = async () => {
         });
         mongoose.set("debug", true);
 
-        await resetDatabase();
+        // await resetDatabase();
         logger.info("Database connected");
     } catch (error) {
         console.log(error);
@@ -26,11 +26,11 @@ export const connectToDatabase = async () => {
     }
 };
 
-const resetDatabase = async () => {
-    if (restoreDb) {
-        await mongoose.connection.db.dropDatabase();
-        logger.info("Database dropped");
-        await loadMockData();
-        logger.info("Data correctly loaded");
-    }
-};
+// const resetDatabase = async () => {
+//     if (restoreDb) {
+//         await mongoose.connection.db.dropDatabase();
+//         logger.info("Database dropped");
+//         await loadMockData();
+//         logger.info("Data correctly loaded");
+//     }
+// };
