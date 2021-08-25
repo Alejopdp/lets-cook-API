@@ -129,7 +129,7 @@ export class Coupon extends Entity<Coupon> {
         else if (this.type.type === "percent") {
             return (price * this.type.value) / 100;
         } else {
-            return price - this.type.value;
+            return this.type.value;
         }
     }
 
