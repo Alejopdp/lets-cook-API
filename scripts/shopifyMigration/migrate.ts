@@ -60,16 +60,14 @@ async function migrateOrders() {
     // Mapping and saving each customer
     orders.forEach(async shopifyOrder => {
         // Map
-        let letsCookOrder = new Order(
-            Date.now(), // ¿Cómo queremos manejar las fechas de las órdenes importadas?
-            OrderStateFactory.createState('ORDER_ACTIVE'),
-            Date.now(), // ¿Cómo queremos manejar las fechas de las órdenes importadas?
-            Week.create(Date.now(), Date.now()),
-            new PlanVariantId(""),
-            Plan.create(
-                // WIP, seguir la jerarqía?
-            )
-        )
+        // let letsCookOrder = new Order(
+        //     Date.now(), // ¿Cómo queremos manejar las fechas de las órdenes importadas?
+        //     OrderStateFactory.createState('ORDER_ACTIVE'),
+        //     Date.now(), // ¿Cómo queremos manejar las fechas de las órdenes importadas?
+        //     Week.create(Date.now(), Date.now()),
+        //     new PlanVariantId(""),
+        //     null,0
+        // )
         
         // Save
         // await orderRepository.save(letsCookOrder);
@@ -79,8 +77,8 @@ async function migrateOrders() {
 async function migrate() {
     // En teoría acá sólo debería haber aggregate roots.
     await Promise.all([
-        migrateCustomers(),
-        migrateOrders()
+        migrateCustomers()
+        // migrateOrders()
     ]);
 }
 
