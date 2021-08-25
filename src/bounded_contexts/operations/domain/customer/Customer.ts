@@ -1,6 +1,5 @@
 // Principal
 import { Entity } from "../../../../core/domain/Entity";
-import { Guard } from "../../../../core/logic/Guard";
 import { CustomerId } from "./CustomerId";
 // import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
@@ -9,8 +8,6 @@ import { Billing } from "../billing/Billing";
 import { PaymentMethod } from "./paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "./paymentMethod/PaymentMethodId";
 import { PersonalInfo } from "./personalInfo/PersonalInfo";
-import { filter, method } from "lodash";
-import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Locale } from "../locale/Locale";
 import { IPreferredDeliveryTime } from "./preferredDeliveryTime/IPreferredDeliveryTime";
 
