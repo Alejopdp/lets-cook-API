@@ -103,7 +103,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     }
 
     public async findByCustomerId(customerId: CustomerId): Promise<PaymentOrder[]> {
-        return await this.findBy({ customer: customerId.value }, Locale.es);
+        return await this.findBy({ customer: customerId.value });
     }
 
     public async findAll(locale: Locale): Promise<PaymentOrder[]> {
@@ -112,6 +112,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
 
     public async findBy(conditions: any, locale: Locale = Locale.es): Promise<PaymentOrder[]> {
         const paymentOrdersDb = await MongoosePaymentOrder.find({ ...conditions, deletionFlag: false })
+            .sort({ billingDate: 1 })
             .populate("week")
             .populate({
                 path: "recipes",
