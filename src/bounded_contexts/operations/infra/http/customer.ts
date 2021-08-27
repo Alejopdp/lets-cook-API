@@ -20,6 +20,7 @@ import { getCustomerByIdController } from "../../useCases/getCustomerById";
 import { createCustomerByAdminController } from "../../useCases/createCustomerByAdmin";
 import { getCustomerInformationAsAdminController } from "../../useCases/getCustomerInformationAsAdmin";
 import { exportCustomersController } from "../../services/exportCustomers";
+import { addPaymentMethodController } from "../../useCases/addPaymentMethod";
 
 const customerRouter = express.Router();
 
@@ -45,6 +46,7 @@ customerRouter.put("/update-shipping/:id", (req, res) => updateShippingCustomerC
 customerRouter.put("/update-billing/:id", (req, res) => updateCustomerBillingController.execute(req, res));
 customerRouter.put("/update-info/:id", (req, res) => updateCustomerInfoController.execute(req, res));
 customerRouter.put("/update-payment/:id", (req, res) => updatePaymentMethodController.execute(req, res));
+customerRouter.put("/add-payment-method/:id", (req, res) => addPaymentMethodController.execute(req, res));
 customerRouter.put("/delete/:id", (req, res) => deleteCustomerController.execute(req, res));
 
 // // POSTs
