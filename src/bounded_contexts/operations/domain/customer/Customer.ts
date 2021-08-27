@@ -90,6 +90,11 @@ export class Customer extends Entity<Customer> {
         this.paymentMethods = [...this.paymentMethods, newPaymentMethod];
     }
 
+    public addPaymentMethodAndSetItAsDefault(newPaymentMethod: PaymentMethod): void {
+        newPaymentMethod.isDefault = true;
+        this.paymentMethods.forEach((paymentMethod) => (paymentMethod.isDefault = false));
+        this.paymentMethods = [...this.paymentMethods, newPaymentMethod];
+    }
     public getDefaultPaymentMethod(): PaymentMethod | undefined {
         return this.paymentMethods.find((method) => method.isDefault);
     }

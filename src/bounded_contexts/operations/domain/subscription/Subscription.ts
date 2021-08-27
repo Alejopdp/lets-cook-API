@@ -130,7 +130,9 @@ export class Subscription extends Entity<Subscription> {
     }
 
     private isCouponApplyable(): boolean {
-        return !!this.coupon && this.couponChargesQtyApplied <= this.coupon.maxChargeQtyValue;
+        return (
+            (!!this.coupon && this.couponChargesQtyApplied <= this.coupon.maxChargeQtyValue) || this.coupon?.maxChargeQtyType === "all_fee"
+        );
     }
 
     public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week, shippingZone: ShippingZone): Order {
