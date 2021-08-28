@@ -36,6 +36,7 @@ export class ExportSubscriptions {
                     subscription.customer.getShippingAddress().longitude!
                 )
             );
+
             subscriptionsExport.push({
                 customerId: subscription.customer.id.value,
                 customerFirstName: subscription.customer.getPersonalInfo().name || "",
