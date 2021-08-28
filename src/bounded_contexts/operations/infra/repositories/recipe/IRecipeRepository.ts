@@ -16,4 +16,5 @@ export interface IRecipeRepository {
     delete(recipeId: RecipeId): Promise<void>;
     findByWeekId(weekId: WeekId): Promise<Recipe[]>;
     findForOrder(order: Order, restrictionId?: RecipeRestrictionId): Promise<Recipe[]>;
+    findNextWeekRecipes(): Promise<Recipe[]>
 }
