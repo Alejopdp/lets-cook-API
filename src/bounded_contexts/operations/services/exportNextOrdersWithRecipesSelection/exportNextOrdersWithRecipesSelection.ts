@@ -70,8 +70,8 @@ export class ExportNextOrdersWithRecipesSelection {
             }
         }
 
+        if (ordersExport.length === 0) throw new Error("Todavía nadie ha seleccionado las recetas de su pedido");
         this.exportService.exportNextOrdersWithRecipesSelection(ordersExport);
-        console.log("a");
 
         return;
     }
