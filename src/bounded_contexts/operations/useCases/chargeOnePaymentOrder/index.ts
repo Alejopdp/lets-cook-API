@@ -7,6 +7,7 @@ import { mongooseSubscriptionRepository } from "../../infra/repositories/subscri
 import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { ChargeOnePaymentOrder } from "./chargeOnePaymentOrder";
 import { ChargeOnePaymentOrderController } from "./chargeOnePaymentOrderController";
+import { ChargeOnePaymentOrderPresenter } from "./chargeOnePaymentOrderPresenter";
 
 export const chargeOnePaymentOrder: ChargeOnePaymentOrder = new ChargeOnePaymentOrder(
     mongooseOrderRepository,
@@ -17,4 +18,8 @@ export const chargeOnePaymentOrder: ChargeOnePaymentOrder = new ChargeOnePayment
     mongooseWeekRepository,
     stripeService
 );
-export const chargeOnePaymentOrderController: ChargeOnePaymentOrderController = new ChargeOnePaymentOrderController(chargeOnePaymentOrder);
+export const chargeOnePaymentOrderPresenter: ChargeOnePaymentOrderPresenter = new ChargeOnePaymentOrderPresenter();
+export const chargeOnePaymentOrderController: ChargeOnePaymentOrderController = new ChargeOnePaymentOrderController(
+    chargeOnePaymentOrder,
+    chargeOnePaymentOrderPresenter
+);

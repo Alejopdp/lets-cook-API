@@ -25,6 +25,7 @@ export class GetPaymentOrderByIdPresenter {
             state: paymentOrder.state.humanTitle,
             orders: presentedOrders,
             totalAmount: paymentOrder.getTotalAmount(),
+            paymentIntentId: paymentOrder.paymentIntentId,
         };
     }
 

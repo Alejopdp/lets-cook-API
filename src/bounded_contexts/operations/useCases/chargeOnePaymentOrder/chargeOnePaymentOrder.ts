@@ -42,13 +42,14 @@ export class ChargeOnePaymentOrder {
         this._weekRepository = weekRepository;
         this._paymentService = paymentService;
     }
-    public async execute(dto: ChargeOnePaymentOrderDto): Promise<any> {
+    public async execute(dto: ChargeOnePaymentOrderDto): Promise<{ paymentIntentId: string; paymentOrderState: string }> {
         const paymentOrderId: PaymentOrderId = new PaymentOrderId(dto.paymentOrderId);
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
         if (paymentOrder.state.isBilled()) throw new Error("La orden ya fue cobrada");
-        const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId);
-        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(
-            paymentOrder.customerId
+
+        const orders: Order[] = await this.orderRepository.findActiveOrdersByPaymentOrderId(paymentOrderId);
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(
+            orders.map((order) => order.subscriptionId)
         );
         const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
@@ -84,7 +85,6 @@ export class ChargeOnePaymentOrder {
 
         // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
         if (paymentIntent.status === "succeeded") {
-            console.log("PAYMENT INTENT SUCCESSFUL");
             paymentOrder.toBilled(orders);
         } else {
             paymentOrder.toRejected(orders);
@@ -93,7 +93,6 @@ export class ChargeOnePaymentOrder {
         paymentOrder.paymentIntentId = paymentIntent.id;
 
         const newOrders: Order[] = [];
-
         for (let subscription of customerSubscriptions) {
             if (subscription.frequency.isOneTime()) {
                 // TO DO: End subscription
@@ -145,6 +144,8 @@ export class ChargeOnePaymentOrder {
         await this.orderRepository.bulkSave(newOrders);
         await this.paymentOrderRepository.save(paymentOrder);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+
+        return { paymentIntentId: paymentOrder.paymentIntentId, paymentOrderState: paymentOrder.state.title };
     }
 
     /**
