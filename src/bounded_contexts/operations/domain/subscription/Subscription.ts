@@ -223,6 +223,12 @@ export class Subscription extends Entity<Subscription> {
         return this.plan.getPlanVariantLabel(this.planVariantId);
     }
 
+    public getNextChoosableRecipesOrder(orders: Order[] = []): Order | undefined {
+        const order: Order | undefined = orders.find((order) => order.isInTimeToChooseRecipes());
+
+        return order;
+    }
+
     public getNextActiveOrder(orders: Order[] = []): Order | undefined {
         return orders.find((order) => order.isActive()); // TO DO: It works if orders is sorted ASC
     }

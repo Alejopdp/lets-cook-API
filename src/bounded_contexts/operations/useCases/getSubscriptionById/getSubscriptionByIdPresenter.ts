@@ -43,7 +43,7 @@ export class GetSubscriptionByIdPresenter {
         }
 
         const nextActiveOrder: Order | undefined = subscription.getNextOrderToShip(orders);
-        const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondActiveOrder(orders);
+        const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondOrderToShip(orders);
         const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? nextActiveOrder : null;
         const nextWeekOrder =
             nextActiveOrder && nextActiveOrder.isNextWeek()
