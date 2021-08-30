@@ -31,6 +31,7 @@ export class GetPaymentOrdersAsAdminPresenter {
             customerId: customer.id.value,
             state: paymentOrder.state.title,
             amount: paymentOrder.getTotalAmount(),
+            paymentIntentId: paymentOrder.paymentIntentId,
         };
     }
 }

@@ -1,4 +1,5 @@
 import express from "express";
+import { chargeOnePaymentOrderController } from "../../useCases/chargeOnePaymentOrder";
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getCustomerPaymentOrdersController } from "../../useCases/getCustomerPaymentOrders";
 import { getPaymentOrderByIdController } from "../../useCases/getPaymentOrderById";
@@ -17,6 +18,7 @@ paymentOrderRouter.get("/:id", (req, res) => getPaymentOrderByIdController.execu
 paymentOrderRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
 
 // PUTs
+paymentOrderRouter.put("/charge/:id", (req, res) => chargeOnePaymentOrderController.execute(req, res));
 paymentOrderRouter.put("/update-state/:id", (req, res) => updatePaymentOrderAndOrdersStateController.execute(req, res));
 
 // DELETEs

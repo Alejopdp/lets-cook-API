@@ -24,6 +24,8 @@ export interface IOrderRepository {
     findByWeek(weekId: WeekId): Promise<Order[]>;
     findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>;
     findByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]>;
+    findActiveOrdersByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>;
+    findACtiveOrdersByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]>;
     findPastOrdersByCustomerIdList(subscriptionsIds: SubscriptionId[]): Promise<Order[]>;
     getFirstOrderOfSubscription(subscriptionId: SubscriptionId): Promise<Order | undefined>;
     saveCancelledOrders(orders: Order[]): Promise<void>;

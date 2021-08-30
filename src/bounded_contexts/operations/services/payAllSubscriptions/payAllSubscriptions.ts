@@ -45,12 +45,12 @@ export class PayAllSubscriptions {
         const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
-        const activeSusbcriptions = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerIdList(
-            customers.map((customer) => customer.id)
-        );
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const paymentOrdersToBill: PaymentOrder[] = await this.paymentOrderRepository.findActiveByBillingDate(today);
-        const ordersToBill: Order[] = await this.orderRepository.findByPaymentOrderIdList(paymentOrdersToBill.map((po) => po.id));
+        const ordersToBill: Order[] = await this.orderRepository.findACtiveOrdersByPaymentOrderIdList(
+            paymentOrdersToBill.map((po) => po.id)
+        );
+        const activeSusbcriptions = await this.subscriptionRepository.findByIdList(ordersToBill.map((order) => order.subscriptionId));
         const ordersWIthoutPaymentOrder = [];
         const customerMap: { [customerId: string]: Customer } = {};
         const paymentOrderOrderMap: { [paymentOrderId: string]: Order[] } = {};
@@ -187,12 +187,9 @@ export class PayAllSubscriptions {
             }
         }
 
-        // logger.info(`New Payment orders: ${JSON.stringify(newPaymentOrders)}`);
-        // logger.info(`orders: ${JSON.stringify(newOrders)}`);
-        // logger.info(`BILLED ORDERS: ${JSON.stringify(ordersToBill)}`);
-
         await this.orderRepository.saveOrdersWithNewState(ordersToBill);
         await this.orderRepository.bulkSave(newOrders);
+        await this.paymentOrderRepository.bulkSave(paymentOrdersToBill);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
     }
 
