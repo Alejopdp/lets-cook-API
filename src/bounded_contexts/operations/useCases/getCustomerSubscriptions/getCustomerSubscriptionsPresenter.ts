@@ -68,14 +68,9 @@ export class GetCustomerSubscriptionsPresenter {
                 });
             }
 
-            const nextOrder = subscription.getNextActiveOrder(orderSubscriptionMap[subscription.id.value]);
+            const nextOrder = subscription.getNextChoosableRecipesOrder(orderSubscriptionMap[subscription.id.value]);
 
-            if (
-                !!nextOrder &&
-                !nextOrder.hasChosenRecipes() &&
-                nextOrder.plan.abilityToChooseRecipes &&
-                nextOrder.isInTimeToChooseRecipes()
-            ) {
+            if (!!nextOrder && !nextOrder.hasChosenRecipes() && nextOrder.plan.abilityToChooseRecipes) {
                 pendingActions.push({
                     type: "choose_recipes",
                     planName: nextOrder.plan.name,
