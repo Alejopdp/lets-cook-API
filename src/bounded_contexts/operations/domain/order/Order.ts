@@ -194,7 +194,13 @@ export class Order extends Entity<Order> {
         fridayAt2359.setDate(today.getDate() + differenceInDays); // Delivery day of this week
         fridayAt2359.setHours(23, 59, 59);
 
-        return today < fridayAt2359 && today < this.week.minDay;
+        const todayWithDummyHours = new Date();
+        todayWithDummyHours.setHours(0, 0, 0, 0);
+
+        const weekMinDayWithDummyHours = new Date(this.week.minDay);
+        weekMinDayWithDummyHours.setHours(0, 0, 0, 0);
+
+        return today < fridayAt2359 && todayWithDummyHours < weekMinDayWithDummyHours;
     }
 
     public isNextWeek(): boolean {

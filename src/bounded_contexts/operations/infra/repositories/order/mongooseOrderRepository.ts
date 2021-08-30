@@ -91,8 +91,17 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]> {
         return await this.findBy({ paymentOrder: paymentOrderId.value });
     }
+
     public async findByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]> {
         return await this.findBy({ paymentOrder: paymentOrdersIds.map((id) => id.value) });
+    }
+
+    public async findActiveOrdersByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]> {
+        return await this.findBy({ paymentOrder: paymentOrderId.value, state: "ORDER_ACTIVE" });
+    }
+
+    public async findACtiveOrdersByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]> {
+        return await this.findBy({ paymentOrder: paymentOrdersIds.map((id) => id.value), state: "ORDER_ACTIVE" });
     }
 
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
