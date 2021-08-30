@@ -1,19 +1,18 @@
 // To run from root, execute the following:
 // npx ts-node scripts/shopifyMigration/migrate.ts
+
+import Stripe from "stripe";
+import { stripeService } from "../../src/bounded_contexts/operations/application/paymentService";
 import { Customer } from "../../src/bounded_contexts/operations/domain/customer/Customer";
-// import { Order } from "../../src/bounded_contexts/operations/domain/order/Order";
-// import { OrderStateFactory } from "../../src/bounded_contexts/operations/domain/order/orderState/OrderStateFactory";
-// import { Plan } from "../../src/bounded_contexts/operations/domain/plan/Plan";
-// import { PlanVariantId } from "../../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariantId";
-// import { Week } from "../../src/bounded_contexts/operations/domain/week/Week";
+import { PaymentMethod } from "../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod";
 import { ICustomerRepository } from "../../src/bounded_contexts/operations/infra/repositories/customer/ICustomerRepository";
 import { MongooseCustomerRepository } from "../../src/bounded_contexts/operations/infra/repositories/customer/mongooseCustomerRepository";
 import { connectToDatabase } from "../../src/infraestructure/mongoose/config/config";
-// import { IOrderRepository } from "../../src/bounded_contexts/operations/infra/repositories/order/IOrderRepository";
-// import { MongooseOrderRepository } from "../../src/bounded_contexts/operations/infra/repositories/order/mongooseOrderRepository";
-// import { RequestInfo } from "node-fetch";
-// Recharge api token: 	fca35e686341f59f50c3222d61ef0d645a09c7434f4ee93aea04127169b043f5
-// Recharge API: https://api.rechargeapps.com/{resource}
+
+const stripeConfig: Stripe.StripeConfig = {
+    apiVersion: "2020-08-27",
+};
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, stripeConfig);
 
 async function fetchRechargeEntityCollection(entityCollectionName: string): Promise<any[]> {
 
@@ -46,32 +45,55 @@ async function fetchShopifyEntityCollection(entityCollectionName: string): Promi
 
 async function migrateCustomers() {
 
-    // let results = await fetchRechargeEntityCollection("subscriptions");
-    // console.log(results);
+    console.info("Customers migration is starting.");
 
-    let temp = await fetchRechargeEntityCollection("charges");
-    console.log(temp);
+    let shopifyCustomers: any[];
+    let rechargeCustomers: any[];
 
-    // Fetching customers
-    // let customers: any[] = await fetchShopifyEntityCollection('customers');
+    // await Promise.all([
+    //     async () => {shopifyCustomers = await fetchShopifyEntityCollection('customers');},
+    //     async () => {rechargeCustomers = await fetchRechargeEntityCollection('customers');}
+    // ])
 
-    // // Instantiating repository to save customers
-    // let customerRepository: ICustomerRepository = new MongooseCustomerRepository();
+    shopifyCustomers = await fetchShopifyEntityCollection('customers');
+    rechargeCustomers = await fetchRechargeEntityCollection('customers');
 
-    // // Mapping and saving each customer
-    // customers.forEach(async shopifyCustomer => {
-    //     // Map
-    //     let letsCookCustomer = Customer.create(
-    //         shopifyCustomer.email,
-    //         true,
-    //         "123",
-    //         [],
-    //         undefined,undefined,undefined, "active"
-    //     )
+    // Instantiating repository to save customers
+    let customerRepository: ICustomerRepository = new MongooseCustomerRepository();
 
-    //     // Save
-    //     await customerRepository.save(letsCookCustomer);
-    // });
+    // Mapping and saving each customer
+    //@ts-ignore false positive
+    shopifyCustomers.forEach(async shopifyCustomer => {
+
+        let existingCustomer = await customerRepository.findByEmail(shopifyCustomer.email);
+        
+        let rechargeCustomer = rechargeCustomers.find(rc => rc.shopify_customer_id == shopifyCustomer.id);
+
+        let stripeCustomerPaymentMethods: any;
+        if(rechargeCustomer)
+            stripeCustomerPaymentMethods = (await stripe.paymentMethods.list({
+                customer: rechargeCustomer.stripe_customer_token,
+                type: 'card'
+            }));
+
+        console.log(stripeCustomerPaymentMethods);
+
+        // let letsCookCustomer = Customer.create(
+        //     shopifyCustomer.email,
+        //     true,
+        //     rechargeCustomer.stripe_customer_token,
+        //     [
+        //         new PaymentMethod()
+        //     ],
+        //     undefined,undefined,undefined, "active"
+        // );
+
+        // Save
+        // await customerRepository.save(letsCookCustomer);
+    });
+
+    console.info("Customers migration has ended.");
+    
 }
 
 async function migrateOrders() {
@@ -108,6 +130,8 @@ async function migrate() {
         migrateCustomers()
         // migrateOrders()
     ]);
+
+    console.info("All migration methods have ended.");
 }
 
 migrate();
