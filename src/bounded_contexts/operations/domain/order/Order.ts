@@ -200,7 +200,12 @@ export class Order extends Entity<Order> {
         const weekMinDayWithDummyHours = new Date(this.week.minDay);
         weekMinDayWithDummyHours.setHours(0, 0, 0, 0);
 
-        return today < fridayAt2359 && todayWithDummyHours < weekMinDayWithDummyHours;
+        return (
+            today < fridayAt2359 &&
+            todayWithDummyHours < weekMinDayWithDummyHours &&
+            (this.isActive() || this.state.title === "ORDER_BILLED") &&
+            this.isNextWeek()
+        );
     }
 
     public isNextWeek(): boolean {

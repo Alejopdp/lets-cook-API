@@ -68,7 +68,7 @@ export class GetCustomerSubscriptionsPresenter {
                 });
             }
 
-            const nextOrder = subscription.getNextActiveOrder(orderSubscriptionMap[subscription.id.value]);
+            const nextOrder = subscription.getNextChoosableRecipesOrder(orderSubscriptionMap[subscription.id.value]);
 
             if (
                 !!nextOrder &&
