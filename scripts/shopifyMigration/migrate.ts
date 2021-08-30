@@ -1,5 +1,5 @@
 // To run from root, execute the following:
-// npx ts-node scripts/shopifyMigration/migrate.ts
+// npm exec ts-node scripts/shopifyMigration/migrate.ts
 
 import Stripe from "stripe";
 import { stripeService } from "../../src/bounded_contexts/operations/application/paymentService";
