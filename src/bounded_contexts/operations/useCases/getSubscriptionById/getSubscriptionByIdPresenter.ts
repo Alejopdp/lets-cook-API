@@ -42,7 +42,7 @@ export class GetSubscriptionByIdPresenter {
             };
         }
 
-        const nextActiveOrder: Order | undefined = subscription.getNextActiveOrder(orders);
+        const nextActiveOrder: Order | undefined = subscription.getNextOrderToShip(orders);
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondActiveOrder(orders);
         const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? nextActiveOrder : null;
         const nextWeekOrder =
@@ -64,6 +64,7 @@ export class GetSubscriptionByIdPresenter {
         const canChooseRecipes = subscription.plan.abilityToChooseRecipes;
         const nextTwelveOrders = this.presentOrders(orders);
 
+        console.log("ACTUAL WEEK ORDER; ", actualWeekOrder);
         return {
             subscriptionId: subscription.id.value,
             plan: presentedPlan,

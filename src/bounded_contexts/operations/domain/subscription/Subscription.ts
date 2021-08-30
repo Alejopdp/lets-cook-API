@@ -227,11 +227,22 @@ export class Subscription extends Entity<Subscription> {
         return orders.find((order) => order.isActive()); // TO DO: It works if orders is sorted ASC
     }
 
+    public getNextOrderToShip(orders: Order[] = []): Order | undefined {
+        return orders.find((order) => order.isActive() || order.state.title === "ORDER_BILLED"); // TO DO: It works if orders is sorted ASC
+    }
+
     public getNextSecondActiveOrder(orders: Order[]): Order | undefined {
         const nextOrder: Order | undefined = this.getNextActiveOrder(orders);
         if (!!!nextOrder) return undefined;
 
         return orders.find((order) => order.isActive() && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
+    }
+
+    public getNextSecondOrderToShip(orders: Order[]): Order | undefined {
+        const nextOrder: Order | undefined = this.getNextOrderToShip(orders);
+        if (!!!nextOrder) return undefined;
+
+        return orders.find((order) => (order.isActive() || order.state.title === "ORDER_BILLED") && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextShipmentLabel(orders: Order[] = []): string {
