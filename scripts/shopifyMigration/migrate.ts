@@ -38,6 +38,10 @@ async function fetchShopifyEntityCollection(entityCollectionName: string): Promi
     let request = fetch(`https://87700134e27c0aca518cb36d356c837b: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@bon-chef-recetas-ingredientes.myshopify.com/admin/api/2021-07/${entityCollectionName}.json`)
     let response = await request;
     let value = await response.json();
+    let linkHeader: string = response.headers.get("Link");
+    // console.log(linkHeader.substr(1, linkHeader.lastIndexOf(">") - 1));
+    
+
     let result: any[] = value[entityCollectionName];
     return result;
 
@@ -69,24 +73,65 @@ async function migrateCustomers() {
         
         let rechargeCustomer = rechargeCustomers.find(rc => rc.shopify_customer_id == shopifyCustomer.id);
 
-        let stripeCustomerPaymentMethods: any;
+/*      id: 'pm_1JTVbwH24hlkZqHlxw6yqJVv',
+      object: 'payment_method',
+      billing_details: [Object],
+      card: [Object],
+      created: 1630172792,
+      customer: 'cus_K7l8XAhU622rSw',
+      livemode: true,
+      metadata: {},
+      type: 'card'*/
+
+
+        let stripeCustomerPaymentMethods: Stripe.PaymentMethod[] = [];
+        let letsCookCustomerPaymentMethods: PaymentMethod[] = [];
+
         if(rechargeCustomer)
+        {
+            let stripeCustomer = (await stripe.customers.retrieve(rechargeCustomer.stripe_customer_token));
+
+            console.log(stripeCustomer);
+
+
             stripeCustomerPaymentMethods = (await stripe.paymentMethods.list({
                 customer: rechargeCustomer.stripe_customer_token,
                 type: 'card'
-            }));
+            })).data;
 
-        console.log(stripeCustomerPaymentMethods);
+            stripeCustomerPaymentMethods.forEach(pm => {
+                if(pm.card)
+                    letsCookCustomerPaymentMethods.push(
+                        new PaymentMethod(
+                            pm.card?.brand,
+                            pm.card?.last4,
+                            pm.card?.exp_month,
+                            pm.card?.exp_year,
+                            pm.card?.checks?.cvc_check || "",
+                            //@ts-ignore
+                            stripeCustomer.invoice_settings && pm.id == stripeCustomer.invoice_settings.default_payment_method,
+                            pm.id
+                        )
+                    );
+            });
 
-        // let letsCookCustomer = Customer.create(
-        //     shopifyCustomer.email,
-        //     true,
-        //     rechargeCustomer.stripe_customer_token,
-        //     [
-        //         new PaymentMethod()
-        //     ],
-        //     undefined,undefined,undefined, "active"
-        // );
+        }
+
+        console.log(letsCookCustomerPaymentMethods);
+
+        let letsCookCustomer = Customer.create(
+            shopifyCustomer.email,
+            true,
+            rechargeCustomer.stripe_customer_token,
+            letsCookCustomerPaymentMethods,
+            undefined, // from shopify
+            undefined, // from shopify
+            undefined, // generate randomly passing restrictions
+            "active",
+            undefined,
+            undefined, // from shopify
+            undefined // if possible, create guid with seed from shopify id
+        );
 
         // Save
         // await customerRepository.save(letsCookCustomer);
