@@ -36,6 +36,7 @@ export class GetRecipeListPresenter {
                 availableMonths: recipe.availableMonths,
                 relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.value),
                 tools: recipe.recipeTools,
+                nutritionalInfo: recipe.getPresentedNutritionalInfo(),
                 recipeVariants: recipe.recipeVariants.map((variant) => {
                     return {
                         ingredients: variant.ingredients.map((ing) => ing.name),

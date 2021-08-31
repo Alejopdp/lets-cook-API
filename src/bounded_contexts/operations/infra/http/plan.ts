@@ -10,6 +10,7 @@ import { updatePlanController } from "../../useCases/updatePlan";
 import { getAdditionalPlansByPlanIdController } from "../../useCases/getAdditionalPlansByPlanId";
 import { getPlanVariantsRecipesByWeekListController } from "../../useCases/getPlanVariantsRecipesByWeek";
 import { getDataForSwappingAPlanController } from "../../useCases/getDataForSwappingAPlan";
+import { getPlanAhorroController } from "../../useCases/getPlanAhorro";
 
 const planRouter = express.Router();
 
@@ -23,6 +24,7 @@ planRouter.get("/additionals", (req, res) => getAdditionalPlanListController.exe
 planRouter.get("/additionals/:id", (req, res) => getAdditionalPlansByPlanIdController.execute(req, res));
 planRouter.get("/plans/week", (req, res) => getPlanVariantsRecipesByWeekListController.execute(req, res));
 planRouter.get("/data-for-swapping/:subscriptionId", (req, res) => getDataForSwappingAPlanController.execute(req, res));
+planRouter.get("/ahorro", (req, res) => getPlanAhorroController.execute(req, res));
 planRouter.get("/:id", (req, res) => getPlanByIdController.execute(req, res));
 
 // PUT
