@@ -19,6 +19,7 @@ import { deleteCustomerController } from "../../useCases/deleteCustomer";
 import { getCustomerByIdController } from "../../useCases/getCustomerById";
 import { createCustomerByAdminController } from "../../useCases/createCustomerByAdmin";
 import { getCustomerInformationAsAdminController } from "../../useCases/getCustomerInformationAsAdmin";
+import { exportCustomersController } from "../../services/exportCustomers";
 
 const customerRouter = express.Router();
 
@@ -30,6 +31,7 @@ const options: multer.Options = {
 // customerRouter.get("/:email", (req, res) => emailValidatedController.execute(req, res));
 customerRouter.get("/", (req, res) => getCustomerListController.execute(req, res));
 customerRouter.get("/by-name/:name", (req, res) => getCustomerByNameController.execute(req, res));
+customerRouter.get("/export", (req, res) => exportCustomersController.execute(req, res));
 customerRouter.get("/:id", (req, res) => getCustomerByIdController.execute(req, res));
 customerRouter.get("/information-as-admin/:id", (req, res) => getCustomerInformationAsAdminController.execute(req, res));
 

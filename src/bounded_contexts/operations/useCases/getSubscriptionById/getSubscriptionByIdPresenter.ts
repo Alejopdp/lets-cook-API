@@ -44,7 +44,7 @@ export class GetSubscriptionByIdPresenter {
 
         const nextActiveOrder: Order | undefined = subscription.getNextActiveOrder(orders);
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondActiveOrder(orders);
-        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? await this.presentWeekRecipes(nextActiveOrder) : null;
+        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? nextActiveOrder : null;
         const nextWeekOrder =
             nextActiveOrder && nextActiveOrder.isNextWeek()
                 ? nextActiveOrder

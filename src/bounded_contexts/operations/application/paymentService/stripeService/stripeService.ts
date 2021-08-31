@@ -16,7 +16,7 @@ export class StripeService implements IPaymentService {
         customerId: string
     ): Promise<Stripe.PaymentIntent> {
         const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
-            amount: Math.trunc(amount * 100),
+            amount: Math.max(Math.trunc(amount * 100), 50),
             currency: "eur",
             payment_method_types: ["card"],
             receipt_email: receiptEmail,

@@ -1,4 +1,5 @@
 import express from "express";
+import { exportNextOrdersWithRecipesSelectionController } from "../../services/exportNextOrdersWithRecipesSelection";
 import { chooseRecipesForOrderController } from "../../useCases/chooseRecipesForOrder";
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getNextOrdersBySubscriptionController } from "../../useCases/getNextOrdersBySubscription";
@@ -9,6 +10,7 @@ const orderRouter = express.Router();
 
 // GETs
 orderRouter.get("/", (req, res) => res.json({}));
+orderRouter.get("/export-next-with-recipes-selection", (req, res) => exportNextOrdersWithRecipesSelectionController.execute(req, res));
 orderRouter.get("/by-subscription/:subscriptionId", (req, res) => getNextOrdersBySubscriptionController.execute(req, res));
 orderRouter.get("/:id", (req, res) => getOrderByIdController.execute(req, res));
 

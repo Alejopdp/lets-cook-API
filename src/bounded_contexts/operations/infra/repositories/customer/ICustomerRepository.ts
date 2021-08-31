@@ -1,6 +1,4 @@
-import { Locale } from "../../../domain/locale/Locale";
 import { Customer } from "../../../domain/customer/Customer";
-import { ShippingZoneId } from "../../../domain/shipping/ShippingZoneId";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 
 export interface ICustomerRepository {
