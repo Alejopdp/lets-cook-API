@@ -49,8 +49,6 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     public discountOrderAmount(order: Order): void {
-        console.log("La order a cancelar: ", order.getTotalPrice());
-        console.log("Payment order price: ", this.amount);
         this.amount -= order.getTotalPrice();
         this.discountAmount -= order.discountAmount;
     }
