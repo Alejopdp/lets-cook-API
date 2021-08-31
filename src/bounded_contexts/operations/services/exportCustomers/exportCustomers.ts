@@ -87,8 +87,8 @@ export class ExportCustomers {
                 shippingCountry: "España",
                 shopifyCustomerId: "",
                 pastOrdersCount: customerPastOrdersMap[customer.id.value]?.length || 0,
-                numberOfActiveSubscriptions: customerActiveSubscriptionsMap[customer.id.value].length,
-                numberOfSubscriptions: customerSubscriptionsMap[customer.id.value].length,
+                numberOfActiveSubscriptions: customerActiveSubscriptionsMap[customer.id.value]?.length || 0,
+                numberOfSubscriptions: customerSubscriptionsMap[customer.id.value]?.length || 0,
             });
         }
 

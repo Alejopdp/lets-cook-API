@@ -57,7 +57,7 @@ export class ExportNextOrdersWithRecipesSelection {
                     planSku: order.plan.planSku.code,
                     planName: order.plan.name,
                     planVariantId: subscription.planVariantId.value,
-                    planVariantSku: subscription.getPlanVariantSku()?.code || "",
+                    planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
                     planVariantDescription: subscription.getPlanVariantLabel(),
                     recipeVariantSku:
                         recipeSelection.recipe.recipeVariants.find((variant) => variant.restriction.equals(subscription.restriction))?.sku

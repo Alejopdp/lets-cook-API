@@ -55,8 +55,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
 
     public discountOrdersAmount(orders: Order[]): void {
         for (let order of orders) {
-            this.amount -= order.getTotalPrice();
-            this.discountAmount -= order.discountAmount;
+            this.discountOrderAmount(order);
         }
     }
 
