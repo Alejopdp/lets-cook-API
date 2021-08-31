@@ -29,17 +29,7 @@ export class Handle3dSecureFailure {
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
-        subscription.cancel(new CancellationReason("Método de pago no confirmado", ""), orders);
-
-        for (let paymentOrder of paymentOrders) {
-            const order: Order = orders.find((order) => order.paymentOrderId?.equals(paymentOrder.id))!;
-
-            if (paymentOrder.amount === order.getTotalPrice()) {
-                paymentOrder.toCancelled([]);
-            } else {
-                paymentOrder.discountOrderAmount(order);
-            }
-        }
+        subscription.cancel(new CancellationReason("Método de pago no confirmado", ""), orders, paymentOrders);
 
         await this.subscriptionRepository.save(subscription);
         await this.paymentOrderRepository.updateMany(paymentOrders);
