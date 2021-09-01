@@ -20,9 +20,9 @@ async function fetchRechargeEntityCollection(entityCollectionName: string): Prom
 
     let request = fetch(
         `https://api.rechargeapps.com/${entityCollectionName}`, {
-            method: 'GET',
-            headers: { "X-Recharge-Access-Token" : "fca35e686341f59f50c3222d61ef0d645a09c7434f4ee93aea04127169b043f5" }
-        }
+        method: 'GET',
+        headers: { "X-Recharge-Access-Token": "fca35e686341f59f50c3222d61ef0d645a09c7434f4ee93aea04127169b043f5" }
+    }
     );
     let response = await request;
     let value = await response.json();
@@ -31,18 +31,30 @@ async function fetchRechargeEntityCollection(entityCollectionName: string): Prom
 
 }
 
+function getNextLinkFromResponse(response: any): string {
+    let linkHeader: string = response.headers.get("Link");
+    let nextLink = linkHeader.substr(1, linkHeader.lastIndexOf(">") - 1);
+    return nextLink;
+}
+
 async function fetchShopifyEntityCollection(entityCollectionName: string): Promise<any[]> {
 
     const fetch = require('node-fetch');
 
-    let request = fetch(`https://87700134e27c0aca518cb36d356c837b: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@bon-chef-recetas-ingredientes.myshopify.com/admin/api/2021-07/${entityCollectionName}.json`)
-    let response = await request;
-    let value = await response.json();
-    let linkHeader: string = response.headers.get("Link");
-    // console.log(linkHeader.substr(1, linkHeader.lastIndexOf(">") - 1));
-    
+    let result: any[] = [];
 
-    let result: any[] = value[entityCollectionName];
+    let url = `https://87700134e27c0aca518cb36d356c837b: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@bon-chef-recetas-ingredientes.myshopify.com/admin/api/2021-07/${entityCollectionName}.json`;
+
+    let max = 5;
+    while (url && --max) {
+        let response = await fetch(url);
+
+        let value = await response.json();
+        result.push(value[entityCollectionName]);
+
+        url = getNextLinkFromResponse(response);
+    }
+
     return result;
 
 }
@@ -70,25 +82,24 @@ async function migrateCustomers() {
     shopifyCustomers.forEach(async shopifyCustomer => {
 
         let existingCustomer = await customerRepository.findByEmail(shopifyCustomer.email);
-        
+
         let rechargeCustomer = rechargeCustomers.find(rc => rc.shopify_customer_id == shopifyCustomer.id);
 
-/*      id: 'pm_1JTVbwH24hlkZqHlxw6yqJVv',
-      object: 'payment_method',
-      billing_details: [Object],
-      card: [Object],
-      created: 1630172792,
-      customer: 'cus_K7l8XAhU622rSw',
-      livemode: true,
-      metadata: {},
-      type: 'card'*/
+        /*      id: 'pm_1JTVbwH24hlkZqHlxw6yqJVv',
+              object: 'payment_method',
+              billing_details: [Object],
+              card: [Object],
+              created: 1630172792,
+              customer: 'cus_K7l8XAhU622rSw',
+              livemode: true,
+              metadata: {},
+              type: 'card'*/
 
 
         let stripeCustomerPaymentMethods: Stripe.PaymentMethod[] = [];
         let letsCookCustomerPaymentMethods: PaymentMethod[] = [];
 
-        if(rechargeCustomer)
-        {
+        if (rechargeCustomer) {
             let stripeCustomer = (await stripe.customers.retrieve(rechargeCustomer.stripe_customer_token));
 
             console.log(stripeCustomer);
@@ -100,7 +111,7 @@ async function migrateCustomers() {
             })).data;
 
             stripeCustomerPaymentMethods.forEach(pm => {
-                if(pm.card)
+                if (pm.card)
                     letsCookCustomerPaymentMethods.push(
                         new PaymentMethod(
                             pm.card?.brand,
@@ -122,7 +133,7 @@ async function migrateCustomers() {
         let letsCookCustomer = Customer.create(
             shopifyCustomer.email,
             true,
-            rechargeCustomer.stripe_customer_token,
+            rechargeCustomer?.stripe_customer_token,
             letsCookCustomerPaymentMethods,
             undefined, // from shopify
             undefined, // from shopify
@@ -138,7 +149,7 @@ async function migrateCustomers() {
     });
 
     console.info("Customers migration has ended.");
-    
+
 }
 
 async function migrateOrders() {
@@ -160,7 +171,7 @@ async function migrateOrders() {
         //     new PlanVariantId(""),
         //     null,0
         // )
-        
+
         // Save
         // await orderRepository.save(letsCookOrder);
     });
