@@ -29,6 +29,7 @@ export class ExportNextOrdersWithRecipesSelection {
         date.setDate(date.getDate() + 7);
         const actualWeek: Week | undefined = await this.weekRepository.findCurrentWeek(date);
         if (!!!actualWeek) throw new Error("Está queriendo exportar ordenes de una semana no registrada en la base de datos");
+
         const orders: Order[] = await this.orderRepository.findByWeek(actualWeek.id);
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(orders.map((order) => order.subscriptionId));
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
@@ -40,7 +41,8 @@ export class ExportNextOrdersWithRecipesSelection {
 
         for (let order of orders) {
             const subscription = subscriptionMap[order.subscriptionId.value];
-            for (let recipeSelection of order.recipeSelection) {
+
+            if (order.recipeSelection.length === 0) {
                 ordersExport.push({
                     orderId: order.id.value,
                     weekLabel: actualWeek.getLabel(),
@@ -58,19 +60,47 @@ export class ExportNextOrdersWithRecipesSelection {
                     planVariantId: subscription.planVariantId.value,
                     planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
                     planVariantDescription: subscription.getPlanVariantLabel(),
-                    recipeVariantSku:
-                        recipeSelection.recipe.recipeVariants.find((variant) => variant.restriction.equals(subscription.restriction))?.sku
-                            .code || "",
-                    recipeVariantId: recipeSelection.recipeVariantId.value,
-                    recipeName: `${recipeSelection.quantity} x ${recipeSelection.recipe.getName()}`,
+                    recipeVariantSku: "",
+                    recipeVariantId: "",
+                    recipeName: "",
                     numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
                     numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
                     customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                 });
             }
+
+            for (let recipeSelection of order.recipeSelection) {
+                for (let i = 0; i < recipeSelection.quantity; i++) {
+                    ordersExport.push({
+                        orderId: order.id.value,
+                        weekLabel: actualWeek.getLabel(),
+                        deliveryDate: order.getHumanShippmentDay(),
+                        customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
+                        customerId: subscription.customer.id.value,
+                        customerFirstName: subscription.customer.getPersonalInfo().name!,
+                        customerLastName: subscription.customer.getPersonalInfo().lastName!,
+                        customerEmail: subscription.customer.email,
+                        recipeFormSubmissionDate: "???",
+                        recipeFormUpdateDate: "???",
+                        planId: order.plan.id.value,
+                        planSku: order.plan.planSku.code,
+                        planName: order.plan.name,
+                        planVariantId: subscription.planVariantId.value,
+                        planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
+                        planVariantDescription: subscription.getPlanVariantLabel(),
+                        recipeVariantSku:
+                            recipeSelection.recipe.recipeVariants.find((variant) => variant.restriction.equals(subscription.restriction))
+                                ?.sku.code || "",
+                        recipeVariantId: recipeSelection.recipeVariantId.value,
+                        recipeName: recipeSelection.recipe.getName(),
+                        numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
+                        numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
+                        customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
+                    });
+                }
+            }
         }
 
-        if (ordersExport.length === 0) throw new Error("Todavía nadie ha seleccionado las recetas de su pedido");
         this.exportService.exportNextOrdersWithRecipesSelection(ordersExport);
 
         return;
