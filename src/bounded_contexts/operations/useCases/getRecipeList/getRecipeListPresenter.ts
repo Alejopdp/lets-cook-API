@@ -28,9 +28,7 @@ export class GetRecipeListPresenter {
                 availableWeeks: recipe.availableWeeks.map((week: Week) => {
                     return {
                         id: week.id.value,
-                        label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
-                            week.maxDay
-                        )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
+                        label: week.getShorterLabel(),
                     };
                 }),
                 availableMonths: recipe.availableMonths,
