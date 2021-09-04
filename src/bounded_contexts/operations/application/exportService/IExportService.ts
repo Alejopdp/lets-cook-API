@@ -1,5 +1,11 @@
 import { Order } from "../../domain/order/Order";
 
+export enum RecipeSelectionState {
+    ELIGIO = "Eligió",
+    NO_ELIGE = "No Elige",
+    AUN_NO_ELIGIO = "Aún no eligió",
+    ELEGIDA_POR_LC = "Elegida por LC",
+}
 export interface OrdersWithRecipeSelectionExport {
     orderId: string | number;
     weekLabel: string;
@@ -23,6 +29,13 @@ export interface OrdersWithRecipeSelectionExport {
     numberOfPersons: number;
     numberOfRecipes: number;
     customerPreferredLanguage: string;
+    chooseState: RecipeSelectionState;
+    pricePlan: number;
+    kitPrice: number;
+    planDiscount: number;
+    kitDiscount: number;
+    finalPrice: number;
+    finalKitPrice: number;
 }
 
 export interface SubscriptionExport {

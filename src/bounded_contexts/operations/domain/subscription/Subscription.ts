@@ -1,5 +1,6 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { paymentOrderMapper } from "../../mappers";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
 import { Coupon } from "../cupons/Cupon";
 import { Customer } from "../customer/Customer";
@@ -8,6 +9,7 @@ import { OrderActive } from "../order/orderState/OrderActive";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { Plan } from "../plan/Plan";
 import { IPlanFrequency } from "../plan/PlanFrequency/IPlanFrequency";
+import { PlanVariant } from "../plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { ShippingZone } from "../shipping/ShippingZone";
@@ -293,6 +295,21 @@ export class Subscription extends Entity<Subscription> {
         if (comment) this.restrictionComment = comment;
     }
 
+    public changePlanVariant(variantId: PlanVariantId, orders: Order[], paymentOrders: PaymentOrder[]): void {
+        // const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(variantId);
+        // if (!!!planVariant) throw new Error("La variante ingresada no existe");
+        // const paymentOrderOrderMap: { [paymentOrderId: string]: Order };
+        // orders.forEach((order) => {
+        //     order.price = planVariant.getPaymentPrice();
+        //     if (order.discountAmount !== 0 && !!this.coupon && !this.coupon?.isFreeShippingCoupon()) {
+        //         order.discountAmount = this.coupon.getDiscount(this.plan, variantId, 0); // ShippingCost dummy if it is not a free shipping coupon
+        //     }
+        //     paymentOrderOrderMap[order.paymentOrderId?.value! as string] = order;
+        // });
+        // paymentOrders.forEach((paymentOrder) => {
+        //     paymentOrder.amount;
+        // });
+    }
     /**
      * Getter planVariantId
      * @return {PlanVariantId}
