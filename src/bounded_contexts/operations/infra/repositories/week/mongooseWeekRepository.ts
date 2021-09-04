@@ -150,4 +150,14 @@ export class MongooseWeekRepository implements IWeekRepository {
 
         return weekDb ? weekMapper.toDomain(weekDb) : undefined;
     }
+
+    public async findLastAndNextEight(): Promise<Week[]> {
+        const minDay = new Date();
+        const maxDay = new Date();
+
+        minDay.setDate(minDay.getDate() - 7 * 8);
+        maxDay.setDate(maxDay.getDate() + 7 * 8);
+
+        return await this.findBy({ minDay: { $gte: minDay }, maxDay: { $lte: maxDay } });
+    }
 }
