@@ -220,8 +220,8 @@ export class MongooseOrderRepository implements IOrderRepository {
         const thisWeekMinDay = new Date();
         const thisWeekMaxDay = new Date();
 
-        thisWeekMinDay.setDate(thisWeekMaxDay.getDate() + (0 - today.getDay()));
-        thisWeekMinDay.setDate(thisWeekMaxDay.getDate() + (6 - today.getDay()));
+        thisWeekMinDay.setDate(thisWeekMinDay.getDate() + (0 - today.getDay()));
+        thisWeekMaxDay.setDate(thisWeekMaxDay.getDate() + (6 - today.getDay()));
 
         return await this.findBy({ shippingDate: { $gte: thisWeekMinDay, $lte: thisWeekMaxDay } });
     }

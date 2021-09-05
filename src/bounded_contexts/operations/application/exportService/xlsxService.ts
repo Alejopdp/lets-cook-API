@@ -12,7 +12,6 @@ import { utils, WorkBook, WorkSheet, writeFile } from "xlsx";
 export class XlsxService implements IExportService {
     public exportSubscriptions(subscriptionsExport: SubscriptionExport[]): void {
         const workbook: WorkBook = utils.book_new();
-        console.log(subscriptionsExport);
         const sheet: WorkSheet = utils.json_to_sheet(subscriptionsExport);
 
         utils.book_append_sheet(workbook, sheet, "Suscripciones");
@@ -36,7 +35,6 @@ export class XlsxService implements IExportService {
     }
     public exportNextOrdersWithRecipesSelection(orders: OrdersWithRecipeSelectionExport[]): void {
         const workbook: WorkBook = utils.book_new();
-        console.log(orders);
         const sheet: WorkSheet = utils.json_to_sheet(orders);
 
         utils.book_append_sheet(workbook, sheet, "Selección recetas");
