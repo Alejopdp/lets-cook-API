@@ -16,9 +16,9 @@ export class ChooseRecipesForOrderController extends BaseController {
             const dto: ChooseRecipesForOrderDto = {
                 orderId: this.req.params.orderId,
                 recipeSelection: this.req.body.recipeSelection,
+                isAdminChoosing: this.req.decode?.roleTitle === "Administrador",
             };
 
-            console.log("A VER ESE DTO: ", dto)
             await this.chooseRecipesForOrder.execute(dto);
 
             return this.ok(this.res);

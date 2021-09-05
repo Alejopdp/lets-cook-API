@@ -33,9 +33,7 @@ export class ChooseRecipesForOrder {
             newRecipeSelection.push(newSelection);
         }
 
-        order.updateRecipes(newRecipeSelection);
-
-        console.log("A VERGA: ", order);
+        order.updateRecipes(newRecipeSelection, dto.isAdminChoosing);
 
         await this.orderRepository.save(order);
     }
