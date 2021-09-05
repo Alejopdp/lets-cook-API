@@ -14,7 +14,13 @@ export class ExportNextOrdersWithRecipesSelectionController extends BaseControll
     protected async executeImpl(): Promise<any> {
         try {
             const dto: ExportNextOrdersWithRecipesSelectionDto = {
-                weeks: this.req.body.weeks,
+                weeks: this.req.body.weeks || [],
+                shippingDates: Array.isArray(this.req.body.shippingDates)
+                    ? this.req.body.shippingDates.map((dateString: string) => new Date(dateString))
+                    : [],
+                billingDates: Array.isArray(this.req.body.billingDates)
+                    ? this.req.body.billingDates.map((dateString: string) => new Date(dateString))
+                    : [],
             };
 
             await this.exportNextOrdersWithRecipesSelection.execute(dto);

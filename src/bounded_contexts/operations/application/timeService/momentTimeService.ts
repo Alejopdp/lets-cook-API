@@ -29,6 +29,10 @@ export class MomentTimeService {
         return moment(date).format("dddd Do MMMM");
     }
 
+    public static getDddDdMmmm(date: Date): string {
+        return moment(date).format("dd, DD MMM");
+    }
+
     public static getDdMmYyyy(date: Date): string {
         return moment(date).format("DD/MM/YYYY");
     }

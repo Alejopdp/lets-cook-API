@@ -205,6 +205,27 @@ export class MongooseOrderRepository implements IOrderRepository {
         return await this.findBy({ week: weeksIds.map((id) => id.value) });
     }
 
+    public async findByBillingDates(billingDates: Date[]): Promise<Order[]> {
+        billingDates.forEach((date) => date.setHours(0, 0, 0, 0));
+        return await this.findBy({ billingDate: billingDates });
+    }
+
+    public async findByShippingDates(shippingDates: Date[]): Promise<Order[]> {
+        shippingDates.forEach((date) => date.setHours(0, 0, 0, 0));
+        return await this.findBy({ shippingDate: shippingDates });
+    }
+
+    public async findCurrentWeekOrders(): Promise<Order[]> {
+        const today = new Date();
+        const thisWeekMinDay = new Date();
+        const thisWeekMaxDay = new Date();
+
+        thisWeekMinDay.setDate(thisWeekMaxDay.getDate() + (0 - today.getDay()));
+        thisWeekMinDay.setDate(thisWeekMaxDay.getDate() + (6 - today.getDay()));
+
+        return await this.findBy({ shippingDate: { $gte: thisWeekMinDay, $lte: thisWeekMaxDay } });
+    }
+
     public async delete(orderId: OrderId): Promise<void> {
         await MongooseOrder.updateOne({ _id: orderId.value }, { deletionFlag: true });
     }

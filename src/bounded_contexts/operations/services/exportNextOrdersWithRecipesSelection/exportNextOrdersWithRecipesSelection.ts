@@ -5,7 +5,6 @@ import { CustomerId } from "../../domain/customer/CustomerId";
 import { Order } from "../../domain/order/Order";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Subscription } from "../../domain/subscription/Subscription";
-import { Week } from "../../domain/week/Week";
 import { WeekId } from "../../domain/week/WeekId";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
@@ -36,7 +35,16 @@ export class ExportNextOrdersWithRecipesSelection {
 
     public async execute(dto: ExportNextOrdersWithRecipesSelectionDto): Promise<void> {
         const weeksIds: WeekId[] = dto.weeks.map((id: string) => new WeekId(id));
-        const orders: Order[] = await this.orderRepository.findByWeekList(weeksIds);
+
+        const orders: Order[] =
+            weeksIds.length > 0
+                ? await this.orderRepository.findByWeekList(weeksIds)
+                : dto.billingDates.length > 0
+                ? await this.orderRepository.findByBillingDates(dto.billingDates)
+                : dto.shippingDates.length > 0
+                ? await this.orderRepository.findByShippingDates(dto.shippingDates)
+                : await this.orderRepository.findCurrentWeekOrders();
+
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(orders.map((order) => order.subscriptionId));
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
