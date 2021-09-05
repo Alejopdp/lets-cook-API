@@ -143,6 +143,12 @@ export class Customer extends Entity<Customer> {
         return paymentMethod?.stripeId || "";
     }
 
+    public getFullNameOrEmail(): string {
+        if (!!!this.getPersonalInfo().fullName) return this.email;
+
+        return this.getPersonalInfo().fullName!;
+    }
+
     public getPersonalInfo(): {
         name?: string;
         lastName?: string;
@@ -266,8 +272,6 @@ export class Customer extends Entity<Customer> {
         if (filterPaymentById.length > 0) {
             if (isDefault) {
                 for (let paymentMethod of this.paymentMethods) {
-                    console.log("CREADO: ", paymentMethod.id);
-                    console.log("LO QUE M ELLGA: ", paymentId);
                     if (paymentMethod.id.equals(new PaymentMethodId(paymentId))) {
                         paymentMethod.isDefault = true;
                     } else {
@@ -277,7 +281,6 @@ export class Customer extends Entity<Customer> {
             }
             // filterPaymentById[0].changePaymentData(brand, last4Numbers, exp_month, exp_year, cvc, stripeId, isDefault);
         } else {
-            console.log("ESTA ENTRANDO ACACAC: ");
             if (isDefault) {
                 if (this.paymentMethods.length > 0) {
                     const filterPaymentsByDiferentId = this.paymentMethods.filter(

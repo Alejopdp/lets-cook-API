@@ -29,6 +29,10 @@ export class MomentTimeService {
         return moment(date).format("dddd Do MMMM");
     }
 
+    public static getDddDdMmmm(date: Date): string {
+        return moment(date).format("dd, DD MMM");
+    }
+
     public static getDdMmYyyy(date: Date): string {
         return moment(date).format("DD/MM/YYYY");
     }
@@ -42,13 +46,17 @@ export class MomentTimeService {
     }
 
     public static getShorterHumanWeekRangeLabel(minDay: Date, maxDay: Date): string {
-        maxDay.setDate(maxDay.getDate() - 1);
-        const minMonth: string = moment(minDay).format("MMMM");
+        const minDayCopy = new Date(minDay);
+        const maxDayCopy = new Date(maxDay);
+        maxDayCopy.setDate(maxDayCopy.getDate() - 1);
+        const minMonth: string = moment(minDayCopy).format("MMMM");
         const minMonthWithCapitalLetter = minMonth.charAt(0).toUpperCase() + minMonth.slice(1, 3);
-        const maxMonth: string = moment(maxDay).format("MMMM");
+        const maxMonth: string = moment(maxDayCopy).format("MMMM");
         const maxMonthWithCapitalLetter = maxMonth.charAt(0).toUpperCase() + maxMonth.slice(1, 3);
 
-        return `${moment(minDay).format("DD")} ${minMonthWithCapitalLetter} - ${moment(maxDay).format("DD")} ${maxMonthWithCapitalLetter}`;
+        return `${moment(minDayCopy).format("DD")} ${minMonthWithCapitalLetter} - ${moment(maxDayCopy).format(
+            "DD"
+        )} ${maxMonthWithCapitalLetter}`;
     }
 
     public static getDayOfThisWeekByDayNumber(dayNumber: number): Date {

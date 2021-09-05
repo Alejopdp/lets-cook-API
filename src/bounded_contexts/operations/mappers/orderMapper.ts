@@ -40,6 +40,9 @@ export class OrderMapper implements Mapper<Order> {
             subscriptionId,
             recipeVariantsIds,
             recipeSelection,
+            raw.choseByAdmin,
+            raw.firstDateOfRecipesSelection,
+            raw.lastDateOfRecipesSelection,
             paymentOrderId,
             new OrderId(raw._id)
         );
@@ -59,6 +62,9 @@ export class OrderMapper implements Mapper<Order> {
             subscription: t.subscriptionId.value,
             recipeVariants: t.recipesVariantsIds.map((id) => id.value),
             recipeSelection: t.recipeSelection.map((selection) => ({ recipe: selection.recipe.id.value, quantity: selection.quantity })),
+            choseByAdmin: t.choseByAdmin,
+            firstDateOfRecipesSelection: t.firstDateOfRecipesSelection,
+            lastDateOfRecipesSelection: t.lastDateOfRecipesSelection,
             paymentOrder: t.paymentOrderId?.value,
             _id: t.id.value,
         };

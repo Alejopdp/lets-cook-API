@@ -91,9 +91,23 @@ const OrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        choseByAdmin: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+
+        firstDateOfRecipesSelection: {
+            type: Date,
+        },
+
+        lastDateOfRecipesSelection: {
+            type: Date,
+        },
+
         deletionFlag: {
             type: Boolean,
-            isRequired: true,
+            required: true,
             default: false,
         },
     },

@@ -89,7 +89,8 @@ export class Subscription extends Entity<Subscription> {
                     hasFreeShipping,
                     this._id,
                     [],
-                    []
+                    [],
+                    false
                 )
             );
 
@@ -113,7 +114,8 @@ export class Subscription extends Entity<Subscription> {
                         hasFreeShipping,
                         this._id,
                         [],
-                        []
+                        [],
+                        false
                     )
                 );
 
@@ -158,7 +160,8 @@ export class Subscription extends Entity<Subscription> {
             hasFreeShipping,
             this.id,
             [],
-            []
+            [],
+            false
         );
     }
 
