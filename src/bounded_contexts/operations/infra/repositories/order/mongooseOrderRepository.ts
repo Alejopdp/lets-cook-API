@@ -201,6 +201,10 @@ export class MongooseOrderRepository implements IOrderRepository {
         });
     }
 
+    public async findByWeekList(weeksIds: WeekId[]): Promise<Order[]> {
+        return await this.findBy({ week: weeksIds.map((id) => id.value) });
+    }
+
     public async delete(orderId: OrderId): Promise<void> {
         await MongooseOrder.updateOne({ _id: orderId.value }, { deletionFlag: true });
     }

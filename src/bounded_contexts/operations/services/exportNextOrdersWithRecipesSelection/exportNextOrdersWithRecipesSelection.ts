@@ -6,10 +6,12 @@ import { Order } from "../../domain/order/Order";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { Week } from "../../domain/week/Week";
+import { WeekId } from "../../domain/week/WeekId";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
+import { ExportNextOrdersWithRecipesSelectionDto } from "./exportNextOrdersWithRecipesSelectionDto";
 
 export class ExportNextOrdersWithRecipesSelection {
     private _orderRepository: IOrderRepository;
@@ -32,13 +34,9 @@ export class ExportNextOrdersWithRecipesSelection {
         this._shippingZoneRepository = shippingZoneRepository;
     }
 
-    public async execute(): Promise<void> {
-        const date = new Date();
-        date.setDate(date.getDate() + 7);
-        const actualWeek: Week | undefined = await this.weekRepository.findCurrentWeek(date);
-        if (!!!actualWeek) throw new Error("Está queriendo exportar ordenes de una semana no registrada en la base de datos");
-
-        const orders: Order[] = await this.orderRepository.findByWeek(actualWeek.id);
+    public async execute(dto: ExportNextOrdersWithRecipesSelectionDto): Promise<void> {
+        const weeksIds: WeekId[] = dto.weeks.map((id: string) => new WeekId(id));
+        const orders: Order[] = await this.orderRepository.findByWeekList(weeksIds);
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(orders.map((order) => order.subscriptionId));
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
@@ -56,7 +54,7 @@ export class ExportNextOrdersWithRecipesSelection {
             if (order.recipeSelection.length === 0) {
                 ordersExport.push({
                     orderId: order.id.value,
-                    weekLabel: actualWeek.getShorterLabel(),
+                    weekLabel: order.week.getShorterLabel(),
                     deliveryDate: order.getHumanShippmentDay(),
                     customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
                     customerId: subscription.customer.id.value,
@@ -103,7 +101,7 @@ export class ExportNextOrdersWithRecipesSelection {
                 for (let i = 0; i < recipeSelection.quantity; i++) {
                     ordersExport.push({
                         orderId: order.id.value,
-                        weekLabel: actualWeek.getShorterLabel(),
+                        weekLabel: order.week.getShorterLabel(),
                         deliveryDate: order.getHumanShippmentDay(),
                         customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
                         customerId: subscription.customer.id.value,
@@ -166,7 +164,7 @@ export class ExportNextOrdersWithRecipesSelection {
 
                 ordersExport.push({
                     orderId: "",
-                    weekLabel: actualWeek.getShorterLabel(),
+                    weekLabel: customerOrders[0].week.getShorterLabel(),
                     deliveryDate: customerOrders[0].getHumanShippmentDay(),
                     customerPreferredShippingHour: customer.getShippingAddress().preferredShippingHour,
                     customerId: customerId,
