@@ -26,6 +26,9 @@ export class Order extends Entity<Order> {
     private _subscriptionId: SubscriptionId;
     private _recipesVariantsIds: RecipeVariantId[];
     private _recipeSelection: RecipeSelection[];
+    private _choseByAdmin: boolean;
+    private _firstDateOfRecipesSelection?: Date;
+    private _lastDateOfRecipesSelection?: Date;
     private _paymentOrderId?: PaymentOrderId;
 
     constructor(
@@ -41,6 +44,9 @@ export class Order extends Entity<Order> {
         subscriptionId: SubscriptionId,
         recipeVariantsIds: RecipeVariantId[],
         recipeSelection: RecipeSelection[],
+        choseByAdmin: boolean,
+        firstDateOfRecipesSelection?: Date,
+        lastDateOfRecipesSelection?: Date,
         paymentOrderId?: PaymentOrderId,
         orderId?: OrderId
     ) {
@@ -57,10 +63,13 @@ export class Order extends Entity<Order> {
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;
         this._recipeSelection = recipeSelection;
+        this._choseByAdmin = choseByAdmin;
+        this._firstDateOfRecipesSelection = firstDateOfRecipesSelection;
+        this._lastDateOfRecipesSelection = lastDateOfRecipesSelection;
         this._paymentOrderId = paymentOrderId;
     }
 
-    public updateRecipes(recipeSelection: RecipeSelection[]): void {
+    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean): void {
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
 
@@ -75,6 +84,7 @@ export class Order extends Entity<Order> {
         }
 
         this.recipeSelection = recipeSelection;
+        this.choseByAdmin = isAdminChoosing;
     }
 
     public isActive(): boolean {
@@ -311,6 +321,30 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter choseByAdmin
+     * @return {boolean}
+     */
+    public get choseByAdmin(): boolean {
+        return this._choseByAdmin;
+    }
+
+    /**
+     * Getter firstDateOfRecipesSelection
+     * @return {Date | undefined}
+     */
+    public get firstDateOfRecipesSelection(): Date | undefined {
+        return this._firstDateOfRecipesSelection;
+    }
+
+    /**
+     * Getter lastDateOfRecipesSelection
+     * @return {Date | undefined}
+     */
+    public get lastDateOfRecipesSelection(): Date | undefined {
+        return this._lastDateOfRecipesSelection;
+    }
+
+    /**
      * Getter paymentOrderId
      * @return {PaymentOrderId | undefined}
      */
@@ -412,6 +446,30 @@ export class Order extends Entity<Order> {
      */
     public set recipeSelection(value: RecipeSelection[]) {
         this._recipeSelection = value;
+    }
+
+    /**
+     * Setter choseByAdmin
+     * @param {boolean} value
+     */
+    public set choseByAdmin(value: boolean) {
+        this._choseByAdmin = value;
+    }
+
+    /**
+     * Setter firstDateOfRecipesSelection
+     * @param {Date | undefined}
+     */
+    public set firstDateOfRecipesSelection(value: Date | undefined) {
+        this._firstDateOfRecipesSelection = value;
+    }
+
+    /**
+     * Setter lastDateOfRecipesSelection
+     * @param {Date | undefined}
+     */
+    public set lastDateOfRecipesSelection(value: Date | undefined) {
+        this._lastDateOfRecipesSelection = value;
     }
 
     /**
