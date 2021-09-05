@@ -31,6 +31,7 @@ export interface IOrderRepository {
     findByBillingDates(billingDates: Date[]): Promise<Order[]>;
     findByShippingDates(shippingDates: Date[]): Promise<Order[]>;
     findCurrentWeekOrders(): Promise<Order[]>;
+    findAllByCustomersIds(customersIds: CustomerId[]): Promise<Order[]>;
     getFirstOrderOfSubscription(subscriptionId: SubscriptionId): Promise<Order | undefined>;
     saveCancelledOrders(orders: Order[]): Promise<void>;
     saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void>;

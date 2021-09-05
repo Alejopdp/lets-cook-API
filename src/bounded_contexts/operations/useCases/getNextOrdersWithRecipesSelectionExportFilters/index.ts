@@ -1,3 +1,4 @@
+import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
 import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { GetNextOrdersWithRecipesSelectionExportFilters } from "./getNextOrdersWithRecipesSelectionExportFilters";
@@ -5,7 +6,7 @@ import { GetNextOrdersWithRecipesSelectionExportFiltersController } from "./getN
 import { GetNextOrdersWithRecipesSelectionExportFiltersPresenter } from "./getNextOrdersWithRecipesSelectionExportFiltersPresenter";
 
 export const getNextOrdersWithRecipesSelectionExportFilters: GetNextOrdersWithRecipesSelectionExportFilters =
-    new GetNextOrdersWithRecipesSelectionExportFilters(mongooseWeekRepository, mongooseShippingZoneRepository);
+    new GetNextOrdersWithRecipesSelectionExportFilters(mongooseWeekRepository, mongooseShippingZoneRepository, mongooseCustomerRepository);
 export const getNextOrdersWithRecipesSelectionExportFiltersPresenter: GetNextOrdersWithRecipesSelectionExportFiltersPresenter =
     new GetNextOrdersWithRecipesSelectionExportFiltersPresenter();
 export const getNextOrdersWithRecipesSelectionExportFiltersController: GetNextOrdersWithRecipesSelectionExportFiltersController =

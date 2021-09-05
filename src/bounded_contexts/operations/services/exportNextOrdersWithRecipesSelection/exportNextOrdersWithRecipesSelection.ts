@@ -35,7 +35,7 @@ export class ExportNextOrdersWithRecipesSelection {
 
     public async execute(dto: ExportNextOrdersWithRecipesSelectionDto): Promise<void> {
         const weeksIds: WeekId[] = dto.weeks.map((id: string) => new WeekId(id));
-
+        console.log("DTO CUSTOMERS: ", dto.customers);
         const orders: Order[] =
             weeksIds.length > 0
                 ? await this.orderRepository.findByWeekList(weeksIds)
@@ -43,6 +43,8 @@ export class ExportNextOrdersWithRecipesSelection {
                 ? await this.orderRepository.findByBillingDates(dto.billingDates)
                 : dto.shippingDates.length > 0
                 ? await this.orderRepository.findByShippingDates(dto.shippingDates)
+                : dto.customers.length > 0
+                ? await this.orderRepository.findAllByCustomersIds(dto.customers.map((id) => new CustomerId(id)))
                 : await this.orderRepository.findCurrentWeekOrders();
 
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(orders.map((order) => order.subscriptionId));
@@ -132,7 +134,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
                         numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
                         customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
-                        chooseState: RecipeSelectionState.ELIGIO, // TO DO: Elegido por LC
+                        chooseState: order.choseByAdmin ? RecipeSelectionState.ELEGIDA_POR_LC : RecipeSelectionState.ELIGIO, // TO DO: Elegido por LC
                         pricePlan: order.getTotalPrice(),
                         //@ts-ignore
                         kitPrice: orderPlanVariant.numberOfPersons

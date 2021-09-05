@@ -226,6 +226,10 @@ export class MongooseOrderRepository implements IOrderRepository {
         return await this.findBy({ shippingDate: { $gte: thisWeekMinDay, $lte: thisWeekMaxDay } });
     }
 
+    public async findAllByCustomersIds(customersIds: CustomerId[]): Promise<Order[]> {
+        return await this.findBy({ customer: customersIds.map((id) => id.value) });
+    }
+
     public async delete(orderId: OrderId): Promise<void> {
         await MongooseOrder.updateOne({ _id: orderId.value }, { deletionFlag: true });
     }

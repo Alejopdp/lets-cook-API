@@ -21,6 +21,7 @@ export class ExportNextOrdersWithRecipesSelectionController extends BaseControll
                 billingDates: Array.isArray(this.req.body.billingDates)
                     ? this.req.body.billingDates.map((dateString: string) => new Date(dateString))
                     : [],
+                customers: this.req.body.customers || [],
             };
 
             await this.exportNextOrdersWithRecipesSelection.execute(dto);

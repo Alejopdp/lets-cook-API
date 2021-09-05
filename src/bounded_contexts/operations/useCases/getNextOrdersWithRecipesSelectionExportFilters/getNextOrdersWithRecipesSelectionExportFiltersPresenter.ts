@@ -1,4 +1,5 @@
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Customer } from "../../domain/customer/Customer";
 import { Week } from "../../domain/week/Week";
 
 interface FilterOption {
@@ -6,11 +7,22 @@ interface FilterOption {
     label: string;
 }
 export class GetNextOrdersWithRecipesSelectionExportFiltersPresenter {
-    public present({ weeks, shippingDates, billingDates }: { weeks: Week[]; shippingDates: Date[]; billingDates: Date[] }): any {
+    public present({
+        weeks,
+        shippingDates,
+        billingDates,
+        customers,
+    }: {
+        weeks: Week[];
+        shippingDates: Date[];
+        billingDates: Date[];
+        customers: Customer[];
+    }): any {
         return {
             weeks: this.presentWeeks(weeks),
             shippingDates: this.presentDates(shippingDates).sort((date1, date2) => (date1.value > date2.value ? 1 : -1)),
             billingDates: this.presentDates(billingDates).sort((date1, date2) => (date1.value > date2.value ? 1 : -1)),
+            customers: this.presentCustomers(customers),
         };
     }
 
@@ -25,6 +37,13 @@ export class GetNextOrdersWithRecipesSelectionExportFiltersPresenter {
         return dates.map((date) => ({
             value: date,
             label: MomentTimeService.getDddDdMmmm(date),
+        }));
+    }
+
+    private presentCustomers(customers: Customer[]): FilterOption[] {
+        return customers.map((customer) => ({
+            value: customer.id.value,
+            label: customer.getFullNameOrEmail(),
         }));
     }
 }
