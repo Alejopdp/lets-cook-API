@@ -85,6 +85,8 @@ export class Order extends Entity<Order> {
 
         this.recipeSelection = recipeSelection;
         this.choseByAdmin = isAdminChoosing;
+        if (!!!this.firstDateOfRecipesSelection) this.firstDateOfRecipesSelection = new Date();
+        this.lastDateOfRecipesSelection = new Date();
     }
 
     public isActive(): boolean {
