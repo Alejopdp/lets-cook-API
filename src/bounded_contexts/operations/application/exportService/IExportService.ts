@@ -23,6 +23,8 @@ export interface OrdersWithRecipeSelectionExport {
     planVariantId: string | number;
     planVariantSku: string;
     planVariantDescription: string;
+    subscriptionRestrictionComment: string;
+    subscriptionRestriction: string;
     recipeVariantId: string | number;
     recipeVariantSku: string;
     recipeName: string;

@@ -1,8 +1,10 @@
 import _ from "lodash";
 import { IExportService, OrdersWithRecipeSelectionExport, RecipeSelectionState } from "../../application/exportService/IExportService";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { Order } from "../../domain/order/Order";
+import { RestrictionCodeFactory } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/RestrictionCodeFactory";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { WeekId } from "../../domain/week/WeekId";
@@ -65,20 +67,22 @@ export class ExportNextOrdersWithRecipesSelection {
                 ordersExport.push({
                     orderId: order.id.value,
                     weekLabel: order.week.getShorterLabel(),
-                    deliveryDate: order.getHumanShippmentDay(),
+                    deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
                     customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
                     customerId: subscription.customer.id.value,
                     customerFirstName: subscription.customer.getPersonalInfo().name!,
                     customerLastName: subscription.customer.getPersonalInfo().lastName!,
                     customerEmail: subscription.customer.email,
-                    recipeFormSubmissionDate: "???",
-                    recipeFormUpdateDate: "???",
+                    recipeFormSubmissionDate: order.firstDateOfRecipesSelection,
+                    recipeFormUpdateDate: order.lastDateOfRecipesSelection,
                     planId: order.plan.id.value,
                     planSku: order.plan.planSku.code,
                     planName: order.plan.name,
                     planVariantId: subscription.planVariantId.value,
                     planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
                     planVariantDescription: subscription.getPlanVariantLabel(),
+                    subscriptionRestrictionComment: subscription.restrictionComment,
+                    subscriptionRestriction: RestrictionCodeFactory.createCode(subscription.restriction?.value),
                     recipeVariantSku: "",
                     recipeVariantId: "",
                     recipeName: "",
@@ -112,20 +116,22 @@ export class ExportNextOrdersWithRecipesSelection {
                     ordersExport.push({
                         orderId: order.id.value,
                         weekLabel: order.week.getShorterLabel(),
-                        deliveryDate: order.getHumanShippmentDay(),
+                        deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
                         customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
                         customerId: subscription.customer.id.value,
                         customerFirstName: subscription.customer.getPersonalInfo().name!,
                         customerLastName: subscription.customer.getPersonalInfo().lastName!,
                         customerEmail: subscription.customer.email,
-                        recipeFormSubmissionDate: "???",
-                        recipeFormUpdateDate: "???",
+                        recipeFormSubmissionDate: order.firstDateOfRecipesSelection,
+                        recipeFormUpdateDate: order.lastDateOfRecipesSelection,
                         planId: order.plan.id.value,
                         planSku: order.plan.planSku.code,
                         planName: order.plan.name,
                         planVariantId: subscription.planVariantId.value,
                         planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
                         planVariantDescription: subscription.getPlanVariantLabel(),
+                        subscriptionRestrictionComment: subscription.restrictionComment,
+                        subscriptionRestriction: RestrictionCodeFactory.createCode(subscription.restriction?.value),
                         recipeVariantSku:
                             recipeSelection.recipe.recipeVariants.find((variant) => variant.restriction.equals(subscription.restriction))
                                 ?.sku.code || "",
@@ -175,20 +181,22 @@ export class ExportNextOrdersWithRecipesSelection {
                 ordersExport.push({
                     orderId: "",
                     weekLabel: customerOrders[0].week.getShorterLabel(),
-                    deliveryDate: customerOrders[0].getHumanShippmentDay(),
+                    deliveryDate: MomentTimeService.getDddDdMmmm(customerOrders[0].shippingDate),
                     customerPreferredShippingHour: customer.getShippingAddress().preferredShippingHour,
                     customerId: customerId,
                     customerFirstName: customer.getPersonalInfo().name!,
                     customerLastName: customer.getPersonalInfo().lastName!,
                     customerEmail: customer.email,
-                    recipeFormSubmissionDate: "???",
-                    recipeFormUpdateDate: "???",
+                    recipeFormSubmissionDate: "",
+                    recipeFormUpdateDate: "",
                     planId: "",
                     planSku: "",
                     planName: "",
                     planVariantId: "",
                     planVariantSku: "",
                     planVariantDescription: "",
+                    subscriptionRestrictionComment: "",
+                    subscriptionRestriction: "",
                     recipeVariantSku: "",
                     recipeVariantId: "",
                     recipeName: "",
