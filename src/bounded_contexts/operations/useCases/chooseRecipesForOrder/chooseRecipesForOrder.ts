@@ -20,6 +20,7 @@ export class ChooseRecipesForOrder {
     public async execute(dto: ChooseRecipesForOrderDto): Promise<any> {
         const orderId: OrderId = new OrderId(dto.orderId);
         const recipesIds: RecipeId[] = dto.recipeSelection.map((selection) => new RecipeId(selection.recipeId));
+        console.log("RECIPE SELECTION: ", dto);
         const order: Order = await this.orderRepository.findByIdOrThrow(orderId);
         const recipes: Recipe[] = await this.recipeRepository.findByIdList(recipesIds);
         const newRecipeSelection: RecipeSelection[] = [];
