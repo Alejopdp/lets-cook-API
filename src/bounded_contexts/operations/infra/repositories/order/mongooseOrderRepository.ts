@@ -131,13 +131,14 @@ export class MongooseOrderRepository implements IOrderRepository {
             subscription: subscriptionsIds.map((id) => id.value),
             state: "ORDER_ACTIVE",
             week: week.id.value,
-        }) .populate("customer")
-        .populate({ path: "plan", populate: { path: "additionalPlans" } })
-        .populate("week")
-        .populate({
-            path: "recipeSelection",
-            populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
-        });
+        })
+            .populate("customer")
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week")
+            .populate({
+                path: "recipeSelection",
+                populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
+            });
 
         return ordersDb.map((order: any) => orderMapper.toDomain(order));
     }
@@ -209,7 +210,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             state: "ORDER_BILLED",
             subscription: subscriptionsIds.map((id) => id.value),
             shippingDate: { $lte: new Date() },
-        })
+        });
     }
 
     public async findByWeekList(weeksIds: WeekId[]): Promise<Order[]> {
@@ -238,7 +239,7 @@ export class MongooseOrderRepository implements IOrderRepository {
     }
 
     public async findAllByCustomersIds(customersIds: CustomerId[]): Promise<Order[]> {
-        const ordersDb = await MongooseOrder.find({ "subscription.customer": customersIds.map((id) => id.value), deletionFlag: false })
+        const ordersDb = await MongooseOrder.find({ customer: customersIds.map((id) => id.value), deletionFlag: false })
             .populate("customer")
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
