@@ -15,8 +15,9 @@ export interface OrdersWithRecipeSelectionExport {
     customerFirstName: string;
     customerLastName: string;
     customerEmail: string;
-    recipeFormSubmissionDate: string;
-    recipeFormUpdateDate: string;
+    subscriptionDate: Date | string;
+    recipeFormSubmissionDate: Date | string;
+    recipeFormUpdateDate: Date | string;
     planId: string | number;
     planSku: string;
     planName: string;
@@ -31,7 +32,7 @@ export interface OrdersWithRecipeSelectionExport {
     numberOfPersons: number;
     numberOfRecipes: number;
     customerPreferredLanguage: string;
-    chooseState: RecipeSelectionState;
+    chooseState: RecipeSelectionState | string;
     pricePlan: number;
     kitPrice: number;
     planDiscount: number;

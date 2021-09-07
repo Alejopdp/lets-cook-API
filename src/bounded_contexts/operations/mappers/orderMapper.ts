@@ -1,5 +1,6 @@
 import { planMapper, recipeSelectionMapper, weekMapper } from ".";
 import { Mapper } from "../../../core/infra/Mapper";
+import { Customer } from "../domain/customer/Customer";
 import { Locale } from "../domain/locale/Locale";
 import { Order } from "../domain/order/Order";
 import { OrderId } from "../domain/order/OrderId";
@@ -9,11 +10,10 @@ import { RecipeSelection } from "../domain/order/RecipeSelection";
 import { PaymentOrderId } from "../domain/paymentOrder/PaymentOrderId";
 import { Plan } from "../domain/plan/Plan";
 import { PlanVariantId } from "../domain/plan/PlanVariant/PlanVariantId";
-import { Recipe } from "../domain/recipe/Recipe";
 import { RecipeVariantId } from "../domain/recipe/RecipeVariant/RecipeVariantId";
 import { SubscriptionId } from "../domain/subscription/SubscriptionId";
 import { Week } from "../domain/week/Week";
-import { recipeMapper } from "./recipeMapper";
+import { customerMapper } from "./customerMapper";
 
 export class OrderMapper implements Mapper<Order> {
     public toDomain(raw: any, locale?: Locale): Order {
@@ -23,9 +23,9 @@ export class OrderMapper implements Mapper<Order> {
         const plan: Plan = planMapper.toDomain(raw.plan, Locale.es);
         const subscriptionId: SubscriptionId = new SubscriptionId(raw.subscription);
         const recipeVariantsIds: RecipeVariantId[] = raw.recipeVariants.map((id: string) => new RecipeVariantId(id));
-        // const recipes: Recipe[] = raw.recipes.map((recipe: any) => recipeMapper.toDomain(recipe));
         const recipeSelection: RecipeSelection[] = raw.recipeSelection.map((selection: any) => recipeSelectionMapper.toDomain(selection));
         const paymentOrderId: PaymentOrderId | undefined = raw.paymentOrder ? new PaymentOrderId(raw.paymentOrder) : undefined;
+        const customer: Customer = customerMapper.toDomain(raw.customer);
 
         return new Order(
             raw.shippingDate,
@@ -41,10 +41,12 @@ export class OrderMapper implements Mapper<Order> {
             recipeVariantsIds,
             recipeSelection,
             raw.choseByAdmin,
+            customer,
             raw.firstDateOfRecipesSelection,
             raw.lastDateOfRecipesSelection,
             paymentOrderId,
-            new OrderId(raw._id)
+            new OrderId(raw._id),
+            raw.createdAt
         );
     }
 
@@ -67,6 +69,7 @@ export class OrderMapper implements Mapper<Order> {
             lastDateOfRecipesSelection: t.lastDateOfRecipesSelection,
             paymentOrder: t.paymentOrderId?.value,
             _id: t.id.value,
+            customer: t.customer.id.value,
         };
     }
 }

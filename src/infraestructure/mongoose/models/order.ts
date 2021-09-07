@@ -105,6 +105,12 @@ const OrderSchema = new mongoose.Schema(
             type: Date,
         },
 
+        customer: {
+            type: String,
+            ref: "Customer",
+            required: true,
+        },
+
         deletionFlag: {
             type: Boolean,
             required: true,
