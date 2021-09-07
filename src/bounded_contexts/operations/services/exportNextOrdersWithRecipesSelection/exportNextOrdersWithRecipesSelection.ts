@@ -53,7 +53,7 @@ export class ExportNextOrdersWithRecipesSelection {
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
         const customerOrdersMap: { [customerId: string]: Order[] } = {};
-        const ordersExport: OrdersWithRecipeSelectionExport[] = [];
+        var ordersExport: OrdersWithRecipeSelectionExport[] = [];
 
         for (let subscription of subscriptions) {
             subscriptionMap[subscription.id.value] = subscription;
@@ -73,8 +73,9 @@ export class ExportNextOrdersWithRecipesSelection {
                     customerFirstName: subscription.customer.getPersonalInfo().name!,
                     customerLastName: subscription.customer.getPersonalInfo().lastName!,
                     customerEmail: subscription.customer.email,
-                    recipeFormSubmissionDate: order.firstDateOfRecipesSelection,
-                    recipeFormUpdateDate: order.lastDateOfRecipesSelection,
+                    subscriptionDate: subscription.createdAt,
+                    recipeFormSubmissionDate: order.firstDateOfRecipesSelection || "",
+                    recipeFormUpdateDate: order.lastDateOfRecipesSelection || "",
                     planId: order.plan.id.value,
                     planSku: order.plan.planSku.code,
                     planName: order.plan.name,
@@ -122,8 +123,9 @@ export class ExportNextOrdersWithRecipesSelection {
                         customerFirstName: subscription.customer.getPersonalInfo().name!,
                         customerLastName: subscription.customer.getPersonalInfo().lastName!,
                         customerEmail: subscription.customer.email,
-                        recipeFormSubmissionDate: order.firstDateOfRecipesSelection,
-                        recipeFormUpdateDate: order.lastDateOfRecipesSelection,
+                        subscriptionDate: subscription.createdAt,
+                        recipeFormSubmissionDate: order.firstDateOfRecipesSelection || "",
+                        recipeFormUpdateDate: order.lastDateOfRecipesSelection || "",
                         planId: order.plan.id.value,
                         planSku: order.plan.planSku.code,
                         planName: order.plan.name,
@@ -169,6 +171,8 @@ export class ExportNextOrdersWithRecipesSelection {
                 : [order];
         }
 
+        ordersExport = _.orderBy(ordersExport, ["creationDate"], "desc");
+
         for (let customerId in customerOrdersMap) {
             const customerOrders = customerOrdersMap[customerId];
             const customer: Customer = subscriptionMap[customerOrders[0].subscriptionId.value].customer;
@@ -187,6 +191,7 @@ export class ExportNextOrdersWithRecipesSelection {
                     customerFirstName: customer.getPersonalInfo().name!,
                     customerLastName: customer.getPersonalInfo().lastName!,
                     customerEmail: customer.email,
+                    subscriptionDate: "",
                     recipeFormSubmissionDate: "",
                     recipeFormUpdateDate: "",
                     planId: "",

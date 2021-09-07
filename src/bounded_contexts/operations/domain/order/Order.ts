@@ -1,6 +1,7 @@
 import { logger } from "../../../../../config";
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Customer } from "../customer/Customer";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../paymentOrder/PaymentOrderId";
 import { Plan } from "../plan/Plan";
@@ -30,6 +31,8 @@ export class Order extends Entity<Order> {
     private _firstDateOfRecipesSelection?: Date;
     private _lastDateOfRecipesSelection?: Date;
     private _paymentOrderId?: PaymentOrderId;
+    private _createdAt: Date;
+    private _customer: Customer;
 
     constructor(
         shippingDate: Date,
@@ -45,10 +48,12 @@ export class Order extends Entity<Order> {
         recipeVariantsIds: RecipeVariantId[],
         recipeSelection: RecipeSelection[],
         choseByAdmin: boolean,
+        customer: Customer,
         firstDateOfRecipesSelection?: Date,
         lastDateOfRecipesSelection?: Date,
         paymentOrderId?: PaymentOrderId,
-        orderId?: OrderId
+        orderId?: OrderId,
+        createdAt: Date = new Date()
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -67,6 +72,8 @@ export class Order extends Entity<Order> {
         this._firstDateOfRecipesSelection = firstDateOfRecipesSelection;
         this._lastDateOfRecipesSelection = lastDateOfRecipesSelection;
         this._paymentOrderId = paymentOrderId;
+        this._createdAt = createdAt;
+        this._customer = customer;
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean): void {
@@ -355,6 +362,22 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter createdAt
+     * @return {Date}
+     */
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    /**
+     * Getter customer
+     * @return {Customer}
+     */
+    public get customer(): Customer {
+        return this._customer;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -480,5 +503,21 @@ export class Order extends Entity<Order> {
      */
     public set paymentOrderId(value: PaymentOrderId | undefined) {
         this._paymentOrderId = value;
+    }
+
+    /**
+     * Setter createdAt
+     * @param {Date} value
+     */
+    public set createdAt(value: Date) {
+        this._createdAt = value;
+    }
+
+    /**
+     * Setter customer
+     * @param {Customer} value
+     */
+    public set customer(value: Customer) {
+        this._customer = value;
     }
 }

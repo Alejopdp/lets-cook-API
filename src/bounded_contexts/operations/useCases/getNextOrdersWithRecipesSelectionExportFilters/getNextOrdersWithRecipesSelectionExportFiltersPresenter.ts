@@ -22,7 +22,9 @@ export class GetNextOrdersWithRecipesSelectionExportFiltersPresenter {
             weeks: this.presentWeeks(weeks),
             shippingDates: this.presentDates(shippingDates).sort((date1, date2) => (date1.value > date2.value ? 1 : -1)),
             billingDates: this.presentDates(billingDates).sort((date1, date2) => (date1.value > date2.value ? 1 : -1)),
-            customers: this.presentCustomers(customers),
+            customers: this.presentCustomers(customers).sort((customer1, customer2) =>
+                customer1.value > customer2.value || customer2.value ? 1 : -1
+            ),
         };
     }
 
@@ -41,7 +43,13 @@ export class GetNextOrdersWithRecipesSelectionExportFiltersPresenter {
     }
 
     private presentCustomers(customers: Customer[]): FilterOption[] {
-        return customers.map((customer) => ({
+        const sortedCustomers = customers.sort((customer1, customer2) =>
+            !!!customer2.personalInfo?.name ||
+            (!!customer1.personalInfo?.name && customer1.personalInfo?.name > customer2.personalInfo?.name)
+                ? -1
+                : 1
+        );
+        return sortedCustomers.map((customer) => ({
             value: customer.id.value,
             label: customer.getFullNameOrEmail(),
         }));

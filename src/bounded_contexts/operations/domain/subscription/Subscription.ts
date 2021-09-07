@@ -1,6 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
-import { paymentOrderMapper } from "../../mappers";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
 import { Coupon } from "../cupons/Cupon";
 import { Customer } from "../customer/Customer";
@@ -9,7 +8,6 @@ import { OrderActive } from "../order/orderState/OrderActive";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { Plan } from "../plan/Plan";
 import { IPlanFrequency } from "../plan/PlanFrequency/IPlanFrequency";
-import { PlanVariant } from "../plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { ShippingZone } from "../shipping/ShippingZone";
@@ -29,7 +27,7 @@ export class Subscription extends Entity<Subscription> {
     private _customer: Customer;
     private _coupon?: Coupon;
     private _billingStartDate?: Date;
-    private _creationDate: Date;
+    private _createdAt: Date;
     private _couponChargesQtyApplied: number;
     private _price: number;
 
@@ -39,7 +37,7 @@ export class Subscription extends Entity<Subscription> {
         frequency: IPlanFrequency,
         state: ISubscriptionState,
         restrictionComment: string,
-        creationDate: Date,
+        createdAt: Date,
         customer: Customer,
         price: number,
         restriction?: RecipeVariantRestriction,
@@ -61,7 +59,7 @@ export class Subscription extends Entity<Subscription> {
         this._customer = customer;
         this._coupon = coupon;
         this._billingStartDate = billingStartDate;
-        this._creationDate = creationDate;
+        this._createdAt = createdAt;
         this._couponChargesQtyApplied = couponChargesQtyApplied || 0;
         this._billingDayOfWeek = billingDayOfWeek || 6; // Saturday
         this._cancellationReason = cancellationReason;
@@ -90,7 +88,8 @@ export class Subscription extends Entity<Subscription> {
                     this._id,
                     [],
                     [],
-                    false
+                    false,
+                    this.customer
                 )
             );
 
@@ -115,7 +114,8 @@ export class Subscription extends Entity<Subscription> {
                         this._id,
                         [],
                         [],
-                        false
+                        false,
+                        this.customer
                     )
                 );
 
@@ -161,7 +161,8 @@ export class Subscription extends Entity<Subscription> {
             this.id,
             [],
             [],
-            false
+            false,
+            this.customer
         );
     }
 
@@ -386,11 +387,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Getter creationDate
+     * Getter createdAt
      * @return {Date}
      */
-    public get creationDate(): Date {
-        return this._creationDate;
+    public get createdAt(): Date {
+        return this._createdAt;
     }
 
     /**
@@ -497,11 +498,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Setter creationDate
+     * Setter createdAt
      * @param {Date} value
      */
-    public set creationDate(value: Date) {
-        this._creationDate = value;
+    public set createdAt(value: Date) {
+        this._createdAt = value;
     }
 
     /**
