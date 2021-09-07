@@ -251,6 +251,10 @@ export class MongooseOrderRepository implements IOrderRepository {
         return ordersDb.map((order: any) => orderMapper.toDomain(order));
     }
 
+    public async addCustomerToOrderOfSubscription(subscriptionId: SubscriptionId, customerId: CustomerId): Promise<void> {
+        await MongooseOrder.updateMany({ subscription: subscriptionId.value }, { customer: customerId.value });
+    }
+
     public async delete(orderId: OrderId): Promise<void> {
         await MongooseOrder.updateOne({ _id: orderId.value }, { deletionFlag: true });
     }

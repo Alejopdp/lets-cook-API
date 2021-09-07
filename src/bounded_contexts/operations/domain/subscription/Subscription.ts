@@ -290,6 +290,7 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getMaxRecipesQty(): number {
+        //@ts-ignore
         return this.plan.getPlanVariantById(this.planVariantId)?.numberOfRecipes || 0;
     }
 
