@@ -45,9 +45,9 @@ export class GetNextOrdersWithRecipesSelectionExportFiltersPresenter {
     private presentCustomers(customers: Customer[]): FilterOption[] {
         const sortedCustomers = customers.sort((customer1, customer2) =>
             !!!customer2.personalInfo?.name ||
-            (!!customer1.personalInfo?.name && customer1.personalInfo?.name > customer2.personalInfo?.name)
-                ? -1
-                : 1
+            (!!customer1.personalInfo?.name && customer1.personalInfo?.name.toLowerCase() > customer2.personalInfo?.name.toLowerCase())
+                ? 1
+                : -1
         );
         return sortedCustomers.map((customer) => ({
             value: customer.id.value,
