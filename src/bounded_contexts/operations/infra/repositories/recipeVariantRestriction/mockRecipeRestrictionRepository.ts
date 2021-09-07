@@ -1,3 +1,4 @@
+import { Locale } from "../../../domain/locale/Locale";
 import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { RecipeVariantRestriction } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { IRecipeRestrictionRepository } from "./IRecipeRestrictionRepository";
@@ -7,6 +8,9 @@ export class MockRecipeRestrictionRepository implements IRecipeRestrictionReposi
 
     constructor(database: RecipeVariantRestriction[]) {
         this._database = database;
+    }
+    findByIdOrThrow(recipeRestrictionId: RecipeRestrictionId, locale: Locale): Promise<RecipeVariantRestriction> {
+        throw new Error("Method not implemented.");
     }
     bulkSave(recipeVariantRestrictions: RecipeVariantRestriction[]): Promise<void> {
         throw new Error("Method not implemented.");

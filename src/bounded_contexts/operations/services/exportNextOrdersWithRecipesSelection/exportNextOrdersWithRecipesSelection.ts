@@ -37,7 +37,6 @@ export class ExportNextOrdersWithRecipesSelection {
 
     public async execute(dto: ExportNextOrdersWithRecipesSelectionDto): Promise<void> {
         const weeksIds: WeekId[] = dto.weeks.map((id: string) => new WeekId(id));
-        console.log("DTO CUSTOMERS: ", dto.customers);
         const orders: Order[] =
             weeksIds.length > 0
                 ? await this.orderRepository.findByWeekList(weeksIds)
