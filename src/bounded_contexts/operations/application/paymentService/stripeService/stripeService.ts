@@ -54,6 +54,13 @@ export class StripeService implements IPaymentService {
         throw new Error("Method not implemented.");
     }
 
+    public async refund(paymentIntentId: string, amount: number): Promise<void> {
+        const refund = await this.stripe.refunds.create({
+            payment_intent: paymentIntentId,
+            amount: amount * 100,
+        });
+    }
+
     /**
      * Getter stripe
      * @return {Stripe}

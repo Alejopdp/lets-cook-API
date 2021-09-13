@@ -4,18 +4,18 @@ import { PaymentOrderActive } from "./PaymentOrderActive";
 import { PaymentOrderBilled } from "./PaymentOrderBilled";
 import { PaymentOrderCancelled } from "./PaymentOrderCancelled";
 import { PaymentOrderPartiallyRefunded } from "./PaymentOrderPartiallyRefunded";
-import { PaymentOrderRefunded } from "./PaymentOrderRefunded";
+import { PaymentOrderPendingConfirmation } from "./PaymentOrderPendingConfirmation";
 import { PaymentOrderRejected } from "./PaymentOrderRejected";
 
-export class PaymentOrderPendingConfirmation implements IPaymentOrderState {
+export class PaymentOrderRefunded implements IPaymentOrderState {
     title: string;
     humanTitle: string;
     color: string;
 
     constructor() {
-        this.title = "PAYMENT_ORDER_PENDING_CONFIRMATION";
-        this.humanTitle = "Orden pendiente de pago";
-        this.color = "orange";
+        this.title = "PAYMENT_ORDER_REFUNDED";
+        this.humanTitle = "Activa";
+        this.color = "green";
     }
 
     public toPendingConfirmation(paymentOrder: PaymentOrder): void {
@@ -46,7 +46,7 @@ export class PaymentOrderPendingConfirmation implements IPaymentOrderState {
     }
 
     public isActive(): boolean {
-        return false;
+        return true;
     }
 
     public isBilled(): boolean {
@@ -54,7 +54,7 @@ export class PaymentOrderPendingConfirmation implements IPaymentOrderState {
     }
 
     public isPendingConfirmation(): boolean {
-        return true;
+        return false;
     }
 
     public isRejected(): boolean {
