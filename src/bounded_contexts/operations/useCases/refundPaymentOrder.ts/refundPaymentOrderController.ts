@@ -1,13 +1,17 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { RefundPaymentOrder } from "./refundPaymentOrder";
 import { RefundPaymentOrderDto } from "./refundPaymentOrderDto";
+import { RefundPaymentOrderPresenter } from "./refundPaymentOrderPresenter";
 
 export class RefundPaymentOrderController extends BaseController {
     private _refundPaymentOrder: RefundPaymentOrder;
+    private _refundPaymentOrderPresenter: RefundPaymentOrderPresenter;
 
-    constructor(refundPaymentOrder: RefundPaymentOrder) {
+    constructor(refundPaymentOrder: RefundPaymentOrder, refundPaymentOrderPresenter: RefundPaymentOrderPresenter) {
         super();
         this._refundPaymentOrder = refundPaymentOrder;
+        this._refundPaymentOrderPresenter = refundPaymentOrderPresenter;
     }
 
     protected async executeImpl(): Promise<any> {
@@ -17,10 +21,11 @@ export class RefundPaymentOrderController extends BaseController {
                 amount: this.req.body.amount,
             };
 
-            await this.refundPaymentOrder.execute(dto);
+            const paymentOrder: PaymentOrder = await this.refundPaymentOrder.execute(dto);
+            const presented = this.refundPaymentOrderPresenter.present(paymentOrder);
 
-            return this.ok(this.res);
-        } catch (error) {
+            return this.ok(this.res, presented);
+        } catch (error: Error) {
             return this.fail(error);
         }
     }
@@ -31,5 +36,13 @@ export class RefundPaymentOrderController extends BaseController {
      */
     public get refundPaymentOrder(): RefundPaymentOrder {
         return this._refundPaymentOrder;
+    }
+
+    /**
+     * Getter refundPaymentOrderPresenter
+     * @return {RefundPaymentOrderPresenter}
+     */
+    public get refundPaymentOrderPresenter(): RefundPaymentOrderPresenter {
+        return this._refundPaymentOrderPresenter;
     }
 }

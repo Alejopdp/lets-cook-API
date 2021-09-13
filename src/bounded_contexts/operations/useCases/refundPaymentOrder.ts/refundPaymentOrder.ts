@@ -13,13 +13,15 @@ export class RefundPaymentOrder {
         this._paymentService = paymentService;
     }
 
-    public async execute(dto: RefundPaymentOrderDto): Promise<any> {
+    public async execute(dto: RefundPaymentOrderDto): Promise<PaymentOrder> {
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(new PaymentOrderId(dto.paymentOrderId));
 
         await this.paymentService.refund(paymentOrder.paymentIntentId, dto.amount);
         paymentOrder.refund(dto.amount);
 
         await this.paymentOrderRepository.save(paymentOrder);
+
+        return paymentOrder;
     }
 
     /**
