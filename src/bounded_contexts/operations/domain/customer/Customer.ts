@@ -217,7 +217,7 @@ export class Customer extends Entity<Customer> {
         return {
             details: this.shippingAddress?.details,
             name: this.shippingAddress?.name,
-            preferredShippingHour: this.shippingAddress?.deliveryTime?.getLabel(locale) || "Sin indicar",
+            preferredShippingHour: this.shippingAddress?.deliveryTime?.value() || "Sin indicar",
             latitude: this.shippingAddress?.latitude,
             longitude: this.shippingAddress?.longitude,
         };
