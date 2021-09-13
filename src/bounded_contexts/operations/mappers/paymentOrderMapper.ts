@@ -23,6 +23,7 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             raw.discountAmount,
             raw.shippingCost,
             new CustomerId(raw.customer),
+            raw.quantityRefunded,
             new PaymentOrderId(raw._id)
         );
     }
@@ -39,6 +40,7 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             _id: t.id.value,
             state: t.state.title,
             customer: t.customerId.value,
+            quantityRefunded: t.quantityRefunded,
         };
     }
 }

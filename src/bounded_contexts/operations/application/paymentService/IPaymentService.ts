@@ -6,4 +6,5 @@ export interface IPaymentService {
     createCustomer(email: string): Promise<any>;
     addPaymentMethodToCustomer(paymentMetodId: string, customerId: string): Promise<PaymentMethod>;
     addPaymentMethodToCustomerAndSetAsDefault(paymentMethodId: string, customerId: string): Promise<void>;
+    refund(paymentIntentId: string, amount: number): Promise<void>;
 }

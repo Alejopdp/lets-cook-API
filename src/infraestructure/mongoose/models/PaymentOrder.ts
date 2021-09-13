@@ -54,6 +54,10 @@ const PaymentOrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        quantityRefunded: {
+            type: Number,
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,

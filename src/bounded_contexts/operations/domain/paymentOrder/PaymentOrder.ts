@@ -17,6 +17,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     private _discountAmount: number;
     private _shippingCost: number;
     private _customerId: CustomerId;
+    private _quantityRefunded: number;
 
     constructor(
         shippingDate: Date,
@@ -28,6 +29,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         discountAmount: number,
         shippingCost: number,
         customerId: CustomerId,
+        quantityRefunded: number = 0,
         paymentOrderId?: PaymentOrderId
     ) {
         super(paymentOrderId);
@@ -40,6 +42,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._discountAmount = discountAmount;
         this._shippingCost = shippingCost;
         this._customerId = customerId;
+        this._quantityRefunded = quantityRefunded;
     }
 
     public addOrder(order: Order): void {
@@ -119,6 +122,16 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         return this.amount + this.shippingCost - this.discountAmount;
     }
 
+    public refund(amount: number): void {
+        if (this.quantityRefunded + amount > this.getTotalAmount())
+            throw new Error("No puede devolverse una cantidad mayor al total del monto de la orden");
+        if (amount <= 0) throw new Error("No puede devolverse una cantidad negativa");
+        if (this.quantityRefunded + amount === this.getTotalAmount()) this.state.toRefunded(this);
+        else this.state.toPartiallyRefunded(this);
+
+        this.quantityRefunded += amount;
+    }
+
     /**
      * Getter shippingDate
      * @return {Date}
@@ -192,6 +205,14 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     /**
+     * Getter quantityRefunded
+     * @return {number}
+     */
+    public get quantityRefunded(): number {
+        return this._quantityRefunded;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -261,5 +282,13 @@ export class PaymentOrder extends Entity<PaymentOrder> {
      */
     public set customerId(value: CustomerId) {
         this._customerId = value;
+    }
+
+    /**
+     * Setter quantityRefunded
+     * @param {number} value
+     */
+    public set quantityRefunded(value: number) {
+        this._quantityRefunded = value;
     }
 }

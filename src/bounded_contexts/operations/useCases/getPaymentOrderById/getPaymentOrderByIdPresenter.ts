@@ -22,10 +22,12 @@ export class GetPaymentOrderByIdPresenter {
             shippingCost: paymentOrder.shippingCost,
             customer: paymentOrder.customerId.value,
             customerName: customer.getPersonalInfo().fullName,
-            state: paymentOrder.state.humanTitle,
+            // state: paymentOrder.state.humanTitle,
+            state: paymentOrder.state.title,
             orders: presentedOrders,
             totalAmount: paymentOrder.getTotalAmount(),
             paymentIntentId: paymentOrder.paymentIntentId,
+            quantityRefunded: paymentOrder.quantityRefunded,
         };
     }
 
@@ -39,7 +41,8 @@ export class GetPaymentOrderByIdPresenter {
             presentedOrders.push({
                 id: order.id.value,
                 shippingDate: order.getHumanShippmentDay(),
-                state: order.state.humanTitle,
+                // state: order.state.humanTitle,
+                state: order.state.title,
                 hasRecipes: order.hasChosenRecipes(),
                 recipes: presentedRecipes,
                 planIcon,
