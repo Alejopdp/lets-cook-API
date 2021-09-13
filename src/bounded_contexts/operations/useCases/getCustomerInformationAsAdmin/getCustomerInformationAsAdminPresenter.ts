@@ -70,10 +70,14 @@ export class GetCustomerInformationAsAdminPresenter {
                     : [order];
             }
         }
+
+        console.log("PAYMENT ORDERMAP: ", paymentOrderOrderMap);
+        console.log("PAYMENT ORDERS QTY: ", paymentOrders.length);
+        console.log("ORDERS QTY: ", orders.length);
         return paymentOrders.map((paymentOrder) => ({
             id: paymentOrder.id.value,
             date: paymentOrder.getDdMmYyyyBillingDate(),
-            ordersQty: paymentOrderOrderMap[paymentOrder.id.value].length,
+            ordersQty: paymentOrderOrderMap[paymentOrder.id.value]?.length || "",
             price: paymentOrder.getTotalAmount(),
             status: paymentOrder.state.title,
         }));
