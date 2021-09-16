@@ -189,7 +189,7 @@ export class PayAllSubscriptions {
 
         await this.orderRepository.saveOrdersWithNewState(ordersToBill);
         await this.orderRepository.bulkSave(newOrders);
-        await this.paymentOrderRepository.bulkSave(paymentOrdersToBill);
+        await this.paymentOrderRepository.updateMany(paymentOrdersToBill);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
     }
 
