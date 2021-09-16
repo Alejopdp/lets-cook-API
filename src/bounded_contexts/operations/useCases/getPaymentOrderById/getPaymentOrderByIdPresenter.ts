@@ -26,6 +26,8 @@ export class GetPaymentOrderByIdPresenter {
             state: paymentOrder.state.title,
             orders: presentedOrders,
             totalAmount: paymentOrder.getTotalAmount(),
+            subtotal: paymentOrder.amount,
+            taxes: paymentOrder.getTotalAmount() * 0.21,
             paymentIntentId: paymentOrder.paymentIntentId,
             quantityRefunded: paymentOrder.quantityRefunded,
         };
