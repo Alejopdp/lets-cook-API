@@ -1,3 +1,4 @@
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Coupon } from "../../domain/cupons/Cupon";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
@@ -14,7 +15,7 @@ export class GetCouponListPresenter {
                 discount_type: coupon.type,
                 minimum_requirement: {
                     type: coupon.minRequireType,
-                    value: coupon.minRequireValue
+                    value: coupon.minRequireValue,
                 },
                 apply_to: {
                     type: coupon.productsForApplyingType,
@@ -26,10 +27,12 @@ export class GetCouponListPresenter {
                     value: coupon.maxChargeQtyValue,
                 },
                 date_rage: {
-                    start: coupon.startDate,
-                    expire: coupon.endDate,
+                    start: MomentTimeService.getDdMmYyyy(coupon.startDate),
+                    expire: coupon.endDate ? MomentTimeService.getDdMmYyyy(coupon.endDate) : "Nunca",
                 },
-                state: coupon.state
+                state: coupon.state,
+                quantityApplied: coupon.quantityApplied,
+                quantityOfCustomersWhoHaveApplied: coupon.getCustomersQuantityWhoHaveApplied(),
             });
         }
 

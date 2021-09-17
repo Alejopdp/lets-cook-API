@@ -26,6 +26,8 @@ export class GetCouponByIdPresenter {
                 expire: coupon.endDate ? MomentTimeService.getDdMmYyyy(coupon.endDate) : undefined,
             },
             state: coupon.state,
+            quantityApplied: coupon.quantityApplied,
+            quantityOfCustomersWhoHaveApplied: coupon.getCustomersQuantityWhoHaveApplied(),
         };
     }
 }

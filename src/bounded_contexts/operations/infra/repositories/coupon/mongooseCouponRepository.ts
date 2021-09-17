@@ -11,10 +11,10 @@ export class MongooseCouponRepository implements ICouponRepository {
         const couponDb = couponMapper.toPersistence(coupon);
         // console.log("Test: ", couponDb)
         if (await MongooseCoupon.exists({ _id: coupon.id.value })) {
-            console.log("Test: ", coupon.id.value, couponDb.state, couponDb.state === "deleted" ? true : false);
             await MongooseCoupon.updateOne(
                 { _id: coupon.id.value },
-                { $set: { state: couponDb.state, deletionFlag: couponDb.state === "deleted" ? true : false } }
+                // { $set: { state: couponDb.state, deletionFlag: couponDb.state === "deleted" ? true : false } }
+                couponDb
             );
         } else {
             await MongooseCoupon.create(couponDb);

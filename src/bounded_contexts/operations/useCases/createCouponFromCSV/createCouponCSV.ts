@@ -10,6 +10,7 @@ import { PercentPrice } from "../../domain/cupons/CuponType/PercentagePrice";
 import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { CreateCouponCSVDto } from "./createCouponDto";
+import { CouponState } from "../../domain/cupons/CouponState";
 
 export class CreateCoupon {
     private _couponRepository: ICouponRepository;
@@ -21,12 +22,13 @@ export class CreateCoupon {
     }
 
     public async execute(dto: CreateCouponCSVDto): Promise<void> {
-        const type: ICouponType = 
-        dto.discountType === "fixed" ? new FixedPrice(dto.discountType, dto.discountValue) : 
-        dto.discountType === "free" ? new FreeShipping(dto.discountType, dto.discountValue) : 
-        new PercentPrice(dto.discountType, dto.discountValue);
-        const productsForApplying: PlanId[] = dto.productsForApplyingValue
-        .map((id: string) => new PlanId(id));
+        const type: ICouponType =
+            dto.discountType === "fixed"
+                ? new FixedPrice(dto.discountType, dto.discountValue)
+                : dto.discountType === "free"
+                ? new FreeShipping(dto.discountType, dto.discountValue)
+                : new PercentPrice(dto.discountType, dto.discountValue);
+        const productsForApplying: PlanId[] = dto.productsForApplyingValue.map((id: string) => new PlanId(id));
 
         const coupon: Coupon = Coupon.create(
             dto.couponCode,
@@ -40,9 +42,9 @@ export class CreateCoupon {
             dto.maxChargeQtyValue,
             dto.startDate,
             dto.endDate,
-            "active"
+            CouponState.ACTIVE,
+            0
         );
-        console.log("CouponUseCase: ", coupon)
         await this.couponRepository.save(coupon);
     }
 

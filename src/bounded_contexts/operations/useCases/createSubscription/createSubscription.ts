@@ -192,6 +192,7 @@ export class CreateSubscription {
             }
         }
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+        if (coupon) await this.couponRepository.save(coupon);
 
         return { subscription, paymentIntent, firstOrder: orders[0], customerPaymentMethods: customer.paymentMethods };
     }
