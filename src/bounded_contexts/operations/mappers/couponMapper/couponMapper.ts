@@ -46,7 +46,7 @@ export class CouponMapper implements Mapper<Coupon> {
             raw.endDate,
             raw.state,
             raw.quantityApplied,
-            raw.customersWhoHaveApplied.map((id) => new CustomerId(id)),
+            raw.customersWhoHaveApplied.map((id: any) => new CustomerId(id)),
             new CouponId(raw._id)
         );
     }
