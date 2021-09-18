@@ -30,7 +30,7 @@ export class AssignOrdersToPaymentOrders {
         if (paymentOrdersToUpdate.length === 0) {
             const createPaymentOrdersServiceDto: CreatePaymentOrdersDto = {
                 orders: [...dto.orders],
-                shippingCost: dto.shippingCost,
+                shippingCost: dto.hasFreeShipping ? 0 : dto.shippingCost,
                 subscription: dto.subscription,
             };
 
@@ -53,7 +53,7 @@ export class AssignOrdersToPaymentOrders {
             if (ordersWithoutPaymentOrders.length > 0) {
                 const createPaymentOrdersServiceDto: CreatePaymentOrdersDto = {
                     orders: ordersWithoutPaymentOrders,
-                    shippingCost: dto.shippingCost,
+                    shippingCost: dto.hasFreeShipping ? 0 : dto.shippingCost,
                     subscription: dto.subscription,
                 };
                 newPaymentOrders = this.createPaymentOrdersService.execute(createPaymentOrdersServiceDto);

@@ -9,4 +9,5 @@ export interface AssignOrdersToPaymentOrdersDto {
     subscription: Subscription;
     weeks: Week[];
     shippingCost: number;
+    hasFreeShipping: boolean;
 }
