@@ -12,7 +12,6 @@ import { PersonalInfo } from "../../domain/customer/personalInfo/PersonalInfo";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 export class CustomerMapper implements Mapper<Customer> {
     public toDomain(raw: any): Customer {
-        console.log(raw);
         const shippingAddress: Address | undefined = raw.shippingAddress ? addressMapper.toDomain(raw.shippingAddress) : undefined;
         const billingAddress: Billing | undefined = raw.billingAddress ? billingMapper.toDomain(raw.billingAddress) : undefined;
         const paymentMethods: PaymentMethod[] = raw.paymentMethods.map((rawMethod: any) => paymentMethodMapper.toDomain(rawMethod));

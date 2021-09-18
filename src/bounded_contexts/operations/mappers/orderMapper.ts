@@ -46,7 +46,8 @@ export class OrderMapper implements Mapper<Order> {
             raw.lastDateOfRecipesSelection,
             paymentOrderId,
             new OrderId(raw._id),
-            raw.createdAt
+            raw.createdAt,
+            raw.counter
         );
     }
 

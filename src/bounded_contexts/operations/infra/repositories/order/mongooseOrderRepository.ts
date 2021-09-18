@@ -19,7 +19,9 @@ export class MongooseOrderRepository implements IOrderRepository {
         if (await MongooseOrder.exists({ _id: order.id.value })) {
             await MongooseOrder.updateOne({ _id: order.id.value }, orderDb);
         } else {
-            await MongooseOrder.create(orderDb);
+            const orderToSave = new MongooseOrder(orderDb);
+            // await MongooseOrder.create(orderDb);
+            await orderToSave.save();
         }
     }
 

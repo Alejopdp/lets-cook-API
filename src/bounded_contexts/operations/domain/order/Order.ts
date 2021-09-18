@@ -33,6 +33,7 @@ export class Order extends Entity<Order> {
     private _paymentOrderId?: PaymentOrderId;
     private _createdAt: Date;
     private _customer: Customer;
+    private _counter: number;
 
     constructor(
         shippingDate: Date,
@@ -53,7 +54,8 @@ export class Order extends Entity<Order> {
         lastDateOfRecipesSelection?: Date,
         paymentOrderId?: PaymentOrderId,
         orderId?: OrderId,
-        createdAt: Date = new Date()
+        createdAt: Date = new Date(),
+        counter: number = 0
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -74,6 +76,7 @@ export class Order extends Entity<Order> {
         this._paymentOrderId = paymentOrderId;
         this._createdAt = createdAt;
         this._customer = customer;
+        this._counter = counter;
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean): void {
@@ -378,6 +381,14 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter counter
+     * @return {number}
+     */
+    public get counter(): number {
+        return this._counter;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -519,5 +530,13 @@ export class Order extends Entity<Order> {
      */
     public set customer(value: Customer) {
         this._customer = value;
+    }
+
+    /**
+     * Setter counter
+     * @param {number} value
+     */
+    public set counter(value: number) {
+        this._counter = value;
     }
 }
