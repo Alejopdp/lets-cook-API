@@ -119,6 +119,9 @@ export class Order extends Entity<Order> {
     }
 
     public skip(): void {
+        const today = new Date();
+
+        if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
         this.state.toSkipped(this);
     }
 
