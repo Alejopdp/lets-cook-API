@@ -35,9 +35,12 @@ export class PlanVariantWithRecipe extends PlanVariant {
     }
 
     public getLabel(): string {
-        return this.name || `${this.numberOfRecipes} recetas para ${this.numberOfPersons} personas`;
+        return this.description || `${this.numberOfRecipes} recetas para ${this.numberOfPersons} personas`;
     }
 
+    public getLabelWithPrice(): string {
+        return `${this.getLabel()} / ${this.getPaymentPrice()} €`;
+    }
     public getServingsQuantity(): number {
         return this.numberOfPersons * this.numberOfRecipes;
     }

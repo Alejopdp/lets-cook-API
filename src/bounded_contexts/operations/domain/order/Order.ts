@@ -161,6 +161,7 @@ export class Order extends Entity<Order> {
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
         this.recipesVariantsIds = [];
+        this.price = newPlan.getPlanVariantPrice(newPlanVariantId);
     }
 
     public getDdMmYyyyShipmentDate(): string {

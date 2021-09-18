@@ -55,9 +55,8 @@ export class SwapSubscriptionPlan {
 
         // UPDATE PAYEMNT ORDERS COST
         if (oldSubscriptionPrice !== subscription.price) {
-            const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByBillingDateList(
-                orders.map((order) => order.billingDate),
-                subscription.customer.id
+            const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(
+                orders.map((order) => order.paymentOrderId!)
             );
             const coupon: Coupon | undefined = subscription.coupon
                 ? await this.couponRepository.findById(subscription.coupon.id)
