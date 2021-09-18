@@ -29,13 +29,17 @@ export class MongooseCouponRepository implements ICouponRepository {
     }
 
     public async findByCode(couponCode: string): Promise<Coupon | undefined> {
-        const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode, deletionFlag: false });
+        const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode.toUpperCase(), deletionFlag: false });
 
         return couponDb ? couponMapper.toDomain(couponDb) : undefined;
     }
 
     public async findActiveByCode(couponCode: string): Promise<Coupon | undefined> {
-        const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode, deletionFlag: false, state: CouponState.ACTIVE });
+        const couponDb = await MongooseCoupon.findOne({
+            couponCode: couponCode.toUpperCase(),
+            deletionFlag: false,
+            state: CouponState.ACTIVE,
+        });
 
         return couponDb ? couponMapper.toDomain(couponDb) : undefined;
     }
