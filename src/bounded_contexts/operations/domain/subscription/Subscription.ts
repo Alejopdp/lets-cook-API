@@ -275,7 +275,7 @@ export class Subscription extends Entity<Subscription> {
 
         if (servingsQty === 0) return "";
 
-        return `${servingsQty} raciones a ${this.price / servingsQty} € por ración`;
+        return `${servingsQty} raciones a ${Math.round((this.price / servingsQty + Number.EPSILON) * 100) / 100} € por ración`;
     }
 
     public getPriceByFrequencyLabel(): string {

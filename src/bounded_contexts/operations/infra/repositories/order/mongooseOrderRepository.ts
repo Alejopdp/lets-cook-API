@@ -63,7 +63,10 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void> {
         const ordersIdToSave = orders.map((order) => order.id.value);
 
-        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { plan: newPlan.id.value, planVariant: newPlanVariantId.value });
+        await MongooseOrder.updateMany(
+            { _id: ordersIdToSave },
+            { plan: newPlan.id.value, planVariant: newPlanVariantId.value, price: newPlan.getPlanVariantPrice(newPlanVariantId) }
+        );
     }
 
     public async getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[]): Promise<{ [key: string]: number }> {
