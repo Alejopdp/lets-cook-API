@@ -6,4 +6,5 @@ export interface ICouponRepository {
     findAll(): Promise<Coupon[]>;
     findById(couponId: CouponId): Promise<Coupon | undefined>;
     findByCode(couponCode: string): Promise<Coupon | undefined>;
+    findActiveByCode(couponCode: string): Promise<Coupon | undefined>
 }

@@ -45,6 +45,10 @@ export class CreateCoupon {
             CouponState.ACTIVE,
             0
         );
+        const couponWithSameCode: Coupon | undefined = await this.couponRepository.findActiveByCode(coupon.couponCode);
+
+        if (couponWithSameCode) throw new Error("Ya existe un cupón activo con el mismo código ingresado");
+
         await this.couponRepository.save(coupon);
     }
 

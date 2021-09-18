@@ -5,6 +5,7 @@ import { Coupon as MongooseCoupon } from "../../../../../infraestructure/mongoos
 import { couponMapper } from "../../../mappers/couponMapper";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
+import { CouponState } from "../../../domain/cupons/CouponState";
 
 export class MongooseCouponRepository implements ICouponRepository {
     public async save(coupon: Coupon): Promise<void> {
@@ -29,6 +30,13 @@ export class MongooseCouponRepository implements ICouponRepository {
 
     public async findByCode(couponCode: string): Promise<Coupon | undefined> {
         const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode, deletionFlag: false });
+
+        return couponDb ? couponMapper.toDomain(couponDb) : undefined;
+    }
+
+    public async findActiveByCode(couponCode: string): Promise<Coupon | undefined> {
+        const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode, deletionFlag: false, state: CouponState.ACTIVE });
+
         return couponDb ? couponMapper.toDomain(couponDb) : undefined;
     }
 

@@ -141,7 +141,8 @@ export class CreateManySubscriptions {
             orders,
             frequencyWeeksMap: frequencyWeekMap,
             customerId: customer.id,
-            shippingCost: customerShippingZone.cost,
+            // shippingCost: customerShippingZone.cost,
+            shippingCost: 0,
         };
 
         const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersWithDifferentFreqToPaymentOrders.execute(

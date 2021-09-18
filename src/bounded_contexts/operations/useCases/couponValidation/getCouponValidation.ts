@@ -21,7 +21,7 @@ export class GetCouponValidation {
     }
 
     public async execute(dto: GetCouponValidationDto): Promise<any> {
-        const coupon: Coupon | undefined = await this.couponRepository.findByCode(dto.coupon);
+        const coupon: Coupon | undefined = await this.couponRepository.findActiveByCode(dto.coupon);
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const planId: PlanId = new PlanId(dto.planId);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);

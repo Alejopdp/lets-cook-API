@@ -80,7 +80,7 @@ export class Coupon extends Entity<Coupon> {
     ): Coupon {
         const maxChargesQty = maxChargeQtyType === "only_fee" ? 1 : maxChargeQtyValue;
         return new Coupon(
-            couponCode,
+            couponCode.toUpperCase(),
             type,
             minRequireType,
             minRequireValue,
