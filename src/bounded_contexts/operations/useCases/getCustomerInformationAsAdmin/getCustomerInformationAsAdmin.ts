@@ -37,13 +37,9 @@ export class GetCustomerInformationAsAdmin {
     ): Promise<{ customer: Customer; subscriptions: Subscription[]; paymentOrders: PaymentOrder[]; orders: Order[] }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer = await this.customerRepository.findByIdOrThrow(customerId);
-        console.log("AAA");
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
-        console.log("BBB");
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(customerId);
-        console.log("CCC");
         const orders: Order[] = await this.orderRepository.findByPaymentOrderIdList(paymentOrders.map((po) => po.id));
-        console.log("DDD");
 
         return { customer, subscriptions, paymentOrders, orders };
     }

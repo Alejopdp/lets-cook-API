@@ -33,6 +33,7 @@ export class Order extends Entity<Order> {
     private _paymentOrderId?: PaymentOrderId;
     private _createdAt: Date;
     private _customer: Customer;
+    private _counter: number;
 
     constructor(
         shippingDate: Date,
@@ -53,7 +54,8 @@ export class Order extends Entity<Order> {
         lastDateOfRecipesSelection?: Date,
         paymentOrderId?: PaymentOrderId,
         orderId?: OrderId,
-        createdAt: Date = new Date()
+        createdAt: Date = new Date(),
+        counter: number = 0
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -74,6 +76,7 @@ export class Order extends Entity<Order> {
         this._paymentOrderId = paymentOrderId;
         this._createdAt = createdAt;
         this._customer = customer;
+        this._counter = counter;
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean): void {
@@ -116,6 +119,9 @@ export class Order extends Entity<Order> {
     }
 
     public skip(): void {
+        const today = new Date();
+
+        if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
         this.state.toSkipped(this);
     }
 
@@ -158,6 +164,7 @@ export class Order extends Entity<Order> {
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
         this.recipesVariantsIds = [];
+        this.price = newPlan.getPlanVariantPrice(newPlanVariantId);
     }
 
     public getDdMmYyyyShipmentDate(): string {
@@ -201,8 +208,10 @@ export class Order extends Entity<Order> {
 
     public isActualWeek(): boolean {
         const date: Date = new Date();
+        const auxMinDay = new Date(this.week.minDay);
+        auxMinDay.setDate(auxMinDay.getDate() - 1);
 
-        return date >= this.week.minDay && date <= this.week.maxDay;
+        return date >= auxMinDay && date <= this.week.maxDay;
     }
 
     public isInTimeToChooseRecipes(): boolean {
@@ -229,9 +238,11 @@ export class Order extends Entity<Order> {
 
     public isNextWeek(): boolean {
         const date: Date = new Date();
-        const minDayDifferenceInDays = (this.week.minDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
+        const auxMinDay = new Date(this.week.minDay);
+        auxMinDay.setDate(auxMinDay.getDate() - 1);
+        const minDayDifferenceInDays = (auxMinDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
 
-        return minDayDifferenceInDays < 7 && date <= this.week.minDay;
+        return minDayDifferenceInDays < 7 && date <= auxMinDay;
     }
     /**
      * Getter shippingDate
@@ -378,6 +389,14 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter counter
+     * @return {number}
+     */
+    public get counter(): number {
+        return this._counter;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -519,5 +538,13 @@ export class Order extends Entity<Order> {
      */
     public set customer(value: Customer) {
         this._customer = value;
+    }
+
+    /**
+     * Setter counter
+     * @param {number} value
+     */
+    public set counter(value: number) {
+        this._counter = value;
     }
 }

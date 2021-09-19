@@ -86,8 +86,6 @@ export class CreateSubscription {
         const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
-        const addressIsChanged: boolean =
-            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
         const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
 
@@ -99,24 +97,6 @@ export class CreateSubscription {
             customer.personalInfo?.birthDate,
             dto.locale
         );
-        if (addressIsChanged) {
-            customer.changeShippingAddress(
-                dto.latitude,
-                dto.longitude,
-                dto.addressName,
-                dto.addressName,
-                dto.addressDetails,
-                customer.shippingAddress?.deliveryTime
-            );
-            customer.changeBillingAddress(
-                dto.latitude,
-                dto.longitude,
-                dto.addressName,
-                customer.billingAddress?.customerName || `${dto.customerFirstName} ${dto.customerLastName}`,
-                dto.addressDetails,
-                customer.billingAddress?.identification || ""
-            );
-        }
 
         const subscription: Subscription = new Subscription(
             planVariantId,
@@ -129,7 +109,7 @@ export class CreateSubscription {
             plan.getPlanVariantPrice(planVariantId),
             undefined,
             coupon,
-            undefined, // Validate and use cupón
+            undefined,
             undefined,
             new Date() // TO DO: Calculate
         );
@@ -149,6 +129,7 @@ export class CreateSubscription {
             subscription,
             weeks: nextTwelveWeeks,
             shippingCost: customerShippingZone.cost,
+            hasFreeShipping: customerSubscriptions.length > 0,
         };
 
         const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
@@ -173,6 +154,7 @@ export class CreateSubscription {
             customer.stripeId
         );
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
+        newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
@@ -185,13 +167,9 @@ export class CreateSubscription {
         await this.orderRepository.bulkSave(orders);
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
-        if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
-            for (let paymentOrder of paymentOrdersToUpdate) {
-                // TO DO: Update Orders shipping cost too
-                paymentOrder.shippingCost = customerShippingZone.cost;
-            }
-        }
+
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+        if (coupon) await this.couponRepository.save(coupon);
 
         return { subscription, paymentIntent, firstOrder: orders[0], customerPaymentMethods: customer.paymentMethods };
     }

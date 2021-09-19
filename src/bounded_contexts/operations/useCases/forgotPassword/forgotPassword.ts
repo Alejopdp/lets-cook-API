@@ -7,7 +7,7 @@ import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { ForgotPasswordDto } from "./forgotPasswordDto";
-const crypto = require('crypto');
+const crypto = require("crypto");
 import { ForgotPasswordErrors, invalidArguments } from "./forgotPasswordErrors";
 
 type Response = Either<Failure<ForgotPasswordErrors>, any>;
@@ -25,15 +25,11 @@ export class ForgotPassword implements UseCase<ForgotPasswordDto, Promise<Respon
 
     public async execute(dto: ForgotPasswordDto): Promise<Response> {
         const customer: Customer | undefined = await this.customerRepository.findByEmail(dto.email);
-        // console.log(customer)
         if (!customer) return isFailure(invalidArguments());
 
-        // customer.requestChangePassword();
-
         const token = this.tokenService.passwordGenerationToken({ email: customer.email, id: customer.id.value });
-        // console.log('Token: ', token)
-        let random: string = parseInt(crypto.randomBytes(3).toString('hex'), 16).toString().substr(0,6);
-        // console.log('random',random)
+        let random: string = parseInt(crypto.randomBytes(3).toString("hex"), 16).toString().substr(0, 6);
+
         customer.codeToRecoverPassword = random;
 
         await this.notificationService.notifyNewBackOfficeUserToRecoverPassword(
