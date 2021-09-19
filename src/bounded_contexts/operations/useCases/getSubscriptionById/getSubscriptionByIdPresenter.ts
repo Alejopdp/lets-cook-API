@@ -46,7 +46,6 @@ export class GetSubscriptionByIdPresenter {
         const nextActiveOrder: Order | undefined = subscription.getNextOrderToShip(orders);
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondOrderToShip(orders);
         const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? nextActiveOrder : null;
-        console.log("NEXT AVICE ORDER IS ACTUAL WWEK; ", nextActiveOrder.isActualWeek());
         const nextWeekOrder =
             nextActiveOrder && nextActiveOrder.isNextWeek()
                 ? nextActiveOrder
