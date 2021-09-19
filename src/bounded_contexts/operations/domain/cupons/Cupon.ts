@@ -1,16 +1,15 @@
 // Principal
 import { Entity } from "../../../../core/domain/Entity";
-import { Guard } from "../../../../core/logic/Guard";
 import { ICouponType } from "./CuponType/ICuponType";
 import { PlanId } from "../plan/PlanId";
 import { CouponId } from "../cupons/CouponId";
 import { ILimitAplication } from "./LimitAplication/ILimitAplication";
-import { Locale } from "../locale/Locale";
-import { logger } from "../../../../../config";
-import { String } from "aws-sdk/clients/apigateway";
 import { Subscription } from "../subscription/Subscription";
 import { Plan } from "../plan/Plan";
 import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
+import { Customer } from "../customer/Customer";
+import { CustomerId } from "../customer/CustomerId";
+import { CouponState } from "./CouponState";
 
 export class Coupon extends Entity<Coupon> {
     private _couponCode: string;
@@ -24,7 +23,9 @@ export class Coupon extends Entity<Coupon> {
     private _maxChargeQtyValue: number;
     private _startDate: Date;
     private _endDate: Date;
-    private _state: string;
+    private _state: CouponState;
+    private _quantityApplied: number;
+    private _customersWhoHaveApplied: CustomerId[];
 
     protected constructor(
         couponCode: string,
@@ -38,7 +39,9 @@ export class Coupon extends Entity<Coupon> {
         maxChargeQtyValue: number,
         startDate: Date,
         endDate: Date,
-        state: string,
+        state: CouponState,
+        quantityApplied: number,
+        customersWhoHaveApplied: CustomerId[],
         id?: CouponId
     ) {
         super(id);
@@ -54,6 +57,8 @@ export class Coupon extends Entity<Coupon> {
         this._startDate = startDate;
         this._endDate = endDate;
         this._state = state;
+        this._quantityApplied = quantityApplied;
+        this._customersWhoHaveApplied = customersWhoHaveApplied;
     }
 
     public static create(
@@ -68,12 +73,14 @@ export class Coupon extends Entity<Coupon> {
         maxChargeQtyValue: number,
         startDate: Date,
         endDate: Date,
-        state: string,
+        state: CouponState,
+        quantityApplied: number,
+        customersWhoHaveApplied: CustomerId[] = [],
         id?: CouponId
     ): Coupon {
         const maxChargesQty = maxChargeQtyType === "only_fee" ? 1 : maxChargeQtyValue;
         return new Coupon(
-            couponCode,
+            couponCode.toUpperCase(),
             type,
             minRequireType,
             minRequireValue,
@@ -85,11 +92,13 @@ export class Coupon extends Entity<Coupon> {
             startDate,
             endDate,
             state,
+            quantityApplied,
+            customersWhoHaveApplied,
             id
         );
     }
 
-    public updateState(state: string): void {
+    public updateState(state: CouponState): void {
         this.state = state;
     }
 
@@ -104,7 +113,10 @@ export class Coupon extends Entity<Coupon> {
 
         if (this.isApplyingToRightProducts(plan)) throw new Error("El cupón de descuento no aplica para el plan que estas comprando");
 
-        return this.limites.every((limit) => limit.isValid(subscriptions, this.id));
+        if (this.state === CouponState.INACTIVE || this.state === CouponState.DELETED || this.state === CouponState.UNAVAILABLE)
+            throw new Error("El cupón de descuento no está disponible");
+
+        return this.limites.every((limit) => limit.isValid(subscriptions, this.id)); // Use quantityApplied and customersWhoHaveApplied
     }
 
     private isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost: number): boolean {
@@ -140,6 +152,20 @@ export class Coupon extends Entity<Coupon> {
     public isExpiredByEndDate(): boolean {
         return !!this.endDate && new Date() < this.endDate;
     }
+
+    public addApplication(customerApplying: Customer): void {
+        const applicationLimit: number | undefined = this.limites.find((limit) => limit.type === "limit_qty")?.value;
+        this.quantityApplied = this.quantityApplied + 1;
+        console.log("QUANTITY APPLIED: ", this.quantityApplied);
+        if (this.quantityApplied === applicationLimit) this.updateState(CouponState.UNAVAILABLE);
+        if (this.customersWhoHaveApplied.some((customerId) => customerId.equals(customerApplying.id))) return;
+        else this.customersWhoHaveApplied = [...this.customersWhoHaveApplied, customerApplying.id];
+    }
+
+    public getCustomersQuantityWhoHaveApplied(): number {
+        return this.customersWhoHaveApplied.length;
+    }
+
     /**
      * Getter name
      * @return {string}
@@ -230,10 +256,26 @@ export class Coupon extends Entity<Coupon> {
 
     /**
      * Getter availablePlanFrecuencies
-     * @return {string}
+     * @return {CouponState}
      */
-    public get state(): string {
+    public get state(): CouponState {
         return this._state;
+    }
+
+    /**
+     * Getter quantityApplied
+     * @return {number}
+     */
+    public get quantityApplied(): number {
+        return this._quantityApplied;
+    }
+
+    /**
+     * Getter customersWhoHaveApplied
+     * @return {CustomerId[]}
+     */
+    public get customersWhoHaveApplied(): CustomerId[] {
+        return this._customersWhoHaveApplied;
     }
 
     /**
@@ -327,9 +369,25 @@ export class Coupon extends Entity<Coupon> {
 
     /**
      * Setter locale
-     * @param {string} value
+     * @param {CouponState} value
      */
-    public set state(value: string) {
+    public set state(value: CouponState) {
         this._state = value;
+    }
+
+    /**
+     * Setter quantityApplied
+     * @param {number} value
+     */
+    public set quantityApplied(value: number) {
+        this._quantityApplied = value;
+    }
+
+    /**
+     * Setter customersWhoHaveApplied
+     * @param {CustomerId[]} value
+     */
+    public set customersWhoHaveApplied(value: CustomerId[]) {
+        this._customersWhoHaveApplied = value;
     }
 }

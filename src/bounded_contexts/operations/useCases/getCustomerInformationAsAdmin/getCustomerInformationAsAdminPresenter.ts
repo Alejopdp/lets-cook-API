@@ -30,8 +30,11 @@ export class GetCustomerInformationAsAdminPresenter {
                 })),
             },
             subscriptions: this.presentSubscriptions(subscriptions),
-            orders: this.presentOrders(orders),
-            paymentOrders: this.presentPaymentOrders(paymentOrders, orders),
+            orders: this.presentOrders(orders.filter((order) => order.billingDate >= new Date())),
+            paymentOrders: this.presentPaymentOrders(
+                paymentOrders.filter((paymentOrder) => paymentOrder.billingDate <= new Date()),
+                orders
+            ),
         };
     }
 
@@ -71,9 +74,6 @@ export class GetCustomerInformationAsAdminPresenter {
             }
         }
 
-        console.log("PAYMENT ORDERMAP: ", paymentOrderOrderMap);
-        console.log("PAYMENT ORDERS QTY: ", paymentOrders.length);
-        console.log("ORDERS QTY: ", orders.length);
         return paymentOrders.map((paymentOrder) => ({
             id: paymentOrder.id.value,
             date: paymentOrder.getDdMmYyyyBillingDate(),

@@ -5,16 +5,16 @@ import { Coupon as MongooseCoupon } from "../../../../../infraestructure/mongoos
 import { couponMapper } from "../../../mappers/couponMapper";
 import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
+import { CouponState } from "../../../domain/cupons/CouponState";
 
 export class MongooseCouponRepository implements ICouponRepository {
     public async save(coupon: Coupon): Promise<void> {
         const couponDb = couponMapper.toPersistence(coupon);
-        // console.log("Test: ", couponDb)
         if (await MongooseCoupon.exists({ _id: coupon.id.value })) {
-            console.log("Test: ", coupon.id.value, couponDb.state, couponDb.state === "deleted" ? true : false);
             await MongooseCoupon.updateOne(
                 { _id: coupon.id.value },
-                { $set: { state: couponDb.state, deletionFlag: couponDb.state === "deleted" ? true : false } }
+                // { $set: { state: couponDb.state, deletionFlag: couponDb.state === "deleted" ? true : false } }
+                couponDb
             );
         } else {
             await MongooseCoupon.create(couponDb);
@@ -28,7 +28,18 @@ export class MongooseCouponRepository implements ICouponRepository {
     }
 
     public async findByCode(couponCode: string): Promise<Coupon | undefined> {
-        const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode, deletionFlag: false });
+        const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode.toUpperCase(), deletionFlag: false });
+
+        return couponDb ? couponMapper.toDomain(couponDb) : undefined;
+    }
+
+    public async findActiveByCode(couponCode: string): Promise<Coupon | undefined> {
+        const couponDb = await MongooseCoupon.findOne({
+            couponCode: couponCode.toUpperCase(),
+            deletionFlag: false,
+            state: CouponState.ACTIVE,
+        });
+
         return couponDb ? couponMapper.toDomain(couponDb) : undefined;
     }
 

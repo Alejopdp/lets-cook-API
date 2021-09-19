@@ -8,6 +8,7 @@ import { PercentPrice } from "../../domain/cupons/CuponType/PercentagePrice";
 import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { CreateCouponDto } from "./createCouponDto";
+import { CouponState } from "../../domain/cupons/CouponState";
 
 export class CreateCoupon {
     private _couponRepository: ICouponRepository;
@@ -23,7 +24,8 @@ export class CreateCoupon {
                 : dto.discountType === "free"
                 ? new FreeShipping(dto.discountType, dto.discountValue)
                 : new PercentPrice(dto.discountType, dto.discountValue);
-        const productsForApplying: PlanId[] = dto.productsForApplyingValue.map((id: string) => new PlanId(id));
+
+        const productsForApplying: PlanId[] = dto.productsForApplyingValue.map((plan: any) => new PlanId(plan.id));
 
         const coupon: Coupon = Coupon.create(
             dto.couponCode,
@@ -37,8 +39,14 @@ export class CreateCoupon {
             dto.maxChargeQtyValue,
             dto.startDate,
             dto.endDate,
-            "active"
+            CouponState.ACTIVE,
+            0
         );
+
+        const activeCouponWithSameCode: Coupon | undefined = await this.couponRepository.findActiveByCode(coupon.couponCode);
+
+        if (activeCouponWithSameCode) throw new Error("Ya existe un cupón activo con el mismo código ingresado");
+
         await this.couponRepository.save(coupon);
     }
 

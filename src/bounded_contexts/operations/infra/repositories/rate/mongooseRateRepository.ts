@@ -7,9 +7,7 @@ import { rateMapper } from "../../../mappers";
 export class MongooseRateRepository implements IRateRepository {
     public async save(rate: Rate): Promise<void> {
         const rateDb = rateMapper.toPersistence(rate);
-        // console.log("Test: ", couponDb)
         if (await MongooseRate.exists({ _id: rate.id.value })) {
-            console.log("Test: ", rate.id.value, rateDb.state);
             await MongooseRate.updateOne(
                 { _id: rate.id.value },
                 {

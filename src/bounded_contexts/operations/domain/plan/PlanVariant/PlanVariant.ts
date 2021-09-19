@@ -44,10 +44,17 @@ export class PlanVariant extends Entity<PlanVariant> {
     }
 
     public getLabel(): string {
-        return this.attributes.reduce(
-            (acc: string, attribute: PlanVariantAttribute) => (acc = `${acc} / ${attribute.key} ${attribute.value}`),
-            ""
+        return (
+            this.description ||
+            this.attributes.reduce(
+                (acc: string, attribute: PlanVariantAttribute) => (acc = `${acc} / ${attribute.key} ${attribute.value}`),
+                ""
+            )
         );
+    }
+
+    public getLabelWithPrice(): string {
+        return `${this.getLabel()} / ${this.getPaymentPrice()} €`;
     }
 
     public getServingsQuantity(): number {

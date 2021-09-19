@@ -41,7 +41,7 @@ export class PayAllSubscriptions {
     }
 
     public async execute(): Promise<void> {
-        // const today: Date = new Date(2021, 7, 28);
+        // const today: Date = new Date(2021, 9, 2);
         const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
@@ -189,7 +189,7 @@ export class PayAllSubscriptions {
 
         await this.orderRepository.saveOrdersWithNewState(ordersToBill);
         await this.orderRepository.bulkSave(newOrders);
-        await this.paymentOrderRepository.bulkSave(paymentOrdersToBill);
+        await this.paymentOrderRepository.updateMany(paymentOrdersToBill);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
     }
 
