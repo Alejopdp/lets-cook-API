@@ -10,7 +10,6 @@ import { CouponState } from "../../../domain/cupons/CouponState";
 export class MongooseCouponRepository implements ICouponRepository {
     public async save(coupon: Coupon): Promise<void> {
         const couponDb = couponMapper.toPersistence(coupon);
-        // console.log("Test: ", couponDb)
         if (await MongooseCoupon.exists({ _id: coupon.id.value })) {
             await MongooseCoupon.updateOne(
                 { _id: coupon.id.value },

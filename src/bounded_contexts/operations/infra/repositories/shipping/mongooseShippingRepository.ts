@@ -10,9 +10,7 @@ import { logger } from "../../../../../../config";
 export class MongooseShippingRepository implements IShippingZoneRepository {
     public async save(shipping: ShippingZone): Promise<void> {
         const shippingDb = shippingMapper.toPersistence(shipping);
-        // console.log("Test: ", shippingDb)
         if (await MongooseShippingZone.exists({ _id: shipping.id.value })) {
-            console.log("Test: ", shipping.id.value, shippingDb);
             await MongooseShippingZone.updateOne(
                 { _id: shipping.id.value },
                 {

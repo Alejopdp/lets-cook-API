@@ -208,8 +208,10 @@ export class Order extends Entity<Order> {
 
     public isActualWeek(): boolean {
         const date: Date = new Date();
+        const auxMinDay = new Date(this.week.minDay);
+        auxMinDay.setDate(auxMinDay.getDate() - 1);
 
-        return date >= this.week.minDay && date <= this.week.maxDay;
+        return date >= auxMinDay && date <= this.week.maxDay;
     }
 
     public isInTimeToChooseRecipes(): boolean {
@@ -236,9 +238,11 @@ export class Order extends Entity<Order> {
 
     public isNextWeek(): boolean {
         const date: Date = new Date();
-        const minDayDifferenceInDays = (this.week.minDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
+        const auxMinDay = new Date(this.week.minDay);
+        auxMinDay.setDate(auxMinDay.getDate() - 1);
+        const minDayDifferenceInDays = (auxMinDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
 
-        return minDayDifferenceInDays < 7 && date <= this.week.minDay;
+        return minDayDifferenceInDays < 7 && date <= auxMinDay;
     }
     /**
      * Getter shippingDate

@@ -154,6 +154,7 @@ export class CreateSubscription {
             customer.stripeId
         );
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
+        newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
