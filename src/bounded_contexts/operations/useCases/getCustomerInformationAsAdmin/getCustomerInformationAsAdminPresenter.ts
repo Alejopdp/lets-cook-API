@@ -30,7 +30,11 @@ export class GetCustomerInformationAsAdminPresenter {
                 })),
             },
             subscriptions: this.presentSubscriptions(subscriptions),
-            orders: this.presentOrders(orders.filter((order) => order.billingDate >= new Date())),
+            orders: this.presentOrders(
+                orders
+                    .filter((order) => order.billingDate >= new Date() && (order.isActive() || order.isSkipped()))
+                    .sort((order1, order2) => (order1.shippingDate > order2.shippingDate ? 1 : -1))
+            ),
             paymentOrders: this.presentPaymentOrders(
                 paymentOrders.filter((paymentOrder) => paymentOrder.billingDate <= new Date()),
                 orders
