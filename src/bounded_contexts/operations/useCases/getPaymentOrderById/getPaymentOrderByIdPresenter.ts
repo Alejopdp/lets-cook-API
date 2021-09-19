@@ -42,6 +42,7 @@ export class GetPaymentOrderByIdPresenter {
 
             presentedOrders.push({
                 id: order.id.value,
+                number: order.counter,
                 shippingDate: order.getHumanShippmentDay(),
                 // state: order.state.humanTitle,
                 state: order.state.title,

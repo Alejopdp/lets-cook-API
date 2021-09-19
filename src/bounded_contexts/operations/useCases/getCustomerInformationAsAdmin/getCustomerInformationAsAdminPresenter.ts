@@ -61,6 +61,7 @@ export class GetCustomerInformationAsAdminPresenter {
             variation: order.getPlanVariantLabel(order.planVariantId),
             price: order.getTotalPrice(),
             active: order.isActive(),
+            orderNumber: order.counter,
         }));
     }
 

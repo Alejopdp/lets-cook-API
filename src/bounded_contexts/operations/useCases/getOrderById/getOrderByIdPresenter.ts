@@ -18,6 +18,7 @@ export class GetOrderByIdPresenter {
 
         return {
             id: order.id.value,
+            number: order.counter,
             shippingDate: order.getHumanShippmentDay(),
             billingDate: order.getHumanBillingDay(),
             state: order.state.title,
