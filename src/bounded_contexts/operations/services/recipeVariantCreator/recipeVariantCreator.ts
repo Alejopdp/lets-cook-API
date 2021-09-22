@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { logger } from "../../../../../config";
 import { Ingredient } from "../../domain/ingredient/ingredient";
+import { Locale } from "../../domain/locale/Locale";
 import { RecipeVariant } from "../../domain/recipe/RecipeVariant/RecipeVariant";
 import { RecipeRestrictionId } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { RecipeVariantRestriction } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
@@ -21,7 +22,7 @@ export class RecipeVariantCreator {
     public async execute(dto: RecipeVariantCreatorDto): Promise<RecipeVariant[]> {
         const allIngredientsName: string[] = _.uniq(_.flatten(dto.variants.map((variant) => variant.ingredients)));
         const restrictions: RecipeVariantRestriction[] = await this.recipeRestrictionRepository.findAll();
-        const ingredients: Ingredient[] = await this.ingredientRepository.findAllByName(allIngredientsName);
+        const ingredients: Ingredient[] = await this.ingredientRepository.findAllByName(allIngredientsName, Locale.es);
         const variants: RecipeVariant[] = [];
 
         for (let v of dto.variants) {
@@ -33,7 +34,7 @@ export class RecipeVariantCreator {
             );
             const sku: RecipeVariantSku = new RecipeVariantSku(v.sku);
 
-            variants.push(new RecipeVariant(variantIngredients, variantRestriction, sku));
+            variants.push(new RecipeVariant(variantIngredients, variantRestriction!, sku));
         }
 
         return variants;

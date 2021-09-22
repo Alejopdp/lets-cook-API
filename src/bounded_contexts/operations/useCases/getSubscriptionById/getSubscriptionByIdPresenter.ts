@@ -112,7 +112,9 @@ export class GetSubscriptionByIdPresenter {
             isDefault: variant.isDefault,
             description: variant.getLabelWithPrice(),
             price: variant.getPaymentPrice(),
+            //@ts-ignore
             numberOfPersons: variant.numberOfPersons || 0,
+            //@ts-ignore
             numberOfRecipes: variant.numberOfRecipes || 0,
         };
     }

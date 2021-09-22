@@ -11,6 +11,12 @@ export class MockPlanRepository implements IPlanRepository {
     constructor(database: Plan[]) {
         this._database = database;
     }
+    findByIdOrThrow(planId: PlanId, locale: Locale): Promise<Plan> {
+        throw new Error("Method not implemented.");
+    }
+    findPlanAhorro(locale: Locale): Promise<Plan | undefined> {
+        throw new Error("Method not implemented.");
+    }
 
     findByPlanVariantId(planVariantId: PlanVariantId): Promise<Plan | undefined> {
         throw new Error("Method not implemented.");

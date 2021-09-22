@@ -8,13 +8,7 @@ export class RateMapper implements Mapper<Rate> {
     public toDomain(raw: any): Rate {
         const customerId = new CustomerId(raw.customerId);
         const recipeId = new RecipeId(raw.recipeId);
-        return new Rate(
-            customerId, 
-            recipeId, 
-            raw.rateValue, 
-            raw.comment, 
-            new RateId(raw._id)
-        );
+        return Rate.create(customerId, recipeId, raw.rateValue, raw.comment, new RateId(raw._id));
     }
     public toPersistence(t: Rate): any {
         return {

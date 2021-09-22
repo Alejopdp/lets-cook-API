@@ -1,4 +1,4 @@
-import { INotificationService } from "./INotificationService";
+import { INotificationService, NewSubscriptionNotificationDto } from "./INotificationService";
 import Mail from "nodemailer/lib/mailer";
 import nodemailer from "nodemailer";
 import { MailOptions } from "nodemailer/lib/json-transport";
@@ -9,6 +9,15 @@ export class NodemailerService implements INotificationService {
 
     constructor(transporter: Mail) {
         this._transporter = transporter;
+    }
+    notifyCustomerAboutNewSubscriptionSuccessfullyCreated(dto: NewSubscriptionNotificationDto): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    notifyAdminsAboutNewSubscriptionSuccessfullyCreated(): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    sendErrorEmail(errorMessage: string): Promise<void> {
+        throw new Error("Method not implemented.");
     }
 
     notifyNewBackOfficeUserToRecoverPassword(email: string, redirectUrl: string): Promise<void> {

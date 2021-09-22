@@ -94,6 +94,7 @@ export class CreateSubscription {
             dto.customerLastName,
             dto.phone1,
             "",
+            //@ts-ignore
             customer.personalInfo?.birthDate,
             dto.locale
         );

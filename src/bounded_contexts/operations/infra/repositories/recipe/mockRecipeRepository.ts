@@ -1,7 +1,9 @@
 import _ from "lodash";
+import { Order } from "../../../domain/order/Order";
 import { Recipe } from "../../../domain/recipe/Recipe";
 import { RecipeId } from "../../../domain/recipe/RecipeId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
+import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { WeekId } from "../../../domain/week/WeekId";
 import { IRecipeRepository } from "./IRecipeRepository";
 
@@ -10,6 +12,15 @@ export class MockRecipeRepository implements IRecipeRepository {
 
     constructor(database: Recipe[]) {
         this._database = database;
+    }
+    findByIdList(recipesIds: RecipeId[]): Promise<Recipe[]> {
+        throw new Error("Method not implemented.");
+    }
+    findForOrder(order: Order, restrictionId?: RecipeRestrictionId): Promise<Recipe[]> {
+        throw new Error("Method not implemented.");
+    }
+    findNextWeekRecipes(): Promise<Recipe[]> {
+        throw new Error("Method not implemented.");
     }
     findByWeekId(weekId: WeekId): Promise<Recipe[]> {
         throw new Error("Method not implemented.");
