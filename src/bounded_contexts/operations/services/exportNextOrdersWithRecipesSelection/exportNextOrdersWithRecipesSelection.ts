@@ -86,7 +86,9 @@ export class ExportNextOrdersWithRecipesSelection {
                     recipeVariantSku: "",
                     recipeVariantId: "",
                     recipeName: "",
+                    //@ts-ignore
                     numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
+                    //@ts-ignore
                     numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
                     customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                     chooseState: order.plan.abilityToChooseRecipes ? RecipeSelectionState.AUN_NO_ELIGIO : RecipeSelectionState.NO_ELIGE,
@@ -138,7 +140,9 @@ export class ExportNextOrdersWithRecipesSelection {
                                 ?.sku.code || "",
                         recipeVariantId: recipeSelection.recipeVariantId.value,
                         recipeName: recipeSelection.recipe.getName(),
+                        //@ts-ignore
                         numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
+                        //@ts-ignore
                         numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
                         customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                         chooseState: order.choseByAdmin ? RecipeSelectionState.ELEGIDA_POR_LC : RecipeSelectionState.ELIGIO, // TO DO: Elegido por LC

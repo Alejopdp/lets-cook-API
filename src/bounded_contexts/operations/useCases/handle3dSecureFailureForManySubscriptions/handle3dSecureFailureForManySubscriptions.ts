@@ -30,19 +30,19 @@ export class Handle3dSecureFailureForManySubscriptions {
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
         for (let subscription of subscriptions) {
-            subscription.cancel(new CancellationReason("Método de pago no confirmado", ""), orders);
+            subscription.cancel(new CancellationReason("Método de pago no confirmado", ""), orders, paymentOrders);
         }
 
-        for (let paymentOrder of paymentOrders) {
-            const ordersOfPaymentOrder: Order[] = orders.filter((order) => order.paymentOrderId?.equals(paymentOrder.id))!;
-            const ordersTotalAmount = ordersOfPaymentOrder.reduce((acc, order) => (acc += order.getTotalPrice()), 0);
+        // for (let paymentOrder of paymentOrders) {
+        //     const ordersOfPaymentOrder: Order[] = orders.filter((order) => order.paymentOrderId?.equals(paymentOrder.id))!;
+        //     const ordersTotalAmount = ordersOfPaymentOrder.reduce((acc, order) => (acc += order.getTotalPrice()), 0);
 
-            if (paymentOrder.amount === ordersTotalAmount) {
-                paymentOrder.toCancelled([]);
-            } else {
-                paymentOrder.discountOrdersAmount(ordersOfPaymentOrder);
-            }
-        }
+        //     if (paymentOrder.amount === ordersTotalAmount) {
+        //         paymentOrder.toCancelled([]);
+        //     } else {
+        //         paymentOrder.discountOrdersAmount(ordersOfPaymentOrder);
+        //     }
+        // }
 
         await this.subscriptionRepository.saveCancelledSubscriptions(subscriptions);
         await this.paymentOrderRepository.updateMany(paymentOrders);

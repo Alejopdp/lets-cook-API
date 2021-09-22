@@ -16,6 +16,7 @@ export class ChooseRecipesForOrderController extends BaseController {
             const dto: ChooseRecipesForOrderDto = {
                 orderId: this.req.params.orderId,
                 recipeSelection: this.req.body.recipeSelection,
+                //@ts-ignore
                 isAdminChoosing: this.req.decode?.roleTitle === "Administrador",
             };
 
@@ -23,7 +24,7 @@ export class ChooseRecipesForOrderController extends BaseController {
 
             return this.ok(this.res);
         } catch (error) {
-            return this.fail(error);
+            return this.fail(error as Error);
         }
     }
 

@@ -74,6 +74,7 @@ export class PayAllSubscriptions {
         // CUSTOMERS MAP
         for (let customer of customers) {
             const customerShippingZone = shippingZones.find((shippingZone) =>
+                //@ts-ignore
                 shippingZone.hasAddressInside(customer.shippingAddress?.latitude, customer.shippingAddress?.longitude)
             );
 
