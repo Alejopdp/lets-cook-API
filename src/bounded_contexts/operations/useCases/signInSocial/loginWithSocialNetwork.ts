@@ -9,7 +9,7 @@ import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser } from "./log
 import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
 import { initializeApp, credential } from "firebase-admin";
 // var admin = require("firebase-admin");
-const firebaseAdminConfig = require("../../../../../firebase-admin.json");
+const firebaseAdminConfig = require("../../../../firebase-admin.json");
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { logger } from "../../../../../config";
 
