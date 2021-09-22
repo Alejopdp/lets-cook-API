@@ -27,7 +27,7 @@ jobs:
                   #   cache: "npm"
             - run: npm install #This is so it doesn't try to run a migration
             - run: npm run build:staging
-            - run: zip -r deploy.zip dist/ package.json .npmrc .platform/
+            - run: zip -r deploy.zip dist/ package.json .npmrc .ebextensions/ .platform/
             - name: Deploy to EB
               uses: einaregilsson/beanstalk-deploy@v18
               with:
