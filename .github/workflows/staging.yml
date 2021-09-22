@@ -1,0 +1,41 @@
+name: Deploy dev
+on:
+    push:
+        branches:
+            - staging
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        env:
+            URLDB: ${{ secrets.URLDB }}
+            S3_ASSETS_ACCESS_KEY_ID: ${{secrets.S3_ASSETS_ACCESS_KEY_ID}}
+            S3_ASSETS_SECRET_KEY: ${{secrets.S3_ASSETS_SECRET_KEY}}
+            S3_BUCKET_NAME: ${{secrets.S3_BUCKET_NAME}}
+            JWT_SEED: ${{secrets.JWT_SEED}}
+            SES_SECRET_ACCES_ID: ${{secrets.SES_SECRET_ACCES_ID}}
+            SES_ACCES_KEY_ID: ${{secrets.SES_ACCES_KEY_ID}}
+            STRIPE_PUBLIC_KEY: ${{secrets.STRIPE_PUBLIC_KEY}}
+            STRIPE_SECRET_KEY: ${{secrets.STRIPE_SECRET_KEY}}
+            NOTIFICATION_EMAIL_USER: ${{secrets.NOTIFICATION_EMAIL_USER}}
+            ADMIN_ORIGIN_URL: ${{secrets.ADMIN_ORIGIN_URL}}
+            CUSTOMER_ORIGIN_URL: ${{secrets.CUSTOMER_ORIGIN_URL}}
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: "14"
+                  #   cache: "npm"
+            - run: npm install #This is so it doesn't try to run a migration
+            - run: npm run webpack
+            - run: zip -r deploy.zip dist/ package.json .npmrc .platform
+            - name: Deploy to EB
+              uses: einaregilsson/beanstalk-deploy@v18
+              with:
+                  SES_ACCES_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  SES_SECRET_ACCES_ID: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  application_name: Lets Cook
+                  environment_name: Letscook-env
+                  version_label: ${{github.SHA}}
+                  deployment_package: deploy.zip
+                  region: eu-west-3
+                  version_description: ${{github.SHA}}
