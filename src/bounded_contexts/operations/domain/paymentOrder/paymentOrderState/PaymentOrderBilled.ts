@@ -2,7 +2,9 @@ import { PaymentOrder } from "../PaymentOrder";
 import { IPaymentOrderState } from "./IPaymentOrderState";
 import { PaymentOrderActive } from "./PaymentOrderActive";
 import { PaymentOrderCancelled } from "./PaymentOrderCancelled";
+import { PaymentOrderPartiallyRefunded } from "./PaymentOrderPartiallyRefunded";
 import { PaymentOrderPendingConfirmation } from "./PaymentOrderPendingConfirmation";
+import { PaymentOrderRefunded } from "./PaymentOrderRefunded";
 import { PaymentOrderRejected } from "./PaymentOrderRejected";
 
 export class PaymentOrderBilled implements IPaymentOrderState {
@@ -33,6 +35,14 @@ export class PaymentOrderBilled implements IPaymentOrderState {
 
     public toCancelled(paymentOrder: PaymentOrder): void {
         paymentOrder.state = new PaymentOrderCancelled();
+    }
+
+    public toPartiallyRefunded(paymentOrder: PaymentOrder): void {
+        paymentOrder.state = new PaymentOrderPartiallyRefunded();
+    }
+
+    public toRefunded(paymentOrder: PaymentOrder): void {
+        paymentOrder.state = new PaymentOrderRefunded();
     }
 
     public isActive(): boolean {

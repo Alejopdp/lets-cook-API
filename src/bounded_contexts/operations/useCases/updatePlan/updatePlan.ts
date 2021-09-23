@@ -106,10 +106,16 @@ export class UpdatePlan {
             }
         }
 
+        if (planVariants.every((variant) => !variant.isDefault))
+            throw new Error("Es necesario indicar por lo menos una variante como default");
+        if (planVariants.some((variatn) => variatn.isDefault && variatn.isDeleted))
+            throw new Error("No es posible marcar como default una varianta marcada como eliminada");
+
         const planVariantsIds: PlanVariantId[] = planVariants.reduce(
             (acc: PlanVariantId[], planVariant) => (planVariant.isDeleted ? [...acc, planVariant.id] : acc),
             []
         );
+
         const subscriptionsWithOneOfThePlanVariants = await this.subscriptionRepository.findActiveSubscriptionByPlanVariantsIds(
             planVariantsIds
         );

@@ -71,6 +71,9 @@ export class ReorderPlan {
             undefined,
             new Date() // TO DO: Calculate
         );
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(
+            oldSubscription.customer.id
+        );
 
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
@@ -87,13 +90,14 @@ export class ReorderPlan {
             subscription,
             weeks: nextTwelveWeeks,
             shippingCost: customerShippingZone.cost,
+            hasFreeShipping: customerSubscriptions.length > 0,
         };
 
         const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
 
         const paymentIntent = await this.paymentService.paymentIntent(
             subscription.plan.getPlanVariantPrice(subscription.planVariantId),
-            subscription.customer.getDefaultPaymentMethod()?.stripeId,
+            subscription.customer.getDefaultPaymentMethod()?.stripeId || "",
             subscription.customer.email,
             subscription.customer.stripeId
         );
@@ -101,7 +105,8 @@ export class ReorderPlan {
         newPaymentOrders[0]?.toBilled(orders.filter((order) => order.paymentOrderId?.equals(newPaymentOrders[0].id))); // TO DO: Handlear 3dSecure rechazado
 
         await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
-        await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
+        // @ts-ignore
+        await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated({});
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);

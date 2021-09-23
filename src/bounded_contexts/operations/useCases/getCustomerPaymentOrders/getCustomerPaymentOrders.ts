@@ -24,8 +24,6 @@ export class GetCustomerPaymentOrders {
             paymentOrders.map((paymentOrder) => paymentOrder.id)
         );
 
-        logger.debug(`El hermoso mapa: ${ordersCountMap}`);
-
         return { paymentOrders, ordersCountMap };
     }
 

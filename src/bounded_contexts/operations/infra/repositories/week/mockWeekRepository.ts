@@ -12,6 +12,9 @@ export class MockWeekRepository implements IWeekRepository {
     constructor(database: Week[]) {
         this._database = database;
     }
+    findLastAndNextEight(): Promise<Week[]> {
+        throw new Error("Method not implemented.");
+    }
     findWeekTwelveWeeksLater(): Promise<Week | undefined> {
         throw new Error("Method not implemented.");
     }

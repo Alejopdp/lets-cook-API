@@ -103,7 +103,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     }
 
     public async findByCustomerId(customerId: CustomerId): Promise<PaymentOrder[]> {
-        return await this.findBy({ customer: customerId.value }, Locale.es);
+        return await this.findBy({ customer: customerId.value });
     }
 
     public async findAll(locale: Locale): Promise<PaymentOrder[]> {
@@ -112,6 +112,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
 
     public async findBy(conditions: any, locale: Locale = Locale.es): Promise<PaymentOrder[]> {
         const paymentOrdersDb = await MongoosePaymentOrder.find({ ...conditions, deletionFlag: false })
+            .sort({ billingDate: 1 })
             .populate("week")
             .populate({
                 path: "recipes",
@@ -124,6 +125,19 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
 
     public async findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
         return await this.findBy({ billingDate, state: "PAYMENT_ORDER_ACTIVE" }, Locale.es);
+    }
+
+    public async findActiveByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]> {
+        return await this.findBy({
+            customer: customerIds.map((id) => id.value),
+            state: ["PAYMENT_ORDER_ACTIVE", "PAYMENT_ORDER_REJECTED", "PAYMENT_ORDER_PENDING_CONFIRMATION"],
+        });
+    }
+
+    public async updateShippingCost(paymentOrders: PaymentOrder[], shippingCost: number): Promise<void> {
+        // const paymentOrdersDb = paymentOrders.map(paymentOrder => paymentOrderMapper.toPersistence(paymentOrder))
+
+        await MongoosePaymentOrder.updateMany({ _id: paymentOrders.map((po) => po.id.value) }, { shippingCost });
     }
 
     public async delete(paymentOrderId: PaymentOrderId): Promise<void> {

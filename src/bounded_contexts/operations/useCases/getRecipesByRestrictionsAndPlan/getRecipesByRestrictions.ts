@@ -6,6 +6,7 @@ import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeReposi
 import { Week } from "../../domain/week/Week";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { Locale } from "../../domain/locale/Locale";
+import { RecipeRestrictionId } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 
 export class GetRecipesByRestrictions {
     private _recipeRepository: IRecipeRepository;
@@ -15,16 +16,10 @@ export class GetRecipesByRestrictions {
     }
 
     public async execute(dto: GetRecipesByRestrictionsDto): Promise<any> {
-
         const recipes: Recipe[] = await this.recipeRepository.findBy({ relatedPlans: dto.planId });
 
-        let filterRecipesByrestriction = recipes.filter((val: Recipe) => {
-            for(let i = 0; i < val.recipeVariants.length; i++) {
-                return  val.recipeVariants[i].recipeVariantRestrictions[0]
-                    && val.recipeVariants[i].recipeVariantRestrictions[0].id 
-                    && val.recipeVariants[i].recipeVariantRestrictions[0].id.value
-                    && val.recipeVariants[i].recipeVariantRestrictions[0].id.value === dto.restrictionId
-            } 
+        let filterRecipesByrestriction = recipes.filter((recipe: Recipe) => {
+            recipe.recipeVariants.filter((variant) => variant.restriction.id.equals(new RecipeRestrictionId(dto.restrictionId)));
         });
 
         return filterRecipesByrestriction;

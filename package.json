@@ -4,8 +4,10 @@
     "description": "Ecolophy API for both Web and Mobile clients",
     "main": "server.ts",
     "scripts": {
-        "start": "node dist/index",
+        "start": "node dist/src/index",
+        "dev": "node dist/index",
         "webpack": "webpack --config webpack.config.ts",
+        "build:staging": "tsc",
         "lint": "eslint . --ext .ts",
         "test": "mocha -r ts-node/register src/bounded_contexts/**/*.test.ts"
     },

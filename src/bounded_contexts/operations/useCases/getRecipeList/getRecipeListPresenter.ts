@@ -28,14 +28,13 @@ export class GetRecipeListPresenter {
                 availableWeeks: recipe.availableWeeks.map((week: Week) => {
                     return {
                         id: week.id.value,
-                        label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
-                            week.maxDay
-                        )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
+                        label: week.getShorterLabel(),
                     };
                 }),
                 availableMonths: recipe.availableMonths,
                 relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.value),
                 tools: recipe.recipeTools,
+                nutritionalInfo: recipe.getPresentedNutritionalInfo(),
                 recipeVariants: recipe.recipeVariants.map((variant) => {
                     return {
                         ingredients: variant.ingredients.map((ing) => ing.name),

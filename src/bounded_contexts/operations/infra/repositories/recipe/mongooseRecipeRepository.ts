@@ -84,6 +84,22 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         }
     }
 
+    public async findNextWeekRecipes(): Promise<Recipe[]> {
+        const date: Date = new Date();
+        date.setDate(date.getDate() + 7);
+        const recipesDb = await RecipeModel.find({
+            "availableWeeks.minDay": { $gte: date },
+            "availableWeeks.maxDay": { $lte: date },
+            deletionFlag: false,
+        })
+            .populate("availableWeeks")
+            .populate({
+                path: "recipeVariants",
+                populate: { path: "restriction" },
+            });
+
+        return recipesDb.map((recipe: any) => recipeMapper.toDomain(recipe));
+    }
     public async delete(recipeId: RecipeId): Promise<void> {
         await RecipeModel.findOneAndUpdate({ _id: recipeId.value }, { deletionFlag: true });
     }

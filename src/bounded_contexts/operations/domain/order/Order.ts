@@ -1,6 +1,7 @@
 import { logger } from "../../../../../config";
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Customer } from "../customer/Customer";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../paymentOrder/PaymentOrderId";
 import { Plan } from "../plan/Plan";
@@ -26,7 +27,13 @@ export class Order extends Entity<Order> {
     private _subscriptionId: SubscriptionId;
     private _recipesVariantsIds: RecipeVariantId[];
     private _recipeSelection: RecipeSelection[];
+    private _choseByAdmin: boolean;
+    private _firstDateOfRecipesSelection?: Date;
+    private _lastDateOfRecipesSelection?: Date;
     private _paymentOrderId?: PaymentOrderId;
+    private _createdAt: Date;
+    private _customer: Customer;
+    private _counter: number;
 
     constructor(
         shippingDate: Date,
@@ -41,8 +48,14 @@ export class Order extends Entity<Order> {
         subscriptionId: SubscriptionId,
         recipeVariantsIds: RecipeVariantId[],
         recipeSelection: RecipeSelection[],
+        choseByAdmin: boolean,
+        customer: Customer,
+        firstDateOfRecipesSelection?: Date,
+        lastDateOfRecipesSelection?: Date,
         paymentOrderId?: PaymentOrderId,
-        orderId?: OrderId
+        orderId?: OrderId,
+        createdAt: Date = new Date(),
+        counter: number = 0
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -57,10 +70,16 @@ export class Order extends Entity<Order> {
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;
         this._recipeSelection = recipeSelection;
+        this._choseByAdmin = choseByAdmin;
+        this._firstDateOfRecipesSelection = firstDateOfRecipesSelection;
+        this._lastDateOfRecipesSelection = lastDateOfRecipesSelection;
         this._paymentOrderId = paymentOrderId;
+        this._createdAt = createdAt;
+        this._customer = customer;
+        this._counter = counter;
     }
 
-    public updateRecipes(recipeSelection: RecipeSelection[]): void {
+    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean): void {
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
 
@@ -75,6 +94,9 @@ export class Order extends Entity<Order> {
         }
 
         this.recipeSelection = recipeSelection;
+        this.choseByAdmin = isAdminChoosing;
+        if (!!!this.firstDateOfRecipesSelection) this.firstDateOfRecipesSelection = new Date();
+        this.lastDateOfRecipesSelection = new Date();
     }
 
     public isActive(): boolean {
@@ -97,6 +119,9 @@ export class Order extends Entity<Order> {
     }
 
     public skip(): void {
+        const today = new Date();
+
+        if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
         this.state.toSkipped(this);
     }
 
@@ -139,6 +164,7 @@ export class Order extends Entity<Order> {
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
         this.recipesVariantsIds = [];
+        this.price = newPlan.getPlanVariantPrice(newPlanVariantId);
     }
 
     public getDdMmYyyyShipmentDate(): string {
@@ -182,8 +208,10 @@ export class Order extends Entity<Order> {
 
     public isActualWeek(): boolean {
         const date: Date = new Date();
+        const auxMinDay = new Date(this.week.minDay);
+        auxMinDay.setDate(auxMinDay.getDate() - 1);
 
-        return date >= this.week.minDay && date <= this.week.maxDay;
+        return date >= auxMinDay && date <= this.week.maxDay;
     }
 
     public isInTimeToChooseRecipes(): boolean {
@@ -194,14 +222,27 @@ export class Order extends Entity<Order> {
         fridayAt2359.setDate(today.getDate() + differenceInDays); // Delivery day of this week
         fridayAt2359.setHours(23, 59, 59);
 
-        return today < fridayAt2359 && today < this.week.minDay;
+        const todayWithDummyHours = new Date();
+        todayWithDummyHours.setHours(0, 0, 0, 0);
+
+        const weekMinDayWithDummyHours = new Date(this.week.minDay);
+        weekMinDayWithDummyHours.setHours(0, 0, 0, 0);
+
+        return (
+            today < fridayAt2359 &&
+            todayWithDummyHours < weekMinDayWithDummyHours &&
+            (this.isActive() || this.state.title === "ORDER_BILLED") &&
+            this.isNextWeek()
+        );
     }
 
     public isNextWeek(): boolean {
         const date: Date = new Date();
-        const minDayDifferenceInDays = (this.week.minDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
+        const auxMinDay = new Date(this.week.minDay);
+        auxMinDay.setDate(auxMinDay.getDate() - 1);
+        const minDayDifferenceInDays = (auxMinDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
 
-        return minDayDifferenceInDays < 7 && date <= this.week.minDay;
+        return minDayDifferenceInDays < 7 && date <= auxMinDay;
     }
     /**
      * Getter shippingDate
@@ -300,11 +341,59 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter choseByAdmin
+     * @return {boolean}
+     */
+    public get choseByAdmin(): boolean {
+        return this._choseByAdmin;
+    }
+
+    /**
+     * Getter firstDateOfRecipesSelection
+     * @return {Date | undefined}
+     */
+    public get firstDateOfRecipesSelection(): Date | undefined {
+        return this._firstDateOfRecipesSelection;
+    }
+
+    /**
+     * Getter lastDateOfRecipesSelection
+     * @return {Date | undefined}
+     */
+    public get lastDateOfRecipesSelection(): Date | undefined {
+        return this._lastDateOfRecipesSelection;
+    }
+
+    /**
      * Getter paymentOrderId
      * @return {PaymentOrderId | undefined}
      */
     public get paymentOrderId(): PaymentOrderId | undefined {
         return this._paymentOrderId;
+    }
+
+    /**
+     * Getter createdAt
+     * @return {Date}
+     */
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    /**
+     * Getter customer
+     * @return {Customer}
+     */
+    public get customer(): Customer {
+        return this._customer;
+    }
+
+    /**
+     * Getter counter
+     * @return {number}
+     */
+    public get counter(): number {
+        return this._counter;
     }
 
     /**
@@ -404,10 +493,58 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Setter choseByAdmin
+     * @param {boolean} value
+     */
+    public set choseByAdmin(value: boolean) {
+        this._choseByAdmin = value;
+    }
+
+    /**
+     * Setter firstDateOfRecipesSelection
+     * @param {Date | undefined}
+     */
+    public set firstDateOfRecipesSelection(value: Date | undefined) {
+        this._firstDateOfRecipesSelection = value;
+    }
+
+    /**
+     * Setter lastDateOfRecipesSelection
+     * @param {Date | undefined}
+     */
+    public set lastDateOfRecipesSelection(value: Date | undefined) {
+        this._lastDateOfRecipesSelection = value;
+    }
+
+    /**
      * Setter paymentOrderId
      * @param {PaymentOrderId | undefined} value
      */
     public set paymentOrderId(value: PaymentOrderId | undefined) {
         this._paymentOrderId = value;
+    }
+
+    /**
+     * Setter createdAt
+     * @param {Date} value
+     */
+    public set createdAt(value: Date) {
+        this._createdAt = value;
+    }
+
+    /**
+     * Setter customer
+     * @param {Customer} value
+     */
+    public set customer(value: Customer) {
+        this._customer = value;
+    }
+
+    /**
+     * Setter counter
+     * @param {number} value
+     */
+    public set counter(value: number) {
+        this._counter = value;
     }
 }

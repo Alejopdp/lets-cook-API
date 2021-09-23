@@ -89,13 +89,19 @@ export class MongoosePlanRepository implements IPlanRepository {
     }
 
     public async findByPlanVariantId(planVariantId: PlanVariantId): Promise<Plan | undefined> {
-        const planDb = await MongoosePlan.findOne({ "variants._id": planVariantId.value });
+        const planDb = await MongoosePlan.findOne({ "variants._id": planVariantId.value }).populate("additionalPlans");
 
         return planDb ? planMapper.toDomain(planDb, Locale.es) : undefined;
     }
 
     public async findAllWithRecipesFlag(locale: Locale): Promise<Plan[]> {
         return await this.findBy({ hasRecipes: true }, locale);
+    }
+
+    public async findPlanAhorro(locale: Locale = Locale.es): Promise<Plan | undefined> {
+        const planDb = await MongoosePlan.findOne({ sku: "PLAHOR" }).populate("additionalPlans");
+
+        return planDb ? planMapper.toDomain(planDb, locale) : undefined;
     }
 
     public async delete(planId: PlanId): Promise<void> {

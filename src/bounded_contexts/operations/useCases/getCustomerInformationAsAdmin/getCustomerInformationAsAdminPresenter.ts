@@ -30,8 +30,15 @@ export class GetCustomerInformationAsAdminPresenter {
                 })),
             },
             subscriptions: this.presentSubscriptions(subscriptions),
-            orders: this.presentOrders(orders),
-            paymentOrders: this.presentPaymentOrders(paymentOrders, orders),
+            orders: this.presentOrders(
+                orders
+                    .filter((order) => order.billingDate >= new Date() && (order.isActive() || order.isSkipped()))
+                    .sort((order1, order2) => (order1.shippingDate > order2.shippingDate ? 1 : -1))
+            ),
+            paymentOrders: this.presentPaymentOrders(
+                paymentOrders.filter((paymentOrder) => paymentOrder.billingDate <= new Date()),
+                orders
+            ),
         };
     }
 
@@ -54,6 +61,7 @@ export class GetCustomerInformationAsAdminPresenter {
             variation: order.getPlanVariantLabel(order.planVariantId),
             price: order.getTotalPrice(),
             active: order.isActive(),
+            orderNumber: order.counter,
         }));
     }
 
@@ -70,10 +78,11 @@ export class GetCustomerInformationAsAdminPresenter {
                     : [order];
             }
         }
+
         return paymentOrders.map((paymentOrder) => ({
             id: paymentOrder.id.value,
             date: paymentOrder.getDdMmYyyyBillingDate(),
-            ordersQty: paymentOrderOrderMap[paymentOrder.id.value].length,
+            ordersQty: paymentOrderOrderMap[paymentOrder.id.value]?.length || "",
             price: paymentOrder.getTotalAmount(),
             status: paymentOrder.state.title,
         }));

@@ -142,6 +142,7 @@ export class CreateManySubscriptions {
             frequencyWeeksMap: frequencyWeekMap,
             customerId: customer.id,
             shippingCost: customerShippingZone.cost,
+            // shippingCost: 0,
         };
 
         const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersWithDifferentFreqToPaymentOrders.execute(
@@ -160,6 +161,7 @@ export class CreateManySubscriptions {
         );
 
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
+        newPaymentOrders[0].shippingCost = 0;
 
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);

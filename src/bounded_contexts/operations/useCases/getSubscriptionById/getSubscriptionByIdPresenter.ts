@@ -7,6 +7,7 @@ import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Week } from "../../domain/week/Week";
 import { PlanId } from "../../domain/plan/PlanId";
+import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -42,8 +43,8 @@ export class GetSubscriptionByIdPresenter {
             };
         }
 
-        const nextActiveOrder: Order | undefined = subscription.getNextActiveOrder(orders);
-        const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondActiveOrder(orders);
+        const nextActiveOrder: Order | undefined = subscription.getNextOrderToShip(orders);
+        const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondOrderToShip(orders);
         const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? nextActiveOrder : null;
         const nextWeekOrder =
             nextActiveOrder && nextActiveOrder.isNextWeek()
@@ -67,6 +68,9 @@ export class GetSubscriptionByIdPresenter {
         return {
             subscriptionId: subscription.id.value,
             plan: presentedPlan,
+            actualPlanVariant: this.presentPlanVariant(
+                subscription.plan.planVariants.find((variant) => subscription.planVariantId.equals(variant.id))!
+            ),
             shippingAddress,
             // billingData,
             paymentMethod: presentedPaymentMethod,
@@ -85,8 +89,12 @@ export class GetSubscriptionByIdPresenter {
 
     private async presentPlan(subscription: Subscription): Promise<any> {
         return {
+            id: subscription.plan.id.value,
             planName: subscription.plan.name,
             planVariantDescription: subscription.getPlanVariantLabel(),
+            variants: subscription.plan.planVariants
+                .filter((variant) => !variant.isDeleted)
+                .map((variant) => this.presentPlanVariant(variant)),
             state: {
                 state: subscription.state.humanTitle,
                 stateTitle: subscription.state.title,
@@ -95,6 +103,19 @@ export class GetSubscriptionByIdPresenter {
             price: subscription.price,
             priceLabel: subscription.getPriceByFrequencyLabel(),
             icon: await this.storageService.getPresignedUrlForFile(subscription.plan.iconLinealColorUrl),
+        };
+    }
+
+    private presentPlanVariant(variant: PlanVariant): any {
+        return {
+            id: variant.id.value,
+            isDefault: variant.isDefault,
+            description: variant.getLabelWithPrice(),
+            price: variant.getPaymentPrice(),
+            //@ts-ignore
+            numberOfPersons: variant.numberOfPersons || 0,
+            //@ts-ignore
+            numberOfRecipes: variant.numberOfRecipes || 0,
         };
     }
 

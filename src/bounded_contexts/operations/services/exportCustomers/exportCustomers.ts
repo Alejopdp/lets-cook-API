@@ -52,12 +52,11 @@ export class ExportCustomers {
                     ? [subscription]
                     : [];
 
-            subscriptionCustomerMap[actualKey] = subscription.customer;
+            subscriptionCustomerMap[subscription.id.value] = subscription.customer;
         }
 
         for (let order of pastOrders) {
             const customer: Customer = subscriptionCustomerMap[order.subscriptionId.value as string];
-
             customerPastOrdersMap[customer.id.value] = Array.isArray(customerPastOrdersMap[customer.id.value])
                 ? [...customerPastOrdersMap[customer.id.value], order]
                 : [order];
@@ -88,8 +87,8 @@ export class ExportCustomers {
                 shippingCountry: "España",
                 shopifyCustomerId: "",
                 pastOrdersCount: customerPastOrdersMap[customer.id.value]?.length || 0,
-                numberOfActiveSubscriptions: customerActiveSubscriptionsMap[customer.id.value].length,
-                numberOfSubscriptions: customerSubscriptionsMap[customer.id.value].length,
+                numberOfActiveSubscriptions: customerActiveSubscriptionsMap[customer.id.value]?.length || 0,
+                numberOfSubscriptions: customerSubscriptionsMap[customer.id.value]?.length || 0,
             });
         }
 

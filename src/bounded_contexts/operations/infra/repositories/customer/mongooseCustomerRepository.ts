@@ -61,6 +61,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
 
     public async findBy(conditions: any): Promise<Customer[]> {
         const customerDb = await MongooseCustomer.find({ ...conditions, deletionFlag: false });
+
         return customerDb.map((raw: any) => customerMapper.toDomain(raw));
     }
 

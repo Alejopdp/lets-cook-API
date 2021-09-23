@@ -91,13 +91,60 @@ const OrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        choseByAdmin: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+
+        firstDateOfRecipesSelection: {
+            type: Date,
+        },
+
+        lastDateOfRecipesSelection: {
+            type: Date,
+        },
+
+        customer: {
+            type: String,
+            ref: "Customer",
+            required: true,
+        },
+
+        counter: {
+            type: Number,
+            // required: true,
+        },
+
         deletionFlag: {
             type: Boolean,
-            isRequired: true,
+            required: true,
             default: false,
         },
     },
     { collection: "Order", timestamps: true }
 );
+
+OrderSchema.pre("save", async function (done) {
+    if (this.isNew) {
+        const count = await Order.count();
+        //@ts-ignore
+        this.counter = count + 20000;
+    }
+
+    done();
+});
+
+OrderSchema.pre("insertMany", async function (next: any, docs: any) {
+    const count = await Order.count();
+
+    console.log("COUNT: ", count);
+
+    for (let i = 1; i <= docs.length; i++) {
+        docs[i - 1].counter = count + 20000 + i;
+    }
+
+    next();
+});
 
 export const Order = mongoose.model("Order", OrderSchema);

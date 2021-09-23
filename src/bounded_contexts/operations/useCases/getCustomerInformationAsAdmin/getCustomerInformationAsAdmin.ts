@@ -39,9 +39,7 @@ export class GetCustomerInformationAsAdmin {
         const customer: Customer = await this.customerRepository.findByIdOrThrow(customerId);
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(customerId);
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(
-            subscriptions.map((subscription) => subscription.id)
-        );
+        const orders: Order[] = await this.orderRepository.findByPaymentOrderIdList(paymentOrders.map((po) => po.id));
 
         return { customer, subscriptions, paymentOrders, orders };
     }

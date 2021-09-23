@@ -22,12 +22,14 @@ export class Customer extends Entity<Customer> {
     private _state?: string;
     private _codeToRecoverPassword?: string;
     private _personalInfo?: PersonalInfo;
+    private _receivedOrdersQuantity: number;
 
     protected constructor(
         email: string,
         isEmailVerified: boolean,
         stripeId: string,
         paymentMethods: PaymentMethod[],
+        receivedOrdersQuantity: number,
         shippingAddress?: Address,
         billingAddress?: Billing,
         password?: UserPassword,
@@ -41,6 +43,7 @@ export class Customer extends Entity<Customer> {
         this._isEmailVerified = isEmailVerified;
         this._stripeId = stripeId;
         this._paymentMethods = paymentMethods;
+        this._receivedOrdersQuantity = receivedOrdersQuantity;
         this._shippingAddress = shippingAddress;
         this._billingAddress = billingAddress;
         this._password = password;
@@ -54,6 +57,7 @@ export class Customer extends Entity<Customer> {
         isEmailVerified: boolean,
         stripeId: string,
         paymentMethods: PaymentMethod[],
+        receivedOrdersQuantity: number,
         shippingAddress?: Address,
         billingAddress?: Billing,
         password?: UserPassword,
@@ -67,6 +71,7 @@ export class Customer extends Entity<Customer> {
             isEmailVerified,
             stripeId,
             paymentMethods,
+            receivedOrdersQuantity,
             shippingAddress,
             billingAddress,
             password,
@@ -87,6 +92,11 @@ export class Customer extends Entity<Customer> {
         this.paymentMethods = [...this.paymentMethods, newPaymentMethod];
     }
 
+    public addPaymentMethodAndSetItAsDefault(newPaymentMethod: PaymentMethod): void {
+        newPaymentMethod.isDefault = true;
+        this.paymentMethods.forEach((paymentMethod) => (paymentMethod.isDefault = false));
+        this.paymentMethods = [...this.paymentMethods, newPaymentMethod];
+    }
     public getDefaultPaymentMethod(): PaymentMethod | undefined {
         return this.paymentMethods.find((method) => method.isDefault);
     }
@@ -133,6 +143,12 @@ export class Customer extends Entity<Customer> {
         const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.equals(paymentMethodId));
 
         return paymentMethod?.stripeId || "";
+    }
+
+    public getFullNameOrEmail(): string {
+        if (!!!this.getPersonalInfo().fullName) return this.email;
+
+        return this.getPersonalInfo().fullName!;
     }
 
     public getPersonalInfo(): {
@@ -203,7 +219,7 @@ export class Customer extends Entity<Customer> {
         return {
             details: this.shippingAddress?.details,
             name: this.shippingAddress?.name,
-            preferredShippingHour: this.shippingAddress?.deliveryTime?.getLabel(locale) || "Sin indicar",
+            preferredShippingHour: this.shippingAddress?.deliveryTime?.value() || "",
             latitude: this.shippingAddress?.latitude,
             longitude: this.shippingAddress?.longitude,
         };
@@ -258,8 +274,6 @@ export class Customer extends Entity<Customer> {
         if (filterPaymentById.length > 0) {
             if (isDefault) {
                 for (let paymentMethod of this.paymentMethods) {
-                    console.log("CREADO: ", paymentMethod.id);
-                    console.log("LO QUE M ELLGA: ", paymentId);
                     if (paymentMethod.id.equals(new PaymentMethodId(paymentId))) {
                         paymentMethod.isDefault = true;
                     } else {
@@ -269,7 +283,6 @@ export class Customer extends Entity<Customer> {
             }
             // filterPaymentById[0].changePaymentData(brand, last4Numbers, exp_month, exp_year, cvc, stripeId, isDefault);
         } else {
-            console.log("ESTA ENTRANDO ACACAC: ");
             if (isDefault) {
                 if (this.paymentMethods.length > 0) {
                     const filterPaymentsByDiferentId = this.paymentMethods.filter(
@@ -321,6 +334,14 @@ export class Customer extends Entity<Customer> {
      */
     public get codeToRecoverPassword(): string | undefined {
         return this._codeToRecoverPassword;
+    }
+
+    /**
+     * Getter receivedOrdersQuantity
+     * @return {number}
+     */
+    public get receivedOrdersQuantity(): number {
+        return this._receivedOrdersQuantity;
     }
 
     /**
@@ -401,6 +422,14 @@ export class Customer extends Entity<Customer> {
      */
     public set codeToRecoverPassword(value: string | undefined) {
         this._codeToRecoverPassword = value;
+    }
+
+    /**
+     * Setter receivedOrdersQuantity
+     * @param {number} value
+     */
+    public set receivedOrdersQuantity(value: number) {
+        this._receivedOrdersQuantity = value;
     }
 
     /**

@@ -24,6 +24,11 @@ export class GetRecipesForOrderPresenter {
             nextDeliveryLabel: order.getHumanShippmentDay(),
             maxRecipesQty: subscription.getMaxRecipesQty(),
             subscriptionId: subscription.id.value,
+            actualChosenRecipes: order.recipeSelection.map((recipeSelection) => ({
+                recipeId: recipeSelection.recipe.id.value,
+                quantity: recipeSelection.quantity,
+                recipeVariantId: recipeSelection.recipeVariantId.value,
+            })),
         };
     }
 

@@ -27,13 +27,13 @@ export class CreateManySubscriptionsController extends BaseController {
                 result.subscriptions,
                 result.paymentIntent,
                 result.paymentOrder,
-                result.paymentMethodId
+                result.paymentMethodId || ""
             );
 
             return this.ok(this.res, presented);
             // return this.ok(this.res);
         } catch (error) {
-            return this.fail(error);
+            return this.fail(error as Error);
         }
     }
 

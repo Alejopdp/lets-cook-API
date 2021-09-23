@@ -24,3 +24,4 @@ export const addressMapper: AddressMapper = new AddressMapper();
 export const billingMapper: BillingMapper = new BillingMapper();
 export const personalInfoMapper: PersonalInfoMapper = new PersonalInfoMapper();
 export const recipeSelectionMapper: RecipeSelectionMapper = new RecipeSelectionMapper();
+export const rateMapper: RateMapper = new RateMapper();

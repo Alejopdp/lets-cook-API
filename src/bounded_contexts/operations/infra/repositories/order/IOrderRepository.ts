@@ -24,11 +24,19 @@ export interface IOrderRepository {
     findByWeek(weekId: WeekId): Promise<Order[]>;
     findByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>;
     findByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]>;
+    findActiveOrdersByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>;
+    findACtiveOrdersByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]>;
     findPastOrdersByCustomerIdList(subscriptionsIds: SubscriptionId[]): Promise<Order[]>;
+    findByWeekList(weeksIds: WeekId[]): Promise<Order[]>;
+    findByBillingDates(billingDates: Date[]): Promise<Order[]>;
+    findByShippingDates(shippingDates: Date[]): Promise<Order[]>;
+    findCurrentWeekOrders(): Promise<Order[]>;
+    findAllByCustomersIds(customersIds: CustomerId[]): Promise<Order[]>;
     getFirstOrderOfSubscription(subscriptionId: SubscriptionId): Promise<Order | undefined>;
     saveCancelledOrders(orders: Order[]): Promise<void>;
     saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void>;
     saveSkippedAndActiveOrders(skippedOrders: Order[], activeOrders: Order[]): Promise<void>;
     saveOrdersWithNewState(orders: Order[]): Promise<void>;
+    addCustomerToOrderOfSubscription(subscriptionId: SubscriptionId, customerId: CustomerId): Promise<void>
     delete(orderId: OrderId): Promise<void>;
 }

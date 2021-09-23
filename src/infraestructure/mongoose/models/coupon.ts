@@ -9,75 +9,81 @@ const CouponSchema = new mongoose.Schema(
         },
         couponCode: {
             type: String,
-            required: true
+            required: true,
         },
         type: {
             type: {
                 type: String,
-                required: true
+                required: true,
             },
             value: {
                 type: Number,
-                required: false
-            }
+                required: false,
+            },
         },
         minRequireType: {
             type: String,
-            required: true
+            required: true,
         },
         minRequireValue: {
             type: Number,
-            required: false
+            required: false,
         },
         productsForApplyingType: {
             type: String,
-            required: true
+            required: true,
         },
         productsForApplyingValue: {
-            type: [
-                {
-                    type: String,
-                    value: {
-                        type: [String],
-                        ref: "Plan",
-                        required: true
-                    }
-                }
-            ]
+            type: [String],
+            ref: "Plan",
+            required: true,
+            default: [],
         },
         limites: {
             type: [
                 {
                     type: {
                         type: String,
-                        required: true
+                        required: true,
                     },
                     value: {
-                            type: Number,
-                            required: false
-                        }
-                }
+                        type: Number,
+                        required: false,
+                    },
+                },
             ],
         },
         maxChargeQtyType: {
             type: String,
-            required: true
+            required: true,
         },
         maxChargeQtyValue: {
             type: Number,
-            required: true
+            required: true,
         },
         startDate: {
             type: Date,
-            required: true
+            required: true,
         },
         endDate: {
             type: Date,
-            required: false
+            required: false,
         },
         state: {
             type: String,
-            required: true
+            required: true,
+        },
+        quantityApplied: {
+            type: Number,
+            required: true,
+            default: 0,
+        },
+
+        customersWhoHaveApplied: {
+            type: [String],
+            required: true,
+            default: [],
+            ref: "Customer",
         },
         deletionFlag: {
             type: Boolean,
