@@ -31,8 +31,8 @@ const AddressSchema = new mongoose.Schema({
     },
 
     deliveryTime: {
-        type: String
-    }
+        type: String,
+    },
 });
 
 const BillingSchema = new mongoose.Schema({
@@ -62,12 +62,12 @@ const BillingSchema = new mongoose.Schema({
 
     customerName: {
         type: String,
-        required: true
+        required: true,
     },
 
     identification: {
         type: String,
-        required: true
+        required: true,
     },
 });
 
@@ -84,7 +84,7 @@ const PersonalInfoSchema = new mongoose.Schema({
 
     lastName: {
         type: String,
-        required: true
+        required: true,
     },
 
     phone1: {
@@ -100,8 +100,8 @@ const PersonalInfoSchema = new mongoose.Schema({
     },
 
     preferredLanguage: {
-        type: String
-    }
+        type: String,
+    },
 });
 
 const PaymentMethodSchema = new mongoose.Schema({
@@ -171,8 +171,13 @@ const CustomerSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        receivedOrdersQuantity: {
+            type: Number,
+            required: true,
+            default: 0,
+        },
         personalInfo: {
-            type: PersonalInfoSchema
+            type: PersonalInfoSchema,
         },
         shippingAddress: {
             type: AddressSchema,
