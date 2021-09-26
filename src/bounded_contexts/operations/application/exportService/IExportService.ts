@@ -39,6 +39,7 @@ export interface OrdersWithRecipeSelectionExport {
     kitDiscount: number;
     finalPrice: number;
     finalKitPrice: number;
+    finalPortionPrice: number
 }
 
 export interface SubscriptionExport {

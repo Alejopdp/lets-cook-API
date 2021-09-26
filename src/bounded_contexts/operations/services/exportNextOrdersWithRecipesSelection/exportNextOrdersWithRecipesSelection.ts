@@ -93,23 +93,12 @@ export class ExportNextOrdersWithRecipesSelection {
                     customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                     chooseState: order.plan.abilityToChooseRecipes ? RecipeSelectionState.AUN_NO_ELIGIO : RecipeSelectionState.NO_ELIGE,
                     pricePlan: order.getTotalPrice(),
-                    //@ts-ignore
-                    kitPrice: orderPlanVariant.numberOfPersons
-                        ? //@ts-ignore
-                          order.getTotalPrice() / orderPlanVariant.numberOfPersons
-                        : order.getTotalPrice(),
+                    kitPrice: order.getKitPrice(),
                     planDiscount: order.discountAmount,
-                    //@ts-ignore
-                    kitDiscount: orderPlanVariant.numberOfPersons
-                        ? //@ts-ignore
-                          order.discountAmount / orderPlanVariant.numberOfPersons
-                        : order.discountAmount,
+                    kitDiscount: order.getKitDiscount(),
                     finalPrice: order.getTotalPrice() - order.discountAmount,
-                    //@ts-ignore
-                    finalKitPrice: orderPlanVariant.numberOfPersons
-                        ? //@ts-ignore
-                          (order.getTotalPrice() - order.discountAmount) / orderPlanVariant.numberOfPersons
-                        : order.getTotalPrice() - order.discountAmount,
+                    finalKitPrice: order.getFinalKitPrice(),
+                    finalPortionPrice: order.getFinalPortionPrice(),
                 });
             }
 
@@ -147,23 +136,12 @@ export class ExportNextOrdersWithRecipesSelection {
                         customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                         chooseState: order.choseByAdmin ? RecipeSelectionState.ELEGIDA_POR_LC : RecipeSelectionState.ELIGIO, // TO DO: Elegido por LC
                         pricePlan: order.getTotalPrice(),
-                        //@ts-ignore
-                        kitPrice: orderPlanVariant.numberOfPersons
-                            ? //@ts-ignore
-                              order.getTotalPrice() / orderPlanVariant.numberOfPersons
-                            : order.getTotalPrice(),
+                        kitPrice: order.getKitPrice(),
                         planDiscount: order.discountAmount,
-                        //@ts-ignore
-                        kitDiscount: orderPlanVariant.numberOfPersons
-                            ? //@ts-ignore
-                              order.discountAmount / orderPlanVariant.numberOfPersons
-                            : order.discountAmount,
+                        kitDiscount: order.getKitDiscount(),
                         finalPrice: order.getTotalPrice() - order.discountAmount,
-                        //@ts-ignore
-                        finalKitPrice: orderPlanVariant.numberOfPersons
-                            ? //@ts-ignore
-                              (order.getTotalPrice() - order.discountAmount) / orderPlanVariant.numberOfPersons
-                            : order.getTotalPrice() - order.discountAmount,
+                        finalKitPrice: order.getFinalKitPrice(),
+                        finalPortionPrice: order.getFinalPortionPrice(),
                     });
                 }
             }
@@ -218,6 +196,7 @@ export class ExportNextOrdersWithRecipesSelection {
                     kitDiscount: customerShippingZone.cost,
                     finalPrice: customerShippingZone.cost,
                     finalKitPrice: customerShippingZone.cost,
+                    finalPortionPrice: customerShippingZone.cost,
                 });
             }
         }

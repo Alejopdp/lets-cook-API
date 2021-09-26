@@ -1,3 +1,4 @@
+import { Utils } from "../../../..//core/logic/Utils";
 import { logger } from "../../../../../config";
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
@@ -204,6 +205,53 @@ export class Order extends Entity<Order> {
 
     public getPlanVariantLabel(planVariantId: PlanVariantId): string {
         return this.plan.getPlanVariantLabel(planVariantId);
+    }
+
+    public getKitPrice(): number {
+        const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
+        if (!!!planVariant) return 0;
+
+        return Utils.roundTwoDecimals(
+            //@ts-ignore
+            planVariant.numberOfPersons
+                ? //@ts-ignore
+                  this.getTotalPrice() / planVariant.numberOfPersons
+                : this.getTotalPrice()
+        );
+    }
+
+    public getKitDiscount(): number {
+        const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
+        if (!!!planVariant) return 0;
+
+        return Utils.roundTwoDecimals(
+            //@ts-ignore
+            planVariant.numberOfPersons
+                ? //@ts-ignore
+                  this.discountAmount / planVariant.numberOfPersons
+                : this.discountAmount
+        );
+    }
+
+    public getFinalKitPrice(): number {
+        const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
+        if (!!!planVariant) return 0;
+
+        return Utils.roundTwoDecimals(
+            //@ts-ignore
+            planVariant.numberOfPersons
+                ? //@ts-ignore
+                  (this.getTotalPrice() - this.discountAmount) / planVariant.numberOfPersons
+                : this.getTotalPrice() - this.discountAmount
+        );
+    }
+
+    public getFinalPortionPrice(): number {
+        const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
+        if (!!!planVariant) return 0;
+
+        //@ts-ignore
+        return Utils.roundTwoDecimals(this.getFinalKitPrice() / (planVariant.numberOfPersons || 1));
     }
 
     public isActualWeek(): boolean {
