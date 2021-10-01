@@ -137,10 +137,15 @@ export class PayAllSubscriptions {
         for (let subscription of activeSusbcriptions) {
             const subscriptionIdValue = subscription.id.value;
             const customerId = subscription.customer.id.value;
+            const baseOrderForCreatingThe12Order = subscriptionOrderMap[subscriptionIdValue];
 
             if (subscription.frequency.isOneTime()) {
                 // TO DO: End subscription
-            } else {
+            } else if (
+                baseOrderForCreatingThe12Order.isActive() ||
+                baseOrderForCreatingThe12Order.isSkipped() ||
+                baseOrderForCreatingThe12Order.isPaymentRejected()
+            ) {
                 const newOrder = subscription.getNewOrderAfterBilling(
                     subscriptionOrderMap[subscriptionIdValue],
                     frequencyWeekMap[subscription.frequency.value()],
