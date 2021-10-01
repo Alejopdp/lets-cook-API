@@ -57,7 +57,7 @@ export class ExportNextOrdersWithRecipesSelection {
 
         const subscriptionsIds: SubscriptionId[] = [];
         const paymentOrdersIds: PaymentOrderId[] = [];
-        const customersQuantityOfRecipeSelectionMap: { [customerId: string | number]: number } = {};
+        const customersQuantityOfRecipeSelectionMap: { [customerId: string]: number } = {};
 
         for (let order of orders) {
             subscriptionsIds.push(order.subscriptionId);
@@ -72,7 +72,7 @@ export class ExportNextOrdersWithRecipesSelection {
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
         const customerOrdersMap: { [customerId: string]: Order[] } = {};
         const paymentOrderMap: { [paymentOrderId: string]: PaymentOrder } = {};
-        const customerSubscriptionsMap: { [customerId: string | number]: Subscription[] } = {};
+        const customerSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
         var ordersExport: OrdersWithRecipeSelectionExport[] = [];
 
         for (let subscription of subscriptions) {
