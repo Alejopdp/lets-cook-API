@@ -213,7 +213,6 @@ export class Customer extends Entity<Customer> {
         latitude?: number;
         longitude?: number;
     } {
-        console.log(this.shippingAddress?.name);
         return {
             details: this.shippingAddress?.details,
             name: this.shippingAddress?.name,
