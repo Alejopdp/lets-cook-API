@@ -88,13 +88,18 @@ export class ExportNextOrdersWithRecipesSelection {
             const subscription = subscriptionMap[order.subscriptionId.value];
             const orderPlanVariant = order.plan.getPlanVariantById(order.planVariantId);
 
-            if (!!!paymentOrderMap[order.paymentOrderId!.value])
-                console.log(`The order ${order.id.value} has no payment order ${order.paymentOrderId}`);
+            console.log("CUSTOMER: ", subscription.customer.id.value);
             if (order.recipeSelection.length === 0) {
                 ordersExport.push({
-                    stripePaymentId: order.paymentOrderId &&  paymentOrderMap[order.paymentOrderId.value] ? paymentOrderMap[order.paymentOrderId.value]?.paymentIntentId || "" : "",
+                    stripePaymentId:
+                        order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
+                            ? paymentOrderMap[order.paymentOrderId.value]?.paymentIntentId || ""
+                            : "",
                     paymentOrderId: order.paymentOrderId?.value || "",
-                    paymentOrderState: order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value] ? paymentOrderMap[order.paymentOrderId.value]?.state.title || "" : "",
+                    paymentOrderState:
+                        order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
+                            ? paymentOrderMap[order.paymentOrderId.value]?.state.title || ""
+                            : "",
                     orderId: order.id.value,
                     weekLabel: order.week.getShorterLabel(),
                     deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
@@ -141,9 +146,15 @@ export class ExportNextOrdersWithRecipesSelection {
             for (let recipeSelection of order.recipeSelection) {
                 for (let i = 0; i < recipeSelection.quantity; i++) {
                     ordersExport.push({
-                        stripePaymentId: order.paymentOrderId &&  paymentOrderMap[order.paymentOrderId.value] ? paymentOrderMap[order.paymentOrderId.value]?.paymentIntentId || "" : "",
+                        stripePaymentId:
+                            order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
+                                ? paymentOrderMap[order.paymentOrderId.value]?.paymentIntentId || ""
+                                : "",
                         paymentOrderId: order.paymentOrderId?.value || "",
-                        paymentOrderState: order.paymentOrderId &&  paymentOrderMap[order.paymentOrderId.value] ? paymentOrderMap[order.paymentOrderId.value]?.state.title || "" : "",
+                        paymentOrderState:
+                            order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
+                                ? paymentOrderMap[order.paymentOrderId.value]?.state.title || ""
+                                : "",
                         orderId: order.id.value,
                         weekLabel: order.week.getShorterLabel(),
                         deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
