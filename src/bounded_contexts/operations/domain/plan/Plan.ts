@@ -170,6 +170,13 @@ export class Plan extends Entity<Plan> {
         return `${variantLabel} - ${this.getPlanVariantPrice(planVariantId)}`;
     }
 
+    public getNumberOfRecipesOfPlanVariant(planVariantId: PlanVariantId): string | number {
+        const planVariant: PlanVariant | undefined = this.getPlanVariantById(planVariantId)
+
+        // @ts-ignore
+        return !!planVariant ? planVariant.numberOfRecipes || 0 : 0
+    }
+
     public isPrincipal(): boolean {
         return this.type === PlanType.Principal;
     }

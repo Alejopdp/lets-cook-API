@@ -207,6 +207,11 @@ export class Order extends Entity<Order> {
         return this.plan.getPlanVariantLabel(planVariantId);
     }
 
+    public getNumberOfRecipesOrReturn0(): number {
+        const numberOfRecipes: string | number = this.plan.getNumberOfRecipesOfPlanVariant(this.planVariantId);
+        return typeof numberOfRecipes === "string" ? parseInt(numberOfRecipes) : numberOfRecipes;
+    }
+
     public getKitPrice(): number {
         const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
         if (!!!planVariant) return 0;
