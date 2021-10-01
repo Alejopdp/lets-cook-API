@@ -127,6 +127,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         return await this.findBy({ billingDate, state: "PAYMENT_ORDER_ACTIVE" }, Locale.es);
     }
 
+    public async findByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
+        return await this.findBy({ billingDate }, Locale.es);
+    }
+
     public async findActiveByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]> {
         return await this.findBy({
             customer: customerIds.map((id) => id.value),

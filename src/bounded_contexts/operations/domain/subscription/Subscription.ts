@@ -141,8 +141,6 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week, shippingZone: ShippingZone): Order {
-        console.log("BILLED ORDER: ", billedOrder);
-        console.log("NEW ORDER WEEK: ", newOrderWeek);
         const newBillingDate: Date = this.getNewOrderDateFrom(billedOrder.billingDate);
         const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
         const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
