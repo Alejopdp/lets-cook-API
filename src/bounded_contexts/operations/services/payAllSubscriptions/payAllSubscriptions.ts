@@ -46,10 +46,8 @@ export class PayAllSubscriptions {
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
-        const paymentOrdersToBill: PaymentOrder[] = await this.paymentOrderRepository.findActiveByBillingDate(today);
-        const ordersToBill: Order[] = await this.orderRepository.findACtiveOrdersByPaymentOrderIdList(
-            paymentOrdersToBill.map((po) => po.id)
-        );
+        const paymentOrdersToBill: PaymentOrder[] = await this.paymentOrderRepository.findByBillingDate(today);
+        const ordersToBill: Order[] = await this.orderRepository.findByPaymentOrderIdList(paymentOrdersToBill.map((po) => po.id));
         const activeSusbcriptions = await this.subscriptionRepository.findByIdList(ordersToBill.map((order) => order.subscriptionId));
         const ordersWIthoutPaymentOrder = [];
         const customerMap: { [customerId: string]: Customer } = {};
@@ -100,32 +98,36 @@ export class PayAllSubscriptions {
 
         // PAYMENT ORDERS BILLING
         for (let paymentOrderToBill of paymentOrdersToBill) {
-            const paymentOrderId: string = paymentOrderToBill.id.value as string;
-            try {
-                const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
-                const shippingCost = customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost || 0;
-                const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some((order) => order.hasFreeShipping);
-                const totalAmount = customerHasFreeShipping
-                    ? paymentOrderToBill.amount - paymentOrderToBill.discountAmount
-                    : paymentOrderToBill.amount - paymentOrderToBill.discountAmount + shippingCost;
+            if (paymentOrderToBill.state.title === "PAYMENT_ORDER_ACTIVE") {
+                const paymentOrderId: string = paymentOrderToBill.id.value as string;
+                try {
+                    const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
+                    const shippingCost = customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost || 0;
+                    const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some(
+                        (order) => order.hasFreeShipping
+                    );
+                    const totalAmount = customerHasFreeShipping
+                        ? paymentOrderToBill.amount - paymentOrderToBill.discountAmount
+                        : paymentOrderToBill.amount - paymentOrderToBill.discountAmount + shippingCost;
 
-                const paymentIntent = await this.paymentService.paymentIntent(
-                    totalAmount,
-                    paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
-                    paymentOrderCustomer.email,
-                    paymentOrderCustomer.stripeId as string
-                );
+                    const paymentIntent = await this.paymentService.paymentIntent(
+                        totalAmount,
+                        paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
+                        paymentOrderCustomer.email,
+                        paymentOrderCustomer.stripeId as string
+                    );
 
-                // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
-                if (paymentIntent.status === "succeeded") {
-                    paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId]);
-                } else {
-                    paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
+                    // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
+                    if (paymentIntent.status === "succeeded") {
+                        paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId]);
+                    } else {
+                        paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
+                    }
+
+                    paymentOrderToBill.paymentIntentId = paymentIntent.id;
+                } catch (error) {
+                    ordersWithError.push();
                 }
-
-                paymentOrderToBill.paymentIntentId = paymentIntent.id;
-            } catch (error) {
-                ordersWithError.push();
             }
         }
 
