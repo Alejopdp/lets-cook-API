@@ -138,6 +138,7 @@ export class PayAllSubscriptions {
             const subscriptionIdValue = subscription.id.value;
             const customerId = subscription.customer.id.value;
             const baseOrderForCreatingThe12Order = subscriptionOrderMap[subscriptionIdValue];
+            if (subscription.state.isCancelled()) continue;
 
             if (subscription.frequency.isOneTime()) {
                 // TO DO: End subscription
@@ -195,7 +196,8 @@ export class PayAllSubscriptions {
             }
         }
 
-        await this.orderRepository.saveOrdersWithNewState(ordersToBill);
+        // await this.orderRepository.saveOrdersWithNewState(ordersToBill);
+        await this.orderRepository.updateMany(ordersToBill);
         await this.orderRepository.bulkSave(newOrders);
         await this.paymentOrderRepository.updateMany(paymentOrdersToBill);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
