@@ -75,6 +75,10 @@ export class Recipe extends Entity<Recipe> {
         return this.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
     }
 
+    public getDefaultVariantSku(): string {
+        return this.recipeVariants[0].sku.code;
+    }
+
     /**
      * Getter recipeGeneralData
      * @return {RecipeGeneralData}

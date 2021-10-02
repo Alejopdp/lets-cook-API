@@ -31,6 +31,12 @@ export class MongooseOrderRepository implements IOrderRepository {
         await MongooseOrder.insertMany(ordersToSave);
     }
 
+    public async updateMany(orders: Order[]): Promise<void> {
+        for (let order of orders) {
+            await this.save(order);
+        }
+    }
+
     public async saveOrdersWithNewState(orders: Order[]): Promise<void> {
         const ordersIdToSave = orders.map((order) => order.id.value);
 

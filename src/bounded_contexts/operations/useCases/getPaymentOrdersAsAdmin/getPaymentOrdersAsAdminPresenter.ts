@@ -16,7 +16,12 @@ export class GetPaymentOrdersAsAdminPresenter {
             const presentedOrder = this.presentPaymentOrder(paymentOrder, customerMap[paymentOrder.customerId.value]);
 
             if (paymentOrder.state.title === "PAYMENT_ORDER_ACTIVE") activeOrders.push(presentedOrder);
-            if (paymentOrder.state.title === "PAYMENT_ORDER_BILLED") billedOrders.push(presentedOrder);
+            if (
+                paymentOrder.state.title === "PAYMENT_ORDER_BILLED" ||
+                paymentOrder.state.title === "PAYMENT_ORDER_REFUNDED" ||
+                paymentOrder.state.title === "PAYMENT_ORDER_PARTIALLY_REFUNDED"
+            )
+                billedOrders.push(presentedOrder);
             if (paymentOrder.state.title === "PAYMENT_ORDER_REJECTED") rejectedOrders.push(presentedOrder);
         }
 

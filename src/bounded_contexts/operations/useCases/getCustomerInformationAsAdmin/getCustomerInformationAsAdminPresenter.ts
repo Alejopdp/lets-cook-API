@@ -62,6 +62,7 @@ export class GetCustomerInformationAsAdminPresenter {
             price: order.getTotalPrice(),
             active: order.isActive(),
             orderNumber: order.counter,
+            isSkipped: order.isSkipped(),
         }));
     }
 

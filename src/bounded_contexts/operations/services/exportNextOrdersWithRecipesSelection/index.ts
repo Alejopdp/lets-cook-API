@@ -1,5 +1,6 @@
 import { xlsxService } from "../../application/exportService";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
+import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
 import { mongooseWeekRepository } from "../../infra/repositories/week";
@@ -11,7 +12,8 @@ export const exportNextOrdersWithRecipesSelection: ExportNextOrdersWithRecipesSe
     mongooseWeekRepository,
     mongooseSubscriptionRepository,
     xlsxService,
-    mongooseShippingZoneRepository
+    mongooseShippingZoneRepository,
+    mongoosePaymentOrderReposiotry
 );
 
 export const exportNextOrdersWithRecipesSelectionController: ExportNextOrdersWithRecipesSelectionController =

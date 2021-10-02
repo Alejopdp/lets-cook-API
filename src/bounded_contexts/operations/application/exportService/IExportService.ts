@@ -7,7 +7,12 @@ export enum RecipeSelectionState {
     ELEGIDA_POR_LC = "Elegida por LC",
 }
 export interface OrdersWithRecipeSelectionExport {
+    stripePaymentId: string;
+    paymentOrderId: string | number;
+    paymentOrderState: string;
     orderId: string | number;
+    orderNumber: string | number;
+    orderState: string;
     weekLabel: string;
     deliveryDate: string;
     customerPreferredShippingHour: string;
@@ -29,6 +34,7 @@ export interface OrdersWithRecipeSelectionExport {
     recipeVariantId: string | number;
     recipeVariantSku: string;
     recipeName: string;
+    recipeSku: string;
     numberOfPersons: number;
     numberOfRecipes: number;
     customerPreferredLanguage: string;
@@ -39,6 +45,8 @@ export interface OrdersWithRecipeSelectionExport {
     kitDiscount: number;
     finalPrice: number;
     finalKitPrice: number;
+    finalPortionPrice: number;
+    recipeDivision: number;
 }
 
 export interface SubscriptionExport {
