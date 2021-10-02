@@ -11,6 +11,8 @@ export interface OrdersWithRecipeSelectionExport {
     paymentOrderId: string | number;
     paymentOrderState: string;
     orderId: string | number;
+    orderNumber: string | number;
+    orderState: string;
     weekLabel: string;
     deliveryDate: string;
     customerPreferredShippingHour: string;

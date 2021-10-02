@@ -88,7 +88,6 @@ export class ExportNextOrdersWithRecipesSelection {
             const subscription = subscriptionMap[order.subscriptionId.value];
             const orderPlanVariant = order.plan.getPlanVariantById(order.planVariantId);
 
-            console.log("CUSTOMER: ", subscription.customer.id.value);
             if (order.recipeSelection.length === 0) {
                 ordersExport.push({
                     stripePaymentId:
@@ -101,6 +100,8 @@ export class ExportNextOrdersWithRecipesSelection {
                             ? paymentOrderMap[order.paymentOrderId.value]?.state.title || ""
                             : "",
                     orderId: order.id.value,
+                    orderNumber: order.counter,
+                    orderState: order.state.title,
                     weekLabel: order.week.getShorterLabel(),
                     deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
                     customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
@@ -156,6 +157,8 @@ export class ExportNextOrdersWithRecipesSelection {
                                 ? paymentOrderMap[order.paymentOrderId.value]?.state.title || ""
                                 : "",
                         orderId: order.id.value,
+                        orderNumber: order.counter,
+                        orderState: order.state.title,
                         weekLabel: order.week.getShorterLabel(),
                         deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
                         customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
@@ -223,6 +226,8 @@ export class ExportNextOrdersWithRecipesSelection {
                     paymentOrderId: "N/A",
                     paymentOrderState: "N/A",
                     orderId: "N/A",
+                    orderNumber: "N/A",
+                    orderState: "N/A",
                     weekLabel: customerOrders[0].week.getShorterLabel(),
                     deliveryDate: MomentTimeService.getDddDdMmmm(customerOrders[0].shippingDate),
                     customerPreferredShippingHour: customer.getShippingAddress().preferredShippingHour,
