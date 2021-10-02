@@ -34,7 +34,7 @@ export class CreatePlan {
                       dto.locale
                   )
                 : [];
-        console.log("The DTO: ", dto);
+
         for (let variant of dto.planVariants) {
             var attributes: PlanVariantAttribute[] = [];
 
@@ -80,7 +80,7 @@ export class CreatePlan {
                         attr.key.toLowerCase() !== "deleted" &&
                         attr.key.toLowerCase() !== "description"
                 );
-                console.log("The attributes: ", attributes);
+
                 let planVariant: PlanVariant = new PlanVariant(
                     new PlanSku(variant.sku),
                     "",
@@ -94,7 +94,7 @@ export class CreatePlan {
                 planVariants.push(planVariant);
             }
         }
-        console.log("Plan variants: ", planVariants);
+
         const plan: Plan = Plan.create(
             dto.planName,
             dto.planDescription,
@@ -124,7 +124,6 @@ export class CreatePlan {
         plan.imageUrl = imageUrl;
         plan.iconLinealUrl = iconLinealUrl;
         plan.iconLinealColorUrl = iconLinealColorUrl;
-        console.log("Saving the following plan: ", plan);
 
         await this.planRepository.save(plan);
     }
