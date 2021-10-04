@@ -88,6 +88,8 @@ export class CreateSubscription {
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
         const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
+        const addressIsChanged: boolean =
+            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
 
         customer.changePersonalInfo(
             dto.customerFirstName,
@@ -98,6 +100,25 @@ export class CreateSubscription {
             customer.personalInfo?.birthDate,
             dto.locale
         );
+
+        if (addressIsChanged) {
+            customer.changeShippingAddress(
+                dto.latitude,
+                dto.longitude,
+                dto.addressName,
+                dto.addressName,
+                dto.addressDetails,
+                customer.shippingAddress?.deliveryTime
+            );
+            customer.changeBillingAddress(
+                dto.latitude,
+                dto.longitude,
+                dto.addressName,
+                customer.billingAddress?.customerName || `${dto.customerFirstName} ${dto.customerLastName}`,
+                dto.addressDetails,
+                customer.billingAddress?.identification || ""
+            );
+        }
 
         const subscription: Subscription = new Subscription(
             planVariantId,
@@ -170,6 +191,12 @@ export class CreateSubscription {
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
 
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+        if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
+            for (let paymentOrder of paymentOrdersToUpdate) {
+                // TO DO: Update Orders shipping cost too
+                paymentOrder.shippingCost = customerShippingZone.cost;
+            }
+        }
         if (coupon) await this.couponRepository.save(coupon);
 
         return { subscription, paymentIntent, firstOrder: orders[0], customerPaymentMethods: customer.paymentMethods };
