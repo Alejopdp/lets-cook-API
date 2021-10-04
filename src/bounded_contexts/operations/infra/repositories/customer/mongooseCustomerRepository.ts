@@ -77,6 +77,12 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         return customer;
     }
 
+    public async updateMany(customers: Customer[]): Promise<void> {
+        for (let customer of customers) {
+            await this.save(customer);
+        }
+    }
+
     public async delete(customerId: CustomerId): Promise<void> {
         await MongooseCustomer.updateOne({ _id: customerId.value }, { $set: { deletionFlag: true } });
     }

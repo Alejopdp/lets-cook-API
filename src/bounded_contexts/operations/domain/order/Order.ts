@@ -144,6 +144,7 @@ export class Order extends Entity<Order> {
 
     public bill(): void {
         this.state.toBilled(this);
+        this.customer.countOneReceivedOrder();
     }
 
     public cancel(paymentOrder?: PaymentOrder): void {

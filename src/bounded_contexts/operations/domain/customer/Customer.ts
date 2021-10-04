@@ -211,6 +211,10 @@ export class Customer extends Entity<Customer> {
         }
     }
 
+    public countOneReceivedOrder(): void {
+        this.receivedOrdersQuantity = this.receivedOrdersQuantity + 1;
+    }
+
     public getShippingAddress(locale: Locale = Locale.es): {
         name?: string;
         details?: string;
