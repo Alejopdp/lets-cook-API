@@ -175,11 +175,17 @@ export class CreateSubscription {
             customer.email,
             customer.stripeId
         );
+
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
         newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
+        } else if (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled") {
+            await this.paymentService.removePaymentMethodFromCustomer(
+                dto.stripePaymentMethodId || customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId))
+            );
+            throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
         } else {
             newPaymentOrders[0]?.toBilled(orders);
         }

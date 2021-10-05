@@ -47,13 +47,19 @@ export class PaymentOrder extends Entity<PaymentOrder> {
 
     public addOrder(order: Order): void {
         order.paymentOrderId = this.id;
+        if (this.state.isPendingConfirmation()) return;
+
         this.amount = this.amount + order.price; // TO DO: Add price with discount
         this.discountAmount += order.discountAmount; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+
+        if (this.state.isCancelled()) this.state.toActive(this);
     }
 
     public discountOrderAmount(order: Order): void {
         this.amount -= order.getTotalPrice();
         this.discountAmount -= order.discountAmount;
+
+        if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
     }
 
     public discountOrdersAmount(orders: Order[]): void {
@@ -88,7 +94,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
 
     public toActive(orders: Order[]): void {
         for (let order of orders) {
-            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(); // TO DO: Handle this?
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(this); // TO DO: Handle this?
         }
 
         this.state.toActive(this);
