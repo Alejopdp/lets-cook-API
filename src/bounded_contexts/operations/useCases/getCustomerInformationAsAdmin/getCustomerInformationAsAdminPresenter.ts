@@ -32,11 +32,11 @@ export class GetCustomerInformationAsAdminPresenter {
             subscriptions: this.presentSubscriptions(subscriptions),
             orders: this.presentOrders(
                 orders
-                    .filter((order) => order.billingDate >= new Date() && (order.isActive() || order.isSkipped()))
+                    .filter((order) => order.shippingDate >= new Date() && (order.isActive() || order.isSkipped() || order.isBilled()))
                     .sort((order1, order2) => (order1.shippingDate > order2.shippingDate ? 1 : -1))
             ),
             paymentOrders: this.presentPaymentOrders(
-                paymentOrders.filter((paymentOrder) => paymentOrder.billingDate <= new Date()),
+                paymentOrders.filter((paymentOrder) => paymentOrder.state.isBilled()),
                 orders
             ),
         };
@@ -60,7 +60,7 @@ export class GetCustomerInformationAsAdminPresenter {
             plan: order.plan.name,
             variation: order.getPlanVariantLabel(order.planVariantId),
             price: order.getTotalPrice(),
-            active: order.isActive(),
+            active: order.isActive() || order.isBilled(),
             orderNumber: order.counter,
             isSkipped: order.isSkipped(),
         }));

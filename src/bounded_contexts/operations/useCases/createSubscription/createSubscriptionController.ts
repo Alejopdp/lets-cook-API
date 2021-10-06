@@ -35,9 +35,6 @@ export class CreateSubscriptionController extends BaseController {
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
-            console.log("REQ BODY LAT: ", this.req.body);
-            // console.log("REQ BODY LAT: ", this.req.body.lng);
-
             const result = await this.createSubscription.execute(dto);
             const presented = this.createSubscriptionPresenter.present(
                 result.subscription,

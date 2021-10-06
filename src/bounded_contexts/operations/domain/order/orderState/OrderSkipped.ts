@@ -30,6 +30,7 @@ export class OrderSkipped implements IOrderState {
     }
 
     public toBilled(order: Order): void {
+        return;
         order.state = new OrderBilled();
     }
 
@@ -56,6 +57,11 @@ export class OrderSkipped implements IOrderState {
     public isCancelled(): boolean {
         return false;
     }
+
+    public isBilled(): boolean {
+        return false;
+    }
+
     public isActive(): boolean {
         return false;
     }

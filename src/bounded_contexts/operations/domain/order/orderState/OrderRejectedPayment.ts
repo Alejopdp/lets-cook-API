@@ -57,6 +57,10 @@ export class OrderRejectedPayment implements IOrderState {
         return false;
     }
 
+    public isBilled(): boolean {
+        return false;
+    }
+
     public isActive(): boolean {
         return false;
     }

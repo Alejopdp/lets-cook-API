@@ -168,18 +168,26 @@ export class CreateSubscription {
                 customerSubscriptions.length > 0);
 
         const paymentIntent = await this.paymentService.paymentIntent(
-            hasFreeShipping ? newPaymentOrders[0].getTotalAmount() - customerShippingZone.cost : newPaymentOrders[0].getTotalAmount(),
+            hasFreeShipping
+                ? (newPaymentOrders[0].getTotalAmount() * 100 - customerShippingZone.cost * 100) / 100
+                : newPaymentOrders[0].getTotalAmount(),
             dto.stripePaymentMethodId
                 ? dto.stripePaymentMethodId
                 : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
             customer.email,
             customer.stripeId
         );
+
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
         newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
+        } else if (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled") {
+            await this.paymentService.removePaymentMethodFromCustomer(
+                dto.stripePaymentMethodId || customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId))
+            );
+            throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
         } else {
             newPaymentOrders[0]?.toBilled(orders);
         }

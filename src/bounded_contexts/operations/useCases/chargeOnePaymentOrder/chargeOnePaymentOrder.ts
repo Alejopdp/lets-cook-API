@@ -73,8 +73,8 @@ export class ChargeOnePaymentOrder {
 
         const customerHasFreeShipping = orders.some((order) => order.hasFreeShipping);
         const totalAmount = customerHasFreeShipping
-            ? paymentOrder.amount - paymentOrder.discountAmount
-            : paymentOrder.amount - paymentOrder.discountAmount + shippingCost;
+            ? (paymentOrder.amount * 100 - paymentOrder.discountAmount * 100) / 100
+            : (paymentOrder.amount * 100 - paymentOrder.discountAmount * 100 + shippingCost * 100) / 100;
 
         const paymentIntent = await this.paymentService.paymentIntent(
             totalAmount,
@@ -121,8 +121,8 @@ export class ChargeOnePaymentOrder {
         }
 
         for (let billingDateAndOrders of Object.entries(billingDateOrdersMap)) {
-            const ordersAmount = billingDateAndOrders[1].reduce((acc, order) => acc + order.getTotalPrice(), 0);
-            const ordersDiscount = billingDateAndOrders[1].reduce((acc, order) => acc + order.discountAmount, 0);
+            const ordersAmount = billingDateAndOrders[1].reduce((acc, order) => (acc * 100 + order.getTotalPrice() * 100) / 100, 0);
+            const ordersDiscount = billingDateAndOrders[1].reduce((acc, order) => (acc * 100 + order.discountAmount * 100) / 100, 0);
 
             const newPaymentOrder = new PaymentOrder(
                 new Date(),

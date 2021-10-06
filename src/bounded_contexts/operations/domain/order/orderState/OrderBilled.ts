@@ -56,7 +56,11 @@ export class OrderBilled implements IOrderState {
         return false;
     }
 
-    public isActive(): boolean {
+    public isBilled(): boolean {
         return true;
+    }
+
+    public isActive(): boolean {
+        return false;
     }
 }

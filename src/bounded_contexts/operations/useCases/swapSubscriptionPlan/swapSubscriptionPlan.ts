@@ -63,13 +63,14 @@ export class SwapSubscriptionPlan {
                 : undefined;
 
             for (let paymentOrder of paymentOrders) {
-                paymentOrder.amount = paymentOrder.amount - oldSubscriptionPrice + subscription.price;
+                paymentOrder.amount = (paymentOrder.amount * 100 - oldSubscriptionPrice * 100 + subscription.price * 100) / 100;
                 if (!!coupon) {
                     // TO DO: ChECK COUPON VALIDATIONS
                     paymentOrder.discountAmount =
-                        paymentOrder.discountAmount -
-                        coupon.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) +
-                        coupon.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost);
+                        (paymentOrder.discountAmount * 100 -
+                            coupon.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) * 100 +
+                            coupon.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost) * 100) /
+                        100;
                 }
             }
 
