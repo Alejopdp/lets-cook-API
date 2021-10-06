@@ -1,6 +1,10 @@
 // To run from root, execute the following:
 // npm exec ts-node scripts/shopifyMigration/migrate.ts
 
+/**
+ * Attempt to clone production database.
+ */
+
 import Stripe from "stripe";
 import { UserPassword } from "../../src/bounded_contexts/IAM/domain/user/UserPassword";
 // USE NON-PROD KEY
@@ -209,6 +213,11 @@ async function migrateCustomers() {
                 console.log(`Excluding customer with id ${shopifyCustomer.id} because they have no email and no stripe id.`);
                 return; // skips the customer if no stipe id AND no email
             } else stripeId = await stripeService.createCustomer(shopifyCustomer.email);
+        
+        // IF STAGING THEN
+        /*
+            Attach payment method with id pm_card_visa to customer in stripe.
+        */
 
         let letsCookCustomer = Customer.create(
             shopifyCustomer.email,
@@ -330,6 +339,14 @@ async function migrateSubscriptions() {
 
         let restrictionComment: string = shopifyOrder?.shipping_address?.company ?? "";
 
+        let customer = await customerRepository.findByEmail(customerEmail);
+        if(!customer){
+            console.warn(`Couldn't find customer with email ${customerEmail}.`);
+            return;
+        }
+
+        // Call use case createSubscription instead of the repository.
+
         let subscription = new Subscription(
             planVariantId,
             plan,
@@ -337,7 +354,7 @@ async function migrateSubscriptions() {
             SubscriptionStateFactory.createState(`SUBSCRIPTION_${rs.status}`),
             restrictionComment,
             new Date(rs.created_at) as Date,
-            (await customerRepository.findByEmail(customerEmail))!,
+            customer!,
             plan.getPlanVariantPrice(planVariantId)
         );
 
@@ -348,17 +365,16 @@ async function migrateSubscriptions() {
 }
 
 async function migrate() {
-    process.env.NODE_ENV = "production";
-    await connectToDatabase();
 
-    // En teoría acá sólo debería haber aggregate roots.
-    await Promise.all([
-        // migrateCustomers(),
-        migrateSubscriptions(),
-        // migrateOrders()
-    ]);
+    // process.env.NODE_ENV = "production";
+    // await connectToDatabase();
 
-    console.info("All migration methods have ended.");
+    // // En teoría acá sólo debería haber aggregate roots.
+
+    // //await migrateCustomers();
+    // await migrateSubscriptions();
+
+    // console.info("All migration methods have ended.");
 }
 
 migrate();
