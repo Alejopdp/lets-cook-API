@@ -1,10 +1,6 @@
 // To run from root, execute the following:
 // npm exec ts-node scripts/shopifyMigration/migrate.ts
 
-/**
- * Attempt to clone production database.
- */
-
 import Stripe from "stripe";
 import { UserPassword } from "../../src/bounded_contexts/IAM/domain/user/UserPassword";
 // USE NON-PROD KEY
@@ -25,12 +21,14 @@ import { MongoosePlanRepository } from "../../src/bounded_contexts/operations/in
 import { PlanFrequencyFactory } from "../../src/bounded_contexts/operations/domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { SubscriptionStateFactory } from "../../src/bounded_contexts/operations/domain/subscription/subscriptionState/SubscriptionStateFactory";
 import _ from "lodash";
+import { createSubscription } from "../../src/bounded_contexts/operations/useCases/createSubscription/index";
+import { Locale } from "../../src/bounded_contexts/operations/domain/locale/Locale";
 
 const stripeConfig: Stripe.StripeConfig = {
     apiVersion: "2020-08-27",
 };
 // USE PROD KEY
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, stripeConfig);
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, stripeConfig);
 
 async function fetchRechargeEntityCollection(entityCollectionName: string): Promise<any[]> {
     const fetch = require("node-fetch");
@@ -167,7 +165,10 @@ async function migrateCustomers() {
 
     // Mapping and saving each customer
     //@ts-ignore false positive
-    shopifyCustomers.forEach(async (shopifyCustomer) => {
+
+    let customerMigrationPromises: any[] = [];
+
+    for (const shopifyCustomer of shopifyCustomers) {
         console.log(`Processing customer with id ${shopifyCustomer.id}.`);
 
         let existingCustomer = await customerRepository.findByEmail(shopifyCustomer.email);
@@ -177,41 +178,42 @@ async function migrateCustomers() {
         let stripeCustomerPaymentMethods: Stripe.PaymentMethod[] = [];
         let letsCookCustomerPaymentMethods: PaymentMethod[] = [];
 
-        if (rechargeCustomer?.stripe_customer_token) {
-            let stripeCustomer = await stripe.customers.retrieve(rechargeCustomer.stripe_customer_token);
+        // if (rechargeCustomer?.stripe_customer_token) {
+        //     let stripeCustomer = await stripe.customers.retrieve(rechargeCustomer.stripe_customer_token);
 
-            if (stripeCustomer) {
-                stripeCustomerPaymentMethods = (
-                    await stripe.paymentMethods.list({
-                        customer: rechargeCustomer.stripe_customer_token,
-                        type: "card",
-                    })
-                ).data;
+        //     if (stripeCustomer) {
+        //         stripeCustomerPaymentMethods = (
+        //             await stripe.paymentMethods.list({
+        //                 customer: rechargeCustomer.stripe_customer_token,
+        //                 type: "card",
+        //             })
+        //         ).data;
 
-                stripeCustomerPaymentMethods.forEach((pm) => {
-                    if (pm.card)
-                        letsCookCustomerPaymentMethods.push(
-                            new PaymentMethod(
-                                pm.card?.brand,
-                                pm.card?.last4,
-                                pm.card?.exp_month,
-                                pm.card?.exp_year,
-                                pm.card?.checks?.cvc_check || "",
-                                //@ts-ignore
-                                stripeCustomer.invoice_settings && pm.id == stripeCustomer.invoice_settings.default_payment_method,
-                                pm.id
-                            )
-                        );
-                });
-            }
-        }
+        //         stripeCustomerPaymentMethods.forEach((pm) => {
+        //             if (pm.card)
+        //                 letsCookCustomerPaymentMethods.push(
+        //                     new PaymentMethod(
+        //                         pm.card?.brand,
+        //                         pm.card?.last4,
+        //                         pm.card?.exp_month,
+        //                         pm.card?.exp_year,
+        //                         pm.card?.checks?.cvc_check || "",
+        //                         //@ts-ignore
+        //                         stripeCustomer.invoice_settings && pm.id == stripeCustomer.invoice_settings.default_payment_method,
+        //                         pm.id
+        //                     )
+        //                 );
+        //         });
+        //     }
+        // }
 
         let stripeId = rechargeCustomer?.stripe_customer_token;
+        stripeId = false;
 
         if (!stripeId)
             if (!shopifyCustomer.email) {
                 console.log(`Excluding customer with id ${shopifyCustomer.id} because they have no email and no stripe id.`);
-                return; // skips the customer if no stipe id AND no email
+                continue; // skips the customer if no stipe id AND no email
             } else stripeId = await stripeService.createCustomer(shopifyCustomer.email);
 
         // IF STAGING THEN
@@ -222,8 +224,9 @@ async function migrateCustomers() {
         let letsCookCustomer = Customer.create(
             shopifyCustomer.email,
             true,
-            rechargeCustomer?.stripe_customer_token,
+            stripeId,
             letsCookCustomerPaymentMethods,
+            shopifyCustomer.orders_count,
             undefined,
             undefined,
             UserPassword.create(generateRandomPassword(shopifyCustomer.id), false), // generate randomly passing restrictions
@@ -237,15 +240,17 @@ async function migrateCustomers() {
                       shopifyCustomer.phone ?? shopifyCustomer.addresses[0]?.phone,
                       shopifyCustomer.addresses[1]?.phone,
                       undefined,
-                      "es", // formato?
+                      Locale.es, // formato?
                       undefined
                   ),
             new CustomerId(uuidv4())
         );
 
         // Save
-        await customerRepository.save(letsCookCustomer);
-    });
+        customerMigrationPromises.push(customerRepository.save(letsCookCustomer));
+    }
+
+    Promise.all(customerMigrationPromises);
 
     console.info("Customers migration has ended.");
 }
@@ -287,17 +292,24 @@ async function migrateSubscriptions() {
     let customerRepository = new MongooseCustomerRepository();
     let planRepository = new MongoosePlanRepository();
 
-    rechargeSubscriptions.forEach(async (rs) => {
-        if (!["ACTIVE", "CANCELLED"].includes(rs.status)) return;
+    let subscriptionMigrationPromises: any[] = [];
 
-        let shopifyVariantId: number = rs.shopify_variant_id;
-        let customerEmail = rs.email;
+    for (const rechargeSubscription of rechargeSubscriptions) {
+        if (!["ACTIVE", "CANCELLED"].includes(rechargeSubscription.status)) {
+            console.log(`Skipping recharge subscription with state ${rechargeSubscription.status}`);
+            continue;
+        }
+
+        let shopifyVariantId: number = rechargeSubscription.shopify_variant_id;
+        let customerEmail = rechargeSubscription.email;
         //@ts-ignore
         let letsCookVariantId: string = variantMapping[shopifyVariantId.toString()];
 
         if (!letsCookVariantId) {
-            console.warn(`Couldn't find LC variant for Shopify variant ${shopifyVariantId}. Skipping subscription ${rs.id}.`);
-            return;
+            console.warn(
+                `Couldn't find LC variant for Shopify variant ${shopifyVariantId}. Skipping subscription ${rechargeSubscription.id}.`
+            );
+            continue;
         }
 
         console.log(letsCookVariantId);
@@ -305,13 +317,13 @@ async function migrateSubscriptions() {
         let plan = (await planRepository.findByPlanVariantId(planVariantId))!;
 
         if (!plan) {
-            console.warn(`Couldn't find plan by variant id ${letsCookVariantId}. Skipping subscription ${rs.id}.`);
-            return;
+            console.warn(`Couldn't find plan by variant id ${letsCookVariantId}. Skipping subscription ${rechargeSubscription.id}.`);
+            continue;
         }
 
         let frequencyValue: string;
         let rechargeFrequency: string;
-        switch ((rechargeFrequency = `${rs.order_interval_unit}${rs.order_interval_frequency}`)) {
+        switch ((rechargeFrequency = `${rechargeSubscription.order_interval_unit}${rechargeSubscription.order_interval_frequency}`)) {
             case "week1":
                 frequencyValue = "weekly";
                 break;
@@ -323,54 +335,82 @@ async function migrateSubscriptions() {
                 break;
             default:
                 console.log("Couldn't match frequency ", rechargeFrequency);
-                return;
+                continue;
         }
         let frequency = PlanFrequencyFactory.createPlanFrequency(frequencyValue);
 
         var shopifyOrder = shopifyOrders.find((so) => {
-            if (so.email == rs.email) {
-                let rechargeAddress = rechargeAddresses.find((ra) => ra.id == rs.address_id);
+            if (so.email == rechargeSubscription.email) {
+                let rechargeAddress = rechargeAddresses.find((ra) => ra.id == rechargeSubscription.address_id);
                 if (rechargeAddress.address1 == so.shipping_address.address1) {
-                    return (so.line_items as any[]).some((li) => li.variant_id == rs.shopify_variant_id);
+                    return (so.line_items as any[]).some((li) => li.variant_id == rechargeSubscription.shopify_variant_id);
                 }
             }
             return false;
         });
 
-        let restrictionComment: string = shopifyOrder?.shipping_address?.company ?? "";
+        let restrictionComment: string = shopifyOrder?.shipping_address?.company ?? "None";
 
         let customer = await customerRepository.findByEmail(customerEmail);
         if (!customer) {
             console.warn(`Couldn't find customer with email ${customerEmail}.`);
-            return;
+            continue;
         }
 
         // Call use case createSubscription instead of the repository.
 
-        let subscription = new Subscription(
-            planVariantId,
-            plan,
-            frequency,
-            SubscriptionStateFactory.createState(`SUBSCRIPTION_${rs.status}`),
-            restrictionComment,
-            new Date(rs.created_at) as Date,
-            customer!,
-            plan.getPlanVariantPrice(planVariantId)
-        );
+        // let subscription = new Subscription(
+        //     planVariantId,
+        //     plan,
+        //     frequency,
+        //     SubscriptionStateFactory.createState(`SUBSCRIPTION_${rs.status}`),
+        //     restrictionComment,
+        //     new Date(rs.created_at) as Date,
+        //     customer!,
+        //     plan.getPlanVariantPrice(planVariantId)
+        // );
 
-        console.log(subscription);
+        // console.log(subscription);
 
         //save subcription to db here
-    });
+        subscriptionMigrationPromises.push(
+            createSubscription.execute({
+                customerId: customer.id.value,
+                customerFirstName: customer.personalInfo?.name ?? "",
+                customerLastName: customer.personalInfo?.lastName ?? "",
+                latitude: 41.4318855,
+                longitude: 2.2191512,
+                addressName: "Avinguda Joan XXIII, 12, El Masnou, España",
+                addressDetails: "1o 3a",
+                locale: Locale.es,
+                paymentMethodId: "",
+                phone1: customer.personalInfo?.phone1 ?? "",
+                planFrequency: frequencyValue,
+                planId: plan.id.value,
+                planVariantId: planVariantId.value,
+                restrictionComment,
+                stripePaymentMethodId: "pm_card_visa",
+            })
+        );
+    }
+
+    Promise.all(subscriptionMigrationPromises);
+    console.info("Customers migration has ended.");
 }
 
 async function migrate() {
-    // process.env.NODE_ENV = "production";
-    // await connectToDatabase();
+    process.env.NODE_ENV = "prodcopy";
+    process.env.STRIPE_SECRET_KEY = "sk_test_9ixChBmgrwQyQn814Tb8gRbm00nQx5UuDU";
+
+    await connectToDatabase();
+
     // // En teoría acá sólo debería haber aggregate roots.
-    // //await migrateCustomers();
-    // await migrateSubscriptions();
-    // console.info("All migration methods have ended.");
+
+    // await migrateCustomers();
+
+    await migrateSubscriptions();
+
+    console.info("All migration methods have ended.");
 }
 
 migrate();
