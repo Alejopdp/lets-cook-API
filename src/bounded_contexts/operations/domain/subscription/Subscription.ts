@@ -51,7 +51,7 @@ export class Subscription extends Entity<Subscription> {
         super(subscriptionId);
         this._planVariantId = planVariantId;
         this._plan = plan;
-        this._price = price;
+        this._price = Math.trunc(price * 100) / 100;
         this._frequency = frequency;
         this._state = state;
         this._restriction = restriction;
@@ -141,8 +141,6 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week, shippingZone: ShippingZone): Order {
-        console.log("BILLED ORDER: ", billedOrder);
-        console.log("NEW ORDER WEEK: ", newOrderWeek);
         const newBillingDate: Date = this.getNewOrderDateFrom(billedOrder.billingDate);
         const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
         const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
@@ -237,29 +235,29 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getNextActiveOrder(orders: Order[] = []): Order | undefined {
-        return orders.find((order) => order.isActive()); // TO DO: It works if orders is sorted ASC
+        return orders.find((order) => order.isActive() || order.isBilled()); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextOrderToShip(orders: Order[] = []): Order | undefined {
-        return orders.find((order) => order.isActive() || order.state.title === "ORDER_BILLED"); // TO DO: It works if orders is sorted ASC
+        return orders.find((order) => order.isActive() || order.isBilled()); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextSecondActiveOrder(orders: Order[]): Order | undefined {
         const nextOrder: Order | undefined = this.getNextActiveOrder(orders);
         if (!!!nextOrder) return undefined;
 
-        return orders.find((order) => order.isActive() && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
+        return orders.find((order) => (order.isActive() || order.isBilled()) && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextSecondOrderToShip(orders: Order[]): Order | undefined {
         const nextOrder: Order | undefined = this.getNextOrderToShip(orders);
         if (!!!nextOrder) return undefined;
 
-        return orders.find((order) => (order.isActive() || order.state.title === "ORDER_BILLED") && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
+        return orders.find((order) => (order.isActive() || order.isBilled()) && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextShipmentLabel(orders: Order[] = []): string {
-        const nextOrder = orders.find((order) => order.isActive());
+        const nextOrder = orders.find((order) => order.isActive() || order.isBilled());
 
         if (!!!nextOrder) return "No tienes una próxima entrega";
 

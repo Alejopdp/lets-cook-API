@@ -2,7 +2,7 @@ name: Deploy dev
 on:
     push:
         branches:
-            - staging
+            - master
 jobs:
     build:
         runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
                   node-version: "14"
                   #   cache: "npm"
             - run: npm install #This is so it doesn't try to run a migration
-            - run: npm run build:staging
+            - run: npm run build:master
             - run: zip -r deploy.zip dist/ package.json .npmrc .ebextensions/ .platform/
             - name: Deploy to EB
               uses: einaregilsson/beanstalk-deploy@v18
@@ -34,7 +34,7 @@ jobs:
                   aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
                   aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                   application_name: Lets Cook
-                  environment_name: Letscook-env
+                  environment_name: production
                   version_label: ${{github.SHA}}
                   deployment_package: deploy.zip
                   region: eu-west-3

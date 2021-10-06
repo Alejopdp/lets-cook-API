@@ -34,7 +34,7 @@ export class CancelASubscription {
 
         subscription.cancel(cancellationReason, orders, paymentOrders);
 
-        await this.orderRepository.saveCancelledOrders(orders); // TO DO: Transaction / Queue
+        await this.orderRepository.saveCancelledOrders(orders.filter((order) => order.isCancelled())); // TO DO: Transaction / Queue
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
         await this.paymentOrderRepository.updateMany(paymentOrders); // TO DO: Transaction / Queue
     }

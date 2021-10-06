@@ -1,6 +1,10 @@
 // To run from root, execute the following:
 // npm exec ts-node scripts/shopifyMigration/migrate.ts
 
+/**
+ * Attempt to clone production database.
+ */
+
 import Stripe from "stripe";
 import { UserPassword } from "../../src/bounded_contexts/IAM/domain/user/UserPassword";
 // USE NON-PROD KEY
@@ -20,6 +24,7 @@ import { PlanVariantId } from "../../src/bounded_contexts/operations/domain/plan
 import { MongoosePlanRepository } from "../../src/bounded_contexts/operations/infra/repositories/plan/mongoosePlanRepository";
 import { PlanFrequencyFactory } from "../../src/bounded_contexts/operations/domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { SubscriptionStateFactory } from "../../src/bounded_contexts/operations/domain/subscription/subscriptionState/SubscriptionStateFactory";
+import _ from "lodash";
 
 const stripeConfig: Stripe.StripeConfig = {
     apiVersion: "2020-08-27",
@@ -97,7 +102,6 @@ async function fetchShopifyEntityCollection(entityCollectionName: string): Promi
         url = getNextLinkFromResponse(response);
     }
 
-    // console.log("Respuesta: ", response);
     return result;
 }
 
@@ -134,8 +138,9 @@ const variantMapping = {
     "25991289798756": "3c0d136d-c98e-44bb-8453-c31ef7e54ada", //AHOR2
     "25991289864292": "573ffd77-fe5b-4242-bd68-4d6c912ba2ef", //AHOR3
     "27290693697636": "9bb23977-54cb-48ad-80a5-3548fb6fa910", //AHOR4
-    "26048533594212": "e03c1ebf-3221-490f-a262-5b4899c70267", //AHOR6
-    "26048603684964": "aa33f617-2f9c-45bb-87a8-2720b1deb329", //AHOR7
+    "26048533594212": "1de93d7f-b7e1-428c-a9b9-bb0cfabb8647", //AHOR5
+    "26048603684964": "e03c1ebf-3221-490f-a262-5b4899c70267", //AHOR6
+    "26048493158500": "aa33f617-2f9c-45bb-87a8-2720b1deb329", //AHOR7
     "27290701496420": "a51f0a00-afb0-498a-9bae-e3db74da37e0", //AHOR8
     "37053063889049": "77d217d6-306e-4d79-93c6-9b0eaa29cf91", //PLDES2
 };
@@ -209,6 +214,11 @@ async function migrateCustomers() {
                 return; // skips the customer if no stipe id AND no email
             } else stripeId = await stripeService.createCustomer(shopifyCustomer.email);
 
+        // IF STAGING THEN
+        /*
+            Attach payment method with id pm_card_visa to customer in stripe.
+        */
+
         let letsCookCustomer = Customer.create(
             shopifyCustomer.email,
             true,
@@ -268,64 +278,99 @@ async function migrateOrders() {
 }
 
 async function migrateSubscriptions() {
+    let rechargeAddresses = await fetchRechargeEntityCollection("addresses");
+
     let shopifyOrders = await fetchShopifyEntityCollection("orders");
-    let shopifyProducts = await fetchShopifyEntityCollection("products");
+
+    let rechargeSubscriptions = await fetchRechargeEntityCollection("subscriptions");
 
     let customerRepository = new MongooseCustomerRepository();
     let planRepository = new MongoosePlanRepository();
 
-    shopifyOrders
-        .filter((so) => (so.tags as string).includes("Subscription"))
-        .forEach((so) => {
-            (so.line_items as any[]).forEach(async (li) => {
-                let shopifyProductId: number = li.product_id;
-                let shopifyVariantId: number = li.variant_id;
-                let shopifyProduct = shopifyProducts.find((sp) => sp.id == shopifyProductId);
-                let shopifyVariant = (shopifyProduct.variants as any[]).find((sv) => sv.id == shopifyVariantId);
-                let sku = shopifyVariant.sku;
-                let customerEmail = so.customer.email;
-                //@ts-ignore
-                let letsCookVariantId: string = variantMapping[shopifyVariantId.toString()];
+    rechargeSubscriptions.forEach(async (rs) => {
+        if (!["ACTIVE", "CANCELLED"].includes(rs.status)) return;
 
-                // console.log(
-                //     customerEmail,
-                //     shopifyVariantId,
-                //     letsCookVariantId,
-                //     sku
-                // );
+        let shopifyVariantId: number = rs.shopify_variant_id;
+        let customerEmail = rs.email;
+        //@ts-ignore
+        let letsCookVariantId: string = variantMapping[shopifyVariantId.toString()];
 
-                let planVariantId = new PlanVariantId(letsCookVariantId);
+        if (!letsCookVariantId) {
+            console.warn(`Couldn't find LC variant for Shopify variant ${shopifyVariantId}. Skipping subscription ${rs.id}.`);
+            return;
+        }
 
-                console.log(li.properties);
+        console.log(letsCookVariantId);
+        let planVariantId = new PlanVariantId(letsCookVariantId);
+        let plan = (await planRepository.findByPlanVariantId(planVariantId))!;
 
-                // let subscription = new Subscription(
-                //     planVariantId,
-                //     (await planRepository.findByPlanVariantId(planVariantId))!,
-                //     PlanFrequencyFactory.createPlanFrequency(""),
-                //     SubscriptionStateFactory.createState(""),
-                //     '',
-                //     new Date(so.created_at) as Date,
-                //     (await customerRepository.findByEmail(customerEmail))!,
-                //     so.total_price
-                // );
+        if (!plan) {
+            console.warn(`Couldn't find plan by variant id ${letsCookVariantId}. Skipping subscription ${rs.id}.`);
+            return;
+        }
 
-                //save subcription to db here
-            });
+        let frequencyValue: string;
+        let rechargeFrequency: string;
+        switch ((rechargeFrequency = `${rs.order_interval_unit}${rs.order_interval_frequency}`)) {
+            case "week1":
+                frequencyValue = "weekly";
+                break;
+            case "day14":
+                frequencyValue = "biweekly";
+                break;
+            case "month1":
+                frequencyValue = "monthly";
+                break;
+            default:
+                console.log("Couldn't match frequency ", rechargeFrequency);
+                return;
+        }
+        let frequency = PlanFrequencyFactory.createPlanFrequency(frequencyValue);
+
+        var shopifyOrder = shopifyOrders.find((so) => {
+            if (so.email == rs.email) {
+                let rechargeAddress = rechargeAddresses.find((ra) => ra.id == rs.address_id);
+                if (rechargeAddress.address1 == so.shipping_address.address1) {
+                    return (so.line_items as any[]).some((li) => li.variant_id == rs.shopify_variant_id);
+                }
+            }
+            return false;
         });
+
+        let restrictionComment: string = shopifyOrder?.shipping_address?.company ?? "";
+
+        let customer = await customerRepository.findByEmail(customerEmail);
+        if (!customer) {
+            console.warn(`Couldn't find customer with email ${customerEmail}.`);
+            return;
+        }
+
+        // Call use case createSubscription instead of the repository.
+
+        let subscription = new Subscription(
+            planVariantId,
+            plan,
+            frequency,
+            SubscriptionStateFactory.createState(`SUBSCRIPTION_${rs.status}`),
+            restrictionComment,
+            new Date(rs.created_at) as Date,
+            customer!,
+            plan.getPlanVariantPrice(planVariantId)
+        );
+
+        console.log(subscription);
+
+        //save subcription to db here
+    });
 }
 
 async function migrate() {
-    process.env.NODE_ENV = "shopify-migration-tests";
-    await connectToDatabase();
-
-    // En teoría acá sólo debería haber aggregate roots.
-    await Promise.all([
-        // migrateCustomers(),
-        migrateSubscriptions(),
-        // migrateOrders()
-    ]);
-
-    console.info("All migration methods have ended.");
+    // process.env.NODE_ENV = "production";
+    // await connectToDatabase();
+    // // En teoría acá sólo debería haber aggregate roots.
+    // //await migrateCustomers();
+    // await migrateSubscriptions();
+    // console.info("All migration methods have ended.");
 }
 
 migrate();

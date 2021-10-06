@@ -6,8 +6,8 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 export const connectToDatabase = async () => {
-    // const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
-    const mongoUri: string = ((process.env.URLDB as string) + "staging") as string;
+    const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
+    // const mongoUri: string = ((process.env.URLDB as string) + "staging") as string;
 
     try {
         await mongoose.connect(mongoUri, {
@@ -16,7 +16,7 @@ export const connectToDatabase = async () => {
             useFindAndModify: false,
             useCreateIndex: true,
         });
-        mongoose.set("debug", true);
+        // mongoose.set("debug", true);
 
         // await resetDatabase();
         logger.info("Database connected");
