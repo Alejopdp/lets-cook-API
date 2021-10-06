@@ -40,7 +40,7 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
         var customer: Customer | undefined = await this.customerRepository.findByEmail(userEmail);
 
         if (!!!customer) {
-            customer = Customer.create(userEmail, true, "", [], undefined, undefined, undefined, "active", undefined);
+            customer = Customer.create(userEmail, true, "", [], 0, undefined, undefined, undefined, "active", undefined);
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
 
             customer.stripeId = stripeCustomerId;
