@@ -51,7 +51,7 @@ export class Subscription extends Entity<Subscription> {
         super(subscriptionId);
         this._planVariantId = planVariantId;
         this._plan = plan;
-        this._price = price;
+        this._price = Math.trunc(price * 100) / 100;
         this._frequency = frequency;
         this._state = state;
         this._restriction = restriction;

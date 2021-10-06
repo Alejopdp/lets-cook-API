@@ -41,9 +41,9 @@ export class PayAllSubscriptions {
     }
 
     public async execute(): Promise<void> {
-        const today: Date = new Date(2021, 9, 23);
+        // const today: Date = new Date(2021, 9, 23);
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
-        // const today: Date = new Date();
+        const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
@@ -97,7 +97,7 @@ export class PayAllSubscriptions {
             subscriptionOrderMap[order.subscriptionId.value] = order;
         }
 
-        logger.info(`${ordersToBill} orders to process`);
+        logger.info(`${ordersToBill.length} orders to process`);
 
         // PAYMENT ORDERS BILLING
         for (let paymentOrderToBill of paymentOrdersToBill) {
@@ -111,8 +111,8 @@ export class PayAllSubscriptions {
                         (order) => order.hasFreeShipping
                     );
                     const totalAmount = customerHasFreeShipping
-                        ? paymentOrderToBill.amount - paymentOrderToBill.discountAmount
-                        : paymentOrderToBill.amount - paymentOrderToBill.discountAmount + shippingCost;
+                        ? (paymentOrderToBill.amount * 100 - paymentOrderToBill.discountAmount * 100) / 100
+                        : (paymentOrderToBill.amount * 100 - paymentOrderToBill.discountAmount * 100 + shippingCost * 100) / 100;
 
                     const paymentIntent = await this.paymentService.paymentIntent(
                         totalAmount,
@@ -187,8 +187,8 @@ export class PayAllSubscriptions {
             }
 
             for (let billingDateAndOrders of Object.entries(billingDateOrdersMap)) {
-                const ordersAmount = billingDateAndOrders[1].reduce((acc, order) => acc + order.getTotalPrice(), 0); // TO DO: Use coupons, probably need to pass orders to a subscription
-                const ordersDiscount = billingDateAndOrders[1].reduce((acc, order) => acc + order.discountAmount, 0); // TO DO: Use coupons, probably need to pass orders to a subscription
+                const ordersAmount = billingDateAndOrders[1].reduce((acc, order) => (acc * 100 + order.getTotalPrice() * 100) / 100, 0); // TO DO: Use coupons, probably need to pass orders to a subscription
+                const ordersDiscount = billingDateAndOrders[1].reduce((acc, order) => (acc * 100 + order.discountAmount * 100) / 100, 0); // TO DO: Use coupons, probably need to pass orders to a subscription
 
                 const newPaymentOrder = new PaymentOrder(
                     new Date(),

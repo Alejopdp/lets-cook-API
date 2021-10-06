@@ -168,7 +168,9 @@ export class CreateSubscription {
                 customerSubscriptions.length > 0);
 
         const paymentIntent = await this.paymentService.paymentIntent(
-            hasFreeShipping ? newPaymentOrders[0].getTotalAmount() - customerShippingZone.cost : newPaymentOrders[0].getTotalAmount(),
+            hasFreeShipping
+                ? (newPaymentOrders[0].getTotalAmount() * 100 - customerShippingZone.cost * 100) / 100
+                : newPaymentOrders[0].getTotalAmount(),
             dto.stripePaymentMethodId
                 ? dto.stripePaymentMethodId
                 : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),

@@ -38,9 +38,9 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._paymentIntentId = paymentIntentId;
         this._billingDate = billingDate;
         this._week = week;
-        this._amount = amount;
-        this._discountAmount = discountAmount;
-        this._shippingCost = shippingCost;
+        this._amount = Math.trunc(amount * 100) / 100;
+        this._discountAmount = Math.trunc(discountAmount * 100) / 100;
+        this._shippingCost = Math.trunc(shippingCost * 100) / 100;
         this._customerId = customerId;
         this._quantityRefunded = quantityRefunded;
     }
@@ -49,15 +49,15 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         order.paymentOrderId = this.id;
         if (this.state.isPendingConfirmation()) return;
 
-        this.amount = this.amount + order.price; // TO DO: Add price with discount
-        this.discountAmount += order.discountAmount; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+        this.amount = (this.amount * 100 + order.price * 100) / 100; // TO DO: Add price with discount
+        this.discountAmount = (this.discountAmount * 100 + order.discountAmount * 100) / 100; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
 
         if (this.state.isCancelled()) this.state.toActive(this);
     }
 
     public discountOrderAmount(order: Order): void {
-        this.amount -= order.getTotalPrice();
-        this.discountAmount -= order.discountAmount;
+        this.amount = (this.amount * 100 - order.getTotalPrice() * 100) / 100;
+        this.discountAmount = (this.discountAmount * 100 - order.discountAmount * 100) / 100;
 
         if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
     }
@@ -125,17 +125,17 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     public getTotalAmount(): number {
-        return this.amount + this.shippingCost - this.discountAmount;
+        return (this.amount * 100 + this.shippingCost * 100 - this.discountAmount * 100) / 100;
     }
 
     public refund(amount: number): void {
-        if (this.quantityRefunded + amount > this.getTotalAmount())
+        if ((this.quantityRefunded * 100 + amount * 100) / 100 > this.getTotalAmount())
             throw new Error("No puede devolverse una cantidad mayor al total del monto de la orden");
         if (amount <= 0) throw new Error("No puede devolverse una cantidad negativa");
-        if (this.quantityRefunded + amount === this.getTotalAmount()) this.state.toRefunded(this);
+        if ((this.quantityRefunded * 100 + amount * 100) / 100 === this.getTotalAmount()) this.state.toRefunded(this);
         else this.state.toPartiallyRefunded(this);
 
-        this.quantityRefunded += amount;
+        this.quantityRefunded = (this.quantityRefunded * 100 + amount * 100) / 100;
     }
 
     /**

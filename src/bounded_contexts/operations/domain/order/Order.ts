@@ -65,8 +65,8 @@ export class Order extends Entity<Order> {
         this._week = week;
         this._planVariantId = planVariantId;
         this._plan = plan;
-        this._price = price;
-        this._discountAmount = discountAmount;
+        this._price = Math.trunc(price * 100) / 100;
+        this._discountAmount = Math.trunc(discountAmount * 100) / 100;
         this._hasFreeShipping = hasFreeShipping;
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;
@@ -250,7 +250,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfPersons
                 ? //@ts-ignore
-                  this.discountAmount / planVariant.numberOfPersons
+                  (this.discountAmount * 100) / planVariant.numberOfPersons / 100
                 : this.discountAmount
         );
     }
@@ -263,8 +263,8 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfPersons
                 ? //@ts-ignore
-                  (this.getTotalPrice() - this.discountAmount) / planVariant.numberOfPersons
-                : this.getTotalPrice() - this.discountAmount
+                  (this.getTotalPrice() * 100 - this.discountAmount * 100) / planVariant.numberOfPersons / 100
+                : (this.getTotalPrice() * 100 - this.discountAmount * 100) / 100
         );
     }
 

@@ -36,7 +36,7 @@ export class GetCustomerInformationAsAdminPresenter {
                     .sort((order1, order2) => (order1.shippingDate > order2.shippingDate ? 1 : -1))
             ),
             paymentOrders: this.presentPaymentOrders(
-                paymentOrders.filter((paymentOrder) => paymentOrder.billingDate <= new Date()),
+                paymentOrders.filter((paymentOrder) => paymentOrder.state.isBilled()),
                 orders
             ),
         };
