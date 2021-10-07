@@ -59,7 +59,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
                 id: subscription.restriction?.id.value,
             },
             state: subscription.state.title,
-            customerName: customer.getPersonalInfo().fullName,
+            customerName: customer.getPersonalInfo().fullName || customer.email,
             restrictionComment: subscription.restrictionComment,
             amountDetails: {
                 subtotal: nextActiveOrder?.price,
