@@ -124,6 +124,7 @@ export class Order extends Entity<Order> {
     }
 
     public skip(paymentOrder: PaymentOrder): void {
+        if (this.isBilled()) throw new Error("No es posible saltar una orden que ya fue cobrada");
         const today = new Date();
 
         if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
