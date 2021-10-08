@@ -28,8 +28,8 @@ export class PlanVariant extends Entity<PlanVariant> {
         super(planVariantId);
         this._sku = sku;
         this._name = name;
-        this._price = Math.trunc(price * 100) / 100;
-        this._priceWithOffer = priceWithOffer ? Math.trunc(priceWithOffer * 100) / 100 : 0;
+        this._price = Math.round(price * 100) / 100;
+        this._priceWithOffer = priceWithOffer ? Math.round(priceWithOffer * 100) / 100 : 0;
         this._attributes = attributes;
         this._description = description;
         this._isDefault = isDefault;

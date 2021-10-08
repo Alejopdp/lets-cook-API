@@ -63,6 +63,7 @@ export class GetCustomerInformationAsAdminPresenter {
             active: order.isActive() || order.isBilled(),
             orderNumber: order.counter,
             isSkipped: order.isSkipped(),
+            state: order.state.title,
         }));
     }
 

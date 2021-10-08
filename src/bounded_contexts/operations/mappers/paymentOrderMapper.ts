@@ -13,16 +13,17 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
         const state: IPaymentOrderState = PaymentOrderStateFactory.createState(raw.state);
         const week: Week = weekMapper.toDomain(raw.week);
 
+        console.log("TO domin: ", raw.amount / 100);
         return new PaymentOrder(
             raw.shippingDate,
             state,
             raw.paymentIntentId,
             raw.billingDate,
             week,
-            // raw.amount / 100,
-            // raw.discountAmount / 100,
-            raw.amount,
-            raw.discountAmount,
+            raw.amount / 100,
+            raw.discountAmount / 100,
+            // raw.amount,
+            // raw.discountAmount,
             raw.shippingCost,
             new CustomerId(raw.customer),
             raw.quantityRefunded,
@@ -37,10 +38,10 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             paymentIntentId: t.paymentIntentId,
             billingDate: t.billingDate,
             week: t.week.id.value,
-            // amount: Math.trunc(t.amount * 100),
-            // discountAmount: Math.trunc(t.discountAmount * 100),
-            amount: t.amount,
-            discountAmount: t.discountAmount,
+            amount: Math.round(t.amount * 100),
+            discountAmount: Math.round(t.discountAmount * 100),
+            // amount: t.amount,
+            // discountAmount: t.discountAmount,
             _id: t.id.value,
             state: t.state.title,
             customer: t.customerId.value,

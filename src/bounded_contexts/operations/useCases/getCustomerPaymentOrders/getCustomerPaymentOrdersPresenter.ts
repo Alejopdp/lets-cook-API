@@ -13,6 +13,7 @@ export class GetCustomerPaymentOrdersPresenter {
                 state: order.state.title,
                 humanState: order.state.humanTitle,
                 ordersQty: countMap[order.id.value],
+                discountAmount: order.discountAmount,
             });
         }
 

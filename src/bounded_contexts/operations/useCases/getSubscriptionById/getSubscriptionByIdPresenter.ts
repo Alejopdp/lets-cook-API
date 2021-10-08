@@ -125,6 +125,7 @@ export class GetSubscriptionByIdPresenter {
             weekLabel: order.getWeekLabel(),
             shippingDate: order.getHumanShippmentDay(),
             isSkipped: order.isSkipped(),
+            state: order.state.title,
         }));
     }
 
