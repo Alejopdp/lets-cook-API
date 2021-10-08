@@ -62,7 +62,7 @@ export class StripeService implements IPaymentService {
     public async refund(paymentIntentId: string, amount: number): Promise<void> {
         const refund = await this.stripe.refunds.create({
             payment_intent: paymentIntentId,
-            amount: amount * 100,
+            amount: Math.trunc(amount * 100),
         });
     }
 

@@ -13,7 +13,6 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
         const state: IPaymentOrderState = PaymentOrderStateFactory.createState(raw.state);
         const week: Week = weekMapper.toDomain(raw.week);
 
-        console.log("TO domin: ", raw.amount / 100);
         return new PaymentOrder(
             raw.shippingDate,
             state,

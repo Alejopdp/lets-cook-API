@@ -193,6 +193,10 @@ export class Order extends Entity<Order> {
         return MomentTimeService.getDateHumanLabel(this.shippingDate);
     }
 
+    public getDdMmYyyyBillingDate(): string {
+        return MomentTimeService.getDdMmYyyy(this.billingDate);
+    }
+
     public getHumanBillingDay(): string {
         return MomentTimeService.getDateHumanLabel(this.billingDate);
     }
