@@ -149,8 +149,12 @@ export class Coupon extends Entity<Coupon> {
         return this.type.type === "free";
     }
 
+    public hasStarted(): boolean {
+        return this.startDate < new Date();
+    }
+
     public isExpiredByEndDate(): boolean {
-        return !!this.endDate && new Date() < this.endDate;
+        return !!this.endDate && new Date() > this.endDate;
     }
 
     public addApplication(customerApplying: Customer): void {

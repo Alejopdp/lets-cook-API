@@ -37,7 +37,12 @@ export class GetCustomerInformationAsAdminPresenter {
                 paymentOrders
             ),
             paymentOrders: this.presentPaymentOrders(
-                paymentOrders.filter((paymentOrder) => paymentOrder.state.isBilled()),
+                paymentOrders.filter(
+                    (paymentOrder) =>
+                        paymentOrder.state.isBilled() ||
+                        paymentOrder.state.title === "PAYMENT_ORDER_REFUNDED" ||
+                        paymentOrder.state.title === "PAYMENT_ORDER_PARTIALLY_REFUNDED"
+                ),
                 orders
             ),
         };

@@ -235,7 +235,7 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getNextActiveOrder(orders: Order[] = []): Order | undefined {
-        return orders.find((order) => order.isActive() || order.isBilled()); // TO DO: It works if orders is sorted ASC
+        return orders.find((order) => order.isActive()); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextOrderToShip(orders: Order[] = []): Order | undefined {

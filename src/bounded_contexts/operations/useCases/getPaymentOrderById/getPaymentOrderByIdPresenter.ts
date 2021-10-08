@@ -27,7 +27,10 @@ export class GetPaymentOrderByIdPresenter {
             orders: presentedOrders,
             totalAmount: Math.round((paymentOrder.getTotalAmount() + Number.EPSILON) * 100) / 100,
             subtotal: paymentOrder.amount,
-            taxes: paymentOrder.shippingCost / (1 + 0.21) + paymentOrder.amount / (1 + 0.1),
+            taxes:
+                paymentOrder.shippingCost +
+                paymentOrder.amount -
+                (paymentOrder.shippingCost / (1 + 0.21) + paymentOrder.amount / (1 + 0.1)),
             paymentIntentId: paymentOrder.paymentIntentId,
             quantityRefunded: paymentOrder.quantityRefunded,
         };

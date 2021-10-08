@@ -64,7 +64,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
             amountDetails: {
                 subtotal: nextActiveOrder?.price,
                 shippingCost: nextPaymentOrder?.shippingCost,
-                discount: "add to subscription",
+                discount: subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
                 taxes: 6,
                 total: nextActiveOrder?.getTotalPrice(),
             },
@@ -74,7 +74,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
             // billingData,
             paymentMethod: presentedPaymentMethod?.cardLabel,
             schedule,
-            nextBillingDate: nextActiveOrder?.getDdMmYyyyShipmentDate(),
+            nextBillingDate: nextActiveOrder?.getDdMmYyyyBillingDate(),
             paymentMehod: customer.getDefaultPaymentMethodCardLabel(),
             hasChosenRecipesForActualWeek,
             hasChosenRecipesForNextWeek,
