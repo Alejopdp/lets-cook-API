@@ -33,7 +33,8 @@ export class GetCustomerInformationAsAdminPresenter {
             orders: this.presentOrders(
                 orders
                     .filter((order) => order.shippingDate >= new Date() && (order.isActive() || order.isSkipped() || order.isBilled()))
-                    .sort((order1, order2) => (order1.shippingDate > order2.shippingDate ? 1 : -1))
+                    .sort((order1, order2) => (order1.shippingDate > order2.shippingDate ? 1 : -1)),
+                paymentOrders
             ),
             paymentOrders: this.presentPaymentOrders(
                 paymentOrders.filter((paymentOrder) => paymentOrder.state.isBilled()),
@@ -53,7 +54,12 @@ export class GetCustomerInformationAsAdminPresenter {
         }));
     }
 
-    public presentOrders(orders: Order[]): any {
+    public presentOrders(orders: Order[], paymentOrders: PaymentOrder[]): any {
+        const paymentOrderMap: { [key: string]: PaymentOrder } = {};
+        for (let paymentOrder of paymentOrders) {
+            paymentOrderMap[paymentOrder.id.value] = paymentOrder;
+        }
+
         return orders.map((order) => ({
             id: order.id.value,
             date: order.getDdMmYyyyShipmentDate(),
@@ -64,6 +70,7 @@ export class GetCustomerInformationAsAdminPresenter {
             orderNumber: order.counter,
             isSkipped: order.isSkipped(),
             state: order.state.title,
+            isSkippable: paymentOrderMap[order.paymentOrderId?.value || ""].state.isActive(),
         }));
     }
 
