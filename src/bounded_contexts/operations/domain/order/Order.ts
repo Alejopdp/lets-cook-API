@@ -251,7 +251,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfPersons
                 ? //@ts-ignore
-                  (this.discountAmount * 100) / planVariant.numberOfPersons / 100
+                  Math.round(this.discountAmount * 100) / planVariant.numberOfPersons / 100
                 : this.discountAmount
         );
     }
@@ -264,8 +264,8 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfPersons
                 ? //@ts-ignore
-                  (this.getTotalPrice() * 100 - this.discountAmount * 100) / planVariant.numberOfPersons / 100
-                : (this.getTotalPrice() * 100 - this.discountAmount * 100) / 100
+                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfPersons / 100
+                : (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / 100
         );
     }
 

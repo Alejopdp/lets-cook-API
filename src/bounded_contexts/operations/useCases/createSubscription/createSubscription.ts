@@ -169,7 +169,7 @@ export class CreateSubscription {
 
         const paymentIntent = await this.paymentService.paymentIntent(
             hasFreeShipping
-                ? (newPaymentOrders[0].getTotalAmount() * 100 - customerShippingZone.cost * 100) / 100
+                ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
                 : newPaymentOrders[0].getTotalAmount(),
             dto.stripePaymentMethodId
                 ? dto.stripePaymentMethodId

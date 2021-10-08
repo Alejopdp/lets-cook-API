@@ -111,8 +111,11 @@ export class PayAllSubscriptions {
                         (order) => order.hasFreeShipping
                     );
                     const totalAmount = customerHasFreeShipping
-                        ? (paymentOrderToBill.amount * 100 - paymentOrderToBill.discountAmount * 100) / 100
-                        : (paymentOrderToBill.amount * 100 - paymentOrderToBill.discountAmount * 100 + shippingCost * 100) / 100;
+                        ? (Math.round(paymentOrderToBill.amount * 100) - Math.round(paymentOrderToBill.discountAmount * 100)) / 100
+                        : (Math.round(paymentOrderToBill.amount * 100) -
+                              Math.round(paymentOrderToBill.discountAmount * 100) +
+                              Math.round(shippingCost * 100)) /
+                          100;
 
                     const paymentIntent = await this.paymentService.paymentIntent(
                         totalAmount,
@@ -187,8 +190,14 @@ export class PayAllSubscriptions {
             }
 
             for (let billingDateAndOrders of Object.entries(billingDateOrdersMap)) {
-                const ordersAmount = billingDateAndOrders[1].reduce((acc, order) => (acc * 100 + order.getTotalPrice() * 100) / 100, 0); // TO DO: Use coupons, probably need to pass orders to a subscription
-                const ordersDiscount = billingDateAndOrders[1].reduce((acc, order) => (acc * 100 + order.discountAmount * 100) / 100, 0); // TO DO: Use coupons, probably need to pass orders to a subscription
+                const ordersAmount = billingDateAndOrders[1].reduce(
+                    (acc, order) => (Math.round(acc * 100) + Math.round(order.getTotalPrice() * 100)) / 100,
+                    0
+                ); // TO DO: Use coupons, probably need to pass orders to a subscription
+                const ordersDiscount = billingDateAndOrders[1].reduce(
+                    (acc, order) => (Math.round(acc * 100) + Math.round(order.discountAmount * 100)) / 100,
+                    0
+                ); // TO DO: Use coupons, probably need to pass orders to a subscription
 
                 const newPaymentOrder = new PaymentOrder(
                     new Date(),
