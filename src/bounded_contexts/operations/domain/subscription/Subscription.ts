@@ -51,7 +51,7 @@ export class Subscription extends Entity<Subscription> {
         super(subscriptionId);
         this._planVariantId = planVariantId;
         this._plan = plan;
-        this._price = Math.trunc(price * 100) / 100;
+        this._price = Math.round(price * 100) / 100;
         this._frequency = frequency;
         this._state = state;
         this._restriction = restriction;
@@ -119,7 +119,7 @@ export class Subscription extends Entity<Subscription> {
                         this.customer
                     )
                 );
-
+                console.log("Coupon discount in createNewOrders: ", this.getCouponDiscount(shippingZone.cost));
                 if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
                 deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
             }

@@ -156,7 +156,6 @@ export class Coupon extends Entity<Coupon> {
     public addApplication(customerApplying: Customer): void {
         const applicationLimit: number | undefined = this.limites.find((limit) => limit.type === "limit_qty")?.value;
         this.quantityApplied = this.quantityApplied + 1;
-        console.log("QUANTITY APPLIED: ", this.quantityApplied);
         if (this.quantityApplied === applicationLimit) this.updateState(CouponState.UNAVAILABLE);
         if (this.customersWhoHaveApplied.some((customerId) => customerId.equals(customerApplying.id))) return;
         else this.customersWhoHaveApplied = [...this.customersWhoHaveApplied, customerApplying.id];

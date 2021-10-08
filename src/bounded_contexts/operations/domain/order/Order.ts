@@ -65,8 +65,8 @@ export class Order extends Entity<Order> {
         this._week = week;
         this._planVariantId = planVariantId;
         this._plan = plan;
-        this._price = Math.trunc(price * 100) / 100;
-        this._discountAmount = Math.trunc(discountAmount * 100) / 100;
+        this._price = Math.round(price * 100) / 100;
+        this._discountAmount = Math.round(discountAmount * 100) / 100;
         this._hasFreeShipping = hasFreeShipping;
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;

@@ -38,9 +38,9 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._paymentIntentId = paymentIntentId;
         this._billingDate = billingDate;
         this._week = week;
-        this._amount = Math.trunc(amount * 100) / 100;
-        this._discountAmount = Math.trunc(discountAmount * 100) / 100;
-        this._shippingCost = Math.trunc(shippingCost * 100) / 100;
+        this._amount = Math.round(amount * 100) / 100;
+        this._discountAmount = Math.round(discountAmount * 100) / 100;
+        this._shippingCost = Math.round(shippingCost * 100) / 100;
         this._customerId = customerId;
         this._quantityRefunded = quantityRefunded;
     }
@@ -48,16 +48,25 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     public addOrder(order: Order): void {
         order.paymentOrderId = this.id;
         if (this.state.isPendingConfirmation()) return;
-
-        this.amount = (this.amount * 100 + order.price * 100) / 100; // TO DO: Add price with discount
-        this.discountAmount = (this.discountAmount * 100 + order.discountAmount * 100) / 100; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+        console.log("**** Adding order ****");
+        console.log("Payment order amount: ", Math.round(this.amount * 100));
+        console.log("ADding the order price: ", Math.round(order.getTotalPrice() * 100));
+        console.log("Result: ", Math.round(this.amount * 100) + Math.round(order.getTotalPrice() * 100));
+        console.log("Result con coma: ", (Math.round(this.amount * 100) + Math.round(order.getTotalPrice() * 100)) / 100);
+        this.amount = (Math.round(this.amount * 100) + Math.round(order.getTotalPrice() * 100)) / 100; // TO DO: Add price with discount
+        this.discountAmount = (Math.round(this.discountAmount * 100) + Math.round(order.discountAmount * 100)) / 100; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
 
         if (this.state.isCancelled()) this.state.toActive(this);
     }
 
     public discountOrderAmount(order: Order): void {
-        this.amount = (this.amount * 100 - order.getTotalPrice() * 100) / 100;
-        this.discountAmount = (this.discountAmount * 100 - order.discountAmount * 100) / 100;
+        console.log("**** Discounting order ****");
+        console.log("Payment order amount: ", Math.round(this.amount * 100));
+        console.log("Discounting the order price: ", Math.round(order.getTotalPrice() * 100));
+        console.log("Result: ", Math.round(this.amount * 100) - Math.round(order.getTotalPrice() * 100));
+        console.log("Result con coma: ", (Math.round(this.amount * 100) - Math.round(order.getTotalPrice() * 100)) / 100);
+        this.amount = (Math.round(this.amount * 100) - Math.round(order.getTotalPrice() * 100)) / 100;
+        this.discountAmount = (Math.round(this.discountAmount * 100) - Math.round(order.discountAmount * 100)) / 100;
 
         if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
     }
@@ -125,7 +134,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     public getTotalAmount(): number {
-        return (this.amount * 100 + this.shippingCost * 100 - this.discountAmount * 100) / 100;
+        return (Math.round(this.amount * 100) + this.shippingCost * 100 - Math.round(this.discountAmount * 100)) / 100;
     }
 
     public refund(amount: number): void {

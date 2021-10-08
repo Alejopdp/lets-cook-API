@@ -32,7 +32,6 @@ export class UpdatePlanController extends BaseController {
                 planImageFileName = this.req.file.originalname;
             }
 
-            console.log("EL BODY QUE ME LLEGA: ", this.req.body);
             const dto: UpdatePlanDto = {
                 id: this.req.params.id,
                 planName: this.req.body.name,
