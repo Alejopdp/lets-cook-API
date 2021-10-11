@@ -33,6 +33,7 @@ export class GetPaymentOrdersAsAdminPresenter {
             id: paymentOrder.id.value,
             billingDate: paymentOrder.getDdMmYyyyBillingDate(),
             customerName: customer.getPersonalInfo()?.fullName,
+            customerEmail: customer.email,
             customerId: customer.id.value,
             state: paymentOrder.state.title,
             amount: paymentOrder.getTotalAmount(),
