@@ -74,11 +74,17 @@ export class ShippingZone extends Entity<ShippingZone> {
         return this.shippingDayOfWeek.dayNumberOfWeek;
     }
 
+    private getDifferenceDaysBetweenTodayAndShippingDate(): number {
+        var today: Date = new Date();
+
+        return this.getDayNumberOfWeek() - today.getDay();
+    }
+
     public nextShippingDate(): Date {
         var today: Date = new Date();
         // today.setDate(today.getDate() + 5); // Testing days
         const deliveryDate: Date = new Date(today.getFullYear(), today.getMonth());
-        const differenceInDays = this.getDayNumberOfWeek() - today.getDay();
+        const differenceInDays = this.getDifferenceDaysBetweenTodayAndShippingDate();
 
         deliveryDate.setDate(today.getDate() + differenceInDays); // Delivery day of this week
 
@@ -92,7 +98,12 @@ export class ShippingZone extends Entity<ShippingZone> {
     public shippingDateHasToSkipWeek(): boolean {
         var today: Date = new Date();
 
-        return today.getDay() >= this.getDayNumberOfWeek();
+        return (
+            today.getDay() >= this.getDayNumberOfWeek() ||
+            today.getDay() === 0 ||
+            today.getDay() === 6 ||
+            (today.getDay() < this.getDayNumberOfWeek() && this.getDifferenceDaysBetweenTodayAndShippingDate() <= 2)
+        );
     }
 
     public getHumanNextShippingDate(): string {

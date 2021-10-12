@@ -57,14 +57,11 @@ export class ExportNextOrdersWithRecipesSelection {
 
         const subscriptionsIds: SubscriptionId[] = [];
         const paymentOrdersIds: PaymentOrderId[] = [];
-        const customersQuantityOfRecipeSelectionMap: { [customerId: string]: number } = {};
 
         for (let order of orders) {
             if (!!!order.paymentOrderId) console.log(`The order ${order.id.value} does not have a payment order`);
             subscriptionsIds.push(order.subscriptionId);
             paymentOrdersIds.push(order.paymentOrderId!);
-            customersQuantityOfRecipeSelectionMap[order.customer.id.value] =
-                (customersQuantityOfRecipeSelectionMap[order.customer.id.value] || 0) + order.getNumberOfRecipesOrReturn0();
         }
 
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(subscriptionsIds);
