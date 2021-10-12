@@ -13,8 +13,9 @@ export class GetCouponListPresenter {
                 stripeId: customer.stripeId,
                 state: customer.state,
                 fullName: customer.personalInfo?.name ? `${customer.personalInfo.name} ${customer.personalInfo.lastName}` : "N/A",
-                firstName: customer.personalInfo?.name || "",
-                lastName: customer.personalInfo?.lastName || "",
+                firstName: customer.personalInfo?.name || "N/A",
+                lastName: customer.personalInfo?.lastName || "N/A",
+                phone1: customer.personalInfo?.phone1 || "N/A",
 
                 payment_methods: customer.paymentMethods.map((payment: PaymentMethod) => {
                     return {

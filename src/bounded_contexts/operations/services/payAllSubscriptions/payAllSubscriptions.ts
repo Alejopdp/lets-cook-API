@@ -41,8 +41,9 @@ export class PayAllSubscriptions {
     }
 
     public async execute(): Promise<void> {
-        const today: Date = new Date(2021, 9, 9);
-        // const today: Date = new Date();
+        // const today: Date = new Date(2021, 9, 23);
+        logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
+        const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
@@ -96,19 +97,25 @@ export class PayAllSubscriptions {
             subscriptionOrderMap[order.subscriptionId.value] = order;
         }
 
+        logger.info(`${ordersToBill.length} orders to process`);
+
         // PAYMENT ORDERS BILLING
         for (let paymentOrderToBill of paymentOrdersToBill) {
             if (paymentOrderToBill.state.title === "PAYMENT_ORDER_ACTIVE") {
                 const paymentOrderId: string = paymentOrderToBill.id.value as string;
                 try {
+                    logger.info(`Starting payment order ${paymentOrderId} processing`);
                     const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
                     const shippingCost = customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost || 0;
                     const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some(
                         (order) => order.hasFreeShipping
                     );
                     const totalAmount = customerHasFreeShipping
-                        ? paymentOrderToBill.amount - paymentOrderToBill.discountAmount
-                        : paymentOrderToBill.amount - paymentOrderToBill.discountAmount + shippingCost;
+                        ? (Math.round(paymentOrderToBill.amount * 100) - Math.round(paymentOrderToBill.discountAmount * 100)) / 100
+                        : (Math.round(paymentOrderToBill.amount * 100) -
+                              Math.round(paymentOrderToBill.discountAmount * 100) +
+                              Math.round(shippingCost * 100)) /
+                          100;
 
                     const paymentIntent = await this.paymentService.paymentIntent(
                         totalAmount,
@@ -119,15 +126,21 @@ export class PayAllSubscriptions {
 
                     // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
                     if (paymentIntent.status === "succeeded") {
+                        logger.info(`${paymentOrderId} processing succeeded`);
                         paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId]);
                     } else {
+                        logger.info(`${paymentOrderId} processing failed`);
                         paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
                     }
 
                     paymentOrderToBill.paymentIntentId = paymentIntent.id;
                 } catch (error) {
-                    ordersWithError.push();
+                    //@ts-ignore
+                    logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
+                    paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
                 }
+            } else {
+                logger.info(`Skipping payment order ${paymentOrderToBill.id.value} due to state ${paymentOrderToBill.state.title}`);
             }
         }
 
@@ -145,7 +158,8 @@ export class PayAllSubscriptions {
             } else if (
                 baseOrderForCreatingThe12Order.isActive() ||
                 baseOrderForCreatingThe12Order.isSkipped() ||
-                baseOrderForCreatingThe12Order.isPaymentRejected()
+                baseOrderForCreatingThe12Order.isPaymentRejected() ||
+                baseOrderForCreatingThe12Order.isBilled()
             ) {
                 const newOrder = subscription.getNewOrderAfterBilling(
                     subscriptionOrderMap[subscriptionIdValue],
@@ -176,8 +190,14 @@ export class PayAllSubscriptions {
             }
 
             for (let billingDateAndOrders of Object.entries(billingDateOrdersMap)) {
-                const ordersAmount = billingDateAndOrders[1].reduce((acc, order) => acc + order.getTotalPrice(), 0); // TO DO: Use coupons, probably need to pass orders to a subscription
-                const ordersDiscount = billingDateAndOrders[1].reduce((acc, order) => acc + order.discountAmount, 0); // TO DO: Use coupons, probably need to pass orders to a subscription
+                const ordersAmount = billingDateAndOrders[1].reduce(
+                    (acc, order) => (Math.round(acc * 100) + Math.round(order.getTotalPrice() * 100)) / 100,
+                    0
+                ); // TO DO: Use coupons, probably need to pass orders to a subscription
+                const ordersDiscount = billingDateAndOrders[1].reduce(
+                    (acc, order) => (Math.round(acc * 100) + Math.round(order.discountAmount * 100)) / 100,
+                    0
+                ); // TO DO: Use coupons, probably need to pass orders to a subscription
 
                 const newPaymentOrder = new PaymentOrder(
                     new Date(),
@@ -196,12 +216,18 @@ export class PayAllSubscriptions {
             }
         }
 
+        logger.info(`${paymentOrdersToBill.filter((po) => po.state.isBilled()).length} processed succesfully`);
+        logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).length} with payment rejected`);
+        logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).map((po) => po.id.value)}`);
+
         // await this.orderRepository.saveOrdersWithNewState(ordersToBill);
         await this.orderRepository.updateMany(ordersToBill);
         await this.orderRepository.bulkSave(newOrders);
         await this.paymentOrderRepository.updateMany(paymentOrdersToBill);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         await this.customerRepository.updateMany(customers);
+
+        logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
     }
 
     /**

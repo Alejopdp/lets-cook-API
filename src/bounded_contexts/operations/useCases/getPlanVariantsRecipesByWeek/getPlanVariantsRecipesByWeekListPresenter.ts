@@ -136,6 +136,8 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                 numberOfRecipes: variant.numberOfRecipes,
                 attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
                 label: variant.getLabel(),
+                isDefault: variant.isDefault,
+                isDeleted: variant.isDeleted,
             };
         } else {
             return {
@@ -144,6 +146,8 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                 price: variant.price,
                 priceWithOffer: variant.priceWithOffer,
                 attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
+                isDefault: variant.isDefault,
+                isDeleted: variant.isDeleted,
             };
         }
     }

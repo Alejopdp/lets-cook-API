@@ -65,8 +65,8 @@ export class Order extends Entity<Order> {
         this._week = week;
         this._planVariantId = planVariantId;
         this._plan = plan;
-        this._price = price;
-        this._discountAmount = discountAmount;
+        this._price = Math.round(price * 100) / 100;
+        this._discountAmount = Math.round(discountAmount * 100) / 100;
         this._hasFreeShipping = hasFreeShipping;
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;
@@ -104,6 +104,10 @@ export class Order extends Entity<Order> {
         return this.state.isActive();
     }
 
+    public isBilled(): boolean {
+        return this.state.isBilled();
+    }
+
     public isSkipped(): boolean {
         return this.state.isSkipped();
     }
@@ -119,14 +123,21 @@ export class Order extends Entity<Order> {
         return this.state.isPaymentRejected();
     }
 
-    public skip(): void {
+    public skip(paymentOrder: PaymentOrder): void {
+        if (this.isBilled()) throw new Error("No es posible saltar una orden que ya fue cobrada");
         const today = new Date();
 
         if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
+        paymentOrder.discountOrderAmount(this);
+
         this.state.toSkipped(this);
     }
 
-    public reactivate(): void {
+    public reactivate(paymentOrder: PaymentOrder): void {
+        const today = new Date();
+
+        if (today > this.shippingDate) throw new Error("No es posible reaundar una orden pasada");
+        paymentOrder.addOrder(this);
         this.state.toActive(this);
     }
 
@@ -148,12 +159,19 @@ export class Order extends Entity<Order> {
     }
 
     public cancel(paymentOrder?: PaymentOrder): void {
-        if (paymentOrder && !this.isCancelled()) {
-            paymentOrder.discountOrderAmount(this);
+        // if (paymentOrder && (this.isActive() || this.isPaymentPending())) {
+        if (paymentOrder && this.isActive()) {
+            paymentOrder.discountOrderAmount(this); // Cancels payment ordeer if amount === 0
         }
 
-        if (paymentOrder && paymentOrder.amount === 0) paymentOrder.toCancelled([]);
+        // if (
+        //     paymentOrder &&
+        //     paymentOrder.amount === 0 &&
+        //     (paymentOrder.state.title === "PAYMENT_ORDER_ACTIVE" || paymentOrder.state.title === "PAYMENT_ORDER_PENDING_CONFIRMATION")
+        // )
+        //     paymentOrder.toCancelled([]);
 
+        if (this.state.title === "ORDER_BILLED") return;
         this.state.toCancelled(this);
     }
 
@@ -174,6 +192,10 @@ export class Order extends Entity<Order> {
     }
     public getHumanShippmentDay(): string {
         return MomentTimeService.getDateHumanLabel(this.shippingDate);
+    }
+
+    public getDdMmYyyyBillingDate(): string {
+        return MomentTimeService.getDdMmYyyy(this.billingDate);
     }
 
     public getHumanBillingDay(): string {
@@ -234,7 +256,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfPersons
                 ? //@ts-ignore
-                  this.discountAmount / planVariant.numberOfPersons
+                  Math.round(this.discountAmount * 100) / planVariant.numberOfPersons / 100
                 : this.discountAmount
         );
     }
@@ -247,8 +269,8 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfPersons
                 ? //@ts-ignore
-                  (this.getTotalPrice() - this.discountAmount) / planVariant.numberOfPersons
-                : this.getTotalPrice() - this.discountAmount
+                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfPersons / 100
+                : (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / 100
         );
     }
 
@@ -261,17 +283,17 @@ export class Order extends Entity<Order> {
     }
 
     public isActualWeek(): boolean {
-        const date: Date = new Date();
+        const today: Date = new Date();
         const auxMinDay = new Date(this.week.minDay);
         auxMinDay.setDate(auxMinDay.getDate() - 1);
 
-        return date >= auxMinDay && date <= this.week.maxDay;
+        return today >= auxMinDay && today <= this.week.maxDay;
     }
 
     public isInTimeToChooseRecipes(): boolean {
         const today = new Date();
         const fridayAt2359: Date = new Date(today.getFullYear(), today.getMonth());
-        const differenceInDays = 5 - today.getDay();
+        const differenceInDays = 5 - today.getDay(); // 5 === day number of Friday
 
         fridayAt2359.setDate(today.getDate() + differenceInDays); // Delivery day of this week
         fridayAt2359.setHours(23, 59, 59);
@@ -285,18 +307,18 @@ export class Order extends Entity<Order> {
         return (
             today < fridayAt2359 &&
             todayWithDummyHours < weekMinDayWithDummyHours &&
-            (this.isActive() || this.state.title === "ORDER_BILLED") &&
+            (this.isActive() || this.isBilled()) &&
             this.isNextWeek()
         );
     }
 
     public isNextWeek(): boolean {
-        const date: Date = new Date();
+        const today: Date = new Date();
         const auxMinDay = new Date(this.week.minDay);
         auxMinDay.setDate(auxMinDay.getDate() - 1);
-        const minDayDifferenceInDays = (auxMinDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
+        const minDayDifferenceInDays = (auxMinDay.getTime() - today.getTime()) / (1000 * 3600 * 24);
 
-        return minDayDifferenceInDays < 7 && date <= auxMinDay;
+        return minDayDifferenceInDays < 7 && today <= auxMinDay;
     }
     /**
      * Getter shippingDate

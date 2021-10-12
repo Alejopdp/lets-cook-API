@@ -14,7 +14,7 @@ export class PaymentOrderPartiallyRefunded implements IPaymentOrderState {
 
     constructor() {
         this.title = "PAYMENT_ORDER_PARTIALLY_REFUNDED";
-        this.humanTitle = "Activa";
+        this.humanTitle = "Orden parcialmente reembolsada";
         this.color = "green";
     }
 
@@ -46,7 +46,7 @@ export class PaymentOrderPartiallyRefunded implements IPaymentOrderState {
     }
 
     public isActive(): boolean {
-        return true;
+        return false;
     }
 
     public isBilled(): boolean {
