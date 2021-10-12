@@ -30,6 +30,7 @@ export class GetOrderByIdPresenter {
             planIcon,
             paymentOrderId: paymentOrder.id.value,
             amount: order.getTotalPrice(),
+            couponCode: order.discountAmount > 0 ? subscription.coupon?.couponCode : undefined,
             //@ts-ignore
             numberOfRecipes: order.plan.getPlanVariantById(order.planVariantId)?.numberOfRecipes || 0,
             customerName: customer.getPersonalInfo().fullName,
