@@ -119,7 +119,7 @@ export class ReorderPlan {
         } else if (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled") {
             throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
         } else {
-            newPaymentOrders[0]?.toBilled(orders);
+            newPaymentOrders[0]?.toBilled(orders, subscription.customer);
         }
 
         // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();

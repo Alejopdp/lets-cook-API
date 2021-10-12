@@ -25,12 +25,14 @@ export class Customer extends Entity<Customer> {
     private _state?: string;
     private _codeToRecoverPassword?: string;
     private _personalInfo?: PersonalInfo;
+    private _receivedOrdersQuantity: number;
 
     protected constructor(
         email: string,
         isEmailVerified: boolean,
         stripeId: string,
         paymentMethods: PaymentMethod[],
+        receivedOrdersQuantity: number,
         shippingAddress?: Address,
         billingAddress?: Billing,
         password?: UserPassword,
@@ -44,6 +46,7 @@ export class Customer extends Entity<Customer> {
         this._isEmailVerified = isEmailVerified;
         this._stripeId = stripeId;
         this._paymentMethods = paymentMethods;
+        this._receivedOrdersQuantity = receivedOrdersQuantity;
         this._shippingAddress = shippingAddress;
         this._billingAddress = billingAddress;
         this._password = password;
@@ -57,6 +60,7 @@ export class Customer extends Entity<Customer> {
         isEmailVerified: boolean,
         stripeId: string,
         paymentMethods: PaymentMethod[],
+        receivedOrdersQuantity: number,
         shippingAddress?: Address,
         billingAddress?: Billing,
         password?: UserPassword,
@@ -70,6 +74,7 @@ export class Customer extends Entity<Customer> {
             isEmailVerified,
             stripeId,
             paymentMethods,
+            receivedOrdersQuantity,
             shippingAddress,
             billingAddress,
             password,
@@ -206,6 +211,10 @@ export class Customer extends Entity<Customer> {
         }
     }
 
+    public countOneReceivedOrder(): void {
+        this.receivedOrdersQuantity = this.receivedOrdersQuantity + 1;
+    }
+
     public getShippingAddress(locale: Locale = Locale.es): {
         name?: string;
         details?: string;
@@ -334,6 +343,14 @@ export class Customer extends Entity<Customer> {
     }
 
     /**
+     * Getter receivedOrdersQuantity
+     * @return {number}
+     */
+    public get receivedOrdersQuantity(): number {
+        return this._receivedOrdersQuantity;
+    }
+
+    /**
      * Getter shippingAddress
      * @return {Address | undefined}
      */
@@ -411,6 +428,14 @@ export class Customer extends Entity<Customer> {
      */
     public set codeToRecoverPassword(value: string | undefined) {
         this._codeToRecoverPassword = value;
+    }
+
+    /**
+     * Setter receivedOrdersQuantity
+     * @param {number} value
+     */
+    public set receivedOrdersQuantity(value: number) {
+        this._receivedOrdersQuantity = value;
     }
 
     /**

@@ -153,8 +153,12 @@ export class Order extends Entity<Order> {
         return this.week.getLabel();
     }
 
-    public bill(): void {
+    public bill(customer?: Customer): void {
         this.state.toBilled(this);
+        if (!!customer) {
+            customer.countOneReceivedOrder();
+            console.log("Updated customer: ", customer.receivedOrdersQuantity);
+        }
     }
 
     public cancel(paymentOrder?: PaymentOrder): void {

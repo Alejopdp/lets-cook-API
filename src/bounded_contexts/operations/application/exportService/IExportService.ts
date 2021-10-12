@@ -47,6 +47,7 @@ export interface OrdersWithRecipeSelectionExport {
     finalKitPrice: number;
     finalPortionPrice: number;
     recipeDivision: number;
+    recivedOrdersQuantity: number;
 }
 
 export interface SubscriptionExport {

@@ -166,7 +166,7 @@ export class CreateManySubscriptions {
         if (paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
         } else {
-            newPaymentOrders[0]?.toBilled(orders);
+            newPaymentOrders[0]?.toBilled(orders, customer);
         }
 
         const subscriptions: Subscription[] = _.flatten(frequencySusbcriptionEntries.map((entry) => entry[1]));
@@ -175,7 +175,7 @@ export class CreateManySubscriptions {
         // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.bulkSave(subscriptions);
         await this.orderRepository.bulkSave(orders);
-        // await this.customerRepository.save(customer);
+        await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
