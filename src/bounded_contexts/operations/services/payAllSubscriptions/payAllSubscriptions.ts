@@ -127,7 +127,7 @@ export class PayAllSubscriptions {
                     // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
                     if (paymentIntent.status === "succeeded") {
                         logger.info(`${paymentOrderId} processing succeeded`);
-                        paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId]);
+                        paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
                     } else {
                         logger.info(`${paymentOrderId} processing failed`);
                         paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);

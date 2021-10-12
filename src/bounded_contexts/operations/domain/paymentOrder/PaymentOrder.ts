@@ -1,6 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CustomerId } from "../customer/CustomerId";
+import { Customer } from "../customer/Customer";
 import { Order } from "../order/Order";
 import { Week } from "../week/Week";
 import { PaymentOrderId } from "./PaymentOrderId";
@@ -83,9 +84,9 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         return MomentTimeService.getDdMmYyyy(this.billingDate);
     }
 
-    public toBilled(orders: Order[]): void {
+    public toBilled(orders: Order[], customer?: Customer): void {
         for (let order of orders) {
-            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(); // TO DO: Handle this?
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(customer); // TO DO: Handle this?
         }
 
         this.state.toBilled(this);

@@ -135,9 +135,7 @@ export class ExportNextOrdersWithRecipesSelection {
                     finalKitPrice: order.getFinalKitPrice(),
                     finalPortionPrice: order.getFinalPortionPrice(),
                     recipeDivision: 1,
-                    // customersQuantityOfRecipeSelectionMap[order.customer.id.value] === 0
-                    //     ? 0
-                    //     : 1 / customersQuantityOfRecipeSelectionMap[order.customer.id.value],
+                    recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
                 });
             }
 
@@ -194,9 +192,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         finalKitPrice: order.getFinalKitPrice(),
                         finalPortionPrice: order.getFinalPortionPrice(),
                         recipeDivision: !!order.getNumberOfRecipesOrReturn0() ? 1 / order.getNumberOfRecipesOrReturn0() : 1,
-                        // customersQuantityOfRecipeSelectionMap[order.customer.id.value] === 0
-                        //     ? 0
-                        //     : 1 / customersQuantityOfRecipeSelectionMap[order.customer.id.value],
+                        recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
                     });
                 }
             }
@@ -259,6 +255,7 @@ export class ExportNextOrdersWithRecipesSelection {
                     finalKitPrice: 0,
                     finalPortionPrice: 0,
                     recipeDivision: 0,
+                    recivedOrdersQuantity: customer.receivedOrdersQuantity,
                 });
             }
         }

@@ -25,6 +25,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         billingAddress: customerDb.billingAddress,
                         paymentMethods: customerDb.paymentMethods,
                         personalInfo: customerDb.personalInfo,
+                        receivedOrdersQuantity: customerDb.receivedOrdersQuantity,
                     },
                 }
             );
