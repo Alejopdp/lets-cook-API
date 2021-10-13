@@ -7,6 +7,7 @@ import { getCouponByIdController } from "../../useCases/getCouponById";
 import { getCouponListController } from "../../useCases/getCouponList";
 import { getCouponValidationController } from "../../useCases/couponValidation";
 import { updateCouponStateController } from "../../useCases/updateCouponState";
+import { exportCouponsController } from "../../useCases/exportCoupons";
 
 const couponRouter = express.Router();
 
@@ -25,5 +26,6 @@ couponRouter.put("/:id", multer(options).single(""), (req, res) => updateCouponS
 // POSTs
 couponRouter.post("/", multer(options).single(""), (req, res) => createCouponController.execute(req, res));
 couponRouter.post("/import", multer(options).single("coupons"), (req, res) => createCouponControllerCSV.execute(req, res));
+couponRouter.post("/export", (req, res) => exportCouponsController.execute(req, res));
 
 export { couponRouter };
