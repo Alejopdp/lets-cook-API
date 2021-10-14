@@ -46,6 +46,7 @@ export class GetCustomerSubscriptionsPresenter {
                 presentedPrincipalSubscriptions.push({
                     id: subscription.id.value,
                     planId: subscription.plan.id.value,
+                    planVariantPrice: subscription.price,
                     planVariantId: subscription.planVariantId.value,
                     planName: subscription.plan.name,
                     planVariantLabel: subscription.getPlanVariantLabel() || "4 recetas para 3 personas",
