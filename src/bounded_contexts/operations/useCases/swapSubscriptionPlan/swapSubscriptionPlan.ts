@@ -63,6 +63,7 @@ export class SwapSubscriptionPlan {
                 : undefined;
 
             for (let paymentOrder of paymentOrders) {
+                if (paymentOrder.state.isBilled()) continue;
                 paymentOrder.amount =
                     (Math.round(paymentOrder.amount * 100) -
                         Math.round(oldSubscriptionPrice * 100) +
