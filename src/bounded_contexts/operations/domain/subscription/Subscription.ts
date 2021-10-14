@@ -119,7 +119,6 @@ export class Subscription extends Entity<Subscription> {
                         this.customer
                     )
                 );
-                console.log("Coupon discount in createNewOrders: ", this.getCouponDiscount(shippingZone.cost));
                 if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
                 deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
             }
@@ -224,6 +223,9 @@ export class Subscription extends Entity<Subscription> {
         this.state.toCancelled(this);
     }
 
+    public isActive(): boolean {
+        return this.state.isActive();
+    }
     public getPlanVariantLabel(): string {
         return this.plan.getPlanVariantLabel(this.planVariantId);
     }

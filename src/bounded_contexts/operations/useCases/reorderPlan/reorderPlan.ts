@@ -100,12 +100,12 @@ export class ReorderPlan {
 
         const hasFreeShipping =
             customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
-            customerSubscriptions.length > 0;
+            (customerSubscriptions.length > 0 && customerSubscriptions.some((subscription) => subscription.isActive()));
 
         const paymentIntent = await this.paymentService.paymentIntent(
             hasFreeShipping
-                ? subscription.plan.getPlanVariantPrice(subscription.planVariantId) - customerShippingZone.cost
-                : subscription.plan.getPlanVariantPrice(subscription.planVariantId),
+                ? subscription.plan.getPlanVariantPrice(subscription.planVariantId)
+                : subscription.plan.getPlanVariantPrice(subscription.planVariantId) + customerShippingZone.cost,
             subscription.customer.getDefaultPaymentMethod()?.stripeId || "",
             subscription.customer.email,
             subscription.customer.stripeId
