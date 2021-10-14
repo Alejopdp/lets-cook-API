@@ -183,6 +183,7 @@ export class Order extends Entity<Order> {
     }
 
     public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId): void {
+        if (this.isBilled()) return
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
