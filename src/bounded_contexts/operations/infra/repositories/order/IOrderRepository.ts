@@ -12,6 +12,7 @@ import { WeekId } from "../../../domain/week/WeekId";
 export interface IOrderRepository {
     save(order: Order): Promise<void>;
     bulkSave(orders: Order[]): Promise<void>;
+    updateMany(orders: Order[]): Promise<void>;
     findAll(locale: Locale): Promise<Order[]>;
     findById(orderId: OrderId, locale: Locale): Promise<Order | undefined>;
     findBy(conditions: any, locale: Locale): Promise<Order[]>;

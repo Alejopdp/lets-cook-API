@@ -16,7 +16,7 @@ export class CustomerEmailValidation {
 
     public async execute(dto: CustomerEmailValidationDto): Promise<any> {
         // const password: UserPassword = UserPassword.create("", false).hashPassword();
-        const customer: Customer = Customer.create(dto.email, false, "", [], undefined, undefined, undefined, undefined, undefined);
+        const customer: Customer = Customer.create(dto.email, false, "", [], 0, undefined, undefined, undefined, undefined, undefined);
         let emailVerified: boolean = await this.customerEmailValidationRepository.isEmailVerified(customer.email);
         return emailVerified;
     }

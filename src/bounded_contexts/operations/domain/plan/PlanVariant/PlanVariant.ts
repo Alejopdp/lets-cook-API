@@ -1,3 +1,4 @@
+import { Utils } from "../../../../../core/logic/Utils";
 import { Entity } from "../../../../../core/domain/Entity";
 import { PlanSku } from "../PlanSku";
 import { PlanVariantAttribute } from "./PlanVariantAttribute";
@@ -27,8 +28,8 @@ export class PlanVariant extends Entity<PlanVariant> {
         super(planVariantId);
         this._sku = sku;
         this._name = name;
-        this._price = price;
-        this._priceWithOffer = priceWithOffer;
+        this._price = Math.round(price * 100) / 100;
+        this._priceWithOffer = priceWithOffer ? Math.round(priceWithOffer * 100) / 100 : 0;
         this._attributes = attributes;
         this._description = description;
         this._isDefault = isDefault;

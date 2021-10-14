@@ -11,12 +11,12 @@ const IngredientSchema = new mongoose.Schema(
             es: {
                 type: String,
                 required: true,
-                unique: true,
+                // unique: true,
             },
             en: {
                 type: String,
                 // required: true,
-                unique: true,
+                // unique: true,
             },
         },
 

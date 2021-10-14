@@ -25,8 +25,8 @@ export class RefundPaymentOrderController extends BaseController {
             const presented = this.refundPaymentOrderPresenter.present(paymentOrder);
 
             return this.ok(this.res, presented);
-        } catch (error: Error) {
-            return this.fail(error);
+        } catch (error) {
+            return this.fail(error as Error);
         }
     }
 

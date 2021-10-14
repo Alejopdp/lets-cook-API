@@ -36,6 +36,7 @@ export class SignUp {
             dto.isEmailVerified,
             "",
             [],
+            0,
             undefined,
             undefined,
             password,

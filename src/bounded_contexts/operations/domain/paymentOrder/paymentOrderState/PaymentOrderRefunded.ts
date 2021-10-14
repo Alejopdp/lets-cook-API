@@ -14,7 +14,7 @@ export class PaymentOrderRefunded implements IPaymentOrderState {
 
     constructor() {
         this.title = "PAYMENT_ORDER_REFUNDED";
-        this.humanTitle = "Activa";
+        this.humanTitle = "Ordern reembolsada";
         this.color = "green";
     }
 
@@ -46,7 +46,7 @@ export class PaymentOrderRefunded implements IPaymentOrderState {
     }
 
     public isActive(): boolean {
-        return true;
+        return false;
     }
 
     public isBilled(): boolean {

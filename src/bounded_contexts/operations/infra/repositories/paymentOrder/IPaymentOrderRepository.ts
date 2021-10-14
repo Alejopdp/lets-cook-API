@@ -18,6 +18,7 @@ export interface IPaymentOrderRepository {
     findActiveByCustomerAndBillingDateList(billingDates: Date[], customerId: CustomerId): Promise<PaymentOrder[]>;
     findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]>;
     findByBillingDateList(billingDateList: Date[], customerId: CustomerId): Promise<PaymentOrder[]>;
+    findByBillingDate(billingDate: Date): Promise<PaymentOrder[]>
     findByIdList(paymentOrdersIds: PaymentOrderId[]): Promise<PaymentOrder[]>;
     findAnActivePaymentOrder(): Promise<PaymentOrder | undefined>;
     findActiveByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]>;

@@ -33,6 +33,11 @@ export class GetNextWeekRecipesPresenter {
                         )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
                     };
                 }),
+                nutritionalInfo: recipe.recipeNutritionalData.nutritionalItems.map((item) => ({
+                    key: item.key,
+                    value: item.value,
+                })),
+
                 availableMonths: recipe.availableMonths,
                 relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.value),
                 tools: recipe.recipeTools,

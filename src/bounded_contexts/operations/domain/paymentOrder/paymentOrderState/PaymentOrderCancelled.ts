@@ -46,7 +46,7 @@ export class PaymentOrderCancelled implements IPaymentOrderState {
     }
 
     public isActive(): boolean {
-        return true;
+        return false;
     }
 
     public isBilled(): boolean {

@@ -4,11 +4,15 @@ import { MomentTimeService } from "../../application/timeService/momentTimeServi
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { Order } from "../../domain/order/Order";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { PaymentOrderId } from "../../domain/paymentOrder/PaymentOrderId";
 import { RestrictionCodeFactory } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/RestrictionCodeFactory";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Subscription } from "../../domain/subscription/Subscription";
+import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { WeekId } from "../../domain/week/WeekId";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
+import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
@@ -20,19 +24,22 @@ export class ExportNextOrdersWithRecipesSelection {
     private _subscriptionRepository: ISubscriptionRepository;
     private _exportService: IExportService;
     private _shippingZoneRepository: IShippingZoneRepository;
+    private _paymentOrderRepository: IPaymentOrderRepository;
 
     constructor(
         orderRepository: IOrderRepository,
         weekRepository: IWeekRepository,
         subscriptionRepository: ISubscriptionRepository,
         exportService: IExportService,
-        shippingZoneRepository: IShippingZoneRepository
+        shippingZoneRepository: IShippingZoneRepository,
+        paymentOrderRepository: IPaymentOrderRepository
     ) {
         this._orderRepository = orderRepository;
         this._weekRepository = weekRepository;
         this._subscriptionRepository = subscriptionRepository;
         this._exportService = exportService;
         this._shippingZoneRepository = shippingZoneRepository;
+        this._paymentOrderRepository = paymentOrderRepository;
     }
 
     public async execute(dto: ExportNextOrdersWithRecipesSelectionDto): Promise<void> {
@@ -48,14 +55,30 @@ export class ExportNextOrdersWithRecipesSelection {
                 ? await this.orderRepository.findAllByCustomersIds(dto.customers.map((id) => new CustomerId(id)))
                 : await this.orderRepository.findCurrentWeekOrders();
 
-        const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(orders.map((order) => order.subscriptionId));
+        const subscriptionsIds: SubscriptionId[] = [];
+        const paymentOrdersIds: PaymentOrderId[] = [];
+
+        for (let order of orders) {
+            if (!!!order.paymentOrderId) console.log(`The order ${order.id.value} does not have a payment order`);
+            subscriptionsIds.push(order.subscriptionId);
+            paymentOrdersIds.push(order.paymentOrderId!);
+        }
+
+        const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(subscriptionsIds);
+        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(paymentOrdersIds);
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
         const customerOrdersMap: { [customerId: string]: Order[] } = {};
+        const paymentOrderMap: { [paymentOrderId: string]: PaymentOrder } = {};
+        const customerSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
         var ordersExport: OrdersWithRecipeSelectionExport[] = [];
 
         for (let subscription of subscriptions) {
             subscriptionMap[subscription.id.value] = subscription;
+        }
+
+        for (let paymentOrder of paymentOrders) {
+            paymentOrderMap[paymentOrder.id.value] = paymentOrder;
         }
 
         for (let order of orders) {
@@ -64,7 +87,18 @@ export class ExportNextOrdersWithRecipesSelection {
 
             if (order.recipeSelection.length === 0) {
                 ordersExport.push({
+                    stripePaymentId:
+                        order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
+                            ? paymentOrderMap[order.paymentOrderId.value]?.paymentIntentId || ""
+                            : "",
+                    paymentOrderId: order.paymentOrderId?.value || "",
+                    paymentOrderState:
+                        order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
+                            ? paymentOrderMap[order.paymentOrderId.value]?.state.title || ""
+                            : "",
                     orderId: order.id.value,
+                    orderNumber: order.counter,
+                    orderState: order.state.title,
                     weekLabel: order.week.getShorterLabel(),
                     deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
                     customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
@@ -86,35 +120,40 @@ export class ExportNextOrdersWithRecipesSelection {
                     recipeVariantSku: "",
                     recipeVariantId: "",
                     recipeName: "",
+                    recipeSku: "",
+                    //@ts-ignore
                     numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
+                    //@ts-ignore
                     numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
                     customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                     chooseState: order.plan.abilityToChooseRecipes ? RecipeSelectionState.AUN_NO_ELIGIO : RecipeSelectionState.NO_ELIGE,
                     pricePlan: order.getTotalPrice(),
-                    //@ts-ignore
-                    kitPrice: orderPlanVariant.numberOfPersons
-                        ? //@ts-ignore
-                          order.getTotalPrice() / orderPlanVariant.numberOfPersons
-                        : order.getTotalPrice(),
+                    kitPrice: order.getKitPrice(),
                     planDiscount: order.discountAmount,
-                    //@ts-ignore
-                    kitDiscount: orderPlanVariant.numberOfPersons
-                        ? //@ts-ignore
-                          order.discountAmount / orderPlanVariant.numberOfPersons
-                        : order.discountAmount,
+                    kitDiscount: order.getKitDiscount(),
                     finalPrice: order.getTotalPrice() - order.discountAmount,
-                    //@ts-ignore
-                    finalKitPrice: orderPlanVariant.numberOfPersons
-                        ? //@ts-ignore
-                          (order.getTotalPrice() - order.discountAmount) / orderPlanVariant.numberOfPersons
-                        : order.getTotalPrice() - order.discountAmount,
+                    finalKitPrice: order.getFinalKitPrice(),
+                    finalPortionPrice: order.getFinalPortionPrice(),
+                    recipeDivision: 1,
+                    recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
                 });
             }
 
             for (let recipeSelection of order.recipeSelection) {
                 for (let i = 0; i < recipeSelection.quantity; i++) {
                     ordersExport.push({
+                        stripePaymentId:
+                            order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
+                                ? paymentOrderMap[order.paymentOrderId.value]?.paymentIntentId || ""
+                                : "",
+                        paymentOrderId: order.paymentOrderId?.value || "",
+                        paymentOrderState:
+                            order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
+                                ? paymentOrderMap[order.paymentOrderId.value]?.state.title || ""
+                                : "",
                         orderId: order.id.value,
+                        orderNumber: order.counter,
+                        orderState: order.state.title,
                         weekLabel: order.week.getShorterLabel(),
                         deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
                         customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
@@ -138,28 +177,22 @@ export class ExportNextOrdersWithRecipesSelection {
                                 ?.sku.code || "",
                         recipeVariantId: recipeSelection.recipeVariantId.value,
                         recipeName: recipeSelection.recipe.getName(),
+                        recipeSku: recipeSelection.recipe.getDefaultVariantSku(),
+                        //@ts-ignore
                         numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
+                        //@ts-ignore
                         numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
                         customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                         chooseState: order.choseByAdmin ? RecipeSelectionState.ELEGIDA_POR_LC : RecipeSelectionState.ELIGIO, // TO DO: Elegido por LC
                         pricePlan: order.getTotalPrice(),
-                        //@ts-ignore
-                        kitPrice: orderPlanVariant.numberOfPersons
-                            ? //@ts-ignore
-                              order.getTotalPrice() / orderPlanVariant.numberOfPersons
-                            : order.getTotalPrice(),
+                        kitPrice: order.getKitPrice(),
                         planDiscount: order.discountAmount,
-                        //@ts-ignore
-                        kitDiscount: orderPlanVariant.numberOfPersons
-                            ? //@ts-ignore
-                              order.discountAmount / orderPlanVariant.numberOfPersons
-                            : order.discountAmount,
+                        kitDiscount: order.getKitDiscount(),
                         finalPrice: order.getTotalPrice() - order.discountAmount,
-                        //@ts-ignore
-                        finalKitPrice: orderPlanVariant.numberOfPersons
-                            ? //@ts-ignore
-                              (order.getTotalPrice() - order.discountAmount) / orderPlanVariant.numberOfPersons
-                            : order.getTotalPrice() - order.discountAmount,
+                        finalKitPrice: order.getFinalKitPrice(),
+                        finalPortionPrice: order.getFinalPortionPrice(),
+                        recipeDivision: !!order.getNumberOfRecipesOrReturn0() ? 1 / order.getNumberOfRecipesOrReturn0() : 1,
+                        recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
                     });
                 }
             }
@@ -182,7 +215,12 @@ export class ExportNextOrdersWithRecipesSelection {
                 )!;
 
                 ordersExport.push({
-                    orderId: "",
+                    stripePaymentId: "N/A",
+                    paymentOrderId: "N/A",
+                    paymentOrderState: "N/A",
+                    orderId: "N/A",
+                    orderNumber: "N/A",
+                    orderState: "N/A",
                     weekLabel: customerOrders[0].week.getShorterLabel(),
                     deliveryDate: MomentTimeService.getDddDdMmmm(customerOrders[0].shippingDate),
                     customerPreferredShippingHour: customer.getShippingAddress().preferredShippingHour,
@@ -190,30 +228,34 @@ export class ExportNextOrdersWithRecipesSelection {
                     customerFirstName: customer.getPersonalInfo().name!,
                     customerLastName: customer.getPersonalInfo().lastName!,
                     customerEmail: customer.email,
-                    subscriptionDate: "",
-                    recipeFormSubmissionDate: "",
-                    recipeFormUpdateDate: "",
-                    planId: "",
-                    planSku: "",
-                    planName: "",
-                    planVariantId: "",
-                    planVariantSku: "",
-                    planVariantDescription: "",
-                    subscriptionRestrictionComment: "",
-                    subscriptionRestriction: "",
-                    recipeVariantSku: "",
-                    recipeVariantId: "",
-                    recipeName: "",
+                    subscriptionDate: "N/A",
+                    recipeFormSubmissionDate: "N/A",
+                    recipeFormUpdateDate: "N/A",
+                    planId: "N/A",
+                    planSku: "N/A",
+                    planName: "Envío",
+                    planVariantId: "N/A",
+                    planVariantSku: "N/A",
+                    planVariantDescription: "N/A",
+                    subscriptionRestrictionComment: "N/A",
+                    subscriptionRestriction: "N/A",
+                    recipeVariantSku: "N/A",
+                    recipeVariantId: "N/A",
+                    recipeName: "N/A",
+                    recipeSku: "",
                     numberOfPersons: 0,
                     numberOfRecipes: 0,
                     customerPreferredLanguage: customer.getPersonalInfo().preferredLanguage!,
-                    chooseState: "", // TO DO: Elegido por LC
+                    chooseState: "N/A", // TO DO: Elegido por LC
                     pricePlan: customerShippingZone.cost,
-                    kitPrice: customerShippingZone.cost,
-                    planDiscount: customerShippingZone.cost,
-                    kitDiscount: customerShippingZone.cost,
-                    finalPrice: customerShippingZone.cost,
-                    finalKitPrice: customerShippingZone.cost,
+                    kitPrice: 0,
+                    planDiscount: 0,
+                    kitDiscount: 0,
+                    finalPrice: 0,
+                    finalKitPrice: 0,
+                    finalPortionPrice: 0,
+                    recipeDivision: 0,
+                    recivedOrdersQuantity: customer.receivedOrdersQuantity,
                 });
             }
         }
@@ -264,5 +306,13 @@ export class ExportNextOrdersWithRecipesSelection {
      */
     public get shippingZoneRepository(): IShippingZoneRepository {
         return this._shippingZoneRepository;
+    }
+
+    /**
+     * Getter paymentOrderRepository
+     * @return {IPaymentOrderRepository}
+     */
+    public get paymentOrderRepository(): IPaymentOrderRepository {
+        return this._paymentOrderRepository;
     }
 }

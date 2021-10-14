@@ -23,6 +23,7 @@ export class StripeService implements IPaymentService {
             payment_method: paymentMethod,
             customer: customerId,
             confirm: true,
+            // setup_future_usage: "off_session"
         };
 
         return await this.stripe.paymentIntents.create(paymentIntentParams);
@@ -50,6 +51,10 @@ export class StripeService implements IPaymentService {
             paymentMethod.id
         );
     }
+
+    public async removePaymentMethodFromCustomer(paymentMethodId: string): Promise<any> {
+        await this.stripe.paymentMethods.detach(paymentMethodId);
+    }
     public async addPaymentMethodToCustomerAndSetAsDefault(paymentMethodId: string, customerId: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
@@ -57,7 +62,7 @@ export class StripeService implements IPaymentService {
     public async refund(paymentIntentId: string, amount: number): Promise<void> {
         const refund = await this.stripe.refunds.create({
             payment_intent: paymentIntentId,
-            amount: amount * 100,
+            amount: Math.trunc(amount * 100),
         });
     }
 

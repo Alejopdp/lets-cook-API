@@ -126,11 +126,9 @@ const OrderSchema = new mongoose.Schema(
 );
 
 OrderSchema.pre("save", async function (done) {
-    console.log("HEllo from pre save");
     if (this.isNew) {
-        console.log("ITS NEW");
         const count = await Order.count();
-        console.log("COUNT: ", count);
+        //@ts-ignore
         this.counter = count + 20000;
     }
 

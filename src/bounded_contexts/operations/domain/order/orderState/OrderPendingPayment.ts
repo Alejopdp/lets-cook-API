@@ -53,6 +53,10 @@ export class OrderPendingPayment implements IOrderState {
         return false;
     }
 
+    public isBilled(): boolean {
+        return false;
+    }
+
     public isCancelled(): boolean {
         return false;
     }

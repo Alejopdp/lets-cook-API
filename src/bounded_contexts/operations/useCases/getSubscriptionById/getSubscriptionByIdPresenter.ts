@@ -112,7 +112,9 @@ export class GetSubscriptionByIdPresenter {
             isDefault: variant.isDefault,
             description: variant.getLabelWithPrice(),
             price: variant.getPaymentPrice(),
+            //@ts-ignore
             numberOfPersons: variant.numberOfPersons || 0,
+            //@ts-ignore
             numberOfRecipes: variant.numberOfRecipes || 0,
         };
     }
@@ -123,6 +125,7 @@ export class GetSubscriptionByIdPresenter {
             weekLabel: order.getWeekLabel(),
             shippingDate: order.getHumanShippmentDay(),
             isSkipped: order.isSkipped(),
+            state: order.state.title,
         }));
     }
 
@@ -154,7 +157,10 @@ export class GetSubscriptionByIdPresenter {
                         )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
                     };
                 }),
-
+                nutritionalInfo: selection.recipe.recipeNutritionalData.nutritionalItems.map((item) => ({
+                    key: item.key,
+                    value: item.value,
+                })),
                 availableMonths: selection.recipe.availableMonths,
                 relatedPlans: selection.recipe.relatedPlans.map((planId: PlanId) => planId.value),
                 tools: selection.recipe.recipeTools,

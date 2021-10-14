@@ -1,6 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CustomerId } from "../customer/CustomerId";
+import { Customer } from "../customer/Customer";
 import { Order } from "../order/Order";
 import { Week } from "../week/Week";
 import { PaymentOrderId } from "./PaymentOrderId";
@@ -38,22 +39,27 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._paymentIntentId = paymentIntentId;
         this._billingDate = billingDate;
         this._week = week;
-        this._amount = amount;
-        this._discountAmount = discountAmount;
-        this._shippingCost = shippingCost;
+        this._amount = Math.round(amount * 100) / 100;
+        this._discountAmount = Math.round(discountAmount * 100) / 100;
+        this._shippingCost = Math.round(shippingCost * 100) / 100;
         this._customerId = customerId;
         this._quantityRefunded = quantityRefunded;
     }
 
     public addOrder(order: Order): void {
         order.paymentOrderId = this.id;
-        this.amount = this.amount + order.price; // TO DO: Add price with discount
-        this.discountAmount += order.discountAmount; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+        if (this.state.isPendingConfirmation()) return;
+        this.amount = (Math.round(this.amount * 100) + Math.round(order.getTotalPrice() * 100)) / 100; // TO DO: Add price with discount
+        this.discountAmount = (Math.round(this.discountAmount * 100) + Math.round(order.discountAmount * 100)) / 100; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+
+        if (this.state.isCancelled()) this.state.toActive(this);
     }
 
     public discountOrderAmount(order: Order): void {
-        this.amount -= order.getTotalPrice();
-        this.discountAmount -= order.discountAmount;
+        this.amount = (Math.round(this.amount * 100) - Math.round(order.getTotalPrice() * 100)) / 100;
+        this.discountAmount = (Math.round(this.discountAmount * 100) - Math.round(order.discountAmount * 100)) / 100;
+
+        if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
     }
 
     public discountOrdersAmount(orders: Order[]): void {
@@ -78,9 +84,9 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         return MomentTimeService.getDdMmYyyy(this.billingDate);
     }
 
-    public toBilled(orders: Order[]): void {
+    public toBilled(orders: Order[], customer?: Customer): void {
         for (let order of orders) {
-            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(); // TO DO: Handle this?
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(customer); // TO DO: Handle this?
         }
 
         this.state.toBilled(this);
@@ -88,7 +94,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
 
     public toActive(orders: Order[]): void {
         for (let order of orders) {
-            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(); // TO DO: Handle this?
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(this); // TO DO: Handle this?
         }
 
         this.state.toActive(this);
@@ -119,17 +125,18 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     public getTotalAmount(): number {
-        return this.amount + this.shippingCost - this.discountAmount;
+        return (Math.round(this.amount * 100) + this.shippingCost * 100 - Math.round(this.discountAmount * 100)) / 100;
     }
 
     public refund(amount: number): void {
-        if (this.quantityRefunded + amount > this.getTotalAmount())
+        if ((Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100 > this.getTotalAmount())
             throw new Error("No puede devolverse una cantidad mayor al total del monto de la orden");
         if (amount <= 0) throw new Error("No puede devolverse una cantidad negativa");
-        if (this.quantityRefunded + amount === this.getTotalAmount()) this.state.toRefunded(this);
+        if ((Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100 === this.getTotalAmount())
+            this.state.toRefunded(this);
         else this.state.toPartiallyRefunded(this);
 
-        this.quantityRefunded += amount;
+        this.quantityRefunded = (Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100;
     }
 
     /**

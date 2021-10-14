@@ -7,7 +7,12 @@ export enum RecipeSelectionState {
     ELEGIDA_POR_LC = "Elegida por LC",
 }
 export interface OrdersWithRecipeSelectionExport {
+    stripePaymentId: string;
+    paymentOrderId: string | number;
+    paymentOrderState: string;
     orderId: string | number;
+    orderNumber: string | number;
+    orderState: string;
     weekLabel: string;
     deliveryDate: string;
     customerPreferredShippingHour: string;
@@ -29,6 +34,7 @@ export interface OrdersWithRecipeSelectionExport {
     recipeVariantId: string | number;
     recipeVariantSku: string;
     recipeName: string;
+    recipeSku: string;
     numberOfPersons: number;
     numberOfRecipes: number;
     customerPreferredLanguage: string;
@@ -39,6 +45,9 @@ export interface OrdersWithRecipeSelectionExport {
     kitDiscount: number;
     finalPrice: number;
     finalKitPrice: number;
+    finalPortionPrice: number;
+    recipeDivision: number;
+    recivedOrdersQuantity: number;
 }
 
 export interface SubscriptionExport {
@@ -129,13 +138,14 @@ export interface CancellationExport {
 }
 
 export interface CouponExport {
-    couponId: string | number;
+    coupon_id: string | number;
     couponCode: string;
     discount_type: string;
-    discount_value: string;
+    discount_value: number;
     minimum_requirement_type: string;
     minimum_requirement_value: string | number;
-    appy_to_value: string;
+    apply_to_type: string;
+    apply_to_value: string;
     application_limit_type_1: string;
     application_limit_value_1: string | number;
     application_limit_type_2: string;
@@ -144,8 +154,8 @@ export interface CouponExport {
     application_limit_value_3: string | number;
     coupons_by_subscriptions_type: string;
     coupons_by_suscription_value: number;
-    date_range_start: string;
-    date_range_expire: string;
+    date_range_start: Date | string;
+    date_range_expire: Date | string;
     state: string;
 }
 
