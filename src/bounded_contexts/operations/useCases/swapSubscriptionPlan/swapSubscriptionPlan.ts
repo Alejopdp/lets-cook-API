@@ -81,7 +81,8 @@ export class SwapSubscriptionPlan {
             await this.paymentOrderRepository.updateMany(paymentOrders);
         }
 
-        await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
+        // await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
+        await this.orderRepository.updateMany(orders);
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
     }
 
