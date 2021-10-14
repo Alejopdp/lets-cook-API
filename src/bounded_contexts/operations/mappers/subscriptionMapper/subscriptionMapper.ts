@@ -41,7 +41,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             raw.restrictionComment,
             raw.createdAt,
             customer,
-            raw.price,
+            raw.price / 100,
             restriction,
             coupon,
             raw.couponChargesQtyApplied,
@@ -68,7 +68,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             billingStartDate: t.billingStartDate,
             cancellation,
             _id: t.id.value,
-            price: t.price,
+            price: Math.round(t.price * 100),
         };
     }
 }
