@@ -45,6 +45,8 @@ export class GetCustomerSubscriptionsPresenter {
             if (subscription.plan.isPrincipal()) {
                 presentedPrincipalSubscriptions.push({
                     id: subscription.id.value,
+                    planId: subscription.plan.id.value,
+                    planVariantId: subscription.planVariantId.value,
                     planName: subscription.plan.name,
                     planVariantLabel: subscription.getPlanVariantLabel() || "4 recetas para 3 personas",
                     nextShippment: subscription.getNextShipmentLabel(orderSubscriptionMap[subscription.id.value]),
@@ -57,6 +59,8 @@ export class GetCustomerSubscriptionsPresenter {
             } else {
                 presentedAdditionalSubscriptions.push({
                     id: subscription.id.value,
+                    planId: subscription.plan.id.value,
+                    planVariantId: subscription.planVariantId.value,
                     planName: subscription.plan.name,
                     planVariantLabel: subscription.getPlanVariantLabel() || "4 recetas para 3 personas",
                     nextShippment: subscription.getNextShipmentLabel(orderSubscriptionMap[subscription.id.value]),

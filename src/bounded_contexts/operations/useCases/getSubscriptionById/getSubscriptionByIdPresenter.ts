@@ -157,7 +157,10 @@ export class GetSubscriptionByIdPresenter {
                         )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
                     };
                 }),
-
+                nutritionalInfo: selection.recipe.recipeNutritionalData.nutritionalItems.map((item) => ({
+                    key: item.key,
+                    value: item.value,
+                })),
                 availableMonths: selection.recipe.availableMonths,
                 relatedPlans: selection.recipe.relatedPlans.map((planId: PlanId) => planId.value),
                 tools: selection.recipe.recipeTools,
