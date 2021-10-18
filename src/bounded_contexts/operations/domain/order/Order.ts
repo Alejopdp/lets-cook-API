@@ -137,8 +137,10 @@ export class Order extends Entity<Order> {
         const today = new Date();
 
         if (today > this.shippingDate) throw new Error("No es posible reaundar una orden pasada");
-        paymentOrder.addOrder(this);
-        this.state.toActive(this);
+        if(this.isSkipped()) { // TO DO: push it to state
+            paymentOrder.addOrder(this);
+            this.state.toActive(this);
+        }
     }
 
     public toPaymentPending(): void {

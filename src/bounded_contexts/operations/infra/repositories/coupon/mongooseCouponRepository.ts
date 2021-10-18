@@ -48,7 +48,7 @@ export class MongooseCouponRepository implements ICouponRepository {
     }
 
     public async findBy(conditions: any): Promise<Coupon[]> {
-        const couponsDb = await MongooseCoupon.find({ ...conditions, deletionFlag: false });
+        const couponsDb = await MongooseCoupon.find({ ...conditions, deletionFlag: false }).sort({ createdAt: -1 });
         return couponsDb.map((raw: any) => couponMapper.toDomain(raw));
     }
 }
