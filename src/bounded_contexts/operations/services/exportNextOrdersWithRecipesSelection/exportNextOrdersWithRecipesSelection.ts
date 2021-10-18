@@ -54,11 +54,12 @@ export class ExportNextOrdersWithRecipesSelection {
                 : dto.customers.length > 0
                 ? await this.orderRepository.findAllByCustomersIds(dto.customers.map((id) => new CustomerId(id)))
                 : await this.orderRepository.findCurrentWeekOrders();
+        const activeOrders: Order[] = orders.filter((order) => !order.isSkipped() && !order.isCancelled());
 
         const subscriptionsIds: SubscriptionId[] = [];
         const paymentOrdersIds: PaymentOrderId[] = [];
 
-        for (let order of orders) {
+        for (let order of activeOrders) {
             if (!!!order.paymentOrderId) console.log(`The order ${order.id.value} does not have a payment order`);
             subscriptionsIds.push(order.subscriptionId);
             paymentOrdersIds.push(order.paymentOrderId!);
@@ -81,7 +82,7 @@ export class ExportNextOrdersWithRecipesSelection {
             paymentOrderMap[paymentOrder.id.value] = paymentOrder;
         }
 
-        for (let order of orders) {
+        for (let order of activeOrders) {
             const subscription = subscriptionMap[order.subscriptionId.value];
             const orderPlanVariant = order.plan.getPlanVariantById(order.planVariantId);
 
@@ -174,10 +175,10 @@ export class ExportNextOrdersWithRecipesSelection {
                         subscriptionRestriction: RestrictionCodeFactory.createCode(subscription.restriction?.value),
                         recipeVariantSku:
                             recipeSelection.recipe.recipeVariants.find((variant) => variant.restriction.equals(subscription.restriction))
-                                ?.sku.code || "",
+                                ?.sku.code || recipeSelection.recipe.getDefaultVariantSku(),
                         recipeVariantId: recipeSelection.recipeVariantId.value,
                         recipeName: recipeSelection.recipe.getName(),
-                        recipeSku: recipeSelection.recipe.getDefaultVariantSku(),
+                        recipeSku: recipeSelection.recipe.recipeGeneralData.recipeSku.code,
                         //@ts-ignore
                         numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
                         //@ts-ignore

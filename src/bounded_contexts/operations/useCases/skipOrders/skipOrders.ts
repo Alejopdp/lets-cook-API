@@ -16,6 +16,7 @@ export class SkipOrders {
     }
 
     public async execute(dto: SkipOrdersDto): Promise<any> {
+        console.log("Orders to skip: ", dto.ordersToSkip);
         const ordersIds: OrderId[] = [...dto.ordersToReactivate, ...dto.ordersToSkip].map((id: any) => new OrderId(id));
         const orders: Order[] = await this.orderRepository.findByIdList(ordersIds);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
@@ -44,7 +45,8 @@ export class SkipOrders {
             activeOrdersToSave.push(order);
         }
 
-        await this.orderRepository.saveSkippedAndActiveOrders(skippedOrdersToSave, activeOrdersToSave);
+        // await this.orderRepository.saveSkippedAndActiveOrders(skippedOrdersToSave, activeOrdersToSave);
+        await this.orderRepository.updateMany([...skippedOrdersToSave, ...activeOrdersToSave]);
         await this.paymentOrderRepository.updateMany(paymentOrders);
     }
 

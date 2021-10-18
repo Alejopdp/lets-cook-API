@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Customer } from "../../domain/customer/Customer";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
@@ -25,7 +26,7 @@ export class GetPaymentOrdersAsAdminPresenter {
             if (paymentOrder.state.title === "PAYMENT_ORDER_REJECTED") rejectedOrders.push(presentedOrder);
         }
 
-        return { activeOrders, billedOrders, rejectedOrders };
+        return { activeOrders, billedOrders: _.orderBy(billedOrders, ["billingDate"], ["desc"]), rejectedOrders };
     }
 
     public presentPaymentOrder(paymentOrder: PaymentOrder, customer: Customer): any {

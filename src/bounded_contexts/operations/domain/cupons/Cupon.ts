@@ -102,7 +102,7 @@ export class Coupon extends Entity<Coupon> {
         this.state = state;
     }
 
-    public isValid(subscriptions: Subscription[], plan: Plan, planVariantId: PlanVariantId, shippingCost?: number): boolean {
+    public isValid(customerSubscriptions: Subscription[], plan: Plan, planVariantId: PlanVariantId, shippingCost?: number): boolean {
         if (this.isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost))
             throw new Error("Para utilizar un cupón de envío gratis primero debes ingresar una dirección de entrega");
         if (this.isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost!))
@@ -116,7 +116,7 @@ export class Coupon extends Entity<Coupon> {
         if (this.state === CouponState.INACTIVE || this.state === CouponState.DELETED || this.state === CouponState.UNAVAILABLE)
             throw new Error("El cupón de descuento no está disponible");
 
-        return this.limites.every((limit) => limit.isValid(subscriptions, this.id)); // Use quantityApplied and customersWhoHaveApplied
+        return this.limites.every((limit) => limit.isValid(customerSubscriptions, this.id)); // Use quantityApplied and customersWhoHaveApplied
     }
 
     private isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost: number): boolean {
