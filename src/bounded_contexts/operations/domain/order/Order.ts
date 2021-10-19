@@ -137,7 +137,8 @@ export class Order extends Entity<Order> {
         const today = new Date();
 
         if (today > this.shippingDate) throw new Error("No es posible reaundar una orden pasada");
-        if(this.isSkipped()) { // TO DO: push it to state
+        if (this.isSkipped()) {
+            // TO DO: push it to state
             paymentOrder.addOrder(this);
             this.state.toActive(this);
         }
@@ -185,7 +186,7 @@ export class Order extends Entity<Order> {
     }
 
     public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId): void {
-        if (this.isBilled()) return
+        if (this.isBilled()) return;
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
@@ -247,9 +248,9 @@ export class Order extends Entity<Order> {
 
         return Utils.roundTwoDecimals(
             //@ts-ignore
-            planVariant.numberOfPersons
+            planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  this.getTotalPrice() / planVariant.numberOfPersons
+                  this.getTotalPrice() / planVariant.numberOfRecipes
                 : this.getTotalPrice()
         );
     }
@@ -260,9 +261,9 @@ export class Order extends Entity<Order> {
 
         return Utils.roundTwoDecimals(
             //@ts-ignore
-            planVariant.numberOfPersons
+            planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  Math.round(this.discountAmount * 100) / planVariant.numberOfPersons / 100
+                  Math.round(this.discountAmount * 100) / planVariant.numberOfRecipes / 100
                 : this.discountAmount
         );
     }
@@ -273,9 +274,9 @@ export class Order extends Entity<Order> {
 
         return Utils.roundTwoDecimals(
             //@ts-ignore
-            planVariant.numberOfPersons
+            planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfPersons / 100
+                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfRecipes / 100
                 : (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / 100
         );
     }
@@ -285,7 +286,7 @@ export class Order extends Entity<Order> {
         if (!!!planVariant) return 0;
 
         //@ts-ignore
-        return Utils.roundTwoDecimals(this.getFinalKitPrice() / (planVariant.numberOfPersons || 1));
+        return Utils.roundTwoDecimals(this.getFinalKitPrice() / ((planVariant.numberOfPersons || 1) * (planVariant.numberOfRecipes || 1)));
     }
 
     public isActualWeek(): boolean {
