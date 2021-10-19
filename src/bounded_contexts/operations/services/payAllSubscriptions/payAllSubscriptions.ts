@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import { logger } from "../../../../../config";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { Customer } from "../../domain/customer/Customer";
@@ -41,7 +42,7 @@ export class PayAllSubscriptions {
     }
 
     public async execute(): Promise<void> {
-        // const today: Date = new Date(2021, 9, 23);
+        // const today: Date = new Date(2021, 9, 30);
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
         const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
@@ -117,12 +118,20 @@ export class PayAllSubscriptions {
                               Math.round(shippingCost * 100)) /
                           100;
 
-                    const paymentIntent = await this.paymentService.paymentIntent(
-                        totalAmount,
-                        paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
-                        paymentOrderCustomer.email,
-                        paymentOrderCustomer.stripeId as string
-                    );
+                    var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
+                        id: "",
+                        status: "succeeded",
+                        client_secret: "",
+                    };
+
+                    if (totalAmount >= 0.5) {
+                        paymentIntent = await this.paymentService.paymentIntent(
+                            totalAmount,
+                            paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
+                            paymentOrderCustomer.email,
+                            paymentOrderCustomer.stripeId as string
+                        );
+                    }
 
                     // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
                     if (paymentIntent.status === "succeeded") {

@@ -74,7 +74,7 @@ export class CreateSubscription {
 
     public async execute(dto: CreateSubscriptionDto): Promise<{
         subscription: Subscription;
-        paymentIntent: Stripe.PaymentIntent;
+        paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string };
         firstOrder: Order;
         customerPaymentMethods: PaymentMethod[];
     }> {
@@ -167,23 +167,31 @@ export class CreateSubscription {
             (customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
                 customerSubscriptions.length > 0);
 
-        const paymentIntent = await this.paymentService.paymentIntent(
-            hasFreeShipping
-                ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
-                : newPaymentOrders[0].getTotalAmount(),
-            dto.stripePaymentMethodId
-                ? dto.stripePaymentMethodId
-                : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
-            customer.email,
-            customer.stripeId
-        );
+        var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+        };
+
+        if (Math.round(newPaymentOrders[0].amount * 100) - Math.round(newPaymentOrders[0].discountAmount * 100) >= 50) {
+            paymentIntent = await this.paymentService.paymentIntent(
+                hasFreeShipping
+                    ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
+                    : newPaymentOrders[0].getTotalAmount(),
+                dto.stripePaymentMethodId
+                    ? dto.stripePaymentMethodId
+                    : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
+                customer.email,
+                customer.stripeId
+            );
+        }
 
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
         newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
-        if (paymentIntent.status === "requires_action") {
+        if (!!paymentIntent && paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
-        } else if (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled") {
+        } else if (!!paymentIntent && (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled")) {
             await this.paymentService.removePaymentMethodFromCustomer(
                 dto.stripePaymentMethodId || customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId))
             );

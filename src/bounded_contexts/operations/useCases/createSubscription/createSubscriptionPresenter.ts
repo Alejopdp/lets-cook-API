@@ -6,14 +6,14 @@ import { Subscription } from "../../domain/subscription/Subscription";
 export class CreateSubscriptionPresenter {
     public present(
         subscription: Subscription,
-        paymentIntent: Stripe.PaymentIntent,
+        paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string },
         firstOrder: Order,
         customerPaymentMethods: PaymentMethod[]
     ): any {
         return {
             subscriptionId: subscription.id.value,
-            client_secret: paymentIntent.client_secret,
-            payment_status: paymentIntent.status,
+            client_secret: paymentIntent?.client_secret || "",
+            payment_status: paymentIntent?.status || "",
             firstOrderId: firstOrder.id.value,
             firstOrderShippingDate: firstOrder.getHumanShippmentDay(),
             paymentOrderId: firstOrder.paymentOrderId?.value,
