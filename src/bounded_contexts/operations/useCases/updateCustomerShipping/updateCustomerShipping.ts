@@ -41,7 +41,7 @@ export class UpdateCustomerShipping {
         const preferredDeliveryTime = dto.deliveryTime ? PreferredDeliveryTimeFactory.createDeliveryTime(dto.deliveryTime) : undefined;
 
         customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, preferredDeliveryTime);
-        paymentOrders.forEach((order) => (order.shippingCost = customerNewShippingZone.cost));
+        paymentOrders.forEach((order) => (order.state.isActive() ? (order.shippingCost = customerNewShippingZone.cost) : ""));
 
         await this.paymentOrderRepository.updateMany(paymentOrders);
         await this.customerRepository.save(customer);
