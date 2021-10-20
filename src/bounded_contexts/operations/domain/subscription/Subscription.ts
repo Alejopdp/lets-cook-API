@@ -135,7 +135,7 @@ export class Subscription extends Entity<Subscription> {
 
     private isCouponApplyable(): boolean {
         return (
-            (!!this.coupon && this.couponChargesQtyApplied <= this.coupon.maxChargeQtyValue) || this.coupon?.maxChargeQtyType === "all_fee"
+            (!!this.coupon && this.couponChargesQtyApplied < this.coupon.maxChargeQtyValue) || this.coupon?.maxChargeQtyType === "all_fee"
         );
     }
 
@@ -144,7 +144,7 @@ export class Subscription extends Entity<Subscription> {
         const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
         const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
 
-        if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
+        if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied = this.couponChargesQtyApplied + 1;
 
         return new Order(
             newShippingDate,
