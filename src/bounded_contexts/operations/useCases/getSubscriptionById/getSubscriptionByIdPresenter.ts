@@ -8,6 +8,7 @@ import { MomentTimeService } from "../../application/timeService/momentTimeServi
 import { Week } from "../../domain/week/Week";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
+import { Locale } from "../../domain/locale/Locale";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -22,7 +23,7 @@ export class GetSubscriptionByIdPresenter {
         const shippingAddress = {
             addressName: customer.shippingAddress?.name,
             addressDetails: customer.shippingAddress?.details,
-            preferredSchedule: "Hardcoded",
+            preferredSchedule: customer.shippingAddress?.deliveryTime?.getLabel(Locale.es) || "Sin seleccionar",
         };
 
         const billingData = {

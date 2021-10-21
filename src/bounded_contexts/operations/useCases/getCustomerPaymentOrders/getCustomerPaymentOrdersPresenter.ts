@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
@@ -5,7 +6,8 @@ export class GetCustomerPaymentOrdersPresenter {
     public present(paymentOrders: PaymentOrder[], countMap: { [key: string]: number }): any {
         const presentedOrders = [];
 
-        for (let order of paymentOrders) {
+        const orderedPaymentOrders = _.orderBy(paymentOrders, ["billingDate"], ["desc"]);
+        for (let order of orderedPaymentOrders) {
             presentedOrders.push({
                 id: order.id.value,
                 billingDate: MomentTimeService.getDdMmYyyy(order.billingDate),

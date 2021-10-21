@@ -5,4 +5,5 @@ export interface UpdateShippingZoneDto {
     cost: number;
     state: string;
     radio: any[];
+    day: number;
 }
