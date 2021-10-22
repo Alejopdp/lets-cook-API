@@ -9,6 +9,8 @@ export class CreatePaymentOrders {
         const shippingDate: Date = new Date(); // TO DO: Es necesaria la shipping date en la payment order?
 
         for (let order of dto.orders) {
+            var hasFreeShipping: boolean = order.hasFreeShipping;
+
             const newPaymentOrder = new PaymentOrder(
                 shippingDate, // unnecessary
                 new PaymentOrderActive(),
@@ -18,7 +20,8 @@ export class CreatePaymentOrders {
                 0,
                 0,
                 dto.shippingCost,
-                dto.subscription.customer.id
+                dto.subscription.customer.id,
+                hasFreeShipping
             );
 
             newPaymentOrder.addOrder(order);

@@ -163,10 +163,13 @@ export class CreateSubscription {
         }
 
         const hasFreeShipping =
-            coupon?.type.type !== "free" &&
-            (customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
-                customerSubscriptions.length > 0);
+            // TO DO: Validar que la semana proxima tiene al menos 1 envio
+            // paymentOrdersToUpdate.some(po => po.)Z
+            coupon?.type.type === "free" ||
+            customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
+            customerSubscriptions.length > 0;
 
+        // newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost;
         var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
             id: "",
             status: "succeeded",

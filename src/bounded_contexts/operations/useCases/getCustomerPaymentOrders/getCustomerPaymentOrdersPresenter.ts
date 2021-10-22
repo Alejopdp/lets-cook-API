@@ -11,7 +11,7 @@ export class GetCustomerPaymentOrdersPresenter {
             presentedOrders.push({
                 id: order.id.value,
                 billingDate: MomentTimeService.getDdMmYyyy(order.billingDate),
-                amount: order.amount,
+                amount: order.getFinalAmount(),
                 state: order.state.title,
                 humanState: order.state.humanTitle,
                 ordersQty: countMap[order.id.value],

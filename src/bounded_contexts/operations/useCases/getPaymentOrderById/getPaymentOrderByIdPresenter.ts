@@ -19,7 +19,7 @@ export class GetPaymentOrderByIdPresenter {
             id: paymentOrder.id.value,
             amount: paymentOrder.amount,
             billingDate: paymentOrder.getHumanBillingDate(),
-            discountAmount: paymentOrder.discountAmount,
+            discountAmount: paymentOrder.getDiscountAmountOrShippingCostIfHasFreeShipping(),
             couponCodes: subscriptions.map((subscription) => subscription.coupon?.couponCode),
             shippingCost: paymentOrder.shippingCost,
             customer: paymentOrder.customerId.value,
@@ -27,7 +27,7 @@ export class GetPaymentOrderByIdPresenter {
             // state: paymentOrder.state.humanTitle,
             state: paymentOrder.state.title,
             orders: presentedOrders,
-            totalAmount: Math.round((paymentOrder.getTotalAmount() + Number.EPSILON) * 100) / 100,
+            totalAmount: paymentOrder.getFinalAmount(),
             subtotal: paymentOrder.amount,
             taxes:
                 paymentOrder.shippingCost +

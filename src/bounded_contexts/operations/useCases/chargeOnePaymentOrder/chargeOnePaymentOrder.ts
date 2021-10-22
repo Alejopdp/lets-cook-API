@@ -140,7 +140,8 @@ export class ChargeOnePaymentOrder {
                 ordersAmount,
                 ordersDiscount,
                 customerShippingZone.cost,
-                customer.id
+                customer.id,
+                false // TO DO: Calculate
             );
 
             newPaymentOrders.push(newPaymentOrder);

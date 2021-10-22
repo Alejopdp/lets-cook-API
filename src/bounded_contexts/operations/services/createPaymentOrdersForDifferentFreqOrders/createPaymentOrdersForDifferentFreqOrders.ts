@@ -17,6 +17,7 @@ export class CreatePaymentOrdersForDifferentFreqOrders {
         const billingDateOrdersEntries = Object.entries(billingDateOrdersMap);
 
         for (let entry of billingDateOrdersEntries) {
+            var hasFreeShipping = entry[1].some((order) => order.hasFreeShipping);
             paymentOrders.push(
                 new PaymentOrder(
                     shippingDate, // unnecessary
@@ -27,7 +28,8 @@ export class CreatePaymentOrdersForDifferentFreqOrders {
                     entry[1].reduce((acc, order) => acc + order.price, 0),
                     0,
                     dto.shippingCost,
-                    dto.customerId
+                    dto.customerId,
+                    hasFreeShipping
                 )
             );
         }

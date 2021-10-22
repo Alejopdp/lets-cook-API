@@ -208,6 +208,8 @@ export class PayAllSubscriptions {
                     0
                 ); // TO DO: Use coupons, probably need to pass orders to a subscription
 
+                const hasFreeShipping = billingDateAndOrders[1].some((order) => order.hasFreeShipping);
+
                 const newPaymentOrder = new PaymentOrder(
                     new Date(),
                     new PaymentOrderActive(),
@@ -217,7 +219,8 @@ export class PayAllSubscriptions {
                     ordersAmount,
                     ordersDiscount,
                     customerShippingZoneMap[customerAndNewOrders[0]]?.cost!,
-                    new CustomerId(customerAndNewOrders[0])
+                    new CustomerId(customerAndNewOrders[0]),
+                    hasFreeShipping
                 );
 
                 newPaymentOrders.push(newPaymentOrder);

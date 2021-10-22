@@ -1,5 +1,6 @@
 import express from "express";
 import { exportSubscriptionsController } from "../../services/exportSubscriptions";
+import { applyCouponToSubscriptionController } from "../../useCases/applyCouponToSubscription";
 import { cancelASubscriptionController } from "../../useCases/cancelASubscription";
 import { createManySubscriptionsController } from "../../useCases/createManySubscriptions";
 import { createSubscriptionController } from "../../useCases/createSubscription";
@@ -37,6 +38,7 @@ subscriptionRouter.put("/handle-3dsecure-failure/:id", (req, res) => handle3dSec
 subscriptionRouter.put("/handle-3dsecure-failure-for-many-subscriptions", (req, res) =>
     handle3dSecureFailureForManySubscriptionsController.execute(req, res)
 );
+subscriptionRouter.put("/apply-coupon/:id", (req, res) => applyCouponToSubscriptionController.execute(req, res));
 
 // DELETEs
 

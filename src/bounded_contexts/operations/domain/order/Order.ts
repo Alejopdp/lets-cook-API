@@ -168,6 +168,7 @@ export class Order extends Entity<Order> {
         // if (paymentOrder && (this.isActive() || this.isPaymentPending())) {
         if (paymentOrder && this.isActive()) {
             paymentOrder.discountOrderAmount(this); // Cancels payment ordeer if amount === 0
+            // if (this.hasFreeShipping) paymentOrder.shippingCost = customerShippingCost
         }
 
         // if (

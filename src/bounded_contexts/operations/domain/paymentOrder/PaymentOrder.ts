@@ -19,6 +19,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     private _shippingCost: number;
     private _customerId: CustomerId;
     private _quantityRefunded: number;
+    private _hasFreeShipping: boolean;
 
     constructor(
         shippingDate: Date,
@@ -30,6 +31,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         discountAmount: number,
         shippingCost: number,
         customerId: CustomerId,
+        hasFreeShipping: boolean,
         quantityRefunded: number = 0,
         paymentOrderId?: PaymentOrderId
     ) {
@@ -43,15 +45,19 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._discountAmount = Math.round(discountAmount * 100) / 100;
         this._shippingCost = Math.round(shippingCost * 100) / 100;
         this._customerId = customerId;
+        this._hasFreeShipping = hasFreeShipping;
         this._quantityRefunded = quantityRefunded;
     }
 
     public addOrder(order: Order): void {
         order.paymentOrderId = this.id;
+
         if (this.state.isPendingConfirmation()) return;
+
         this.amount = (Math.round(this.amount * 100) + Math.round(order.getTotalPrice() * 100)) / 100; // TO DO: Add price with discount
         this.discountAmount = (Math.round(this.discountAmount * 100) + Math.round(order.discountAmount * 100)) / 100; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
 
+        if (order.hasFreeShipping) this.hasFreeShipping = true;
         if (this.state.isCancelled()) this.state.toActive(this);
     }
 
@@ -124,8 +130,23 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this.state.toRejected(this);
     }
 
+    // TO DO: Remove the shipping cost outside of this class in createSubscription and payAllSubscriptions AND USE getFinalAmount()
     public getTotalAmount(): number {
-        return (Math.round(this.amount * 100) + this.shippingCost * 100 - Math.round(this.discountAmount * 100)) / 100;
+        return (Math.round(this.amount * 100) + Math.round(this.shippingCost * 100) - Math.round(this.discountAmount * 100)) / 100;
+    }
+
+    // Same as the previous one, but resting the shipping cost.
+    public getFinalAmount(): number {
+        return (
+            (Math.round(this.amount * 100) +
+                Math.round(this.shippingCost * 100) -
+                Math.round(this.getDiscountAmountOrShippingCostIfHasFreeShipping() * 100)) /
+            100
+        );
+    }
+
+    public getDiscountAmountOrShippingCostIfHasFreeShipping(): number {
+        return this.hasFreeShipping ? this.shippingCost + this.discountAmount : this.discountAmount;
     }
 
     public isBilled(): boolean {
@@ -227,6 +248,22 @@ export class PaymentOrder extends Entity<PaymentOrder> {
      */
     public get quantityRefunded(): number {
         return this._quantityRefunded;
+    }
+
+    /**
+     * Getter hasFreeShipping
+     * @return {boolean}
+     */
+    public get hasFreeShipping(): boolean {
+        return this._hasFreeShipping;
+    }
+
+    /**
+     * Setter hasFreeShipping
+     * @param {boolean} value
+     */
+    public set hasFreeShipping(value: boolean) {
+        this._hasFreeShipping = value;
     }
 
     /**
