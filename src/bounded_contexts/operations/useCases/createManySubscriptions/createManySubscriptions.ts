@@ -157,7 +157,8 @@ export class CreateManySubscriptions {
             totalPrice,
             dto.stripePaymentMethodId ? dto.stripePaymentMethodId : customer.getDefaultPaymentMethod()?.stripeId!,
             customer.email,
-            customer.stripeId
+            customer.stripeId,
+            true
         );
 
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;

@@ -108,7 +108,8 @@ export class ReorderPlan {
                 : subscription.plan.getPlanVariantPrice(subscription.planVariantId) + customerShippingZone.cost,
             subscription.customer.getDefaultPaymentMethod()?.stripeId || "",
             subscription.customer.email,
-            subscription.customer.stripeId
+            subscription.customer.stripeId,
+            true
         );
 
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;

@@ -159,7 +159,7 @@ export class CreateSubscription {
         if (dto.stripePaymentMethodId) {
             const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
 
-            customer.addPaymentMethod(newPaymentMethod);
+            customer.addPaymentMethodAndSetItAsDefault(newPaymentMethod);
         }
 
         const hasFreeShipping =
@@ -177,7 +177,7 @@ export class CreateSubscription {
         };
 
         if (Math.round(newPaymentOrders[0].amount * 100) - Math.round(newPaymentOrders[0].discountAmount * 100) >= 50) {
-            paymentIntent = await this.paymentService.paymentIntent(
+            paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
                 hasFreeShipping
                     ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
                     : newPaymentOrders[0].getTotalAmount(),

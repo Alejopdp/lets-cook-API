@@ -149,6 +149,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         return this.hasFreeShipping ? this.shippingCost + this.discountAmount : this.discountAmount;
     }
 
+    public isPaymentRejected(): boolean {
+        return this.state.isRejected();
+    }
+
     public isBilled(): boolean {
         return this.state.isBilled();
     }
