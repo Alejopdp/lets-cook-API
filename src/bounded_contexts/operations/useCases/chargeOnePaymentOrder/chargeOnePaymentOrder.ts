@@ -81,7 +81,8 @@ export class ChargeOnePaymentOrder {
             totalAmount,
             customer.getDefaultPaymentMethod()?.stripeId!,
             customer.email,
-            customer.stripeId as string
+            customer.stripeId as string,
+            true
         );
 
         // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
@@ -140,7 +141,8 @@ export class ChargeOnePaymentOrder {
                 ordersAmount,
                 ordersDiscount,
                 customerShippingZone.cost,
-                customer.id
+                customer.id,
+                false // TO DO: Calculate
             );
 
             newPaymentOrders.push(newPaymentOrder);

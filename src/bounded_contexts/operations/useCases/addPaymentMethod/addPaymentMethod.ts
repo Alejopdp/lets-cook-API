@@ -17,9 +17,22 @@ export class AddPaymentMethod {
     public async execute(dto: AddPaymentMethodDto): Promise<PaymentMethod> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
-        const newPaymentMethod: PaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripeId, customer.stripeId);
+        const newPaymentMethod = await this.paymentService.getPaymentMethod(dto.stripeId);
+        // const newPaymentMethod: PaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripeId, customer.stripeId);
 
-        customer.addPaymentMethodAndSetItAsDefault(newPaymentMethod);
+        console.log("NEW PAYMENT METHOD: ", newPaymentMethod);
+
+        customer.addPaymentMethodAndSetItAsDefault(
+            new PaymentMethod(
+                newPaymentMethod.card?.brand!,
+                newPaymentMethod.card?.last4!,
+                newPaymentMethod.card?.exp_month!,
+                newPaymentMethod.card?.exp_year!,
+                newPaymentMethod.card?.checks?.cvc_check!,
+                false,
+                newPaymentMethod.id
+            )
+        );
 
         await this.customerRepository.save(customer);
 

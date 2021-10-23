@@ -157,10 +157,13 @@ export class Order extends Entity<Order> {
     }
 
     public bill(customer?: Customer): void {
+        if (this.isCancelled()) return;
+        if (this.isSkipped()) return;
+        if (this.isBilled()) return;
+
         this.state.toBilled(this);
         if (!!customer) {
             customer.countOneReceivedOrder();
-            console.log("Updated customer: ", customer.receivedOrdersQuantity);
         }
     }
 
@@ -168,6 +171,7 @@ export class Order extends Entity<Order> {
         // if (paymentOrder && (this.isActive() || this.isPaymentPending())) {
         if (paymentOrder && this.isActive()) {
             paymentOrder.discountOrderAmount(this); // Cancels payment ordeer if amount === 0
+            // if (this.hasFreeShipping) paymentOrder.shippingCost = customerShippingCost
         }
 
         // if (

@@ -159,14 +159,17 @@ export class CreateSubscription {
         if (dto.stripePaymentMethodId) {
             const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
 
-            customer.addPaymentMethod(newPaymentMethod);
+            customer.addPaymentMethodAndSetItAsDefault(newPaymentMethod);
         }
 
         const hasFreeShipping =
-            coupon?.type.type !== "free" &&
-            (customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
-                customerSubscriptions.length > 0);
+            // TO DO: Validar que la semana proxima tiene al menos 1 envio
+            // paymentOrdersToUpdate.some(po => po.)Z
+            coupon?.type.type === "free" ||
+            customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
+            customerSubscriptions.length > 0;
 
+        // newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost;
         var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
             id: "",
             status: "succeeded",
@@ -174,7 +177,7 @@ export class CreateSubscription {
         };
 
         if (Math.round(newPaymentOrders[0].amount * 100) - Math.round(newPaymentOrders[0].discountAmount * 100) >= 50) {
-            paymentIntent = await this.paymentService.paymentIntent(
+            paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
                 hasFreeShipping
                     ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
                     : newPaymentOrders[0].getTotalAmount(),

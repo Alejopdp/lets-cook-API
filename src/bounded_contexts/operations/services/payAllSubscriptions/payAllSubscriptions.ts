@@ -42,7 +42,7 @@ export class PayAllSubscriptions {
     }
 
     public async execute(): Promise<void> {
-        // const today: Date = new Date(2021, 9, 30);
+        // const today: Date = new Date(2022, 0, 1);
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
         const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
@@ -129,7 +129,8 @@ export class PayAllSubscriptions {
                             totalAmount,
                             paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
                             paymentOrderCustomer.email,
-                            paymentOrderCustomer.stripeId as string
+                            paymentOrderCustomer.stripeId as string,
+                            true
                         );
                     }
 
@@ -208,6 +209,8 @@ export class PayAllSubscriptions {
                     0
                 ); // TO DO: Use coupons, probably need to pass orders to a subscription
 
+                const hasFreeShipping = billingDateAndOrders[1].some((order) => order.hasFreeShipping);
+
                 const newPaymentOrder = new PaymentOrder(
                     new Date(),
                     new PaymentOrderActive(),
@@ -217,7 +220,8 @@ export class PayAllSubscriptions {
                     ordersAmount,
                     ordersDiscount,
                     customerShippingZoneMap[customerAndNewOrders[0]]?.cost!,
-                    new CustomerId(customerAndNewOrders[0])
+                    new CustomerId(customerAndNewOrders[0]),
+                    hasFreeShipping
                 );
 
                 newPaymentOrders.push(newPaymentOrder);

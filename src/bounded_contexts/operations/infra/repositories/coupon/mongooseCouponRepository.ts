@@ -27,6 +27,13 @@ export class MongooseCouponRepository implements ICouponRepository {
         return couponDb ? couponMapper.toDomain(couponDb) : undefined;
     }
 
+    public async findByIdOrThrow(couponId: CouponId): Promise<Coupon> {
+        const couponDb = await MongooseCoupon.findById(couponId.value, { deletionFlag: false });
+        if (!!!couponDb) throw new Error("El cupón ingresado no existe");
+
+        return couponMapper.toDomain(couponDb);
+    }
+
     public async findByCode(couponCode: string): Promise<Coupon | undefined> {
         const couponDb = await MongooseCoupon.findOne({ couponCode: couponCode.toUpperCase(), deletionFlag: false });
 
