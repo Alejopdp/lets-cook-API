@@ -62,12 +62,21 @@ export class GetSubscriptionByIdAsAdminPresenter {
             customerName: customer.getPersonalInfo().fullName || customer.email,
             customerId: customer.id.value,
             restrictionComment: subscription.restrictionComment,
+
             amountDetails: {
                 subtotal: nextActiveOrder?.price,
                 shippingCost: nextPaymentOrder?.shippingCost,
                 discount: subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
-                taxes: 6,
-                total: nextActiveOrder?.getTotalPrice(),
+                taxes:
+                    ((nextActiveOrder?.price || 0) / 1.1 -
+                        (nextActiveOrder?.price || 0) +
+                        (nextPaymentOrder?.shippingCost || 0) / 1.21 -
+                        (nextPaymentOrder?.shippingCost || 0)) *
+                    -1,
+                total:
+                    (nextActiveOrder?.getTotalPrice() || subscription.getPrice()) +
+                    (nextPaymentOrder?.shippingCost || 0) -
+                    subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
             },
             frequency: subscription.frequency.value(),
             plan: presentedPlan,

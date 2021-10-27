@@ -1,21 +1,28 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Customer } from "../../domain/customer/Customer";
+import { Subscription } from "../../domain/subscription/Subscription";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
+import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { GetCouponListPresenter } from "./getCustomerListPresenter";
 
 export class GetCustomerList {
-    private _couponRepository: ICustomerRepository;
+    private _customerRepository: ICustomerRepository;
+    private _subscriptionRepository: ISubscriptionRepository;
     private _storageService: IStorageService;
 
-    constructor(couponRepository: ICustomerRepository, storageService: IStorageService) {
-        this._couponRepository = couponRepository;
+    constructor(customerRepository: ICustomerRepository, subscriptionRepository: ISubscriptionRepository, storageService: IStorageService) {
+        this._customerRepository = customerRepository;
+        this._subscriptionRepository = subscriptionRepository;
         this._storageService = storageService;
     }
 
     public async execute(): Promise<any> {
-        var customer: Customer[] = await this.customerRepository.findAll();
+        var customers: Customer[] = await this.customerRepository.findAll();
+        const subscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerIdList(
+            customers.map((cus) => cus.id)
+        );
         // console.log("GetCoupon Use Case: ", coupons)
-        return GetCouponListPresenter.present(customer);
+        return GetCouponListPresenter.present(customers, subscriptions);
     }
 
     /**
@@ -23,7 +30,15 @@ export class GetCustomerList {
      * @return {ICustomerRepository}
      */
     public get customerRepository(): ICustomerRepository {
-        return this._couponRepository;
+        return this._customerRepository;
+    }
+
+    /**
+     * Getter subscriptionRepository
+     * @return {ISubscriptionRepository}
+     */
+    public get subscriptionRepository(): ISubscriptionRepository {
+        return this._subscriptionRepository;
     }
 
     /**
