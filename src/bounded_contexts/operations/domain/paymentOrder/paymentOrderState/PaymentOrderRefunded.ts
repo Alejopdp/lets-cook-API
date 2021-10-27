@@ -14,7 +14,7 @@ export class PaymentOrderRefunded implements IPaymentOrderState {
 
     constructor() {
         this.title = "PAYMENT_ORDER_REFUNDED";
-        this.humanTitle = "Ordern reembolsada";
+        this.humanTitle = "Orden reembolsada";
         this.color = "green";
     }
 
