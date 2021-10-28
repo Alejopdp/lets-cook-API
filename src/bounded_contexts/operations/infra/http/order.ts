@@ -1,12 +1,18 @@
 import express from "express";
+import multer from "multer";
 import { middleware } from "../../../../shared/middleware";
 import { exportNextOrdersWithRecipesSelectionController } from "../../services/exportNextOrdersWithRecipesSelection";
+import { chooseRecipesForManyOrdersController } from "../../useCases/chooseRecipesForManyOrders";
 import { chooseRecipesForOrderController } from "../../useCases/chooseRecipesForOrder";
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getNextOrdersBySubscriptionController } from "../../useCases/getNextOrdersBySubscription";
 import { getNextOrdersWithRecipesSelectionExportFiltersController } from "../../useCases/getNextOrdersWithRecipesSelectionExportFilters";
 import { getOrderByIdController } from "../../useCases/getOrderById";
 import { skipOrdersController } from "../../useCases/skipOrders";
+
+const options: multer.Options = {
+    dest: "/tmp",
+};
 
 const orderRouter = express.Router();
 
@@ -25,6 +31,9 @@ orderRouter.post("/", (req, res) => createSubscriptionController.execute(req, re
 // PUTs
 orderRouter.put("/skip", (req, res) => skipOrdersController.execute(req, res));
 orderRouter.put("/cancel/:id", (req, res) => res.json({}));
+orderRouter.put("/update-recipes", multer(options).single("recipeSelection"), (req, res) =>
+    chooseRecipesForManyOrdersController.execute(req, res)
+);
 orderRouter.put("/update-recipes/:orderId", middleware.ensureAuthenticated(), (req, res) =>
     chooseRecipesForOrderController.execute(req, res)
 );

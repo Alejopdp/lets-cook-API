@@ -7,9 +7,16 @@ import {
     OrdersWithRecipeSelectionExport,
     SubscriptionExport,
 } from "./IExportService";
-import { utils, WorkBook, WorkSheet, writeFile } from "xlsx";
+import { utils, WorkBook, WorkSheet, writeFile, readFile } from "xlsx";
 
 export class XlsxService implements IExportService {
+    public parseCsvToJson(csvFilePath: string): string[][] {
+        var workbook: WorkBook = readFile(csvFilePath);
+        var third_worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        return utils.sheet_to_json(third_worksheet, { header: 1, blankrows: false });
+    }
+
     public exportSubscriptions(subscriptionsExport: SubscriptionExport[]): void {
         const workbook: WorkBook = utils.book_new();
         const sheet: WorkSheet = utils.json_to_sheet(subscriptionsExport);

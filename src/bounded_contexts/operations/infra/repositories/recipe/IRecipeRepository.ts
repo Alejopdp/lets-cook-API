@@ -4,6 +4,7 @@ import { WeekId } from "../../../domain/week/WeekId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { Order } from "../../../domain/order/Order";
+import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariantSku";
 
 export interface IRecipeRepository {
     save(recipe: Recipe): Promise<void>;
@@ -16,5 +17,6 @@ export interface IRecipeRepository {
     delete(recipeId: RecipeId): Promise<void>;
     findByWeekId(weekId: WeekId): Promise<Recipe[]>;
     findForOrder(order: Order, restrictionId?: RecipeRestrictionId): Promise<Recipe[]>;
-    findNextWeekRecipes(): Promise<Recipe[]>
+    findByRecipeVariantSkuList(recipeVariantSkus: RecipeVariantSku[]): Promise<Recipe[]>;
+    findNextWeekRecipes(): Promise<Recipe[]>;
 }
