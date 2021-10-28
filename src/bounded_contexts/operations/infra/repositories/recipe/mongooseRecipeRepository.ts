@@ -9,6 +9,7 @@ import { logger } from "../../../../../../config";
 import { recipeMapper } from "../../../mappers/recipeMapper";
 import { Order } from "../../../domain/order/Order";
 import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
+import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariantSku";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
     public async save(recipe: Recipe): Promise<void> {
@@ -35,6 +36,10 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         const recipes = await this.findBy({ _id: recipesIds.map((id) => id.value) });
 
         return recipes;
+    }
+
+    public async findByRecipeVariantSkuList(recipeVariantSkus: RecipeVariantSku[]): Promise<Recipe[]> {
+        return await this.findBy({ "recipeVariants.sku": recipeVariantSkus.map((sku) => sku.code) });
     }
 
     public async findByWeekId(weekId: WeekId): Promise<Recipe[]> {

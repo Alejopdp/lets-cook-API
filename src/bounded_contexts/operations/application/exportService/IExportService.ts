@@ -160,6 +160,7 @@ export interface CouponExport {
 }
 
 export interface IExportService {
+    parseCsvToJson(csvFilePath: string): string[][];
     exportSubscriptions(subscriptionsExport: SubscriptionExport[]): void;
     exportCustomers(customersExport: CustomerExport[]): void;
     exportCancellations(cancellationExports: CancellationExport[]): void;

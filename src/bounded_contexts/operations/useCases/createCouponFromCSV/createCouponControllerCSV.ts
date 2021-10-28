@@ -27,8 +27,7 @@ export class CreateCouponControllerCSV extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            // console.log("Body: ",this.req.body)
-            if (!this.req.file) throw new Error("No ha ingresado una imagen para el plan");
+            if (!this.req.file) throw new Error("No ha ingresado ningún archivo para importar cupones");
             const csvCouponsPath = this.req.file.path;
             var workbook = XLSX.readFile(csvCouponsPath);
             var third_worksheet = workbook.Sheets[workbook.SheetNames[0]];

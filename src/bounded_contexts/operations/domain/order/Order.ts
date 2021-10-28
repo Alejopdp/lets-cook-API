@@ -14,6 +14,8 @@ import { Week } from "../week/Week";
 import { OrderId } from "./OrderId";
 import { IOrderState } from "./orderState/IOrderState";
 import { RecipeSelection } from "./RecipeSelection";
+import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
+import { RecipeVariant } from "../recipe/RecipeVariant/RecipeVariant";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -80,7 +82,9 @@ export class Order extends Entity<Order> {
         this._counter = counter;
     }
 
-    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean): void {
+    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, restriction?: RecipeVariantRestriction): void {
+        // TO DO: Search for a better guard?
+        recipeSelection = recipeSelection.filter((selection) => selection.quantity > 0);
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
 
@@ -88,6 +92,15 @@ export class Order extends Entity<Order> {
             throw new Error(`No puedes elegir mas de ${planVariant.getServingsQuantity()}`);
 
         for (let selection of recipeSelection) {
+            const recipeVariantRestriction: RecipeVariantRestriction | undefined = selection.recipe.getVariantRestriction(
+                selection.recipeVariantId
+            );
+            if (!!restriction && !restriction.equals(recipeVariantRestriction) && !restriction.acceptsEveryRecipe())
+                throw new Error(
+                    `El cliente ${this.customer.getFullNameOrEmail()} no puede consumir una receta que no cumpla con ${
+                        restriction.label
+                    } en la suscripción ${this.subscriptionId.value}`
+                );
             if (selection.recipe.availableWeeks.every((week) => !week.id.equals(this.week.id))) {
                 // TO DO: Available weeks could grow too big
                 throw new Error(`La receta ${selection.recipe.getName()} no está disponible en la semana ${this.week.getLabel()}`);
