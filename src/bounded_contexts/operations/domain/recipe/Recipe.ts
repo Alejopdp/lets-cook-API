@@ -56,11 +56,11 @@ export class Recipe extends Entity<Recipe> {
         return this.recipeGeneralData.imageUrl;
     }
 
-    public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]) {
+    public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]): string {
         const variant: RecipeVariant | undefined = this.recipeVariants.find((variant) => variantIds.some((id) => id.equals(variant.id)));
         if (!!!variant) return "";
 
-        return variant.sku;
+        return variant.sku.code;
     }
 
     public updateWeeks(weeks: Week[]): void {

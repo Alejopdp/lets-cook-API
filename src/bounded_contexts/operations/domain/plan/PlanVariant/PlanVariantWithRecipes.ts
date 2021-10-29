@@ -45,6 +45,10 @@ export class PlanVariantWithRecipe extends PlanVariant {
         return this.numberOfPersons * this.numberOfRecipes;
     }
 
+    public getNumberOfRecipes(): number {
+        return this.numberOfRecipes;
+    }
+
     /**
      * Getter numberOfPersons
      * @return {number}
