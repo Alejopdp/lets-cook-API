@@ -3,6 +3,7 @@ import { IExportService } from "../../application/exportService/IExportService";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { ChooseRecipesForManyOrders } from "./chooseRecipesForManyOrders";
 import { ChooseRecipesForManyOrdersDto } from "./chooseRecipesForManyOrdersDto";
+import fs from "fs";
 
 export class ChooseRecipesForManyOrdersController extends BaseController {
     private _chooseRecipesForManyOrders: ChooseRecipesForManyOrders;
@@ -12,7 +13,6 @@ export class ChooseRecipesForManyOrdersController extends BaseController {
         super();
         this._chooseRecipesForManyOrders = chooseRecipesForManyOrders;
         this._xlsxService = xlsxService;
-        // this._chooseRecipesForManyOrdersPresenter = chooseRecipesForManyOrdersPresenter;
     }
 
     protected async executeImpl(): Promise<any> {
@@ -66,10 +66,10 @@ export class ChooseRecipesForManyOrdersController extends BaseController {
                 });
             }
 
-            console.log("Selections: ", JSON.stringify(selections));
             dto.selection = selections;
 
             const { inconsistentCustomerEmails, notOwnerOfOrderCustomerEmails } = await this.chooseRecipesForManyOrders.execute(dto);
+            fs.unlinkSync(filePath);
 
             return this.ok(this.res, { inconsistentCustomerEmails, notOwnerOfOrderCustomerEmails });
         } catch (error) {
