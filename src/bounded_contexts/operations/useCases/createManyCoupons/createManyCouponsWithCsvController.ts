@@ -2,19 +2,21 @@ import { BaseController } from "../../../../core/infra/BaseController";
 import { CouponToCreate, CreateManyCouponsDto } from "./createManyCouponsDto";
 import fs from "fs";
 import { CreateManyCoupons } from "./createManyCoupons";
-import { Locale } from "../../domain/locale/Locale";
 import { IExportService } from "../../application/exportService/IExportService";
 import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
 import { LimitApplicationFactory } from "../../domain/cupons/LimitAplication/LimitApplicationFactory";
+import { CreateManyCouponsPresenter } from "./createManyCouponsWithCsvPresenter";
 
 export class CreateManyCouponsWithCsvController extends BaseController {
     private _createCoupon: CreateManyCoupons;
     private _xlsxService: IExportService;
+    private _createManyCouponsPresenter: CreateManyCouponsPresenter;
 
-    constructor(createCoupon: CreateManyCoupons, xlsxService: IExportService) {
+    constructor(createCoupon: CreateManyCoupons, xlsxService: IExportService, createManyCouponsPresenter: CreateManyCouponsPresenter) {
         super();
         this._createCoupon = createCoupon;
         this._xlsxService = xlsxService;
+        this._createManyCouponsPresenter = createManyCouponsPresenter;
     }
 
     protected async executeImpl(): Promise<any> {
@@ -76,14 +78,11 @@ export class CreateManyCouponsWithCsvController extends BaseController {
             const dto: CreateManyCouponsDto = {
                 couponsToCreate,
             };
-            console.log("CreateManyCouponsControlelr: ", JSON.stringify(dto));
-            console.log("MATRIX: ", JSON.stringify(matrix));
-
-            await this.createCoupon.execute(dto);
+            const coupons = await this.createCoupon.execute(dto);
 
             fs.unlinkSync(filePath);
 
-            return this.ok(this.res);
+            return this.ok(this.res, this.createManyCouponsPresenter.present(coupons));
         } catch (error) {
             return this.fail(error);
         }
@@ -103,5 +102,13 @@ export class CreateManyCouponsWithCsvController extends BaseController {
      */
     public get xlsxService(): IExportService {
         return this._xlsxService;
+    }
+
+    /**
+     * Getter createManyCouponsPresenter
+     * @return {CreateManyCouponsPresenter}
+     */
+    public get createManyCouponsPresenter(): CreateManyCouponsPresenter {
+        return this._createManyCouponsPresenter;
     }
 }
