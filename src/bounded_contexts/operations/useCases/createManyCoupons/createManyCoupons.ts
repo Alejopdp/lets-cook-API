@@ -50,6 +50,8 @@ export class CreateManyCoupons {
         }
 
         await this.couponRepository.saveMany(coupons);
+
+        return coupons;
     }
 
     /**
