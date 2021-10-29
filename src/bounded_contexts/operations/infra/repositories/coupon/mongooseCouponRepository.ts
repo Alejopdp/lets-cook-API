@@ -21,6 +21,12 @@ export class MongooseCouponRepository implements ICouponRepository {
         }
     }
 
+    public async saveMany(coupons: Coupon[]): Promise<void> {
+        const couponsDb = coupons.map((coupon) => couponMapper.toPersistence(coupon));
+
+        await MongooseCoupon.insertMany(couponsDb);
+    }
+
     public async findById(couponId: CouponId): Promise<Coupon | undefined> {
         const couponDb = await MongooseCoupon.findById(couponId.value, { deletionFlag: false });
 

@@ -41,9 +41,10 @@ export class CreateCoupon {
             dto.maxChargeQtyType,
             dto.maxChargeQtyValue,
             dto.startDate,
-            dto.endDate,
             CouponState.ACTIVE,
-            0
+            0,
+            [],
+            dto.endDate
         );
         const couponWithSameCode: Coupon | undefined = await this.couponRepository.findActiveByCode(coupon.couponCode);
 
