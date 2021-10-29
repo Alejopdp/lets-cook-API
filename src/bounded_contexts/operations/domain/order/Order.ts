@@ -88,10 +88,20 @@ export class Order extends Entity<Order> {
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
 
-        if (totalIncomingRecipes > planVariant.getServingsQuantity())
-            throw new Error(`No puedes elegir mas de ${planVariant.getServingsQuantity()}`);
+        if (totalIncomingRecipes > planVariant.getNumberOfRecipes())
+            throw new Error(
+                `No puedes elegir mas de ${planVariant.getNumberOfRecipes()} recetas para el plan ${
+                    this.plan.name
+                } y variante de ${planVariant.getLabel()}`
+            );
 
         for (let selection of recipeSelection) {
+            if (selection.recipe.relatedPlans.every((planId) => !planId.equals(this.plan.id)))
+                throw new Error(
+                    `La receta ${selection.recipe.getName()} (variante con SKU ${selection.recipe.getVariantSkuByVariantsIds([
+                        selection.recipeVariantId,
+                    ])}) no está asociada al ${this.plan.name}`
+                );
             const recipeVariantRestriction: RecipeVariantRestriction | undefined = selection.recipe.getVariantRestriction(
                 selection.recipeVariantId
             );

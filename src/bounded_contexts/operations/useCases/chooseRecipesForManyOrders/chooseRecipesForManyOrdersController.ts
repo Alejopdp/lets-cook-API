@@ -1,5 +1,6 @@
 import { BaseController } from "../../../../core/infra/BaseController";
 import { IExportService } from "../../application/exportService/IExportService";
+import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { ChooseRecipesForManyOrders } from "./chooseRecipesForManyOrders";
 import { ChooseRecipesForManyOrdersDto } from "./chooseRecipesForManyOrdersDto";
 
@@ -25,20 +26,28 @@ export class ChooseRecipesForManyOrdersController extends BaseController {
             const orderIdSelectionMap: { [orderId: string]: { quantity: number; recipeVariantSku: string; customerEmail: string }[] } = {};
 
             for (let i = 0; i < matrix.length; i++) {
-                const orderId = matrix[i][1];
+                const orderId = matrix[i][0];
                 const actualItem = orderIdSelectionMap[orderId];
 
                 if (!!orderId && i > 0) {
                     if (!!!actualItem) {
-                        orderIdSelectionMap[orderId] = [
-                            { customerEmail: matrix[i][0], recipeVariantSku: matrix[i][2], quantity: parseInt(matrix[i][3]) },
-                        ];
+                        orderIdSelectionMap[orderId] = [{ customerEmail: matrix[i][1], recipeVariantSku: matrix[i][4], quantity: 1 }];
                     } else {
-                        orderIdSelectionMap[orderId].push({
-                            customerEmail: matrix[i][0],
-                            recipeVariantSku: matrix[i][2],
-                            quantity: parseInt(matrix[i][3]),
-                        });
+                        if (orderIdSelectionMap[orderId].some((recipeSelection) => recipeSelection.recipeVariantSku === matrix[i][4])) {
+                            orderIdSelectionMap[orderId] = orderIdSelectionMap[orderId].map((recipeSelection) => ({
+                                ...recipeSelection,
+                                quantity:
+                                    recipeSelection.recipeVariantSku === matrix[i][4]
+                                        ? recipeSelection.quantity + 1
+                                        : recipeSelection.quantity,
+                            }));
+                        } else {
+                            orderIdSelectionMap[orderId].push({
+                                customerEmail: matrix[i][1],
+                                recipeVariantSku: matrix[i][4],
+                                quantity: 1,
+                            });
+                        }
                     }
                 }
             }
@@ -57,6 +66,7 @@ export class ChooseRecipesForManyOrdersController extends BaseController {
                 });
             }
 
+            console.log("Selections: ", JSON.stringify(selections));
             dto.selection = selections;
 
             const { inconsistentCustomerEmails, notOwnerOfOrderCustomerEmails } = await this.chooseRecipesForManyOrders.execute(dto);

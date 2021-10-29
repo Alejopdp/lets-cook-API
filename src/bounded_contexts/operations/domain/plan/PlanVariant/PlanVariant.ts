@@ -62,6 +62,10 @@ export class PlanVariant extends Entity<PlanVariant> {
         return 0;
     }
 
+    public getNumberOfRecipes(): number {
+        return 0;
+    }
+
     public getAuxIdFromAttributes(): string {
         return "";
     }
