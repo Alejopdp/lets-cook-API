@@ -176,7 +176,7 @@ export class CreateSubscription {
             client_secret: "",
         };
 
-        if (Math.round(newPaymentOrders[0].amount * 100) - Math.round(newPaymentOrders[0].discountAmount * 100) >= 50) {
+        if (Math.round(newPaymentOrders[0].getFinalAmount()) >= 50) {
             paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
                 hasFreeShipping
                     ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
