@@ -2,12 +2,14 @@ import { CustomerId } from "../../domain/customer/CustomerId";
 import { Order } from "../../domain/order/Order";
 import { OrderId } from "../../domain/order/OrderId";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { RecipeVariantId } from "../../domain/recipe/RecipeVariant/RecipeVariantId";
 import { RecipeVariantSku } from "../../domain/recipe/RecipeVariant/RecipeVariantSku";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
+import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { ChooseRecipesForManyOrdersDto } from "./chooseRecipesForManyOrdersDto";
@@ -16,12 +18,20 @@ export class ChooseRecipesForManyOrders {
     private _orderRepository: IOrderRepository;
     private _recipeRepository: IRecipeRepository;
     private _subscriptionRepository: ISubscriptionRepository;
+    private _paymentOrderRepository: IPaymentOrderRepository;
 
-    constructor(orderRepository: IOrderRepository, recipeRepository: IRecipeRepository, subscriptionRepository: ISubscriptionRepository) {
+    constructor(
+        orderRepository: IOrderRepository,
+        recipeRepository: IRecipeRepository,
+        subscriptionRepository: ISubscriptionRepository,
+        paymentOrderRepository: IPaymentOrderRepository
+    ) {
         this._orderRepository = orderRepository;
         this._recipeRepository = recipeRepository;
         this._subscriptionRepository = subscriptionRepository;
+        this._paymentOrderRepository = paymentOrderRepository;
     }
+
     public async execute(
         dto: ChooseRecipesForManyOrdersDto
     ): Promise<{ inconsistentCustomerEmails: string[]; notOwnerOfOrderCustomerEmails: string[] }> {
@@ -48,10 +58,16 @@ export class ChooseRecipesForManyOrders {
         }
 
         const orders: Order[] = await this.orderRepository.findByIdList(orderIds);
+        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(orders.map((order) => order.subscriptionId));
         const recipes: Recipe[] = await this.recipeRepository.findByRecipeVariantSkuList(recipeVariantSkus);
         const recipeVariantSkuRecipeMap: { [recipeVariantSku: string]: { recipe: Recipe; recipeVariantId: RecipeVariantId } } = {};
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
+        const paymentOrderMap: { [paymentOrderId: string]: PaymentOrder } = {};
+
+        for (let paymentOrder of paymentOrders) {
+            paymentOrderMap[paymentOrder.id.value] = paymentOrder;
+        }
 
         for (let recipe of recipes) {
             for (let variant of recipe.recipeVariants) {
@@ -90,9 +106,11 @@ export class ChooseRecipesForManyOrders {
                     )
             );
             order.updateRecipes(recipeSelections, true, subscriptionMap[order.subscriptionId.value].restriction);
+            paymentOrderMap[order.paymentOrderId?.value!].lastRecipeSelectionDate = new Date();
         }
 
         await this.orderRepository.updateMany(orders);
+        await this.paymentOrderRepository.updateMany(paymentOrders);
 
         return { inconsistentCustomerEmails, notOwnerOfOrderCustomerEmails };
     }
@@ -119,5 +137,13 @@ export class ChooseRecipesForManyOrders {
      */
     public get subscriptionRepository(): ISubscriptionRepository {
         return this._subscriptionRepository;
+    }
+
+    /**
+     * Getter paymentOrderRepository
+     * @return {IPaymentOrderRepository}
+     */
+    public get paymentOrderRepository(): IPaymentOrderRepository {
+        return this._paymentOrderRepository;
     }
 }
