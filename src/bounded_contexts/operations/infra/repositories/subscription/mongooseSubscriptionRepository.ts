@@ -57,6 +57,10 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return await this.findBy({}, locale);
     }
 
+    public async findAllCancelledSubscriptions(): Promise<Subscription[]> {
+        return await this.findBy({ state: "SUBSCRIPTION_CANCELLED" });
+    }
+
     public async findBy(conditions: any, locale: Locale = Locale.es, options?: QueryOptions): Promise<Subscription[]> {
         const subscriptionsDb = await MongooseSubscription.find({ ...conditions, deletionFlag: false }, null, options)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })

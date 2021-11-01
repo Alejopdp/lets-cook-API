@@ -17,7 +17,7 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             raw.shippingDate,
             state,
             raw.paymentIntentId,
-            raw.billingDate,
+            new Date(raw.billingDate),
             week,
             raw.amount / 100,
             raw.discountAmount / 100,

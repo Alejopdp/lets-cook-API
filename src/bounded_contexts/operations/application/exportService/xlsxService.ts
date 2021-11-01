@@ -34,7 +34,11 @@ export class XlsxService implements IExportService {
     }
 
     public exportCancellations(cancellationExports: CancellationExport[]): void {
-        throw new Error("Method not implemented.");
+        const workbook: WorkBook = utils.book_new();
+        const sheet: WorkSheet = utils.json_to_sheet(cancellationExports);
+
+        utils.book_append_sheet(workbook, sheet, "Cancelaciones");
+        writeFile(workbook, "Cancelaciones.xlsx");
     }
 
     public exportCoupons(couponsExport: CouponExport[]): void {

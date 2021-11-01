@@ -110,6 +110,19 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         return await this.findBy({}, locale);
     }
 
+    public async findAllSortedByBillingDateDesc(locale: Locale): Promise<PaymentOrder[]> {
+        const paymentOrdersDb = await MongoosePaymentOrder.find({ deletionFlag: false })
+            .sort({ billingDate: -1 })
+            .populate("week")
+            .populate({
+                path: "recipes",
+                populate: { path: "recipeVariants", populate: { path: "restriction" } },
+            })
+            .populate("plan");
+
+        return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
+    }
+
     public async findBy(conditions: any, locale: Locale = Locale.es): Promise<PaymentOrder[]> {
         const paymentOrdersDb = await MongoosePaymentOrder.find({ ...conditions, deletionFlag: false })
             .sort({ billingDate: 1 })
