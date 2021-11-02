@@ -2,6 +2,7 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { Subscription } from "../../domain/subscription/Subscription";
 import { ExportCancellationsDto } from "./exportCancellationsDto";
 import { CancellationExport, IExportService } from "../../application/exportService/IExportService";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 
 export class ExportCancellations {
     private _subscriptionRepository: ISubscriptionRepository;
@@ -23,11 +24,13 @@ export class ExportCancellations {
                 customerLastName: subscription.customer.getPersonalInfo().lastName!,
                 subscriptionId: subscription.id.value,
                 status: subscription.state.humanTitle,
-                subscriptionCreatedAt: subscription.createdAt,
+                subscriptionCreatedAt: MomentTimeService.getDddDdMmmm(subscription.createdAt),
                 planTitle: subscription.plan.name,
                 planVariantTitle: subscription.getPlanVariantLabel(),
                 cancellationReason: subscription.cancellationReason?.title || "",
-                cancellationDate: subscription.cancellationReason?.date || "",
+                cancellationDate: !!subscription.cancellationReason
+                    ? MomentTimeService.getDddDdMmmm(subscription.cancellationReason?.date!)
+                    : "",
                 cancellationComment: "",
                 // numberOfActiveSubscriptions: 999,
                 // numberOfSubscriptions: 1,

@@ -8,7 +8,10 @@ export class CreateSubscriptionPresenter {
         subscription: Subscription,
         paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string },
         firstOrder: Order,
-        customerPaymentMethods: PaymentMethod[]
+        customerPaymentMethods: PaymentMethod[],
+        amountBilled: number,
+        tax: number,
+        shippingCost: number
     ): any {
         return {
             subscriptionId: subscription.id.value,
@@ -23,6 +26,7 @@ export class CreateSubscriptionPresenter {
                 expirationDate: pm.getExpirationDate(),
                 isDefault: pm.isDefault,
             })),
+            amountBilled,
         };
     }
 }
