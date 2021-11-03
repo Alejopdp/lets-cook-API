@@ -25,7 +25,7 @@ export class CancelASubscription {
 
     public async execute(dto: CancelASubscriptionDto): Promise<void> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const cancellationReason: CancellationReason = new CancellationReason(dto.cancellationReason, dto.cancellationComment);
+        const cancellationReason: CancellationReason = new CancellationReason(dto.cancellationReason, dto.cancellationComment, new Date());
         const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId);
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");
 

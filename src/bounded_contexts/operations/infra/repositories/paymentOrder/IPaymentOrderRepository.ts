@@ -9,6 +9,7 @@ export interface IPaymentOrderRepository {
     bulkSave(paymentOrders: PaymentOrder[]): Promise<void>;
     updateMany(paymentOrders: PaymentOrder[]): Promise<void>;
     findAll(locale: Locale): Promise<PaymentOrder[]>;
+    findAllSortedByBillingDateDesc(locale: Locale): Promise<PaymentOrder[]>;
     findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined>;
     findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder>;
     findBy(conditions: any, locale: Locale): Promise<PaymentOrder[]>;
@@ -18,7 +19,7 @@ export interface IPaymentOrderRepository {
     findActiveByCustomerAndBillingDateList(billingDates: Date[], customerId: CustomerId): Promise<PaymentOrder[]>;
     findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]>;
     findByBillingDateList(billingDateList: Date[], customerId: CustomerId): Promise<PaymentOrder[]>;
-    findByBillingDate(billingDate: Date): Promise<PaymentOrder[]>
+    findByBillingDate(billingDate: Date): Promise<PaymentOrder[]>;
     findByIdList(paymentOrdersIds: PaymentOrderId[]): Promise<PaymentOrder[]>;
     findAnActivePaymentOrder(): Promise<PaymentOrder | undefined>;
     findActiveByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]>;

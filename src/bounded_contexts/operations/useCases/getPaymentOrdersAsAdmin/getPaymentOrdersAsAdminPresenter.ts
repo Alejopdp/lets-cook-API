@@ -26,12 +26,25 @@ export class GetPaymentOrdersAsAdminPresenter {
             if (paymentOrder.state.title === "PAYMENT_ORDER_REJECTED") rejectedOrders.push(presentedOrder);
         }
 
-        return { activeOrders, billedOrders: _.orderBy(billedOrders, ["billingDate"], ["desc"]), rejectedOrders };
+        console.log("GoLA");
+
+        return {
+            activeOrders: activeOrders.sort((po1, po2) =>
+                !!!po1.lastRecipeSelectionDate
+                    ? 1
+                    : !!!po2.lastRecipeSelectionDate
+                    ? -1
+                    : po2.lastRecipeSelectionDate.getTime() - po1.lastRecipeSelectionDate.getTime()
+            ),
+            billedOrders: _.orderBy(billedOrders, ["originalBillingDate"], ["desc"]),
+            rejectedOrders,
+        };
     }
 
     public presentPaymentOrder(paymentOrder: PaymentOrder, customer: Customer): any {
         return {
             id: paymentOrder.id.value,
+            originalBillingDate: paymentOrder.billingDate,
             billingDate: paymentOrder.getDdMmYyyyBillingDate(),
             customerName: customer.getPersonalInfo()?.fullName,
             customerEmail: customer.email,
@@ -39,6 +52,7 @@ export class GetPaymentOrdersAsAdminPresenter {
             state: paymentOrder.state.title,
             amount: paymentOrder.getFinalAmount(),
             paymentIntentId: paymentOrder.paymentIntentId,
+            lastRecipeSelectionDate: paymentOrder.lastRecipeSelectionDate,
         };
     }
 }

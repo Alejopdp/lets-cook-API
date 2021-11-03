@@ -18,5 +18,6 @@ export interface ISubscriptionRepository {
     findActiveSubscriptionByPlanVariantsIds(planVariantsIds: PlanVariantId[]): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerId(customerId: CustomerId): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerIdList(customersIds: CustomerId[]): Promise<Subscription[]>;
+    findAllCancelledSubscriptions(): Promise<Subscription[]>;
     delete(subscriptionId: SubscriptionId): Promise<void>;
 }

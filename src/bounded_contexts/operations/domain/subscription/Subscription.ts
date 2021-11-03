@@ -238,6 +238,7 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public cancel(cancellationReason: CancellationReason, nextOrders: Order[], paymentOrders: PaymentOrder[]): void {
+        cancellationReason.date = new Date();
         this.cancellationReason = cancellationReason;
 
         for (let order of nextOrders) {

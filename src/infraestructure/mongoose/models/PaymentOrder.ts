@@ -63,6 +63,10 @@ const PaymentOrderSchema = new mongoose.Schema(
             default: false,
         },
 
+        lastRecipeSelectionDate: {
+            type: Date,
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,

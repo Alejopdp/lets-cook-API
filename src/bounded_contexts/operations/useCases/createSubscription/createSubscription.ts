@@ -77,6 +77,9 @@ export class CreateSubscription {
         paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string };
         firstOrder: Order;
         customerPaymentMethods: PaymentMethod[];
+        amountBilled: number;
+        tax: number;
+        shippingCost: number;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(customerId);
@@ -176,11 +179,13 @@ export class CreateSubscription {
             client_secret: "",
         };
 
+        const amountToBill = hasFreeShipping
+            ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
+            : newPaymentOrders[0].getTotalAmount();
+
         if (Math.round(newPaymentOrders[0].getFinalAmount()) >= 50) {
             paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
-                hasFreeShipping
-                    ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
-                    : newPaymentOrders[0].getTotalAmount(),
+                amountToBill,
                 dto.stripePaymentMethodId
                     ? dto.stripePaymentMethodId
                     : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
@@ -218,7 +223,17 @@ export class CreateSubscription {
         }
         if (coupon) await this.couponRepository.save(coupon);
 
-        return { subscription, paymentIntent, firstOrder: orders[0], customerPaymentMethods: customer.paymentMethods };
+        return {
+            subscription,
+            paymentIntent,
+            firstOrder: orders[0],
+            customerPaymentMethods: customer.paymentMethods,
+            amountBilled: amountToBill,
+            tax:
+                Math.round((amountToBill - newPaymentOrders[0].shippingCost) * 0.1) +
+                (hasFreeShipping ? 0 : Math.round(newPaymentOrders[0].shippingCost * 0.21)),
+            shippingCost: hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost,
+        };
     }
 
     /**

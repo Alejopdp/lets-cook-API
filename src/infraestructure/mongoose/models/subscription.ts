@@ -30,7 +30,7 @@ const SubscriptionSchema = new mongoose.Schema(
         },
         restrictionComment: {
             type: String,
-            required: true,
+            // required: true,
             default: "",
         },
 
@@ -73,6 +73,10 @@ const SubscriptionSchema = new mongoose.Schema(
                 },
                 comment: {
                     type: String,
+                },
+
+                date: {
+                    type: Date,
                 },
             },
         },

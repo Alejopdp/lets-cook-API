@@ -20,6 +20,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     private _customerId: CustomerId;
     private _quantityRefunded: number;
     private _hasFreeShipping: boolean;
+    private _lastRecipeSelectionDate?: Date;
 
     constructor(
         shippingDate: Date,
@@ -33,7 +34,8 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         customerId: CustomerId,
         hasFreeShipping: boolean,
         quantityRefunded: number = 0,
-        paymentOrderId?: PaymentOrderId
+        paymentOrderId?: PaymentOrderId,
+        lastRecipeSelectionDate?: Date
     ) {
         super(paymentOrderId);
         this._shippingDate = shippingDate;
@@ -47,6 +49,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._customerId = customerId;
         this._hasFreeShipping = hasFreeShipping;
         this._quantityRefunded = quantityRefunded;
+        this._lastRecipeSelectionDate = lastRecipeSelectionDate;
     }
 
     public addOrder(order: Order): void {
@@ -263,6 +266,14 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     /**
+     * Getter lastRecipeSelectionDate
+     * @return { Date | undefined}
+     */
+    public get lastRecipeSelectionDate(): Date | undefined {
+        return this._lastRecipeSelectionDate;
+    }
+
+    /**
      * Setter hasFreeShipping
      * @param {boolean} value
      */
@@ -348,5 +359,13 @@ export class PaymentOrder extends Entity<PaymentOrder> {
      */
     public set quantityRefunded(value: number) {
         this._quantityRefunded = value;
+    }
+
+    /**
+     * Setter lastRecipeSelectionDate
+     * @param {Date | undefined} value
+     */
+    public set lastRecipeSelectionDate(value: Date | undefined) {
+        this._lastRecipeSelectionDate = value;
     }
 }

@@ -122,12 +122,11 @@ export interface CancellationExport {
     customerFirstName: string;
     customerLastName: string;
     customerEmail: string;
-    createdAt: string;
     status: string;
-    shopifyCustomerId: string;
-    pastOrdersCount: number;
-    numberOfActiveSubscriptions: number;
-    numberOfSubscriptions: number;
+    // shopifyCustomerId: string;
+    // pastOrdersCount: number;
+    // numberOfActiveSubscriptions: number;
+    // numberOfSubscriptions: number;
     subscriptionId: string | number;
     subscriptionCreatedAt: string;
     cancellationDate: string;
