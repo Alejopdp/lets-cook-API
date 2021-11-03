@@ -55,29 +55,35 @@ export class SwapSubscriptionPlan {
 
         // UPDATE PAYEMNT ORDERS COST
         if (oldSubscriptionPrice !== subscription.price) {
-            const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByBillingDateList(
-                orders.map((order) => order.billingDate),
-                subscription.customer.id
+            const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(
+                orders.map((order) => order.paymentOrderId!)
             );
             const coupon: Coupon | undefined = subscription.coupon
                 ? await this.couponRepository.findById(subscription.coupon.id)
                 : undefined;
 
             for (let paymentOrder of paymentOrders) {
-                paymentOrder.amount = paymentOrder.amount - oldSubscriptionPrice + subscription.price;
+                if (paymentOrder.state.isBilled()) continue;
+                paymentOrder.amount =
+                    (Math.round(paymentOrder.amount * 100) -
+                        Math.round(oldSubscriptionPrice * 100) +
+                        Math.round(subscription.price * 100)) /
+                    100;
                 if (!!coupon) {
                     // TO DO: ChECK COUPON VALIDATIONS
                     paymentOrder.discountAmount =
-                        paymentOrder.discountAmount -
-                        coupon.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) +
-                        coupon.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost);
+                        (Math.round(paymentOrder.discountAmount * 100) -
+                            Math.round(coupon.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) * 100) +
+                            Math.round(coupon.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost) * 100)) /
+                        100;
                 }
             }
 
             await this.paymentOrderRepository.updateMany(paymentOrders);
         }
 
-        await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
+        // await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
+        await this.orderRepository.updateMany(orders);
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
     }
 

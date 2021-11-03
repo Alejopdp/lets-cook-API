@@ -8,6 +8,7 @@ export class GetSubscriptionListPresenter {
             presentedSubscriptions.push({
                 id: subscription.id.value,
                 customerName: subscription.customer.getPersonalInfo()?.fullName,
+                customerEmail: subscription.customer.email,
                 customerId: subscription.customer.id.value,
                 plan: subscription.plan.name,
                 planVariant: subscription.getPlanVariantLabel(),

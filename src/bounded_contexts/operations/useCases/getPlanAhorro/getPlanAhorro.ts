@@ -14,8 +14,6 @@ export class GetPlanAhorro {
     public async execute(dto: GetPlanAhorroDto): Promise<Plan> {
         var plan: Plan | undefined = await this.planRepository.findPlanAhorro(dto.locale);
 
-        console.log("PLAN: ", plan);
-
         if (!plan) throw new Error("El plan ingresado no existe");
 
         return plan;

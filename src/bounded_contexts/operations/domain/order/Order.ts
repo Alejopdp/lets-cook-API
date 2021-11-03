@@ -1,6 +1,8 @@
+import { Utils } from "../../../..//core/logic/Utils";
 import { logger } from "../../../../../config";
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Customer } from "../customer/Customer";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../paymentOrder/PaymentOrderId";
 import { Plan } from "../plan/Plan";
@@ -12,6 +14,8 @@ import { Week } from "../week/Week";
 import { OrderId } from "./OrderId";
 import { IOrderState } from "./orderState/IOrderState";
 import { RecipeSelection } from "./RecipeSelection";
+import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
+import { RecipeVariant } from "../recipe/RecipeVariant/RecipeVariant";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -26,7 +30,13 @@ export class Order extends Entity<Order> {
     private _subscriptionId: SubscriptionId;
     private _recipesVariantsIds: RecipeVariantId[];
     private _recipeSelection: RecipeSelection[];
+    private _choseByAdmin: boolean;
+    private _firstDateOfRecipesSelection?: Date;
+    private _lastDateOfRecipesSelection?: Date;
     private _paymentOrderId?: PaymentOrderId;
+    private _createdAt: Date;
+    private _customer: Customer;
+    private _counter: number;
 
     constructor(
         shippingDate: Date,
@@ -41,8 +51,14 @@ export class Order extends Entity<Order> {
         subscriptionId: SubscriptionId,
         recipeVariantsIds: RecipeVariantId[],
         recipeSelection: RecipeSelection[],
+        choseByAdmin: boolean,
+        customer: Customer,
+        firstDateOfRecipesSelection?: Date,
+        lastDateOfRecipesSelection?: Date,
         paymentOrderId?: PaymentOrderId,
-        orderId?: OrderId
+        orderId?: OrderId,
+        createdAt: Date = new Date(),
+        counter: number = 0
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -51,23 +67,50 @@ export class Order extends Entity<Order> {
         this._week = week;
         this._planVariantId = planVariantId;
         this._plan = plan;
-        this._price = price;
-        this._discountAmount = discountAmount;
+        this._price = Math.round(price * 100) / 100;
+        this._discountAmount = Math.round(discountAmount * 100) / 100;
         this._hasFreeShipping = hasFreeShipping;
         this._subscriptionId = subscriptionId;
         this._recipesVariantsIds = recipeVariantsIds;
         this._recipeSelection = recipeSelection;
+        this._choseByAdmin = choseByAdmin;
+        this._firstDateOfRecipesSelection = firstDateOfRecipesSelection;
+        this._lastDateOfRecipesSelection = lastDateOfRecipesSelection;
         this._paymentOrderId = paymentOrderId;
+        this._createdAt = createdAt;
+        this._customer = customer;
+        this._counter = counter;
     }
 
-    public updateRecipes(recipeSelection: RecipeSelection[]): void {
+    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, restriction?: RecipeVariantRestriction): void {
+        // TO DO: Search for a better guard?
+        recipeSelection = recipeSelection.filter((selection) => selection.quantity > 0);
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
 
-        if (totalIncomingRecipes > planVariant.getServingsQuantity())
-            throw new Error(`No puedes elegir mas de ${planVariant.getServingsQuantity()}`);
+        if (totalIncomingRecipes > planVariant.getNumberOfRecipes())
+            throw new Error(
+                `No puedes elegir mas de ${planVariant.getNumberOfRecipes()} recetas para el plan ${
+                    this.plan.name
+                } y variante de ${planVariant.getLabel()}`
+            );
 
         for (let selection of recipeSelection) {
+            if (selection.recipe.relatedPlans.every((planId) => !planId.equals(this.plan.id)))
+                throw new Error(
+                    `La receta ${selection.recipe.getName()} (variante con SKU ${selection.recipe.getVariantSkuByVariantsIds([
+                        selection.recipeVariantId,
+                    ])}) no está asociada al ${this.plan.name}`
+                );
+            const recipeVariantRestriction: RecipeVariantRestriction | undefined = selection.recipe.getVariantRestriction(
+                selection.recipeVariantId
+            );
+            if (!!restriction && !restriction.equals(recipeVariantRestriction) && !restriction.acceptsEveryRecipe())
+                throw new Error(
+                    `El cliente ${this.customer.getFullNameOrEmail()} no puede consumir una receta que no cumpla con ${
+                        restriction.label
+                    } en la suscripción ${this.subscriptionId.value}`
+                );
             if (selection.recipe.availableWeeks.every((week) => !week.id.equals(this.week.id))) {
                 // TO DO: Available weeks could grow too big
                 throw new Error(`La receta ${selection.recipe.getName()} no está disponible en la semana ${this.week.getLabel()}`);
@@ -75,10 +118,17 @@ export class Order extends Entity<Order> {
         }
 
         this.recipeSelection = recipeSelection;
+        this.choseByAdmin = isAdminChoosing;
+        if (!!!this.firstDateOfRecipesSelection) this.firstDateOfRecipesSelection = new Date();
+        this.lastDateOfRecipesSelection = new Date();
     }
 
     public isActive(): boolean {
         return this.state.isActive();
+    }
+
+    public isBilled(): boolean {
+        return this.state.isBilled();
     }
 
     public isSkipped(): boolean {
@@ -96,12 +146,25 @@ export class Order extends Entity<Order> {
         return this.state.isPaymentRejected();
     }
 
-    public skip(): void {
+    public skip(paymentOrder: PaymentOrder): void {
+        if (this.isBilled()) throw new Error("No es posible saltar una orden que ya fue cobrada");
+        const today = new Date();
+
+        if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
+        paymentOrder.discountOrderAmount(this);
+
         this.state.toSkipped(this);
     }
 
-    public reactivate(): void {
-        this.state.toActive(this);
+    public reactivate(paymentOrder: PaymentOrder): void {
+        const today = new Date();
+
+        if (today > this.shippingDate) throw new Error("No es posible reaundar una orden pasada");
+        if (this.isSkipped()) {
+            // TO DO: push it to state
+            paymentOrder.addOrder(this);
+            this.state.toActive(this);
+        }
     }
 
     public toPaymentPending(): void {
@@ -116,17 +179,32 @@ export class Order extends Entity<Order> {
         return this.week.getLabel();
     }
 
-    public bill(): void {
+    public bill(customer?: Customer): void {
+        if (this.isCancelled()) return;
+        if (this.isSkipped()) return;
+        if (this.isBilled()) return;
+
         this.state.toBilled(this);
+        if (!!customer) {
+            customer.countOneReceivedOrder();
+        }
     }
 
     public cancel(paymentOrder?: PaymentOrder): void {
-        if (paymentOrder && !this.isCancelled()) {
-            paymentOrder.discountOrderAmount(this);
+        // if (paymentOrder && (this.isActive() || this.isPaymentPending())) {
+        if (paymentOrder && this.isActive()) {
+            paymentOrder.discountOrderAmount(this); // Cancels payment ordeer if amount === 0
+            // if (this.hasFreeShipping) paymentOrder.shippingCost = customerShippingCost
         }
 
-        if (paymentOrder && paymentOrder.amount === 0) paymentOrder.toCancelled([]);
+        // if (
+        //     paymentOrder &&
+        //     paymentOrder.amount === 0 &&
+        //     (paymentOrder.state.title === "PAYMENT_ORDER_ACTIVE" || paymentOrder.state.title === "PAYMENT_ORDER_PENDING_CONFIRMATION")
+        // )
+        //     paymentOrder.toCancelled([]);
 
+        if (this.state.title === "ORDER_BILLED") return;
         this.state.toCancelled(this);
     }
 
@@ -135,10 +213,12 @@ export class Order extends Entity<Order> {
     }
 
     public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId): void {
+        if (this.isBilled()) return;
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
         this.recipesVariantsIds = [];
+        this.price = newPlan.getPlanVariantPrice(newPlanVariantId);
     }
 
     public getDdMmYyyyShipmentDate(): string {
@@ -146,6 +226,10 @@ export class Order extends Entity<Order> {
     }
     public getHumanShippmentDay(): string {
         return MomentTimeService.getDateHumanLabel(this.shippingDate);
+    }
+
+    public getDdMmYyyyBillingDate(): string {
+        return MomentTimeService.getDdMmYyyy(this.billingDate);
     }
 
     public getHumanBillingDay(): string {
@@ -180,16 +264,70 @@ export class Order extends Entity<Order> {
         return this.plan.getPlanVariantLabel(planVariantId);
     }
 
-    public isActualWeek(): boolean {
-        const date: Date = new Date();
+    public getNumberOfRecipesOrReturn0(): number {
+        const numberOfRecipes: string | number = this.plan.getNumberOfRecipesOfPlanVariant(this.planVariantId);
+        return typeof numberOfRecipes === "string" ? parseInt(numberOfRecipes) : numberOfRecipes;
+    }
 
-        return date >= this.week.minDay && date <= this.week.maxDay;
+    public getKitPrice(): number {
+        const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
+        if (!!!planVariant) return 0;
+
+        return Utils.roundTwoDecimals(
+            //@ts-ignore
+            planVariant.numberOfRecipes
+                ? //@ts-ignore
+                  this.getTotalPrice() / planVariant.numberOfRecipes
+                : this.getTotalPrice()
+        );
+    }
+
+    public getKitDiscount(): number {
+        const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
+        if (!!!planVariant) return 0;
+
+        return Utils.roundTwoDecimals(
+            //@ts-ignore
+            planVariant.numberOfRecipes
+                ? //@ts-ignore
+                  Math.round(this.discountAmount * 100) / planVariant.numberOfRecipes / 100
+                : this.discountAmount
+        );
+    }
+
+    public getFinalKitPrice(): number {
+        const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
+        if (!!!planVariant) return 0;
+
+        return Utils.roundTwoDecimals(
+            //@ts-ignore
+            planVariant.numberOfRecipes
+                ? //@ts-ignore
+                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfRecipes / 100
+                : (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / 100
+        );
+    }
+
+    public getFinalPortionPrice(): number {
+        const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(this.planVariantId);
+        if (!!!planVariant) return 0;
+
+        //@ts-ignore
+        return Utils.roundTwoDecimals(this.getFinalKitPrice() / ((planVariant.numberOfPersons || 1) * (planVariant.numberOfRecipes || 1)));
+    }
+
+    public isActualWeek(): boolean {
+        const today: Date = new Date();
+        const auxMinDay = new Date(this.week.minDay);
+        auxMinDay.setDate(auxMinDay.getDate() - 1);
+
+        return today >= auxMinDay && today <= this.week.maxDay;
     }
 
     public isInTimeToChooseRecipes(): boolean {
         const today = new Date();
         const fridayAt2359: Date = new Date(today.getFullYear(), today.getMonth());
-        const differenceInDays = 5 - today.getDay();
+        const differenceInDays = 5 - today.getDay(); // 5 === day number of Friday
 
         fridayAt2359.setDate(today.getDate() + differenceInDays); // Delivery day of this week
         fridayAt2359.setHours(23, 59, 59);
@@ -203,16 +341,18 @@ export class Order extends Entity<Order> {
         return (
             today < fridayAt2359 &&
             todayWithDummyHours < weekMinDayWithDummyHours &&
-            (this.isActive() || this.state.title === "ORDER_BILLED") &&
+            (this.isActive() || this.isBilled()) &&
             this.isNextWeek()
         );
     }
 
     public isNextWeek(): boolean {
-        const date: Date = new Date();
-        const minDayDifferenceInDays = (this.week.minDay.getTime() - date.getTime()) / (1000 * 3600 * 24);
+        const today: Date = new Date();
+        const auxMinDay = new Date(this.week.minDay);
+        auxMinDay.setDate(auxMinDay.getDate() - 1);
+        const minDayDifferenceInDays = (auxMinDay.getTime() - today.getTime()) / (1000 * 3600 * 24);
 
-        return minDayDifferenceInDays < 7 && date <= this.week.minDay;
+        return minDayDifferenceInDays < 7 && today <= auxMinDay;
     }
     /**
      * Getter shippingDate
@@ -311,11 +451,59 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter choseByAdmin
+     * @return {boolean}
+     */
+    public get choseByAdmin(): boolean {
+        return this._choseByAdmin;
+    }
+
+    /**
+     * Getter firstDateOfRecipesSelection
+     * @return {Date | undefined}
+     */
+    public get firstDateOfRecipesSelection(): Date | undefined {
+        return this._firstDateOfRecipesSelection;
+    }
+
+    /**
+     * Getter lastDateOfRecipesSelection
+     * @return {Date | undefined}
+     */
+    public get lastDateOfRecipesSelection(): Date | undefined {
+        return this._lastDateOfRecipesSelection;
+    }
+
+    /**
      * Getter paymentOrderId
      * @return {PaymentOrderId | undefined}
      */
     public get paymentOrderId(): PaymentOrderId | undefined {
         return this._paymentOrderId;
+    }
+
+    /**
+     * Getter createdAt
+     * @return {Date}
+     */
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    /**
+     * Getter customer
+     * @return {Customer}
+     */
+    public get customer(): Customer {
+        return this._customer;
+    }
+
+    /**
+     * Getter counter
+     * @return {number}
+     */
+    public get counter(): number {
+        return this._counter;
     }
 
     /**
@@ -415,10 +603,58 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Setter choseByAdmin
+     * @param {boolean} value
+     */
+    public set choseByAdmin(value: boolean) {
+        this._choseByAdmin = value;
+    }
+
+    /**
+     * Setter firstDateOfRecipesSelection
+     * @param {Date | undefined}
+     */
+    public set firstDateOfRecipesSelection(value: Date | undefined) {
+        this._firstDateOfRecipesSelection = value;
+    }
+
+    /**
+     * Setter lastDateOfRecipesSelection
+     * @param {Date | undefined}
+     */
+    public set lastDateOfRecipesSelection(value: Date | undefined) {
+        this._lastDateOfRecipesSelection = value;
+    }
+
+    /**
      * Setter paymentOrderId
      * @param {PaymentOrderId | undefined} value
      */
     public set paymentOrderId(value: PaymentOrderId | undefined) {
         this._paymentOrderId = value;
+    }
+
+    /**
+     * Setter createdAt
+     * @param {Date} value
+     */
+    public set createdAt(value: Date) {
+        this._createdAt = value;
+    }
+
+    /**
+     * Setter customer
+     * @param {Customer} value
+     */
+    public set customer(value: Customer) {
+        this._customer = value;
+    }
+
+    /**
+     * Setter counter
+     * @param {number} value
+     */
+    public set counter(value: number) {
+        this._counter = value;
     }
 }

@@ -30,6 +30,7 @@ export class ReorderPlan {
     private _notificationService: INotificationService;
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
+    private _customerRepository: ICustomerRepository;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
@@ -39,7 +40,8 @@ export class ReorderPlan {
         paymentService: IPaymentService,
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
-        paymentOrderRepository: IPaymentOrderRepository
+        paymentOrderRepository: IPaymentOrderRepository,
+        customerRepository: ICustomerRepository
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._shippingZoneRepository = shippingZoneRepository;
@@ -49,6 +51,7 @@ export class ReorderPlan {
         this._paymentService = paymentService;
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
+        this._customerRepository = customerRepository;
     }
 
     public async execute(
@@ -69,7 +72,10 @@ export class ReorderPlan {
             undefined,
             undefined, // Validate and use cupón
             undefined,
-            new Date() // TO DO: Calculate
+            new Date() // TO DO: Calculate,
+        );
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(
+            oldSubscription.customer.id
         );
 
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
@@ -87,23 +93,43 @@ export class ReorderPlan {
             subscription,
             weeks: nextTwelveWeeks,
             shippingCost: customerShippingZone.cost,
+            hasFreeShipping: customerSubscriptions.length > 0,
         };
 
         const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
 
+        const hasFreeShipping =
+            customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
+            (customerSubscriptions.length > 0 && customerSubscriptions.some((subscription) => subscription.isActive()));
+
         const paymentIntent = await this.paymentService.paymentIntent(
-            subscription.plan.getPlanVariantPrice(subscription.planVariantId),
-            subscription.customer.getDefaultPaymentMethod()?.stripeId,
+            hasFreeShipping
+                ? subscription.plan.getPlanVariantPrice(subscription.planVariantId)
+                : subscription.plan.getPlanVariantPrice(subscription.planVariantId) + customerShippingZone.cost,
+            subscription.customer.getDefaultPaymentMethod()?.stripeId || "",
             subscription.customer.email,
-            subscription.customer.stripeId
+            subscription.customer.stripeId,
+            true
         );
 
-        newPaymentOrders[0]?.toBilled(orders.filter((order) => order.paymentOrderId?.equals(newPaymentOrders[0].id))); // TO DO: Handlear 3dSecure rechazado
+        newPaymentOrders[0].paymentIntentId = paymentIntent.id;
+        newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
-        await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
-        await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
+        if (paymentIntent.status === "requires_action") {
+            newPaymentOrders[0].toPendingConfirmation(orders);
+        } else if (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled") {
+            throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
+        } else {
+            newPaymentOrders[0]?.toBilled(orders, subscription.customer);
+        }
+
+        // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
+        // @ts-ignore
+        // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated({});
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
+        await this.customerRepository.save(subscription.customer);
+        if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
         return { subscription, paymentIntent, firstOrder: orders[0] };
@@ -171,5 +197,13 @@ export class ReorderPlan {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter customerRepository
+     * @return {ICustomerRepository}
+     */
+    public get customerRepository(): ICustomerRepository {
+        return this._customerRepository;
     }
 }

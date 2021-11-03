@@ -54,6 +54,19 @@ const PaymentOrderSchema = new mongoose.Schema(
             required: true,
         },
 
+        quantityRefunded: {
+            type: Number,
+        },
+
+        hasFreeShipping: {
+            type: Boolean,
+            default: false,
+        },
+
+        lastRecipeSelectionDate: {
+            type: Date,
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,

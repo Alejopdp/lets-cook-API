@@ -7,12 +7,18 @@ import {
     OrdersWithRecipeSelectionExport,
     SubscriptionExport,
 } from "./IExportService";
-import { utils, WorkBook, WorkSheet, writeFile } from "xlsx";
+import { utils, WorkBook, WorkSheet, writeFile, readFile } from "xlsx";
 
 export class XlsxService implements IExportService {
+    public parseCsvToJson(csvFilePath: string): string[][] {
+        var workbook: WorkBook = readFile(csvFilePath);
+        var third_worksheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        return utils.sheet_to_json(third_worksheet, { header: 1, blankrows: false });
+    }
+
     public exportSubscriptions(subscriptionsExport: SubscriptionExport[]): void {
         const workbook: WorkBook = utils.book_new();
-        console.log(subscriptionsExport);
         const sheet: WorkSheet = utils.json_to_sheet(subscriptionsExport);
 
         utils.book_append_sheet(workbook, sheet, "Suscripciones");
@@ -28,15 +34,22 @@ export class XlsxService implements IExportService {
     }
 
     public exportCancellations(cancellationExports: CancellationExport[]): void {
-        throw new Error("Method not implemented.");
+        const workbook: WorkBook = utils.book_new();
+        const sheet: WorkSheet = utils.json_to_sheet(cancellationExports);
+
+        utils.book_append_sheet(workbook, sheet, "Cancelaciones");
+        writeFile(workbook, "Cancelaciones.xlsx");
     }
 
     public exportCoupons(couponsExport: CouponExport[]): void {
-        throw new Error("Method not implemented.");
+        const workbook: WorkBook = utils.book_new();
+        const sheet: WorkSheet = utils.json_to_sheet(couponsExport);
+
+        utils.book_append_sheet(workbook, sheet, "Cupones");
+        writeFile(workbook, "Cupones.xlsx");
     }
     public exportNextOrdersWithRecipesSelection(orders: OrdersWithRecipeSelectionExport[]): void {
         const workbook: WorkBook = utils.book_new();
-        console.log(orders);
         const sheet: WorkSheet = utils.json_to_sheet(orders);
 
         utils.book_append_sheet(workbook, sheet, "Selección recetas");

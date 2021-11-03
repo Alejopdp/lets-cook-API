@@ -1,21 +1,21 @@
 import { Locale } from "../../locale/Locale";
 import { IPreferredDeliveryTime } from "./IPreferredDeliveryTime";
 
-export class From8To12 implements IPreferredDeliveryTime {
+export class From17To20 implements IPreferredDeliveryTime {
     public getLabel(locale: Locale): string {
         switch (locale) {
             case Locale.es:
-                return "De 8 a 12";
+                return "de 17 a 20 hs";
             case Locale.en:
-                return "From 8 to 12";
+                return "5 to 8 pm";
             case Locale.ca:
-                return "De 8 a 12";
+                return "de 17 a 20 hs";
             default:
                 throw new Error("Idioma no valido para el horario de preferencia de entrega");
         }
     }
 
     public value(): string {
-        return "8 - 12";
+        return "17 - 20";
     }
 }

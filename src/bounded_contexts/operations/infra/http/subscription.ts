@@ -1,8 +1,10 @@
 import express from "express";
 import { exportSubscriptionsController } from "../../services/exportSubscriptions";
+import { applyCouponToSubscriptionController } from "../../useCases/applyCouponToSubscription";
 import { cancelASubscriptionController } from "../../useCases/cancelASubscription";
 import { createManySubscriptionsController } from "../../useCases/createManySubscriptions";
 import { createSubscriptionController } from "../../useCases/createSubscription";
+import { exportCancellationsController } from "../../useCases/exportCancellations";
 import { getCustomerSusbcriptionsController } from "../../useCases/getCustomerSubscriptions";
 import { getSubscriptionByIdController } from "../../useCases/getSubscriptionById";
 import { getSubscriptionByIdAsAdminController } from "../../useCases/getSubscriptionByIdAsAdmin";
@@ -21,6 +23,7 @@ subscriptionRouter.get("/", (req, res) => getSubscriptionListController.execute(
 subscriptionRouter.get("/information-as-admin/:id", (req, res) => getSubscriptionByIdAsAdminController.execute(req, res));
 subscriptionRouter.get("/by-customer/:customerId", (req, res) => getCustomerSusbcriptionsController.execute(req, res));
 subscriptionRouter.get("/export", (req, res) => exportSubscriptionsController.execute(req, res));
+subscriptionRouter.get("/export-cancellations", (req, res) => exportCancellationsController.execute(req, res));
 subscriptionRouter.get("/:id", (req, res) => getSubscriptionByIdController.execute(req, res));
 
 // POSTs
@@ -37,6 +40,7 @@ subscriptionRouter.put("/handle-3dsecure-failure/:id", (req, res) => handle3dSec
 subscriptionRouter.put("/handle-3dsecure-failure-for-many-subscriptions", (req, res) =>
     handle3dSecureFailureForManySubscriptionsController.execute(req, res)
 );
+subscriptionRouter.put("/apply-coupon/:id", (req, res) => applyCouponToSubscriptionController.execute(req, res));
 
 // DELETEs
 

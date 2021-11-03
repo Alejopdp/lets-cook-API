@@ -9,6 +9,7 @@ import { logger } from "../../../../../../config";
 import { recipeMapper } from "../../../mappers/recipeMapper";
 import { Order } from "../../../domain/order/Order";
 import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
+import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariantSku";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
     public async save(recipe: Recipe): Promise<void> {
@@ -35,6 +36,10 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         const recipes = await this.findBy({ _id: recipesIds.map((id) => id.value) });
 
         return recipes;
+    }
+
+    public async findByRecipeVariantSkuList(recipeVariantSkus: RecipeVariantSku[]): Promise<Recipe[]> {
+        return await this.findBy({ "recipeVariants.sku": recipeVariantSkus.map((sku) => sku.code) });
     }
 
     public async findByWeekId(weekId: WeekId): Promise<Recipe[]> {
@@ -85,18 +90,20 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     }
 
     public async findNextWeekRecipes(): Promise<Recipe[]> {
-        const date: Date = new Date()
-        date.setDate(date.getDate() + 7)
-        
-        const recipesDb = await RecipeModel.find({ "availableWeeks.minDay": { $lte: date }, "availableWeeks.maxDay": { $gte: date }, deletionFlag: false })
-        .populate("availableWeeks")
-        .populate({
-            path: "recipeVariants",
-            populate: { path: "restriction" },
-        });
+        const date: Date = new Date();
+        date.setDate(date.getDate() + 7);
+        const recipesDb = await RecipeModel.find({
+            "availableWeeks.minDay": { $gte: date },
+            "availableWeeks.maxDay": { $lte: date },
+            deletionFlag: false,
+        })
+            .populate("availableWeeks")
+            .populate({
+                path: "recipeVariants",
+                populate: { path: "restriction" },
+            });
 
-        return recipesDb.map((recipe: any) => recipeMapper.toDomain(recipe) )
-
+        return recipesDb.map((recipe: any) => recipeMapper.toDomain(recipe));
     }
     public async delete(recipeId: RecipeId): Promise<void> {
         await RecipeModel.findOneAndUpdate({ _id: recipeId.value }, { deletionFlag: true });

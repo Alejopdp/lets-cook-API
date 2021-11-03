@@ -21,7 +21,7 @@ export class GetCouponValidation {
     }
 
     public async execute(dto: GetCouponValidationDto): Promise<any> {
-        const coupon: Coupon | undefined = await this.couponRepository.findByCode(dto.coupon);
+        const coupon: Coupon | undefined = await this.couponRepository.findActiveByCode(dto.coupon);
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const planId: PlanId = new PlanId(dto.planId);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
@@ -30,6 +30,7 @@ export class GetCouponValidation {
         if (!coupon) throw new Error("El cupón de descuento ingresado es incorrecto");
         if (coupon.getDiscount(plan, planVariantId, dto.shippingCost) <= 0) throw new Error("El cupón no es aplicable al monto del plan");
 
+        if (!coupon.hasStarted()) throw new Error("El cupón ingresado no es válido");
         if (coupon.isExpiredByEndDate()) throw new Error("El cupón de descuento ingresado ha expirado");
 
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);

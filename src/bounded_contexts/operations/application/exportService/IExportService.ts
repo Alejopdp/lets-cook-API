@@ -1,7 +1,18 @@
 import { Order } from "../../domain/order/Order";
 
+export enum RecipeSelectionState {
+    ELIGIO = "Eligió",
+    NO_ELIGE = "No Elige",
+    AUN_NO_ELIGIO = "Aún no eligió",
+    ELEGIDA_POR_LC = "Elegida por LC",
+}
 export interface OrdersWithRecipeSelectionExport {
+    stripePaymentId: string;
+    paymentOrderId: string | number;
+    paymentOrderState: string;
     orderId: string | number;
+    orderNumber: string | number;
+    orderState: string;
     weekLabel: string;
     deliveryDate: string;
     customerPreferredShippingHour: string;
@@ -9,20 +20,34 @@ export interface OrdersWithRecipeSelectionExport {
     customerFirstName: string;
     customerLastName: string;
     customerEmail: string;
-    recipeFormSubmissionDate: string;
-    recipeFormUpdateDate: string;
+    subscriptionDate: Date | string;
+    recipeFormSubmissionDate: Date | string;
+    recipeFormUpdateDate: Date | string;
     planId: string | number;
     planSku: string;
     planName: string;
     planVariantId: string | number;
     planVariantSku: string;
     planVariantDescription: string;
+    subscriptionRestrictionComment: string;
+    subscriptionRestriction: string;
     recipeVariantId: string | number;
     recipeVariantSku: string;
     recipeName: string;
+    recipeSku: string;
     numberOfPersons: number;
     numberOfRecipes: number;
     customerPreferredLanguage: string;
+    chooseState: RecipeSelectionState | string;
+    pricePlan: number;
+    kitPrice: number;
+    planDiscount: number;
+    kitDiscount: number;
+    finalPrice: number;
+    finalKitPrice: number;
+    finalPortionPrice: number;
+    recipeDivision: number;
+    recivedOrdersQuantity: number;
 }
 
 export interface SubscriptionExport {
@@ -97,12 +122,11 @@ export interface CancellationExport {
     customerFirstName: string;
     customerLastName: string;
     customerEmail: string;
-    createdAt: string;
     status: string;
-    shopifyCustomerId: string;
-    pastOrdersCount: number;
-    numberOfActiveSubscriptions: number;
-    numberOfSubscriptions: number;
+    // shopifyCustomerId: string;
+    // pastOrdersCount: number;
+    // numberOfActiveSubscriptions: number;
+    // numberOfSubscriptions: number;
     subscriptionId: string | number;
     subscriptionCreatedAt: string;
     cancellationDate: string;
@@ -113,13 +137,14 @@ export interface CancellationExport {
 }
 
 export interface CouponExport {
-    couponId: string | number;
+    coupon_id: string | number;
     couponCode: string;
     discount_type: string;
-    discount_value: string;
+    discount_value: number;
     minimum_requirement_type: string;
     minimum_requirement_value: string | number;
-    appy_to_value: string;
+    apply_to_type: string;
+    apply_to_value: string;
     application_limit_type_1: string;
     application_limit_value_1: string | number;
     application_limit_type_2: string;
@@ -128,12 +153,13 @@ export interface CouponExport {
     application_limit_value_3: string | number;
     coupons_by_subscriptions_type: string;
     coupons_by_suscription_value: number;
-    date_range_start: string;
-    date_range_expire: string;
+    date_range_start: Date | string;
+    date_range_expire: Date | string;
     state: string;
 }
 
 export interface IExportService {
+    parseCsvToJson(csvFilePath: string): string[][];
     exportSubscriptions(subscriptionsExport: SubscriptionExport[]): void;
     exportCustomers(customersExport: CustomerExport[]): void;
     exportCancellations(cancellationExports: CancellationExport[]): void;

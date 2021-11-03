@@ -1,17 +1,17 @@
-import { From12To16 } from "./from12to16";
-import { From16To20 } from "./from16to20";
-import { From8To12 } from "./from8to12";
+import { From17To20 } from "./from17to20";
+import { From19To22 } from "./from19to22";
+import { From15To18 } from "./from15to18";
 import { IPreferredDeliveryTime } from "./IPreferredDeliveryTime";
 
 export class PreferredDeliveryTimeFactory {
     public static createDeliveryTime(value: string): IPreferredDeliveryTime {
         switch (value) {
-            case "8 - 12":
-                return new From8To12();
-            case "12 - 16":
-                return new From12To16();
-            case "16 - 20":
-                return new From16To20();
+            case "15 - 18":
+                return new From15To18();
+            case "17 - 20":
+                return new From17To20();
+            case "19 - 22":
+                return new From19To22();
             default:
                 throw new Error("Invalid preferred delivery time value");
         }

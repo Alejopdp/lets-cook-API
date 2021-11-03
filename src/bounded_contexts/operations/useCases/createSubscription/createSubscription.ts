@@ -74,9 +74,12 @@ export class CreateSubscription {
 
     public async execute(dto: CreateSubscriptionDto): Promise<{
         subscription: Subscription;
-        paymentIntent: Stripe.PaymentIntent;
+        paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string };
         firstOrder: Order;
         customerPaymentMethods: PaymentMethod[];
+        amountBilled: number;
+        tax: number;
+        shippingCost: number;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(customerId);
@@ -86,19 +89,21 @@ export class CreateSubscription {
         const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
-        const addressIsChanged: boolean =
-            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
         const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
+        const addressIsChanged: boolean =
+            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
 
         customer.changePersonalInfo(
             dto.customerFirstName,
             dto.customerLastName,
             dto.phone1,
             "",
+            //@ts-ignore
             customer.personalInfo?.birthDate,
             dto.locale
         );
+
         if (addressIsChanged) {
             customer.changeShippingAddress(
                 dto.latitude,
@@ -129,7 +134,7 @@ export class CreateSubscription {
             plan.getPlanVariantPrice(planVariantId),
             undefined,
             coupon,
-            undefined, // Validate and use cupón
+            undefined,
             undefined,
             new Date() // TO DO: Calculate
         );
@@ -149,6 +154,7 @@ export class CreateSubscription {
             subscription,
             weeks: nextTwelveWeeks,
             shippingCost: customerShippingZone.cost,
+            hasFreeShipping: customerSubscriptions.length > 0,
         };
 
         const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
@@ -156,28 +162,50 @@ export class CreateSubscription {
         if (dto.stripePaymentMethodId) {
             const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
 
-            customer.addPaymentMethod(newPaymentMethod);
+            customer.addPaymentMethodAndSetItAsDefault(newPaymentMethod);
         }
 
         const hasFreeShipping =
-            coupon?.type.type !== "free" &&
-            (customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
-                customerSubscriptions.length > 0);
+            // TO DO: Validar que la semana proxima tiene al menos 1 envio
+            // paymentOrdersToUpdate.some(po => po.)Z
+            coupon?.type.type === "free" ||
+            customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
+            customerSubscriptions.length > 0;
 
-        const paymentIntent = await this.paymentService.paymentIntent(
-            hasFreeShipping ? newPaymentOrders[0].getTotalAmount() - customerShippingZone.cost : newPaymentOrders[0].getTotalAmount(),
-            dto.stripePaymentMethodId
-                ? dto.stripePaymentMethodId
-                : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
-            customer.email,
-            customer.stripeId
-        );
+        // newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost;
+        var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+        };
+
+        const amountToBill = hasFreeShipping
+            ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
+            : newPaymentOrders[0].getTotalAmount();
+
+        if (Math.round(newPaymentOrders[0].getFinalAmount()) >= 50) {
+            paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
+                amountToBill,
+                dto.stripePaymentMethodId
+                    ? dto.stripePaymentMethodId
+                    : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
+                customer.email,
+                customer.stripeId
+            );
+        }
+
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
+        newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
-        if (paymentIntent.status === "requires_action") {
+        if (!!paymentIntent && paymentIntent.status === "requires_action") {
             newPaymentOrders[0].toPendingConfirmation(orders);
+        } else if (!!paymentIntent && (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled")) {
+            await this.paymentService.removePaymentMethodFromCustomer(
+                dto.stripePaymentMethodId || customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId))
+            );
+            throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
         } else {
-            newPaymentOrders[0]?.toBilled(orders);
+            newPaymentOrders[0]?.toBilled(orders, customer);
         }
 
         // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
@@ -185,15 +213,27 @@ export class CreateSubscription {
         await this.orderRepository.bulkSave(orders);
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+
+        if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
         if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
             for (let paymentOrder of paymentOrdersToUpdate) {
                 // TO DO: Update Orders shipping cost too
                 paymentOrder.shippingCost = customerShippingZone.cost;
             }
         }
-        if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+        if (coupon) await this.couponRepository.save(coupon);
 
-        return { subscription, paymentIntent, firstOrder: orders[0], customerPaymentMethods: customer.paymentMethods };
+        return {
+            subscription,
+            paymentIntent,
+            firstOrder: orders[0],
+            customerPaymentMethods: customer.paymentMethods,
+            amountBilled: amountToBill,
+            tax:
+                Math.round((amountToBill - newPaymentOrders[0].shippingCost) * 0.1) +
+                (hasFreeShipping ? 0 : Math.round(newPaymentOrders[0].shippingCost * 0.21)),
+            shippingCost: hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost,
+        };
     }
 
     /**

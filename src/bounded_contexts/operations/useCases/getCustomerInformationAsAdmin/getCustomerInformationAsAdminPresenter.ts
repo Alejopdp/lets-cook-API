@@ -30,8 +30,21 @@ export class GetCustomerInformationAsAdminPresenter {
                 })),
             },
             subscriptions: this.presentSubscriptions(subscriptions),
-            orders: this.presentOrders(orders),
-            paymentOrders: this.presentPaymentOrders(paymentOrders, orders),
+            orders: this.presentOrders(
+                orders
+                    .filter((order) => order.shippingDate >= new Date() && (order.isActive() || order.isSkipped() || order.isBilled()))
+                    .sort((order1, order2) => (order1.shippingDate > order2.shippingDate ? 1 : -1)),
+                paymentOrders
+            ),
+            paymentOrders: this.presentPaymentOrders(
+                paymentOrders.filter(
+                    (paymentOrder) =>
+                        paymentOrder.state.isBilled() ||
+                        paymentOrder.state.title === "PAYMENT_ORDER_REFUNDED" ||
+                        paymentOrder.state.title === "PAYMENT_ORDER_PARTIALLY_REFUNDED"
+                ),
+                orders
+            ),
         };
     }
 
@@ -46,14 +59,23 @@ export class GetCustomerInformationAsAdminPresenter {
         }));
     }
 
-    public presentOrders(orders: Order[]): any {
+    public presentOrders(orders: Order[], paymentOrders: PaymentOrder[]): any {
+        const paymentOrderMap: { [key: string]: PaymentOrder } = {};
+        for (let paymentOrder of paymentOrders) {
+            paymentOrderMap[paymentOrder.id.value] = paymentOrder;
+        }
+
         return orders.map((order) => ({
             id: order.id.value,
             date: order.getDdMmYyyyShipmentDate(),
             plan: order.plan.name,
             variation: order.getPlanVariantLabel(order.planVariantId),
             price: order.getTotalPrice(),
-            active: order.isActive(),
+            active: order.isActive() || order.isBilled(),
+            orderNumber: order.counter,
+            isSkipped: order.isSkipped(),
+            state: order.state.title,
+            isSkippable: paymentOrderMap[order.paymentOrderId?.value || ""].state.isActive(),
         }));
     }
 
@@ -70,10 +92,11 @@ export class GetCustomerInformationAsAdminPresenter {
                     : [order];
             }
         }
+
         return paymentOrders.map((paymentOrder) => ({
             id: paymentOrder.id.value,
             date: paymentOrder.getDdMmYyyyBillingDate(),
-            ordersQty: paymentOrderOrderMap[paymentOrder.id.value].length,
+            ordersQty: paymentOrderOrderMap[paymentOrder.id.value]?.length || "",
             price: paymentOrder.getTotalAmount(),
             status: paymentOrder.state.title,
         }));

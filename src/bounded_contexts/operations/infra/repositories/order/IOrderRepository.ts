@@ -12,6 +12,7 @@ import { WeekId } from "../../../domain/week/WeekId";
 export interface IOrderRepository {
     save(order: Order): Promise<void>;
     bulkSave(orders: Order[]): Promise<void>;
+    updateMany(orders: Order[]): Promise<void>;
     findAll(locale: Locale): Promise<Order[]>;
     findById(orderId: OrderId, locale: Locale): Promise<Order | undefined>;
     findBy(conditions: any, locale: Locale): Promise<Order[]>;
@@ -27,10 +28,16 @@ export interface IOrderRepository {
     findActiveOrdersByPaymentOrderId(paymentOrderId: PaymentOrderId): Promise<Order[]>;
     findACtiveOrdersByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[]): Promise<Order[]>;
     findPastOrdersByCustomerIdList(subscriptionsIds: SubscriptionId[]): Promise<Order[]>;
+    findByWeekList(weeksIds: WeekId[]): Promise<Order[]>;
+    findByBillingDates(billingDates: Date[]): Promise<Order[]>;
+    findByShippingDates(shippingDates: Date[]): Promise<Order[]>;
+    findCurrentWeekOrders(): Promise<Order[]>;
+    findAllByCustomersIds(customersIds: CustomerId[]): Promise<Order[]>;
     getFirstOrderOfSubscription(subscriptionId: SubscriptionId): Promise<Order | undefined>;
     saveCancelledOrders(orders: Order[]): Promise<void>;
     saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void>;
     saveSkippedAndActiveOrders(skippedOrders: Order[], activeOrders: Order[]): Promise<void>;
     saveOrdersWithNewState(orders: Order[]): Promise<void>;
+    addCustomerToOrderOfSubscription(subscriptionId: SubscriptionId, customerId: CustomerId): Promise<void>
     delete(orderId: OrderId): Promise<void>;
 }

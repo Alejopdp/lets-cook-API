@@ -25,6 +25,20 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             );
         }
 
+        if (!!!raw.numberOfPersons && !!raw.numberOfRecipes) {
+            return new PlanVariant(
+                new PlanSku(raw.sku),
+                raw.name,
+                raw.price,
+                [...attributes, new PlanVariantAttribute("Recetas", raw.numberOfRecipes)], // TO DO: Esto es un asco
+                raw.description,
+                raw.isDefault,
+                raw.isDeleted,
+                raw.priceWithOffer,
+                new PlanVariantId(raw._id)
+            );
+        }
+
         // return new PlanVariant(raw.sku, raw.name, raw.price, attributes, raw.priceWithOffer);
         return new PlanVariant(
             new PlanSku(raw.sku),

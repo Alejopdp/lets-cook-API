@@ -57,6 +57,7 @@ export class CreateCustomerByAdmin {
             false,
             "test",
             [],
+            0,
             address,
             billing,
             undefined,

@@ -1,3 +1,4 @@
+import { Utils } from "../../../../../core/logic/Utils";
 import { Entity } from "../../../../../core/domain/Entity";
 import { PlanSku } from "../PlanSku";
 import { PlanVariantAttribute } from "./PlanVariantAttribute";
@@ -27,8 +28,8 @@ export class PlanVariant extends Entity<PlanVariant> {
         super(planVariantId);
         this._sku = sku;
         this._name = name;
-        this._price = price;
-        this._priceWithOffer = priceWithOffer;
+        this._price = Math.round(price * 100) / 100;
+        this._priceWithOffer = priceWithOffer ? Math.round(priceWithOffer * 100) / 100 : 0;
         this._attributes = attributes;
         this._description = description;
         this._isDefault = isDefault;
@@ -44,13 +45,24 @@ export class PlanVariant extends Entity<PlanVariant> {
     }
 
     public getLabel(): string {
-        return this.attributes.reduce(
-            (acc: string, attribute: PlanVariantAttribute) => (acc = `${acc} / ${attribute.key} ${attribute.value}`),
-            ""
+        return (
+            this.description ||
+            this.attributes.reduce(
+                (acc: string, attribute: PlanVariantAttribute) => (acc = `${acc} / ${attribute.key} ${attribute.value}`),
+                ""
+            )
         );
     }
 
+    public getLabelWithPrice(): string {
+        return `${this.getLabel()} / ${this.getPaymentPrice()} €`;
+    }
+
     public getServingsQuantity(): number {
+        return 0;
+    }
+
+    public getNumberOfRecipes(): number {
         return 0;
     }
 

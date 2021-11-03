@@ -37,7 +37,7 @@ export class CreateShippingZoneController extends BaseController {
 
             logger.warn(``);
             if (polygonFilter.length > 1) throw new Error("No debe haber más de un polígono con el mismo nombre");
-            if (polygonFilter.length === 0) throw new Error("No existen zonas de envio");
+            if (polygonFilter.length === 0) throw new Error("Ninguno de los polígonos coinciden con el nombre de referencia ingresado");
             if (polygonFilter.length === 1) coordinates = converted.features[0].geometry.coordinates[0];
 
             const dto: CreateShippingZoneDto = {

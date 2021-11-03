@@ -4,8 +4,10 @@
     "description": "Ecolophy API for both Web and Mobile clients",
     "main": "server.ts",
     "scripts": {
-        "start": "node dist/index",
+        "start": "node dist/src/index",
+        "dev": "node dist/index",
         "webpack": "webpack --config webpack.config.ts",
+        "build:staging": "tsc",
         "lint": "eslint . --ext .ts",
         "test": "mocha -r ts-node/register src/bounded_contexts/**/*.test.ts"
     },
@@ -56,6 +58,7 @@
         "express-rate-limit": "^5.2.6",
         "firebase-admin": "^9.10.0",
         "helmet": "^4.0.0",
+        "js-big-decimal": "^1.3.4",
         "jsonwebtoken": "^8.5.1",
         "lodash": "^4.17.20",
         "mocha": "^8.1.1",

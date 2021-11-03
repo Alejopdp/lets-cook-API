@@ -18,6 +18,7 @@ export class GetOrderByIdPresenter {
 
         return {
             id: order.id.value,
+            number: order.counter,
             shippingDate: order.getHumanShippmentDay(),
             billingDate: order.getHumanBillingDay(),
             state: order.state.title,
@@ -29,7 +30,9 @@ export class GetOrderByIdPresenter {
             planIcon,
             paymentOrderId: paymentOrder.id.value,
             amount: order.getTotalPrice(),
-            numberOfRecipes: order.plan.getServingsQuantity(order.planVariantId),
+            couponCode: order.discountAmount > 0 ? subscription.coupon?.couponCode : undefined,
+            //@ts-ignore
+            numberOfRecipes: order.plan.getPlanVariantById(order.planVariantId)?.numberOfRecipes || 0,
             customerName: customer.getPersonalInfo().fullName,
             subscription: {
                 subscriptionId: subscription.id.value,

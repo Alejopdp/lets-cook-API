@@ -3,6 +3,7 @@ import { Customer } from "../../domain/customer/Customer";
 import { Order } from "../../domain/order/Order";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { Subscription } from "../../domain/subscription/Subscription";
 
 export class GetPaymentOrderByIdPresenter {
     private _storageService: IStorageService;
@@ -11,21 +12,26 @@ export class GetPaymentOrderByIdPresenter {
         this._storageService = storageService;
     }
 
-    public async present(paymentOrder: PaymentOrder, orders: Order[], customer: Customer): Promise<any> {
+    public async present(paymentOrder: PaymentOrder, orders: Order[], customer: Customer, subscriptions: Subscription[]): Promise<any> {
         const presentedOrders = await this.presentOrders(orders);
 
         return {
             id: paymentOrder.id.value,
             amount: paymentOrder.amount,
             billingDate: paymentOrder.getHumanBillingDate(),
-            discountAmount: paymentOrder.discountAmount,
+            discountAmount: paymentOrder.getDiscountAmountOrShippingCostIfHasFreeShipping(),
+            couponCodes: subscriptions.map((subscription) => subscription.coupon?.couponCode),
             shippingCost: paymentOrder.shippingCost,
             customer: paymentOrder.customerId.value,
             customerName: customer.getPersonalInfo().fullName,
-            state: paymentOrder.state.humanTitle,
+            // state: paymentOrder.state.humanTitle,
+            state: paymentOrder.state.title,
             orders: presentedOrders,
-            totalAmount: paymentOrder.getTotalAmount(),
+            totalAmount: paymentOrder.getFinalAmount(),
+            subtotal: paymentOrder.amount,
+            taxes: paymentOrder.shippingCost * 0.21 + paymentOrder.amount * 0.1,
             paymentIntentId: paymentOrder.paymentIntentId,
+            quantityRefunded: paymentOrder.quantityRefunded,
         };
     }
 
@@ -38,8 +44,10 @@ export class GetPaymentOrderByIdPresenter {
 
             presentedOrders.push({
                 id: order.id.value,
+                number: order.counter,
                 shippingDate: order.getHumanShippmentDay(),
-                state: order.state.humanTitle,
+                // state: order.state.humanTitle,
+                state: order.state.title,
                 hasRecipes: order.hasChosenRecipes(),
                 recipes: presentedRecipes,
                 planIcon,

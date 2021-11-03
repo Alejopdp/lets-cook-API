@@ -59,14 +59,22 @@ export class GetSubscriptionByIdAsAdminPresenter {
                 id: subscription.restriction?.id.value,
             },
             state: subscription.state.title,
-            customerName: customer.getPersonalInfo().fullName,
+            customerName: customer.getPersonalInfo().fullName || customer.email,
+            customerId: customer.id.value,
             restrictionComment: subscription.restrictionComment,
+
             amountDetails: {
                 subtotal: nextActiveOrder?.price,
                 shippingCost: nextPaymentOrder?.shippingCost,
-                discount: "add to subscription",
-                taxes: 6,
-                total: nextActiveOrder?.getTotalPrice(),
+                discount: subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
+                taxes:
+                    (Math.round((nextActiveOrder?.price || 0) * 0.1 * 100) +
+                        Math.round((nextPaymentOrder?.shippingCost || 0) * 0.21 * 100)) /
+                    100,
+                total:
+                    (nextActiveOrder?.getTotalPrice() || subscription.getPrice()) +
+                    (nextPaymentOrder?.shippingCost || 0) -
+                    subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
             },
             frequency: subscription.frequency.value(),
             plan: presentedPlan,
@@ -74,7 +82,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
             // billingData,
             paymentMethod: presentedPaymentMethod?.cardLabel,
             schedule,
-            nextBillingDate: nextActiveOrder?.getDdMmYyyyShipmentDate(),
+            nextBillingDate: nextActiveOrder?.getDdMmYyyyBillingDate(),
             paymentMehod: customer.getDefaultPaymentMethodCardLabel(),
             hasChosenRecipesForActualWeek,
             hasChosenRecipesForNextWeek,

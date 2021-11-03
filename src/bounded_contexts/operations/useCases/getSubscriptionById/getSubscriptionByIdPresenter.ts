@@ -7,6 +7,8 @@ import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Week } from "../../domain/week/Week";
 import { PlanId } from "../../domain/plan/PlanId";
+import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
+import { Locale } from "../../domain/locale/Locale";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -21,7 +23,7 @@ export class GetSubscriptionByIdPresenter {
         const shippingAddress = {
             addressName: customer.shippingAddress?.name,
             addressDetails: customer.shippingAddress?.details,
-            preferredSchedule: "Hardcoded",
+            preferredSchedule: customer.shippingAddress?.deliveryTime?.getLabel(Locale.es) || "Sin seleccionar",
         };
 
         const billingData = {
@@ -64,10 +66,12 @@ export class GetSubscriptionByIdPresenter {
         const canChooseRecipes = subscription.plan.abilityToChooseRecipes;
         const nextTwelveOrders = this.presentOrders(orders);
 
-        console.log("ACTUAL WEEK ORDER; ", actualWeekOrder);
         return {
             subscriptionId: subscription.id.value,
             plan: presentedPlan,
+            actualPlanVariant: this.presentPlanVariant(
+                subscription.plan.planVariants.find((variant) => subscription.planVariantId.equals(variant.id))!
+            ),
             shippingAddress,
             // billingData,
             paymentMethod: presentedPaymentMethod,
@@ -86,8 +90,12 @@ export class GetSubscriptionByIdPresenter {
 
     private async presentPlan(subscription: Subscription): Promise<any> {
         return {
+            id: subscription.plan.id.value,
             planName: subscription.plan.name,
             planVariantDescription: subscription.getPlanVariantLabel(),
+            variants: subscription.plan.planVariants
+                .filter((variant) => !variant.isDeleted)
+                .map((variant) => this.presentPlanVariant(variant)),
             state: {
                 state: subscription.state.humanTitle,
                 stateTitle: subscription.state.title,
@@ -99,12 +107,26 @@ export class GetSubscriptionByIdPresenter {
         };
     }
 
+    private presentPlanVariant(variant: PlanVariant): any {
+        return {
+            id: variant.id.value,
+            isDefault: variant.isDefault,
+            description: variant.getLabelWithPrice(),
+            price: variant.getPaymentPrice(),
+            //@ts-ignore
+            numberOfPersons: variant.numberOfPersons || 0,
+            //@ts-ignore
+            numberOfRecipes: variant.numberOfRecipes || 0,
+        };
+    }
+
     private presentOrders(orders: Order[]): any {
         return orders.map((order) => ({
             id: order.id.value,
             weekLabel: order.getWeekLabel(),
             shippingDate: order.getHumanShippmentDay(),
             isSkipped: order.isSkipped(),
+            state: order.state.title,
         }));
     }
 
@@ -136,7 +158,10 @@ export class GetSubscriptionByIdPresenter {
                         )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
                     };
                 }),
-
+                nutritionalInfo: selection.recipe.recipeNutritionalData.nutritionalItems.map((item) => ({
+                    key: item.key,
+                    value: item.value,
+                })),
                 availableMonths: selection.recipe.availableMonths,
                 relatedPlans: selection.recipe.relatedPlans.map((planId: PlanId) => planId.value),
                 tools: selection.recipe.recipeTools,

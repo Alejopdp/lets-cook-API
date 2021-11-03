@@ -19,7 +19,9 @@ export class MongooseOrderRepository implements IOrderRepository {
         if (await MongooseOrder.exists({ _id: order.id.value })) {
             await MongooseOrder.updateOne({ _id: order.id.value }, orderDb);
         } else {
-            await MongooseOrder.create(orderDb);
+            const orderToSave = new MongooseOrder(orderDb);
+            // await MongooseOrder.create(orderDb);
+            await orderToSave.save();
         }
     }
 
@@ -27,6 +29,12 @@ export class MongooseOrderRepository implements IOrderRepository {
         const ordersToSave = orders.map((order) => orderMapper.toPersistence(order));
 
         await MongooseOrder.insertMany(ordersToSave);
+    }
+
+    public async updateMany(orders: Order[]): Promise<void> {
+        for (let order of orders) {
+            await this.save(order);
+        }
     }
 
     public async saveOrdersWithNewState(orders: Order[]): Promise<void> {
@@ -60,8 +68,12 @@ export class MongooseOrderRepository implements IOrderRepository {
 
     public async saveSwappedPlanOrders(orders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): Promise<void> {
         const ordersIdToSave = orders.map((order) => order.id.value);
+        const ordersToSave = orders.map((order) => orderMapper.toPersistence(order));
 
-        await MongooseOrder.updateMany({ _id: ordersIdToSave }, { plan: newPlan.id.value, planVariant: newPlanVariantId.value });
+        await MongooseOrder.updateMany(
+            { _id: ordersIdToSave },
+            { plan: newPlan.id.value, planVariant: newPlanVariantId.value, price: newPlan.getPlanVariantPrice(newPlanVariantId) }
+        );
     }
 
     public async getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[]): Promise<{ [key: string]: number }> {
@@ -78,6 +90,7 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async getFirstOrderOfSubscription(subscriptionId: SubscriptionId): Promise<Order | undefined> {
         const orderDb = await MongooseOrder.findOne({ subscription: subscriptionId.value })
             .sort({ shippingDate: 1 })
+            .populate("customer")
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
             .populate({
@@ -106,6 +119,7 @@ export class MongooseOrderRepository implements IOrderRepository {
 
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
+            .populate("customer")
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
             .populate({
@@ -129,7 +143,14 @@ export class MongooseOrderRepository implements IOrderRepository {
             subscription: subscriptionsIds.map((id) => id.value),
             state: "ORDER_ACTIVE",
             week: week.id.value,
-        });
+        })
+            .populate("customer")
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week")
+            .populate({
+                path: "recipeSelection",
+                populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
+            });
 
         return ordersDb.map((order: any) => orderMapper.toDomain(order));
     }
@@ -140,6 +161,7 @@ export class MongooseOrderRepository implements IOrderRepository {
 
     public async findBy(conditions: any, locale?: Locale): Promise<Order[]> {
         const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false })
+            .populate("customer")
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
             .populate({
@@ -154,6 +176,7 @@ export class MongooseOrderRepository implements IOrderRepository {
         const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false, shippingDate: { $gte: new Date() } })
             .sort({ shippingDate: 1 })
             // .limit(12)
+            .populate("customer")
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
             .populate({
@@ -175,6 +198,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             shippingDate: { $gte: new Date() },
         })
             .sort({ shippingDate: 1 })
+            .populate("customer")
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
             .populate({
@@ -199,6 +223,48 @@ export class MongooseOrderRepository implements IOrderRepository {
             subscription: subscriptionsIds.map((id) => id.value),
             shippingDate: { $lte: new Date() },
         });
+    }
+
+    public async findByWeekList(weeksIds: WeekId[]): Promise<Order[]> {
+        return await this.findBy({ week: weeksIds.map((id) => id.value) });
+    }
+
+    public async findByBillingDates(billingDates: Date[]): Promise<Order[]> {
+        billingDates.forEach((date) => date.setHours(0, 0, 0, 0));
+        return await this.findBy({ billingDate: billingDates });
+    }
+
+    public async findByShippingDates(shippingDates: Date[]): Promise<Order[]> {
+        shippingDates.forEach((date) => date.setHours(0, 0, 0, 0));
+        return await this.findBy({ shippingDate: shippingDates });
+    }
+
+    public async findCurrentWeekOrders(): Promise<Order[]> {
+        const today = new Date();
+        const thisWeekMinDay = new Date();
+        const thisWeekMaxDay = new Date();
+
+        thisWeekMinDay.setDate(thisWeekMinDay.getDate() + (0 - today.getDay()));
+        thisWeekMaxDay.setDate(thisWeekMaxDay.getDate() + (6 - today.getDay()));
+
+        return await this.findBy({ shippingDate: { $gte: thisWeekMinDay, $lte: thisWeekMaxDay } });
+    }
+
+    public async findAllByCustomersIds(customersIds: CustomerId[]): Promise<Order[]> {
+        const ordersDb = await MongooseOrder.find({ customer: customersIds.map((id) => id.value), deletionFlag: false })
+            .populate("customer")
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week")
+            .populate({
+                path: "recipeSelection",
+                populate: { path: "recipe", populate: { path: "recipeVariants", populate: { path: "restriction" } } },
+            });
+
+        return ordersDb.map((order: any) => orderMapper.toDomain(order));
+    }
+
+    public async addCustomerToOrderOfSubscription(subscriptionId: SubscriptionId, customerId: CustomerId): Promise<void> {
+        await MongooseOrder.updateMany({ subscription: subscriptionId.value }, { customer: customerId.value });
     }
 
     public async delete(orderId: OrderId): Promise<void> {

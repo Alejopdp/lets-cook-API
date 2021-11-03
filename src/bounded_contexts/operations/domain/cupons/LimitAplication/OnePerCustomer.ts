@@ -8,10 +8,13 @@ export class OnePerCustomer implements ILimitAplication {
 
     constructor(type: string, value: number) {
         this.type = type;
-        this.value = value;
+        this.value = 0;
     }
 
-    public isValid(subscriptions: Subscription[]): boolean {
-        throw new Error("Ya has utilizado este cupón de descuento");
+    public isValid(subscriptions: Subscription[], couponId: CouponId): boolean {
+        if (subscriptions.some((sub) => !!sub.coupon && sub.coupon.id.equals(couponId))) {
+            throw new Error("Ya has utilizado este cupón de descuento");
+        }
+        return true;
     }
 }

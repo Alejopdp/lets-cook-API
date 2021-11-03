@@ -40,6 +40,10 @@ export class OrderActive implements IOrderState {
         order.state = new OrderRejectedPayment();
     }
 
+    public isBilled(): boolean {
+        return false;
+    }
+
     public isPendingPayment(): boolean {
         return false;
     }

@@ -27,7 +27,7 @@ export class Subscription extends Entity<Subscription> {
     private _customer: Customer;
     private _coupon?: Coupon;
     private _billingStartDate?: Date;
-    private _creationDate: Date;
+    private _createdAt: Date;
     private _couponChargesQtyApplied: number;
     private _price: number;
 
@@ -37,7 +37,7 @@ export class Subscription extends Entity<Subscription> {
         frequency: IPlanFrequency,
         state: ISubscriptionState,
         restrictionComment: string,
-        creationDate: Date,
+        createdAt: Date,
         customer: Customer,
         price: number,
         restriction?: RecipeVariantRestriction,
@@ -51,7 +51,7 @@ export class Subscription extends Entity<Subscription> {
         super(subscriptionId);
         this._planVariantId = planVariantId;
         this._plan = plan;
-        this._price = price;
+        this._price = Math.round(price * 100) / 100;
         this._frequency = frequency;
         this._state = state;
         this._restriction = restriction;
@@ -59,7 +59,7 @@ export class Subscription extends Entity<Subscription> {
         this._customer = customer;
         this._coupon = coupon;
         this._billingStartDate = billingStartDate;
-        this._creationDate = creationDate;
+        this._createdAt = createdAt;
         this._couponChargesQtyApplied = couponChargesQtyApplied || 0;
         this._billingDayOfWeek = billingDayOfWeek || 6; // Saturday
         this._cancellationReason = cancellationReason;
@@ -70,6 +70,7 @@ export class Subscription extends Entity<Subscription> {
         const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek());
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
         const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
+        if (this.coupon) this.coupon.addApplication(this.customer);
 
         if (!this.firstShippingDateHasToSkipWeek(shippingZone.getDayNumberOfWeek())) billingDate.setDate(billingDate.getDate() - 7);
 
@@ -87,11 +88,13 @@ export class Subscription extends Entity<Subscription> {
                     hasFreeShipping,
                     this._id,
                     [],
-                    []
+                    [],
+                    false,
+                    this.customer
                 )
             );
 
-            if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
+            if (this.getCouponDiscount(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
 
             return orders;
         } else {
@@ -108,14 +111,15 @@ export class Subscription extends Entity<Subscription> {
                         this.plan,
                         this.plan.getPlanVariantPrice(this.planVariantId),
                         hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
-                        hasFreeShipping,
+                        hasFreeShipping && this.isCouponApplyable(),
                         this._id,
                         [],
-                        []
+                        [],
+                        false,
+                        this.customer
                     )
                 );
-
-                if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
+                if (this.getCouponDiscount(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
                 deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
             }
             return orders;
@@ -131,18 +135,40 @@ export class Subscription extends Entity<Subscription> {
 
     private isCouponApplyable(): boolean {
         return (
-            (!!this.coupon && this.couponChargesQtyApplied <= this.coupon.maxChargeQtyValue) || this.coupon?.maxChargeQtyType === "all_fee"
+            (!!this.coupon && this.couponChargesQtyApplied < this.coupon.maxChargeQtyValue) || this.coupon?.maxChargeQtyType === "all_fee"
         );
     }
 
+    public addCoupon(orders: Order[], paymentOrders: PaymentOrder[], coupon: Coupon, shippingCost: number): void {
+        if (!!this.coupon) throw new Error("La suscripción ya ha usado un cupón");
+        this.coupon = coupon;
+
+        for (let order of orders) {
+            this.applyCoupon(order, paymentOrders.find((po) => po.id.equals(order.paymentOrderId!))!, shippingCost);
+        }
+    }
+
+    private applyCoupon(order: Order, paymentOrder: PaymentOrder, shippingCost: number): void {
+        const hasFreeShipping = this._coupon?.type.type === "free" && this.getCouponDiscount(shippingCost) > 0;
+
+        if (order.isActive() || order.isSkipped()) {
+            order.discountAmount = hasFreeShipping ? 0 : this.getCouponDiscount(shippingCost);
+            order.hasFreeShipping = hasFreeShipping;
+            if (hasFreeShipping) paymentOrder.hasFreeShipping = hasFreeShipping;
+            paymentOrder.discountAmount =
+                Math.round(paymentOrder.discountAmount * 100) / 100 + Math.round(order.discountAmount * 100) / 100;
+
+            if (order.discountAmount > 0 || hasFreeShipping) this.couponChargesQtyApplied = this.couponChargesQtyApplied + 1;
+        }
+    }
+
     public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week, shippingZone: ShippingZone): Order {
-        console.log("BILLED ORDER: ", billedOrder);
-        console.log("NEW ORDER WEEK: ", newOrderWeek);
         const newBillingDate: Date = this.getNewOrderDateFrom(billedOrder.billingDate);
         const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
         const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
 
-        if (this.getCouponDiscount(shippingZone.cost) !== 0) this.couponChargesQtyApplied += 1;
+        if (this.getCouponDiscount(shippingZone.cost) !== 0 || hasFreeShipping)
+            this.couponChargesQtyApplied = this.couponChargesQtyApplied + 1;
 
         return new Order(
             newShippingDate,
@@ -153,10 +179,12 @@ export class Subscription extends Entity<Subscription> {
             this.plan,
             this.plan.getPlanVariantPrice(this.planVariantId),
             hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
-            hasFreeShipping,
+            hasFreeShipping && this.isCouponApplyable(),
             this.id,
             [],
-            []
+            [],
+            false,
+            this.customer
         );
     }
 
@@ -210,6 +238,7 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public cancel(cancellationReason: CancellationReason, nextOrders: Order[], paymentOrders: PaymentOrder[]): void {
+        cancellationReason.date = new Date();
         this.cancellationReason = cancellationReason;
 
         for (let order of nextOrders) {
@@ -219,6 +248,9 @@ export class Subscription extends Entity<Subscription> {
         this.state.toCancelled(this);
     }
 
+    public isActive(): boolean {
+        return this.state.isActive();
+    }
     public getPlanVariantLabel(): string {
         return this.plan.getPlanVariantLabel(this.planVariantId);
     }
@@ -234,25 +266,25 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getNextOrderToShip(orders: Order[] = []): Order | undefined {
-        return orders.find((order) => order.isActive() || order.state.title === "ORDER_BILLED"); // TO DO: It works if orders is sorted ASC
+        return orders.find((order) => order.isActive() || order.isBilled()); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextSecondActiveOrder(orders: Order[]): Order | undefined {
         const nextOrder: Order | undefined = this.getNextActiveOrder(orders);
         if (!!!nextOrder) return undefined;
 
-        return orders.find((order) => order.isActive() && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
+        return orders.find((order) => (order.isActive() || order.isBilled()) && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextSecondOrderToShip(orders: Order[]): Order | undefined {
         const nextOrder: Order | undefined = this.getNextOrderToShip(orders);
         if (!!!nextOrder) return undefined;
 
-        return orders.find((order) => (order.isActive() || order.state.title === "ORDER_BILLED") && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
+        return orders.find((order) => (order.isActive() || order.isBilled()) && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
     }
 
     public getNextShipmentLabel(orders: Order[] = []): string {
-        const nextOrder = orders.find((order) => order.isActive());
+        const nextOrder = orders.find((order) => order.isActive() || order.isBilled());
 
         if (!!!nextOrder) return "No tienes una próxima entrega";
 
@@ -268,7 +300,7 @@ export class Subscription extends Entity<Subscription> {
 
         if (servingsQty === 0) return "";
 
-        return `${servingsQty} raciones a ${this.price / servingsQty} € por ración`;
+        return `${servingsQty} raciones a ${Math.round((this.price / servingsQty + Number.EPSILON) * 100) / 100} € por ración`;
     }
 
     public getPriceByFrequencyLabel(): string {
@@ -284,6 +316,7 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getMaxRecipesQty(): number {
+        //@ts-ignore
         return this.plan.getPlanVariantById(this.planVariantId)?.numberOfRecipes || 0;
     }
 
@@ -293,6 +326,21 @@ export class Subscription extends Entity<Subscription> {
         if (comment) this.restrictionComment = comment;
     }
 
+    public changePlanVariant(variantId: PlanVariantId, orders: Order[], paymentOrders: PaymentOrder[]): void {
+        // const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(variantId);
+        // if (!!!planVariant) throw new Error("La variante ingresada no existe");
+        // const paymentOrderOrderMap: { [paymentOrderId: string]: Order };
+        // orders.forEach((order) => {
+        //     order.price = planVariant.getPaymentPrice();
+        //     if (order.discountAmount !== 0 && !!this.coupon && !this.coupon?.isFreeShippingCoupon()) {
+        //         order.discountAmount = this.coupon.getDiscount(this.plan, variantId, 0); // ShippingCost dummy if it is not a free shipping coupon
+        //     }
+        //     paymentOrderOrderMap[order.paymentOrderId?.value! as string] = order;
+        // });
+        // paymentOrders.forEach((paymentOrder) => {
+        //     paymentOrder.amount;
+        // });
+    }
     /**
      * Getter planVariantId
      * @return {PlanVariantId}
@@ -366,11 +414,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Getter creationDate
+     * Getter createdAt
      * @return {Date}
      */
-    public get creationDate(): Date {
-        return this._creationDate;
+    public get createdAt(): Date {
+        return this._createdAt;
     }
 
     /**
@@ -477,11 +525,11 @@ export class Subscription extends Entity<Subscription> {
     }
 
     /**
-     * Setter creationDate
+     * Setter createdAt
      * @param {Date} value
      */
-    public set creationDate(value: Date) {
-        this._creationDate = value;
+    public set createdAt(value: Date) {
+        this._createdAt = value;
     }
 
     /**

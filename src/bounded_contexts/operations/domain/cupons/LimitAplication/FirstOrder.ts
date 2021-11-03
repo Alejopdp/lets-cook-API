@@ -8,7 +8,7 @@ export class FirstOrder implements ILimitAplication {
 
     constructor(type: string, value: number) {
         this.type = type;
-        this.value = value;
+        this.value = 0;
     }
 
     public isValid(subscriptions: Subscription[]): boolean {

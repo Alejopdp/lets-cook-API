@@ -56,11 +56,11 @@ export class Recipe extends Entity<Recipe> {
         return this.recipeGeneralData.imageUrl;
     }
 
-    public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]) {
+    public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]): string {
         const variant: RecipeVariant | undefined = this.recipeVariants.find((variant) => variantIds.some((id) => id.equals(variant.id)));
         if (!!!variant) return "";
 
-        return variant.sku;
+        return variant.sku.code;
     }
 
     public updateWeeks(weeks: Week[]): void {
@@ -73,6 +73,10 @@ export class Recipe extends Entity<Recipe> {
 
     public getPresentedNutritionalInfo(): { key: string; value: string }[] {
         return this.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
+    }
+
+    public getDefaultVariantSku(): string {
+        return this.recipeVariants[0].sku.code;
     }
 
     /**

@@ -5,6 +5,7 @@ import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/payment
 import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
 import { mongooseWeekRepository } from "../../infra/repositories/week";
+import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { assignOrdersToPaymentOrder } from "../../services/assignOrdersToPaymentOrders";
 import { ReorderPlan } from "./reorderPlan";
 import { ReorderPlanController } from "./reorderPlanController";
@@ -18,7 +19,8 @@ export const reorderPlan: ReorderPlan = new ReorderPlan(
     stripeService,
     awsSesService,
     assignOrdersToPaymentOrder,
-    mongoosePaymentOrderReposiotry
+    mongoosePaymentOrderReposiotry,
+    mongooseCustomerRepository
 );
 export const reorderPlanPresenter: ReorderPlanPresenter = new ReorderPlanPresenter();
 export const reorderPlanController: ReorderPlanController = new ReorderPlanController(reorderPlan, reorderPlanPresenter);

@@ -1,6 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CustomerId } from "../customer/CustomerId";
+import { Customer } from "../customer/Customer";
 import { Order } from "../order/Order";
 import { Week } from "../week/Week";
 import { PaymentOrderId } from "./PaymentOrderId";
@@ -17,6 +18,9 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     private _discountAmount: number;
     private _shippingCost: number;
     private _customerId: CustomerId;
+    private _quantityRefunded: number;
+    private _hasFreeShipping: boolean;
+    private _lastRecipeSelectionDate?: Date;
 
     constructor(
         shippingDate: Date,
@@ -28,7 +32,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         discountAmount: number,
         shippingCost: number,
         customerId: CustomerId,
-        paymentOrderId?: PaymentOrderId
+        hasFreeShipping: boolean,
+        quantityRefunded: number = 0,
+        paymentOrderId?: PaymentOrderId,
+        lastRecipeSelectionDate?: Date
     ) {
         super(paymentOrderId);
         this._shippingDate = shippingDate;
@@ -36,21 +43,32 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._paymentIntentId = paymentIntentId;
         this._billingDate = billingDate;
         this._week = week;
-        this._amount = amount;
-        this._discountAmount = discountAmount;
-        this._shippingCost = shippingCost;
+        this._amount = Math.round(amount * 100) / 100;
+        this._discountAmount = Math.round(discountAmount * 100) / 100;
+        this._shippingCost = Math.round(shippingCost * 100) / 100;
         this._customerId = customerId;
+        this._hasFreeShipping = hasFreeShipping;
+        this._quantityRefunded = quantityRefunded;
+        this._lastRecipeSelectionDate = lastRecipeSelectionDate;
     }
 
     public addOrder(order: Order): void {
         order.paymentOrderId = this.id;
-        this.amount = this.amount + order.price; // TO DO: Add price with discount
-        this.discountAmount += order.discountAmount; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+
+        if (this.state.isPendingConfirmation()) return;
+
+        this.amount = (Math.round(this.amount * 100) + Math.round(order.getTotalPrice() * 100)) / 100; // TO DO: Add price with discount
+        this.discountAmount = (Math.round(this.discountAmount * 100) + Math.round(order.discountAmount * 100)) / 100; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+
+        if (order.hasFreeShipping) this.hasFreeShipping = true;
+        if (this.state.isCancelled()) this.state.toActive(this);
     }
 
     public discountOrderAmount(order: Order): void {
-        this.amount -= order.getTotalPrice();
-        this.discountAmount -= order.discountAmount;
+        this.amount = (Math.round(this.amount * 100) - Math.round(order.getTotalPrice() * 100)) / 100;
+        this.discountAmount = (Math.round(this.discountAmount * 100) - Math.round(order.discountAmount * 100)) / 100;
+
+        if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
     }
 
     public discountOrdersAmount(orders: Order[]): void {
@@ -75,9 +93,9 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         return MomentTimeService.getDdMmYyyy(this.billingDate);
     }
 
-    public toBilled(orders: Order[]): void {
+    public toBilled(orders: Order[], customer?: Customer): void {
         for (let order of orders) {
-            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(); // TO DO: Handle this?
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.bill(customer); // TO DO: Handle this?
         }
 
         this.state.toBilled(this);
@@ -85,7 +103,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
 
     public toActive(orders: Order[]): void {
         for (let order of orders) {
-            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(); // TO DO: Handle this?
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(this); // TO DO: Handle this?
         }
 
         this.state.toActive(this);
@@ -115,8 +133,48 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this.state.toRejected(this);
     }
 
+    // TO DO: Remove the shipping cost outside of this class in createSubscription and payAllSubscriptions AND USE getFinalAmount()
     public getTotalAmount(): number {
-        return this.amount + this.shippingCost - this.discountAmount;
+        return (Math.round(this.amount * 100) + Math.round(this.shippingCost * 100) - Math.round(this.discountAmount * 100)) / 100;
+    }
+
+    // Same as the previous one, but resting the shipping cost.
+    public getFinalAmount(): number {
+        return (
+            (Math.round(this.amount * 100) +
+                Math.round(this.shippingCost * 100) -
+                Math.round(this.getDiscountAmountOrShippingCostIfHasFreeShipping() * 100)) /
+            100
+        );
+    }
+
+    public getDiscountAmountOrShippingCostIfHasFreeShipping(): number {
+        return this.hasFreeShipping ? this.shippingCost + this.discountAmount : this.discountAmount;
+    }
+
+    public isPaymentRejected(): boolean {
+        return this.state.isRejected();
+    }
+
+    public isBilled(): boolean {
+        return this.state.isBilled();
+    }
+
+    public isPartiallyRefunded(): boolean {
+        return this.state.title === "PAYMENT_ORDER_PARTIALLY_REFUNDED";
+    }
+
+    public refund(amount: number): void {
+        if (!!!this.isBilled() && !!!this.isPartiallyRefunded())
+            throw new Error("No puede hacer un reembolso de un pago que no fue cobrado o parcialmente reembolsado");
+        if ((Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100 > this.getTotalAmount())
+            throw new Error("No puede devolverse una cantidad mayor al total del monto de la orden");
+        if (amount <= 0) throw new Error("No puede devolverse una cantidad negativa");
+        if ((Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100 === this.getTotalAmount())
+            this.state.toRefunded(this);
+        else this.state.toPartiallyRefunded(this);
+
+        this.quantityRefunded = (Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100;
     }
 
     /**
@@ -192,6 +250,38 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     /**
+     * Getter quantityRefunded
+     * @return {number}
+     */
+    public get quantityRefunded(): number {
+        return this._quantityRefunded;
+    }
+
+    /**
+     * Getter hasFreeShipping
+     * @return {boolean}
+     */
+    public get hasFreeShipping(): boolean {
+        return this._hasFreeShipping;
+    }
+
+    /**
+     * Getter lastRecipeSelectionDate
+     * @return { Date | undefined}
+     */
+    public get lastRecipeSelectionDate(): Date | undefined {
+        return this._lastRecipeSelectionDate;
+    }
+
+    /**
+     * Setter hasFreeShipping
+     * @param {boolean} value
+     */
+    public set hasFreeShipping(value: boolean) {
+        this._hasFreeShipping = value;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -261,5 +351,21 @@ export class PaymentOrder extends Entity<PaymentOrder> {
      */
     public set customerId(value: CustomerId) {
         this._customerId = value;
+    }
+
+    /**
+     * Setter quantityRefunded
+     * @param {number} value
+     */
+    public set quantityRefunded(value: number) {
+        this._quantityRefunded = value;
+    }
+
+    /**
+     * Setter lastRecipeSelectionDate
+     * @param {Date | undefined} value
+     */
+    public set lastRecipeSelectionDate(value: Date | undefined) {
+        this._lastRecipeSelectionDate = value;
     }
 }

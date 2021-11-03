@@ -6,6 +6,8 @@ import { ShippingZoneRadio } from "../../domain/shipping/ShippingZoneRadio/Shipp
 import { Coordinates } from "../../domain/shipping/ShippingZoneRadio/Coordinates";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { UpdateShippingZoneDto } from "./updateShippingZoneDto";
+import { updatePaymentOrdersShippingCost } from "../../services/updatePaymentOrdersShippingCost";
+import { Day } from "../../domain/day/Day";
 
 export class UpdateShippingZone {
     private _shippingZoneRepository: IShippingZoneRepository;
@@ -19,8 +21,9 @@ export class UpdateShippingZone {
     public async execute(dto: UpdateShippingZoneDto): Promise<void> {
         const shippingZoneId: ShippingZoneId = new ShippingZoneId(dto.id);
         const shipping: ShippingZone | undefined = await this.shippingZoneRepository.findById(shippingZoneId);
-
         if (!shipping) throw new Error("La zona de envío indicada no existe");
+        const shippingCostHasChanged = shipping.cost !== dto.cost;
+        var shippingDayOfWeek: Day = new Day(dto.day);
 
         var shippingRadio: ShippingZoneRadio | undefined = undefined;
 
@@ -43,6 +46,9 @@ export class UpdateShippingZone {
         if (!!shippingRadio) shipping.updateShippingRadio(shippingRadio);
 
         await this.shippingZoneRepository.save(shipping);
+        if (shippingCostHasChanged) {
+            await updatePaymentOrdersShippingCost.execute(shipping, dto.cost);
+        }
     }
 
     /**

@@ -25,6 +25,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         billingAddress: customerDb.billingAddress,
                         paymentMethods: customerDb.paymentMethods,
                         personalInfo: customerDb.personalInfo,
+                        receivedOrdersQuantity: customerDb.receivedOrdersQuantity,
                     },
                 }
             );
@@ -65,6 +66,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
 
     public async findBy(conditions: any): Promise<Customer[]> {
         const customerDb = await MongooseCustomer.find({ ...conditions, deletionFlag: false });
+
         return customerDb.map((raw: any) => customerMapper.toDomain(raw));
     }
 
@@ -74,6 +76,12 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         if (!!!customer) throw new Error("El cliente ingresado no existe");
 
         return customer;
+    }
+
+    public async updateMany(customers: Customer[]): Promise<void> {
+        for (let customer of customers) {
+            await this.save(customer);
+        }
     }
 
     public async delete(customerId: CustomerId): Promise<void> {

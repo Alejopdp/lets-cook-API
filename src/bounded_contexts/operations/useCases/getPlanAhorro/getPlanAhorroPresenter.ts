@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
+import { getPlanByIdController } from "../getPlanById";
 
 export class GetPlanAhorroPresenter {
     private _storageService: IStorageService;
@@ -36,8 +37,12 @@ export class GetPlanAhorroPresenter {
                     sku: variant.sku.code,
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
-                    description: variant.description,
+                    description: variant.getLabel(),
                     isDeleted: variant.isDeleted,
+                    //@ts-ignore
+                    numberOfPersons: variant.numberOfPersons || 0,
+                    //@ts-ignore
+                    numberOfRecipes: variant.numberOfRecipes || 0,
                     //@ts-ignore
                     Personas: variant.numberOfPersons,
                     //@ts-ignore
@@ -54,7 +59,7 @@ export class GetPlanAhorroPresenter {
                 presentedVariants.push({
                     id: variant.id.value,
                     isDefault: variant.isDefault,
-                    description: variant.description,
+                    description: variant.getLabel(),
                     sku: variant.sku.code,
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,

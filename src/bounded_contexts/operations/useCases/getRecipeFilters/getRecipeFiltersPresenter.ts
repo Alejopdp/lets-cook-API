@@ -12,9 +12,7 @@ export class GetRecipeFiltersPresenter {
         for (let week of weeks) {
             presentedWeeks.push({
                 id: week.id.value,
-                label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
-                    week.maxDay
-                )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
+                label: week.getShorterLabel(),
             });
         }
 

@@ -110,6 +110,19 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         return await this.findBy({}, locale);
     }
 
+    public async findAllSortedByBillingDateDesc(locale: Locale): Promise<PaymentOrder[]> {
+        const paymentOrdersDb = await MongoosePaymentOrder.find({ deletionFlag: false })
+            .sort({ billingDate: -1 })
+            .populate("week")
+            .populate({
+                path: "recipes",
+                populate: { path: "recipeVariants", populate: { path: "restriction" } },
+            })
+            .populate("plan");
+
+        return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
+    }
+
     public async findBy(conditions: any, locale: Locale = Locale.es): Promise<PaymentOrder[]> {
         const paymentOrdersDb = await MongoosePaymentOrder.find({ ...conditions, deletionFlag: false })
             .sort({ billingDate: 1 })
@@ -125,6 +138,23 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
 
     public async findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
         return await this.findBy({ billingDate, state: "PAYMENT_ORDER_ACTIVE" }, Locale.es);
+    }
+
+    public async findByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
+        return await this.findBy({ billingDate }, Locale.es);
+    }
+
+    public async findActiveByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]> {
+        return await this.findBy({
+            customer: customerIds.map((id) => id.value),
+            state: ["PAYMENT_ORDER_ACTIVE", "PAYMENT_ORDER_REJECTED", "PAYMENT_ORDER_PENDING_CONFIRMATION"],
+        });
+    }
+
+    public async updateShippingCost(paymentOrders: PaymentOrder[], shippingCost: number): Promise<void> {
+        // const paymentOrdersDb = paymentOrders.map(paymentOrder => paymentOrderMapper.toPersistence(paymentOrder))
+
+        await MongoosePaymentOrder.updateMany({ _id: paymentOrders.map((po) => po.id.value) }, { shippingCost });
     }
 
     public async delete(paymentOrderId: PaymentOrderId): Promise<void> {
