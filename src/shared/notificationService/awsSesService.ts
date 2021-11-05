@@ -12,6 +12,7 @@ import {
     newSubscriptionTemplate,
     sendRecoverPasswordCodeTemplate,
     ticketTemplate,
+    newSubscriptionsTemplate,
 } from "../../emailTemplates/emailTemplates";
 import { planAhorroMailTemplate } from "../../emailTemplates/planAhorro";
 import { vegPlans } from "../../emailTemplates/vegPlans";
@@ -139,6 +140,14 @@ export class AwsSesService implements INotificationService {
         // }
     }
 
+    public async notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(
+        customerEmail: string,
+        customerName: string,
+        planNames: string[]
+    ): Promise<void> {
+        await this.sendMailToAdmins("Nueva compra de un plan", "", newSubscriptionsTemplate(customerName, planNames));
+    }
+
     public async notifyAdminsAboutNewSubscriptionSuccessfullyCreated(dto: NewSubscriptionNotificationDto): Promise<void> {
         await this.sendMailToAdmins(
             "Nueva compra de un plan",
@@ -147,7 +156,7 @@ export class AwsSesService implements INotificationService {
                 dto.customerFirstName,
                 dto.recipeSelection,
                 dto.planName,
-                !!dto.hasIndicatedRestrictions,
+                dto.hasIndicatedRestrictions,
                 dto.shippingCost,
                 dto.firstOrderId,
                 dto.shippingDay,

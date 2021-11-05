@@ -34,6 +34,7 @@ export interface INotificationService {
     notifyCustomerAboutSuccesfulPurchase(): Promise<void>;
     notifyCustomerAboutNewSubscriptionSuccessfullyCreated(dto: NewSubscriptionNotificationDto): Promise<void>;
     notifyAdminsAboutNewSubscriptionSuccessfullyCreated(dto: NewSubscriptionNotificationDto): Promise<void>;
+    notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(customerEmail: string, customerName: string, planNames: string[]): Promise<void>;
     notifyAdminAbountNewSale(): Promise<void>;
     notifyAdminAboutACancellation(subscription: Subscription, adminNameOrEmail?: string): Promise<void>;
     notifyAdminAboutAddressChange(customer: Customer, adminNameOrEmail?: string): Promise<void>;
