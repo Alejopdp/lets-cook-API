@@ -1,3 +1,4 @@
+import { INotificationService, PaymentOrderBilledNotificationDto } from "@src/shared/notificationService/INotificationService";
 import Stripe from "stripe";
 import { logger } from "../../../../../config";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
@@ -22,6 +23,7 @@ export class PayAllSubscriptions {
     private _subscriptionRepository: ISubscriptionRepository;
     private _weekRepository: IWeekRepository;
     private _shippingZoneRepository: IShippingZoneRepository;
+    private _notificationService: INotificationService;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -30,7 +32,8 @@ export class PayAllSubscriptions {
         paymentService: IPaymentService,
         subscriptionRepository: ISubscriptionRepository,
         weekRepository: IWeekRepository,
-        shippingZoneRepository: IShippingZoneRepository
+        shippingZoneRepository: IShippingZoneRepository,
+        notificationService: INotificationService
     ) {
         this._customerRepository = customerRepository;
         this._orderRepository = orderRepository;
@@ -39,6 +42,7 @@ export class PayAllSubscriptions {
         this._subscriptionRepository = subscriptionRepository;
         this._weekRepository = weekRepository;
         this._shippingZoneRepository = shippingZoneRepository;
+        this._notificationService = notificationService;
     }
 
     public async execute(): Promise<void> {
@@ -63,6 +67,7 @@ export class PayAllSubscriptions {
         const newOrders: Order[] = [];
         const frequencyWeekMap: { [frequency: string]: Week } = {};
         const customerShippingZoneMap: { [customerId: string]: ShippingZone | undefined } = {};
+        const notificationDtos: PaymentOrderBilledNotificationDto[] = [];
 
         if (!!!weeklyOrdersWeek || !!!biweeklyOrdersWeek || !!!monthlyOrdersWeek)
             throw new Error("Error al obtener las semanas para una nueva orden");
@@ -138,6 +143,17 @@ export class PayAllSubscriptions {
                     if (paymentIntent.status === "succeeded") {
                         logger.info(`${paymentOrderId} processing succeeded`);
                         paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
+                        notificationDtos.push({
+                            customerEmail: paymentOrderCustomer.email,
+                            foodVAT: totalAmount * 0.1,
+                            phoneNumber: paymentOrderCustomer.personalInfo?.phone1 || "",
+                            shippingAddressCity: "",
+                            shippingAddressName: paymentOrderCustomer.getShippingAddress().name || "",
+                            shippingCost: customerHasFreeShipping ? 0 : shippingCost,
+                            shippingCustomerName: paymentOrderCustomer.getPersonalInfo().fullName || "",
+                            shippingDate: paymentOrderOrderMap[paymentOrderId][0].getHumanShippmentDay(),
+                            totalAmount: totalAmount,
+                        });
                     } else {
                         logger.info(`${paymentOrderId} processing failed`);
                         paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
@@ -239,7 +255,9 @@ export class PayAllSubscriptions {
         await this.paymentOrderRepository.updateMany(paymentOrdersToBill);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         await this.customerRepository.updateMany(customers);
-
+        for (let dto of notificationDtos) {
+            await this.notificationService.notifyCustomerAboutPaymentOrderBilled(dto);
+        }
         logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
     }
 
@@ -297,5 +315,13 @@ export class PayAllSubscriptions {
      */
     public get shippingZoneRepository(): IShippingZoneRepository {
         return this._shippingZoneRepository;
+    }
+
+    /**
+     * Getter notificationService
+     * @return {INotificationService}
+     */
+    public get notificationService(): INotificationService {
+        return this._notificationService;
     }
 }

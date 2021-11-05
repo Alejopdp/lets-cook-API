@@ -5,14 +5,21 @@ import { RecipeVariantRestriction } from "../../domain/recipe/RecipeVariant/reci
 import { RecipeRestrictionId } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { IRecipeRestrictionRepository } from "../../infra/repositories/recipeVariantRestriction/IRecipeRestrictionRepository";
 import { Subscription } from "../../domain/subscription/Subscription";
+import { INotificationService } from "@src/shared/notificationService/INotificationService";
 
 export class UpdateSubscriptionRestriction {
     private _subscriptionRepository: ISubscriptionRepository;
     private _restrictionRepository: IRecipeRestrictionRepository;
+    private _notificationService: INotificationService;
 
-    constructor(subscriptionRepository: ISubscriptionRepository, restrictionRepository: IRecipeRestrictionRepository) {
+    constructor(
+        subscriptionRepository: ISubscriptionRepository,
+        restrictionRepository: IRecipeRestrictionRepository,
+        notificationService: INotificationService
+    ) {
         this._subscriptionRepository = subscriptionRepository;
         this._restrictionRepository = restrictionRepository;
+        this._notificationService = notificationService;
     }
 
     public async execute(dto: UpdateSubscriptionRestrictionDto): Promise<void> {
@@ -26,6 +33,7 @@ export class UpdateSubscriptionRestriction {
         subscription.updateRestriction(restriction, dto.comment);
 
         await this.subscriptionRepository.save(subscription);
+        this.notificationService.notifyAdminAboutRestrictionChange(subscription);
     }
 
     /**
@@ -42,5 +50,13 @@ export class UpdateSubscriptionRestriction {
      */
     public get restrictionRepository(): IRecipeRestrictionRepository {
         return this._restrictionRepository;
+    }
+
+    /**
+     * Getter notificationService
+     * @return {INotificationService}
+     */
+    public get notificationService(): INotificationService {
+        return this._notificationService;
     }
 }

@@ -10,23 +10,27 @@ import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/I
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
+import { INotificationService } from "@src/shared/notificationService/INotificationService";
 
 export class UpdateCustomerShipping {
     private _customerRepository: ICustomerRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _shippingZoneRepository: IShippingZoneRepository;
     private _storageService: IStorageService;
+    private _notificationService: INotificationService;
 
     constructor(
         customerRepository: ICustomerRepository,
         paymentOrderRepository: IPaymentOrderRepository,
         shippingZoneRepository: IShippingZoneRepository,
-        storageService: IStorageService
+        storageService: IStorageService,
+        notificationService: INotificationService
     ) {
         this._customerRepository = customerRepository;
         this._paymentOrderRepository = paymentOrderRepository;
         this._shippingZoneRepository = shippingZoneRepository;
         this._storageService = storageService;
+        this._notificationService = notificationService;
     }
 
     public async execute(dto: UpdateCustomerShippingDto): Promise<void> {
@@ -45,6 +49,7 @@ export class UpdateCustomerShipping {
 
         await this.paymentOrderRepository.updateMany(paymentOrders);
         await this.customerRepository.save(customer);
+        this.notificationService.notifyAdminAboutAddressChange(customer, dto.nameOrEmailOfAdminExecutingRequest);
     }
 
     /**
@@ -77,5 +82,13 @@ export class UpdateCustomerShipping {
      */
     public get shippingZoneRepository(): IShippingZoneRepository {
         return this._shippingZoneRepository;
+    }
+
+    /**
+     * Getter notificationService
+     * @return {INotificationService}
+     */
+    public get notificationService(): INotificationService {
+        return this._notificationService;
     }
 }

@@ -25,6 +25,8 @@ export class UpdateCustomerShippingController extends BaseController {
                 details: this.req.body.details,
                 addressId: this.req.body.addresId,
                 deliveryTime: this.req.body.delivery_time,
+                //@ts-ignore
+                nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
             };
 
             await this.updateCustomer.execute(dto);

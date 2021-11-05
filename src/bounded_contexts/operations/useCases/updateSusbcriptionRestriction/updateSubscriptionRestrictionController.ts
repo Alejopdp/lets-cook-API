@@ -19,6 +19,8 @@ export class UpdateSubscriptionRestrictionController extends BaseController {
                 restrictionId: this.req.body.restrictionId,
                 subscriptionId: this.req.params.id,
                 comment: this.req.body.comment,
+                //@ts-ignore
+                nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
             };
 
             await this.updateSubscriptionRestriction.execute(dto);

@@ -49,6 +49,7 @@ export class SignUp {
         customer.stripeId = stripeCustomerId;
 
         const tokenPayload = {
+            id: customer.id.value,
             email: customer.email,
         };
         await this.signUpRepository.save(customer);

@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { INotificationService } from "../../../../shared/notificationService/INotificationService";
+import { INotificationService, NewSubscriptionNotificationDto } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Coupon } from "../../domain/cupons/Cupon";
@@ -208,7 +208,19 @@ export class CreateSubscription {
             newPaymentOrders[0]?.toBilled(orders, customer);
         }
 
-        // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
+        const notificationDto: NewSubscriptionNotificationDto = {
+            customerEmail: customer.email,
+            customerFirstName: customer.getPersonalInfo().name!,
+            customerLastName: customer.getPersonalInfo().lastName!,
+            firstOrderId: orders[0].id.value as string,
+            hasIndicatedRestrictions: subscription.restrictionComment,
+            isPlanAhorro: false,
+            planName: subscription.plan.name,
+            recipeSelection: [],
+            shippingCost: hasFreeShipping ? 0 : customerShippingZone.cost,
+            shippingDay: orders[0].getHumanShippmentDay(),
+            planSku: subscription.plan.planSku.code,
+        };
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
         await this.customerRepository.save(customer);
@@ -222,6 +234,7 @@ export class CreateSubscription {
             }
         }
         if (coupon) await this.couponRepository.save(coupon);
+        this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
 
         return {
             subscription,

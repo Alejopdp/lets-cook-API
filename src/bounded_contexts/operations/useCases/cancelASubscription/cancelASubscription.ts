@@ -1,3 +1,4 @@
+import { INotificationService } from "@src/shared/notificationService/INotificationService";
 import { CancellationReason } from "../../domain/cancellationReason/CancellationReason";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
@@ -12,15 +13,18 @@ export class CancelASubscription {
     private _subscriptionRepository: ISubscriptionRepository;
     private _orderRepository: IOrderRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
+    private _notificationService: INotificationService;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
         orderRepository: IOrderRepository,
-        paymentOrderRepository: IPaymentOrderRepository
+        paymentOrderRepository: IPaymentOrderRepository,
+        notificationService: INotificationService
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._orderRepository = orderRepository;
         this._paymentOrderRepository = paymentOrderRepository;
+        this._notificationService = notificationService;
     }
 
     public async execute(dto: CancelASubscriptionDto): Promise<void> {
@@ -37,6 +41,7 @@ export class CancelASubscription {
         await this.orderRepository.saveCancelledOrders(orders.filter((order) => order.isCancelled())); // TO DO: Transaction / Queue
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
         await this.paymentOrderRepository.updateMany(paymentOrders); // TO DO: Transaction / Queue
+        this.notificationService.notifyAdminAboutACancellation(subscription, dto.nameOrEmailOfAdminExecutingRequest);
     }
 
     /**
@@ -61,5 +66,13 @@ export class CancelASubscription {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter notificationService
+     * @return {INotificationService}
+     */
+    public get notificationService(): INotificationService {
+        return this._notificationService;
     }
 }

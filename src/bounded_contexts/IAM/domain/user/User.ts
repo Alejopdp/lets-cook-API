@@ -93,6 +93,10 @@ export class User extends Entity<User> {
         this.isActivated = false;
     }
 
+    public getFullName(): string {
+        return `${this.name.firstName} ${this.name.lastName}`;
+    }
+
     /**
      * Getter name
      * @return {UserName}

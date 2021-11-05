@@ -50,6 +50,7 @@ export class SendNewSubscriptionEmail {
             shippingCost: customerShippingZone?.cost!,
             shippingDay: customerShippingZone?.getDayLabel()!,
             isPlanAhorro: subscription.plan.planSlug.slug === "plan-ahorro",
+            planSku: subscription.plan.planSku.code,
         };
 
         await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated(notificationDto);
