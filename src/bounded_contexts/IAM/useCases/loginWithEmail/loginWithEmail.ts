@@ -32,6 +32,7 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
         if (!user.password?.equals(incomingPassword)) return isFailure(invalidLoginArguments());
 
         const tokenPayload = {
+            id: user.id.value,
             fullName: `${user.name.firstName} ${user.name.lastName}`,
             firstName: user.name.firstName,
             lastName: user.name.lastName,

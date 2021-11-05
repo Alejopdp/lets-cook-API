@@ -1,3 +1,4 @@
+import { awsSesService } from "../../../../shared/notificationService/index";
 import { stripeService } from "../../application/paymentService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
@@ -14,5 +15,6 @@ export const payAllSubscriptions: PayAllSubscriptions = new PayAllSubscriptions(
     stripeService,
     mongooseSubscriptionRepository,
     mongooseWeekRepository,
-    mongooseShippingZoneRepository
+    mongooseShippingZoneRepository,
+    awsSesService
 );

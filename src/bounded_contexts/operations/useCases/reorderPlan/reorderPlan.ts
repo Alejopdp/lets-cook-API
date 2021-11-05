@@ -123,7 +123,7 @@ export class ReorderPlan {
             newPaymentOrders[0]?.toBilled(orders, subscription.customer);
         }
 
-        // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
+        await this.notificationService.notifyAdminAboutAPlanReactivation(subscription);
         // @ts-ignore
         // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated({});
         await this.subscriptionRepository.save(subscription);

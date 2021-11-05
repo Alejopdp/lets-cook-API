@@ -32,10 +32,7 @@ export class ForgotPassword implements UseCase<ForgotPasswordDto, Promise<Respon
 
         customer.codeToRecoverPassword = random;
 
-        await this.notificationService.notifyNewBackOfficeUserToRecoverPassword(
-            customer.email,
-            "Digite el siguiente código para validar su correo: " + random
-        );
+        await this.notificationService.notifyNewBackOfficeUserToRecoverPassword(customer.email, random);
 
         await this.customerRepository.save(customer);
 

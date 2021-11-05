@@ -16,6 +16,8 @@ export class CancelASubscriptionController extends BaseController {
                 subscriptionId: this.req.params.id,
                 cancellationComment: this.req.body.cancellationComment,
                 cancellationReason: this.req.body.cancellationReason,
+                //@ts-ignore
+                nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
             };
             await this.cancelASubscription.execute(dto);
 

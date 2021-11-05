@@ -6,5 +6,6 @@ export interface UpdateCustomerShippingDto {
     fullName: string;
     details: string;
     addressId: string;
-    deliveryTime: string; 
+    deliveryTime: string;
+    nameOrEmailOfAdminExecutingRequest?: string;
 }
