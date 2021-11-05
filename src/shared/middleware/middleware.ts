@@ -127,7 +127,7 @@ export class Middleware {
                 }
 
                 //@ts-ignore
-                if (decoded.roleTitle! !== "Admin") {
+                if (decoded.roleTitle! !== "Administrador") {
                     return this.endRequest(401, "No estás autorizado", res);
                 }
 
