@@ -7,23 +7,27 @@ import { SignUpDto } from "./signUpDto";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { ITokenService } from "../../../IAM/application/tokenService/ITokenService";
+import { IMailingListService } from "../../application/mailingListService/IMailingListService";
 
 export class SignUp {
     private _signUpRepository: ICustomerRepository;
     private _storageService: IStorageService;
     private _paymentService: IPaymentService;
     private _tokenService: ITokenService;
+    private _mailingListService: IMailingListService;
 
     constructor(
         signUpRepository: ICustomerRepository,
         storageService: IStorageService,
         paymentService: IPaymentService,
-        tokenService: ITokenService
+        tokenService: ITokenService,
+        mailingListService: IMailingListService
     ) {
         this._signUpRepository = signUpRepository;
         this._storageService = storageService;
         this._paymentService = paymentService;
         this._tokenService = tokenService;
+        this._mailingListService = mailingListService;
     }
 
     public async execute(dto: SignUpDto): Promise<any> {
@@ -52,6 +56,9 @@ export class SignUp {
             id: customer.id.value,
             email: customer.email,
         };
+
+        // if (dto.isInCheckout)
+        //     this.mailingListService.subscribeTo(process.env.MAILING_LIST_GROUP as string, customer.email, customer.getFullNameOrEmail());
         await this.signUpRepository.save(customer);
 
         return { customer, token: this.tokenService.signLoginToken(tokenPayload) };
@@ -87,5 +94,13 @@ export class SignUp {
      */
     public get tokenService(): ITokenService {
         return this._tokenService;
+    }
+
+    /**
+     * Getter mailingListService
+     * @return {IMailingListService}
+     */
+    public get mailingListService(): IMailingListService {
+        return this._mailingListService;
     }
 }

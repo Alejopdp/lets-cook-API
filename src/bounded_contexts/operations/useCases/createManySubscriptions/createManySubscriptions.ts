@@ -174,7 +174,7 @@ export class CreateManySubscriptions {
 
         await this.notificationService.notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(
             customer.email,
-            customer.getFullNameOrEmail(),
+            customer.email,
             dto.plans.map((dtoPlan) => plansMap[dtoPlan.planId].name)
         );
         // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();

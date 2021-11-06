@@ -496,7 +496,7 @@ export const newCancellationTemplate = (subscription: Subscription, adminNameOrE
                 <h2 style="color: #00a555; font-size: 24px; font-weight: 800; line-height: 24px; margin: 48px 0;">
                     Nueva cancelación de plan
                 </h2>
-                <p>El cliente ${adminNameOrEmail || subscription.customer.getFullNameOrEmail()} ha cancelado su ${
+                <p>El cliente ${adminNameOrEmail || subscription.customer.email} ha cancelado su ${
         subscription.plan.name
     } ${subscription.getPlanVariantLabel()} con id ${subscription.id.value}</p>
                 <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
@@ -611,7 +611,7 @@ export const planReactivationTemplate = (subscription: Subscription, adminNameOr
                 <h2 style="color: #00a555; font-size: 24px; font-weight: 800; line-height: 24px; margin: 48px 0;">
                     Reactivación de plan
                 </h2>
-                <p>El cliente ${subscription.customer.getFullNameOrEmail()} ha reactivado su ${
+                <p>El cliente ${subscription.customer.email} ha reactivado su ${
         subscription.plan.name
     } ${subscription.getPlanVariantLabel()} con id ${subscription.id.value}</p>
                 <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
@@ -728,8 +728,8 @@ export const addressChangeTemplate = (customer: Customer, adminNameOrEmail?: str
                 </h2>
                 ${
                     adminNameOrEmail
-                        ? `<p>El administrador ${adminNameOrEmail} ha cambiado la dirección del cliente ${customer.getFullNameOrEmail()} a:`
-                        : `<p>El cliente ${customer.getFullNameOrEmail()} ha cambiado su direcció a:</p>`
+                        ? `<p>El administrador ${adminNameOrEmail} ha cambiado la dirección del cliente ${customer.email} a:`
+                        : `<p>El cliente ${customer.email} ha cambiado su direcció a:</p>`
                 }
                 <ul>
                     <li>${customer.getShippingAddress().name}</li>
@@ -850,12 +850,8 @@ export const restrictionChangeTemplate = (subscription: Subscription, adminNameO
                 </h2>
                 ${
                     !!adminNameOrEmail
-                        ? `<p><p>El administrador ${adminNameOrEmail} ha cambiado la restricción  del ${subscription.plan.name} (id: ${
-                              subscription.id.value
-                          }) a ${subscription.restrictionComment}. El cliente es ${subscription.customer.getFullNameOrEmail()}</p>`
-                        : `<p>El cliente ${subscription.customer.getFullNameOrEmail()} ha cambiado su restricción del ${
-                              subscription.plan.name
-                          } (id: ${subscription.id.value}) a ${subscription.restriction?.label}</p>`
+                        ? `<p><p>El administrador ${adminNameOrEmail} ha cambiado la restricción  del ${subscription.plan.name} (id: ${subscription.id.value}) a ${subscription.restrictionComment}. El cliente es ${subscription.customer.email}</p>`
+                        : `<p>El cliente ${subscription.customer.email} ha cambiado su restricción del ${subscription.plan.name} (id: ${subscription.id.value}) a ${subscription.restriction?.label}</p>`
                 }
                 <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
 

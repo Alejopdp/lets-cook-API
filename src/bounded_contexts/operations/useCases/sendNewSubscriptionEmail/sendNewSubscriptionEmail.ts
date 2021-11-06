@@ -41,7 +41,7 @@ export class SendNewSubscriptionEmail {
 
         const notificationDto: NewSubscriptionNotificationDto = {
             customerEmail: subscription.customer.email,
-            customerFirstName: subscription.customer.personalInfo?.name || "",
+            customerFirstName: subscription.customer.email,
             customerLastName: subscription.customer.personalInfo?.lastName || "",
             recipeSelection: firstOrder ? firstOrder.recipeSelection : [],
             planName: subscription.plan.name,

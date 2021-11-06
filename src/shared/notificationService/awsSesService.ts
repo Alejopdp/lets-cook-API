@@ -145,7 +145,7 @@ export class AwsSesService implements INotificationService {
         customerName: string,
         planNames: string[]
     ): Promise<void> {
-        await this.sendMailToAdmins("Nueva compra de un plan", "", newSubscriptionsTemplate(customerName, planNames));
+        await this.sendMailToAdmins("Nueva compra de un plan", "", newSubscriptionsTemplate(customerEmail, planNames));
     }
 
     public async notifyAdminsAboutNewSubscriptionSuccessfullyCreated(dto: NewSubscriptionNotificationDto): Promise<void> {
