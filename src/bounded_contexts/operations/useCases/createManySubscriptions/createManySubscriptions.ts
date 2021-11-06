@@ -172,7 +172,11 @@ export class CreateManySubscriptions {
 
         const subscriptions: Subscription[] = _.flatten(frequencySusbcriptionEntries.map((entry) => entry[1]));
 
-        // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
+        await this.notificationService.notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(
+            customer.email,
+            customer.email,
+            dto.plans.map((dtoPlan) => plansMap[dtoPlan.planId].name)
+        );
         // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.bulkSave(subscriptions);
         await this.orderRepository.bulkSave(orders);

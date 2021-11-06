@@ -11,6 +11,7 @@ import { orderRouter } from "../../../bounded_contexts/operations/infra/http/ord
 import { recipeRatingRouter } from "../../../bounded_contexts/operations/infra/http/recipeRating";
 import { paymentOrderRouter } from "../../../bounded_contexts/operations/infra/http/paymentOrder";
 import { restrictionRouter } from "../../../bounded_contexts/operations/infra/http/restriction";
+import { mailingListRouter } from "../../../bounded_contexts/operations/infra/http/mailingList";
 
 const v1Router = express.Router();
 
@@ -26,6 +27,7 @@ v1Router.use("/order", orderRouter);
 v1Router.use("/recipe-rating", recipeRatingRouter);
 v1Router.use("/payment-order", paymentOrderRouter);
 v1Router.use("/restriction", restrictionRouter);
+v1Router.use("/mailing-list", mailingListRouter);
 
 // All routes go here
 

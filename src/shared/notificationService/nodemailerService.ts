@@ -12,6 +12,9 @@ export class NodemailerService implements INotificationService {
     constructor(transporter: Mail) {
         this._transporter = transporter;
     }
+    notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(customerEmail: string, customerName: string, planNames: string[]): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
     notifyCustomerAboutPaymentOrderBilled(dto: PaymentOrderBilledNotificationDto): Promise<void> {
         throw new Error("Method not implemented.");
     }

@@ -12,6 +12,7 @@ import { initializeApp, credential } from "firebase-admin";
 const firebaseAdminConfig = require("../../../../firebase-admin.json");
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { logger } from "../../../../../config";
+import { IMailingListService } from "../../application/mailingListService/IMailingListService";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
@@ -23,11 +24,18 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
     private _customerRepository: ICustomerRepository;
     private _tokenService: ITokenService;
     private _paymentService: IPaymentService;
+    private _mailingListService: IMailingListService;
 
-    constructor(userRepository: ICustomerRepository, tokenService: ITokenService, paymentService: IPaymentService) {
+    constructor(
+        userRepository: ICustomerRepository,
+        tokenService: ITokenService,
+        paymentService: IPaymentService,
+        mailingListService: IMailingListService
+    ) {
         this._customerRepository = userRepository;
         this._tokenService = tokenService;
         this._paymentService = paymentService;
+        this._mailingListService = mailingListService;
     }
 
     public async execute(dto: LoginWithSocialMediaDto): Promise<Response> {
@@ -44,6 +52,13 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
 
             customer.stripeId = stripeCustomerId;
+
+            // if (dto.isInCheckout)
+            //     this.mailingListService.subscribeTo(
+            //         process.env.MAILING_LIST_GROUP as string,
+            //         customer.email,
+            //         customer.getFullNameOrEmail()
+            //     );
             await this.customerRepository.save(customer);
         }
 
@@ -78,5 +93,13 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
      */
     public get paymentService(): IPaymentService {
         return this._paymentService;
+    }
+
+    /**
+     * Getter mailingListService
+     * @return {IMailingListService}
+     */
+    public get mailingListService(): IMailingListService {
+        return this._mailingListService;
     }
 }

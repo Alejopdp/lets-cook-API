@@ -3,4 +3,5 @@ export interface SignUpDto {
     isEmailVerified: boolean;
     password: string;
     state: string;
+    isInCheckout: boolean;
 }

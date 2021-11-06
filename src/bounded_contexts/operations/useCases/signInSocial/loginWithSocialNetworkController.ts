@@ -19,6 +19,7 @@ export class LoginWithSocialMediaController extends BaseController {
             const dto: LoginWithSocialMediaDto = {
                 idToken: this.req.params.token,
                 email: this.req.body.email || "",
+                isInCheckout: !!this.req.body.isInCheckout,
             };
 
             const result: Either<Failure<LoginWithEmailErrors>, any> = await this.useCase.execute(dto);

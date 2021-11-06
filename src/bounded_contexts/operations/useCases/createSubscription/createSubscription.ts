@@ -210,7 +210,7 @@ export class CreateSubscription {
 
         const notificationDto: NewSubscriptionNotificationDto = {
             customerEmail: customer.email,
-            customerFirstName: customer.getPersonalInfo().name!,
+            customerFirstName: customer.email,
             customerLastName: customer.getPersonalInfo().lastName!,
             firstOrderId: orders[0].id.value as string,
             hasIndicatedRestrictions: subscription.restrictionComment,
