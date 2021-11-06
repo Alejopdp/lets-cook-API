@@ -18,6 +18,8 @@ export class Handle3dSecureFailureController extends BaseController {
         try {
             const dto: Handle3dSecureFailureDto = {
                 subscriptionId: this.req.params.id,
+                //@ts-ignore
+                currentCustomer: this.req.currentUser,
             };
 
             await this.handle3dSecureFailure.execute(dto);

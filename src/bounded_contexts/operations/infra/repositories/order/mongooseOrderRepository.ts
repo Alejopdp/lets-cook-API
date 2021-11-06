@@ -270,4 +270,8 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async delete(orderId: OrderId): Promise<void> {
         await MongooseOrder.updateOne({ _id: orderId.value }, { deletionFlag: true });
     }
+
+    public async destroyManyBySubscriptionId(subscriptionId: SubscriptionId): Promise<void> {
+        await MongooseOrder.deleteMany({ subscription: subscriptionId.value });
+    }
 }

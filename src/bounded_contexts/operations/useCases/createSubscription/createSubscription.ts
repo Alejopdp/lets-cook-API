@@ -32,6 +32,7 @@ import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymen
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
 import { UpdatePaymentOrdersShippingCostByCustomer } from "../../services/updatePaymentOrdersShippingCostByCustomer/updatePaymentOrdersShippingCostByCustomer";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
+import { createFriendCode } from "../../services/createFriendCode";
 
 export class CreateSubscription {
     private _customerRepository: ICustomerRepository;
@@ -82,7 +83,8 @@ export class CreateSubscription {
         shippingCost: number;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(customerId);
+        const customerSubscriptionHistory: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
+        const customerSubscriptions: Subscription[] = customerSubscriptionHistory.filter((sub) => sub.isActive());
         const coupon: Coupon | undefined = !!dto.couponId ? await this.couponRepository.findById(new CouponId(dto.couponId)) : undefined;
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const planFrequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(dto.planFrequency);
@@ -198,6 +200,7 @@ export class CreateSubscription {
         newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
         if (!!paymentIntent && paymentIntent.status === "requires_action") {
+            if (customerSubscriptionHistory.length === 0) createFriendCode.execute({ customer });
             newPaymentOrders[0].toPendingConfirmation(orders);
         } else if (!!paymentIntent && (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled")) {
             await this.paymentService.removePaymentMethodFromCustomer(
@@ -206,6 +209,7 @@ export class CreateSubscription {
             throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
         } else {
             newPaymentOrders[0]?.toBilled(orders, customer);
+            if (customerSubscriptionHistory.length === 0) createFriendCode.execute({ customer });
         }
 
         const notificationDto: NewSubscriptionNotificationDto = {

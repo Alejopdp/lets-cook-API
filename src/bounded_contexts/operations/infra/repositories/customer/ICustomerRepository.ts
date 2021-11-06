@@ -12,6 +12,7 @@ export interface ICustomerRepository {
     findByIdList(ids: CustomerId[]): Promise<Customer[]>;
     findByIdOrThrow(id: CustomerId): Promise<Customer>;
     findAll(): Promise<Customer[]>;
+    countCustomersWithFriendCode(): Promise<number>;
     delete(customerId: CustomerId): void;
     findByName(name: string): Promise<Customer[]>;
 }

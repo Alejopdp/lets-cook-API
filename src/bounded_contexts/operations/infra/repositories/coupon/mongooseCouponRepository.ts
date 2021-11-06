@@ -57,11 +57,15 @@ export class MongooseCouponRepository implements ICouponRepository {
     }
 
     public async findAll(): Promise<Coupon[]> {
-        return await this.findBy({});
+        return await this.findBy({ state: { $not: { $in: [CouponState.DELETED] } } });
     }
 
     public async findBy(conditions: any): Promise<Coupon[]> {
         const couponsDb = await MongooseCoupon.find({ ...conditions, deletionFlag: false }).sort({ createdAt: -1 });
         return couponsDb.map((raw: any) => couponMapper.toDomain(raw));
+    }
+
+    public async deleteByCode(couponCode: string): Promise<void> {
+        await MongooseCoupon.findOneAndUpdate({ couponCode }, { state: CouponState.DELETED });
     }
 }

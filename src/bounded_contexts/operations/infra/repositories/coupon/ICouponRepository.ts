@@ -9,4 +9,5 @@ export interface ICouponRepository {
     findByIdOrThrow(couponId: CouponId): Promise<Coupon>;
     findByCode(couponCode: string): Promise<Coupon | undefined>;
     findActiveByCode(couponCode: string): Promise<Coupon | undefined>;
+    deleteByCode(couponCode: string): Promise<void>
 }
