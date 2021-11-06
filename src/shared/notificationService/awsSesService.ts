@@ -67,7 +67,7 @@ export class AwsSesService implements INotificationService {
     private async sendMailToAdmins(subject: string, textBody: string, htmlBody: string): Promise<void> {
         const mailParams: SendEmailRequest = {
             Destination: {
-                ToAddresses: ["alejo@novolabs.xyz"],
+                ToAddresses: [process.env.ADMIN_EMAIL as string],
             },
             Source: process.env.NOTIFICATION_EMAIL_USER!,
             Message: {
