@@ -88,8 +88,12 @@ export class GetCustomerSubscriptionsPresenter {
         pendingActions = [
             ...pendingActions,
             // { type: "rate_recipes" },
-            // { type: "invite_code", couponCode: "ALEJOAMIGOS", discountValue: "5%" },
         ];
+
+        if (!!subscriptions[0]?.customer.friendCode) {
+            //@ts-ignore
+            pendingActions.push({ type: "invite_code", couponCode: subscriptions[0]?.customer.friendCode || "", discountValue: "10 €" });
+        }
 
         return {
             principalPlanSubscriptions: presentedPrincipalSubscriptions,

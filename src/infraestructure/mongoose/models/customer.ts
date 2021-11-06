@@ -193,6 +193,9 @@ const CustomerSchema = new mongoose.Schema(
             required: true,
             default: [],
         },
+        friendCode: {
+            type: String,
+        },
         deletionFlag: {
             type: Boolean,
             default: false,

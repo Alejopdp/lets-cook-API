@@ -26,6 +26,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         paymentMethods: customerDb.paymentMethods,
                         personalInfo: customerDb.personalInfo,
                         receivedOrdersQuantity: customerDb.receivedOrdersQuantity,
+                        friendCode: customerDb.friendCode,
                     },
                 }
             );
@@ -76,6 +77,10 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         if (!!!customer) throw new Error("El cliente ingresado no existe");
 
         return customer;
+    }
+
+    public async countCustomersWithFriendCode(): Promise<number> {
+        return await MongooseCustomer.count({ friendCode: { $ne: null } });
     }
 
     public async updateMany(customers: Customer[]): Promise<void> {
