@@ -75,7 +75,13 @@ export class GetCustomerSubscriptionsPresenter {
 
             const nextOrder = subscription.getNextChoosableRecipesOrder(orderSubscriptionMap[subscription.id.value]);
 
-            if (!!nextOrder && !nextOrder.hasChosenRecipes() && nextOrder.plan.abilityToChooseRecipes) {
+            if (
+                !!nextOrder &&
+                !nextOrder.hasChosenRecipes() &&
+                nextOrder.plan.abilityToChooseRecipes &&
+                (nextOrder.isActive() || nextOrder.isBilled())
+                && subscription.isActive()
+            ) {
                 pendingActions.push({
                     type: "choose_recipes",
                     planName: nextOrder.plan.name,

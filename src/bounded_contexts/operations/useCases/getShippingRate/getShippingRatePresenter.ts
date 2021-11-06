@@ -4,7 +4,7 @@ import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 
 export class GetShippingRatePresenter {
-    public present(shippingZone: ShippingZone): any {
+    public present(shippingZone: ShippingZone, hasNextShipping: boolean): any {
         return {
             id: shippingZone.id.value,
             name: shippingZone.name,
@@ -15,6 +15,7 @@ export class GetShippingRatePresenter {
             dayLabel: shippingZone.getDayLabel(),
             dayNumberOfWeek: shippingZone.getDayNumberOfWeek(),
             nextShippingDate: shippingZone.getHumanNextShippingDate(),
+            hasNextShipping,
         };
     }
 }
