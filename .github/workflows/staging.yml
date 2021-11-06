@@ -21,6 +21,7 @@ jobs:
             CUSTOMER_ORIGIN_URL: ${{secrets.CUSTOMER_ORIGIN_URL}}
             MAILER_LITE_API_KEY: ${{secrets.MAILER_LITE_API_KEY}}
             MAILING_LIST_GROUP: ${{secrets.MAILING_LIST_GROUP}}
+            ADMIN_EMAIL: ${{secrets.ADMIN_EMAIL}}
         steps:
             - uses: actions/checkout@v2
             - uses: actions/setup-node@v2
