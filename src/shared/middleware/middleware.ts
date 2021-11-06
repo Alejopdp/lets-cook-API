@@ -66,6 +66,20 @@ export class Middleware {
         return await this.customerRepository.findByIdOrThrow(new CustomerId(customerOrUserId));
     }
 
+    public addCurrentUser() {
+        return async (req: Request, res: Response, next: Function) => {
+            const token = req.headers["authorization"];
+
+            if (token) {
+                const decoded = await this.tokenService.isTokenVerified(token);
+
+                //@ts-ignore
+                req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
+                next();
+            }
+        };
+    }
+
     public ensureAuthenticated() {
         return async (req: Request, res: Response, next: Function) => {
             const token = req.headers["authorization"];

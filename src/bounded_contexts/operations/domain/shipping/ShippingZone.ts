@@ -92,6 +92,8 @@ export class ShippingZone extends Entity<ShippingZone> {
             deliveryDate.setDate(deliveryDate.getDate() + 7); // Delivery day of this week
         }
 
+        deliveryDate.setHours(0, 0, 0, 0);
+
         return deliveryDate;
     }
 
