@@ -11,7 +11,8 @@ export class MailerLiteService implements IMailingListService {
                 "Content-Type": "application/json",
                 "X-MailerLite-ApiKey": process.env.MAILER_LITE_API_KEY,
             },
-            data: { fields: data },
+            //@ts-ignore
+            data: data.name ? { fields: data, name: data.name } : { fields: data },
             url: `https://api.mailerlite.com/api/v2/subscribers/${email}`,
         });
         return res && res.status === 200 ? "" : res.data.error?.message || "Ocurrió un error inesperado al suscribir al cliente";
@@ -41,7 +42,7 @@ export class MailerLiteService implements IMailingListService {
                 "Content-Type": "application/json",
                 "X-MailerLite-ApiKey": process.env.MAILER_LITE_API_KEY,
             },
-            data: { email: newSubscriberEmail, name: newSusbcriberFullName, resubscribe: true, type: "null" },
+            data: { email: newSubscriberEmail, resubscribe: true, type: "null" },
             url: `https://api.mailerlite.com/api/v2/groups/${groupId}/subscribers`,
         });
         return res && res.status === 200 ? "" : res.data.error?.message || "Ocurrió un error inesperado al suscribir al cliente";

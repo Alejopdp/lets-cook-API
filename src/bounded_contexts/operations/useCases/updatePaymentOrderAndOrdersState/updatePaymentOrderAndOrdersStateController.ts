@@ -21,9 +21,9 @@ export class UpdatePaymentOrderAndOrdersStateController extends BaseController {
                 paymentOrderState: this.req.body.state,
             };
 
-            await this.updatePaymentOrderAndOrdersState.execute(dto);
+            const result = await this.updatePaymentOrderAndOrdersState.execute(dto);
 
-            return this.ok(this.res);
+            return this.ok(this.res, { billedPaymentOrderHumanId: result.billedPaymentOrderHumanId });
         } catch (error) {
             return this.fail(error);
         }

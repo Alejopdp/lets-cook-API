@@ -14,7 +14,7 @@ export class UpdatePaymentOrderAndOrdersState {
         this._orderRepository = orderRepository;
     }
 
-    public async execute(dto: UpdatePaymentOrderAndOrdersStateDto): Promise<void> {
+    public async execute(dto: UpdatePaymentOrderAndOrdersStateDto): Promise<{ billedPaymentOrderHumanId: string | number }> {
         const paymentOrderId: PaymentOrderId = new PaymentOrderId(dto.paymentOrderId);
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
         const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId);
@@ -28,6 +28,8 @@ export class UpdatePaymentOrderAndOrdersState {
 
         await this.paymentOrderRepository.save(paymentOrder);
         await this.orderRepository.saveOrdersWithNewState(orders);
+
+        return { billedPaymentOrderHumanId: paymentOrder.getHumanIdOrIdValue() };
     }
 
     /**
