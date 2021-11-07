@@ -218,7 +218,7 @@ export class Subscription extends Entity<Subscription> {
         var todayDayNumber: number = new Date().getDay();
 
         // return today.getDay() >= shippingWeekDayNumber || shippingWeekDayNumber - today.getDay() <= 2;
-        return todayDayNumber === 0 || todayDayNumber === 6;
+        return todayDayNumber === 0 || todayDayNumber === 6 || todayDayNumber === 1;
     }
 
     public billingStartDayHasToSkipWeeks(): boolean {
