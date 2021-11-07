@@ -80,7 +80,7 @@ export class Subscription extends Entity<Subscription> {
                     new Date(deliveryDate),
                     new OrderActive(),
                     new Date(),
-                    orderedWeeks[0],
+                    orderedWeeks[this.firstShippingDateHasToSkipWeek(shippingZone.getDayNumberOfWeek()) ? 1 : 0],
                     this.planVariantId,
                     this.plan,
                     this.plan.getPlanVariantPrice(this.planVariantId),
@@ -106,7 +106,7 @@ export class Subscription extends Entity<Subscription> {
                         new Date(deliveryDate),
                         new OrderActive(),
                         i === 0 ? new Date() : new Date(billingDate),
-                        orderedWeeks[i],
+                        orderedWeeks[this.firstShippingDateHasToSkipWeek(shippingZone.getDayNumberOfWeek()) ? i + 1 : i],
                         this.planVariantId,
                         this.plan,
                         this.plan.getPlanVariantPrice(this.planVariantId),
@@ -215,9 +215,10 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public firstShippingDateHasToSkipWeek(shippingWeekDayNumber: number): boolean {
-        var today: Date = new Date();
+        var todayDayNumber: number = new Date().getDay();
 
-        return today.getDay() >= shippingWeekDayNumber || shippingWeekDayNumber - today.getDay() <= 2;
+        // return today.getDay() >= shippingWeekDayNumber || shippingWeekDayNumber - today.getDay() <= 2;
+        return todayDayNumber === 0 || todayDayNumber === 6;
     }
 
     public billingStartDayHasToSkipWeeks(): boolean {

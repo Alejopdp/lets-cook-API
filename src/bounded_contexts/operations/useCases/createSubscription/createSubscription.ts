@@ -84,18 +84,15 @@ export class CreateSubscription {
         billedPaymentOrderHumanId: string | number;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount] = await Promise.all([
+        const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount, shippingZones] = await Promise.all([
             await this.subscriptionRepository.findByCustomerId(customerId),
             await this.customerRepository.findByIdOrThrow(customerId),
             await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
             // await this.paymentOrderRepository.findAnActivePaymentOrder(),
             await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+            await this.shippingZoneRepository.findAll(),
         ]);
-        // const customerSubscriptionHistory: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
         const coupon: Coupon | undefined = !!dto.couponId ? await this.couponRepository.findById(new CouponId(dto.couponId)) : undefined;
-        // const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
-        // const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
-        // const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
         const customerSubscriptions: Subscription[] = customerSubscriptionHistory.filter((sub) => sub.isActive());
         const planFrequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(dto.planFrequency);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
@@ -149,7 +146,7 @@ export class CreateSubscription {
             new Date() // TO DO: Calculate
         );
 
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        // const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)
         );
@@ -254,7 +251,8 @@ export class CreateSubscription {
         return {
             subscription,
             paymentIntent,
-            firstOrder: today.getDay() === 0 ? orders[1] : orders[0],
+            // firstOrder: today.getDay() === 0 ? orders[1] : orders[0],
+            firstOrder: orders[0],
             billedPaymentOrderHumanId: newPaymentOrders[0].getHumanIdOrIdValue(),
             customerPaymentMethods: customer.paymentMethods,
             amountBilled: amountToBill,
