@@ -249,10 +249,12 @@ export class CreateSubscription {
         if (coupon) await this.couponRepository.save(coupon);
         this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
 
+        const today = new Date();
+
         return {
             subscription,
             paymentIntent,
-            firstOrder: orders[0],
+            firstOrder: today.getDay() === 0 ? orders[1] : orders[0],
             billedPaymentOrderHumanId: newPaymentOrders[0].getHumanIdOrIdValue(),
             customerPaymentMethods: customer.paymentMethods,
             amountBilled: amountToBill,
