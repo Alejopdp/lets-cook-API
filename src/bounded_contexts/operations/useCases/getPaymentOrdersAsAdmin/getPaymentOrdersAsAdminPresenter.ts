@@ -26,8 +26,6 @@ export class GetPaymentOrdersAsAdminPresenter {
             if (paymentOrder.state.title === "PAYMENT_ORDER_REJECTED") rejectedOrders.push(presentedOrder);
         }
 
-        console.log("GoLA");
-
         return {
             activeOrders: activeOrders.sort((po1, po2) =>
                 !!!po1.lastRecipeSelectionDate
@@ -53,6 +51,7 @@ export class GetPaymentOrdersAsAdminPresenter {
             amount: paymentOrder.getFinalAmount(),
             paymentIntentId: paymentOrder.paymentIntentId,
             lastRecipeSelectionDate: paymentOrder.lastRecipeSelectionDate,
+            humanId: paymentOrder.getHumanIdOrIdValue(),
         };
     }
 }
