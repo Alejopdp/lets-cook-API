@@ -11,7 +11,8 @@ export class CreateSubscriptionPresenter {
         customerPaymentMethods: PaymentMethod[],
         amountBilled: number,
         tax: number,
-        shippingCost: number
+        shippingCost: number,
+        billedPaymentOrderHumanId: string | number
     ): any {
         return {
             subscriptionId: subscription.id.value,
@@ -19,6 +20,7 @@ export class CreateSubscriptionPresenter {
             payment_status: paymentIntent?.status || "",
             firstOrderId: firstOrder.id.value,
             firstOrderShippingDate: firstOrder.getHumanShippmentDay(),
+            billedPaymentOrderHumanId,
             paymentOrderId: firstOrder.paymentOrderId?.value,
             customerPaymentMethods: customerPaymentMethods.map((pm) => ({
                 id: pm.id.value,

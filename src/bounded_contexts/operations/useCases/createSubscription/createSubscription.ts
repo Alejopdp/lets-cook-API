@@ -81,6 +81,7 @@ export class CreateSubscription {
         amountBilled: number;
         tax: number;
         shippingCost: number;
+        billedPaymentOrderHumanId: string | number;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount] = await Promise.all([
@@ -252,6 +253,7 @@ export class CreateSubscription {
             subscription,
             paymentIntent,
             firstOrder: orders[0],
+            billedPaymentOrderHumanId: newPaymentOrders[0].getHumanIdOrIdValue(),
             customerPaymentMethods: customer.paymentMethods,
             amountBilled: amountToBill,
             tax:
