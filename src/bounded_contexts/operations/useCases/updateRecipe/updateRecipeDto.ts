@@ -15,11 +15,12 @@ export interface UpdateRecipeDto {
     recipeImage?: ReadStream;
     recipeImageExtension: string;
     imageTags: string[];
-    nutritionalInfo: {key: string, value: string}[];
+    nutritionalInfo: { key: string; value: string }[];
     relatedPlans: number[] | string[];
     availableMonths: Month[];
     availableWeeksIds: string[] | number[];
     backOfficeTags: string[];
     tools: string[];
     variants: NewVariant[];
+    orderPriority: number;
 }

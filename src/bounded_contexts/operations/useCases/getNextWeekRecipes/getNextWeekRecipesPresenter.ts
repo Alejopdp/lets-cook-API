@@ -18,6 +18,7 @@ export class GetNextWeekRecipesPresenter {
                 cookDuration: recipe.recipeGeneralData.cookDuration.value(),
                 cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
                 difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
+                orderPriority: recipe.orderPriority,
                 imageUrl: recipe.recipeGeneralData.imageUrl
                     ? await s3Service.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
                     : "",
@@ -55,6 +56,6 @@ export class GetNextWeekRecipesPresenter {
                 }),
             });
         }
-        return presentedRecipes;
+        return presentedRecipes.sort((r1, r2) => r1.orderPriority! - r2.orderPriority!);
     }
 }

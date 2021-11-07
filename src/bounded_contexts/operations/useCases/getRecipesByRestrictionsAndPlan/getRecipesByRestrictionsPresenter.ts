@@ -53,6 +53,7 @@ export class GetRecipesByRestrictionsPresenter {
                     difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
                     imageUrl: recipe.recipeGeneralData.imageUrl,
                     weight: recipe.recipeGeneralData.recipeWeight.value(),
+                    orderPriority: recipe.orderPriority,
                     weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
                     recipeVariants:
                         recipe && recipe.recipeVaraints
@@ -99,7 +100,7 @@ export class GetRecipesByRestrictionsPresenter {
                 hasRecipes: plan.hasRecipes,
                 variants: presentedVariants,
                 additionalPlans: plan.additionalPlans.map((plan: Plan) => plan.id.value),
-                recipes: presentedRecipes,
+                recipes: presentedRecipes.sort((r1, r2) => r1.orderPriority - r2.orderPriority),
                 abilityToChooseRecipes: plan.abilityToChooseRecipes,
                 slug: plan.planSlug.slug,
                 icon: await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl),

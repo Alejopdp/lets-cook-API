@@ -134,6 +134,10 @@ const RecipeSchema = new mongoose.Schema(
             default: [],
         },
 
+        orderPriority: {
+            type: Number
+        },
+
         deletionFlag: {
             type: Boolean,
             default: false,

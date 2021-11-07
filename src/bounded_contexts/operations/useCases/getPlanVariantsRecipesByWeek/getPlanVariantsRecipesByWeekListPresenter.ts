@@ -91,6 +91,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             cookDuration: recipe.recipeGeneralData.cookDuration.value(),
             cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
             nutritionalInfo: recipe.getPresentedNutritionalInfo(),
+            orderPriority: recipe.orderPriority,
             difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
             imageUrl: recipeUrl,
             weight: recipe.recipeGeneralData.recipeWeight.value(),
@@ -174,7 +175,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             hasRecipes: plan.hasRecipes,
             variants: presentedVariants,
             additionalPlans: presentedAdditionalPlans,
-            recipes: presentedRecipes,
+            recipes: (presentedRecipes || []).sort((r1, r2) => r1.orderPriority - r2.orderPriority),
             abilityToChooseRecipes: plan.abilityToChooseRecipes,
             slug: plan.planSlug.slug, // TO DO: Get it from aggregate root
             icon,

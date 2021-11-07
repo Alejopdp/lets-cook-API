@@ -20,7 +20,7 @@ export class GetRecipesForOrderPresenter {
         }
 
         return {
-            recipes: presentedRecipes,
+            recipes: presentedRecipes.sort((r1, r2) => r1.orderPriority - r2.orderPriority),
             nextDeliveryLabel: order.getHumanShippmentDay(),
             maxRecipesQty: subscription.getMaxRecipesQty(),
             subscriptionId: subscription.id.value,
@@ -46,6 +46,7 @@ export class GetRecipesForOrderPresenter {
             cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
             nutritionalInfo: recipe.getPresentedNutritionalInfo(),
             difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
+            orderPriority: recipe.orderPriority,
             imageUrl: recipeUrl,
             weight: recipe.recipeGeneralData.recipeWeight.value(),
             weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
