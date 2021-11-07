@@ -21,6 +21,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     private _quantityRefunded: number;
     private _hasFreeShipping: boolean;
     private _lastRecipeSelectionDate?: Date;
+    private _humanId?: number;
 
     constructor(
         shippingDate: Date,
@@ -35,7 +36,8 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         hasFreeShipping: boolean,
         quantityRefunded: number = 0,
         paymentOrderId?: PaymentOrderId,
-        lastRecipeSelectionDate?: Date
+        lastRecipeSelectionDate?: Date,
+        humanId?: number
     ) {
         super(paymentOrderId);
         this._shippingDate = shippingDate;
@@ -50,6 +52,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this._hasFreeShipping = hasFreeShipping;
         this._quantityRefunded = quantityRefunded;
         this._lastRecipeSelectionDate = lastRecipeSelectionDate;
+        this._humanId = humanId;
     }
 
     public addOrder(order: Order): void {
@@ -177,6 +180,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this.quantityRefunded = (Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100;
     }
 
+    public addHumanId(actualPaymentOrdersWithHumanIdCount: number): void {
+        this.humanId = 20000 + actualPaymentOrdersWithHumanIdCount + 1;
+    }
+
     /**
      * Getter shippingDate
      * @return {Date}
@@ -274,6 +281,14 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     /**
+     * Getter humanId
+     * @return {number | undefined}
+     */
+    public get humanId(): number | undefined {
+        return this._humanId;
+    }
+
+    /**
      * Setter hasFreeShipping
      * @param {boolean} value
      */
@@ -367,5 +382,13 @@ export class PaymentOrder extends Entity<PaymentOrder> {
      */
     public set lastRecipeSelectionDate(value: Date | undefined) {
         this._lastRecipeSelectionDate = value;
+    }
+
+    /**
+     * Setter humanId
+     * @param {number | undefined} value
+     */
+    public set humanId(value: number | undefined) {
+        this._humanId = value;
     }
 }

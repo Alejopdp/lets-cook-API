@@ -67,6 +67,10 @@ const PaymentOrderSchema = new mongoose.Schema(
             type: Date,
         },
 
+        humanId: {
+            type: Number,
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,

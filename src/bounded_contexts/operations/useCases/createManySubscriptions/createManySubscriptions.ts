@@ -75,9 +75,14 @@ export class CreateManySubscriptions {
         paymentOrder: PaymentOrder;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
+        // const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const plansIds: PlanId[] = dto.plans.map((plan) => new PlanId(plan.planId));
-        const plans: Plan[] = await this.planRepository.findAdditionalPlanListById(plansIds, dto.locale);
+        // const plans: Plan[] = await this.planRepository.findAdditionalPlanListById(plansIds, dto.locale);
+        const [customer, plans, paymentOrderWithHumanIdCount] = await Promise.all([
+            await this.customerRepository.findByIdOrThrow(customerId),
+            await this.planRepository.findAdditionalPlanListById(plansIds, dto.locale),
+            await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+        ]);
         const plansMap: { [planId: string]: Plan } = {};
         const plansDtoPlanVariantMap: { [planId: string]: PlanVariant } = {};
         var totalPrice: number = 0;
@@ -168,6 +173,7 @@ export class CreateManySubscriptions {
             newPaymentOrders[0].toPendingConfirmation(orders);
         } else {
             newPaymentOrders[0]?.toBilled(orders, customer);
+            newPaymentOrders[0] ? newPaymentOrders[0].addHumanId(paymentOrderWithHumanIdCount) : "";
         }
 
         const subscriptions: Subscription[] = _.flatten(frequencySusbcriptionEntries.map((entry) => entry[1]));
