@@ -354,6 +354,13 @@ export class Order extends Entity<Order> {
 
         return minDayDifferenceInDays < 7 && today <= auxMinDay;
     }
+
+    public moveShippingDateToDIfferentDayNumberOfSameWeek(newDayNumber: number): void {
+        if (this.shippingDate.getDay() === newDayNumber) return;
+        const differenceInDays = newDayNumber - this.shippingDate.getDay();
+
+        this.shippingDate.setDate(this.shippingDate.getDate() + differenceInDays);
+    }
     /**
      * Getter shippingDate
      * @return {Date}
