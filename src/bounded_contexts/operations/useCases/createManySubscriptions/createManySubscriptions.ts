@@ -163,7 +163,7 @@ export class CreateManySubscriptions {
             dto.stripePaymentMethodId ? dto.stripePaymentMethodId : customer.getDefaultPaymentMethod()?.stripeId!,
             customer.email,
             customer.stripeId,
-            true
+            false
         );
 
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
