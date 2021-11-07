@@ -38,7 +38,8 @@ export class RecipeMapper implements Mapper<Recipe> {
             availableMonths,
             relatedPlansIds,
             recipeTools,
-            new RecipeId(raw._id)
+            new RecipeId(raw._id),
+            raw.orderPriority
         );
     }
 
@@ -61,6 +62,7 @@ export class RecipeMapper implements Mapper<Recipe> {
             nutritionalInfo,
             backOfficeTags,
             imageTags,
+            orderPriority: t.orderPriority
         };
     }
 }

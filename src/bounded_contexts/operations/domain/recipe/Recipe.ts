@@ -21,6 +21,7 @@ export class Recipe extends Entity<Recipe> {
     private _availableMonths: Month[];
     private _relatedPlans: PlanId[];
     private _recipeTools: string[];
+    private _orderPriority?: number;
 
     constructor(
         recipeGeneralData: RecipeGeneralData,
@@ -32,7 +33,8 @@ export class Recipe extends Entity<Recipe> {
         availableMonths: Month[],
         relatedPlans: PlanId[],
         recipeTools: string[],
-        id?: RecipeId
+        id?: RecipeId,
+        orderPriority?: number
     ) {
         if (!Array.isArray(recipeVariants) || recipeVariants.length === 0)
             throw new Error("Es necesario agregar al menos una variante a la receta");
@@ -46,6 +48,7 @@ export class Recipe extends Entity<Recipe> {
         this._availableMonths = availableMonths;
         this._relatedPlans = relatedPlans;
         this._recipeTools = recipeTools;
+        this._orderPriority = orderPriority;
     }
 
     public getName(): string {
@@ -144,6 +147,14 @@ export class Recipe extends Entity<Recipe> {
     }
 
     /**
+     * Getter orderPriority
+     * @return {number | undefined}
+     */
+    public get orderPriority(): number | undefined {
+        return this._orderPriority;
+    }
+
+    /**
      * Getter recipeTools
      * @return {string[]}
      */
@@ -221,5 +232,13 @@ export class Recipe extends Entity<Recipe> {
      */
     public set recipeTools(value: string[]) {
         this._recipeTools = value;
+    }
+
+    /**
+     * Setter orderPriority
+     * @param {number | undefined} value
+     */
+    public set orderPriority(value: number | undefined) {
+        this._orderPriority = value;
     }
 }

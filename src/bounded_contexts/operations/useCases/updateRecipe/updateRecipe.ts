@@ -83,6 +83,7 @@ export class UpdateRecipe {
         recipe.updateWeeks(weeks);
         recipe.recipeVariants = variants;
         recipe.availableMonths = dto.availableMonths;
+        recipe.orderPriority = dto.orderPriority;
 
         await this.recipeRepository.save(recipe);
     }

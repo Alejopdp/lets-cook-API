@@ -48,6 +48,7 @@ export class UpdateRecipeController extends BaseController {
                 tools: JSON.parse(this.req.body.tools),
                 variants: JSON.parse(this.req.body.variants),
                 availableWeeksIds: JSON.parse(this.req.body.availableWeeksIds),
+                orderPriority: this.req.body.orderPriority,
             };
 
             await this.updateRecipe.execute(dto);
