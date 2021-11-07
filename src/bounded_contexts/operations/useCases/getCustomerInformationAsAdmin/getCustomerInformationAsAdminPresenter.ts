@@ -99,6 +99,7 @@ export class GetCustomerInformationAsAdminPresenter {
             ordersQty: paymentOrderOrderMap[paymentOrder.id.value]?.length || "",
             price: paymentOrder.getTotalAmount(),
             status: paymentOrder.state.title,
+            humanId: paymentOrder.getHumanIdOrIdValue(),
         }));
     }
 }

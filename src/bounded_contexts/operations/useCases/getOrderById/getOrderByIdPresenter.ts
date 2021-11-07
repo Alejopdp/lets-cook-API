@@ -29,6 +29,7 @@ export class GetOrderByIdPresenter {
             planVariant: order.getPlanVariantLabel(order.planVariantId),
             planIcon,
             paymentOrderId: paymentOrder.id.value,
+            paymentOrderHumanId: paymentOrder.getHumanIdOrIdValue(),
             amount: order.getTotalPrice(),
             couponCode: order.discountAmount > 0 ? subscription.coupon?.couponCode : undefined,
             //@ts-ignore

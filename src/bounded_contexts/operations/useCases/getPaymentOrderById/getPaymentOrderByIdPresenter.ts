@@ -32,6 +32,7 @@ export class GetPaymentOrderByIdPresenter {
             taxes: paymentOrder.shippingCost * 0.21 + paymentOrder.amount * 0.1,
             paymentIntentId: paymentOrder.paymentIntentId,
             quantityRefunded: paymentOrder.quantityRefunded,
+            humanId: paymentOrder.getHumanIdOrIdValue(),
         };
     }
 

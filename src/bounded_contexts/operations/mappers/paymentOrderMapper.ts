@@ -28,7 +28,8 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             raw.hasFreeShipping,
             raw.quantityRefunded,
             new PaymentOrderId(raw._id),
-            raw.lastRecipeSelectionDate ? new Date(raw.lastRecipeSelectionDate) : undefined
+            raw.lastRecipeSelectionDate ? new Date(raw.lastRecipeSelectionDate) : undefined,
+            raw.humanId ? raw.humanId : undefined
         );
     }
 
@@ -49,6 +50,7 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             hasFreeShipping: t.hasFreeShipping,
             quantityRefunded: t.quantityRefunded,
             lastRecipeSelectionDate: t.lastRecipeSelectionDate,
+            humanId: t.humanId,
         };
     }
 }

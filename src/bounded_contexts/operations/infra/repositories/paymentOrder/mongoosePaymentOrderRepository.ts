@@ -11,6 +11,10 @@ import { Subscription } from "../../../domain/subscription/Subscription";
 export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async save(paymentOrder: PaymentOrder): Promise<void> {
         const paymentOrderDb = paymentOrderMapper.toPersistence(paymentOrder);
+
+        if (paymentOrderDb.humanId === undefined) {
+            delete paymentOrderDb.humanId;
+        }
         if (await MongoosePaymentOrder.exists({ _id: paymentOrder.id.value })) {
             await MongoosePaymentOrder.updateOne({ _id: paymentOrder.id.value }, paymentOrderDb);
         } else {
@@ -149,6 +153,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
             customer: customerIds.map((id) => id.value),
             state: ["PAYMENT_ORDER_ACTIVE", "PAYMENT_ORDER_REJECTED", "PAYMENT_ORDER_PENDING_CONFIRMATION"],
         });
+    }
+
+    public async countPaymentOrdersWithHumanId(): Promise<number> {
+        return await MongoosePaymentOrder.count({ $and: [{ humanId: { $exists: true } }, { humanId: { $ne: null } }] });
     }
 
     public async updateShippingCost(paymentOrders: PaymentOrder[], shippingCost: number): Promise<void> {

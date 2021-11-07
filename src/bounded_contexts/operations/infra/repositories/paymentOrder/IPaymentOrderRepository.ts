@@ -23,6 +23,7 @@ export interface IPaymentOrderRepository {
     findByIdList(paymentOrdersIds: PaymentOrderId[]): Promise<PaymentOrder[]>;
     findAnActivePaymentOrder(): Promise<PaymentOrder | undefined>;
     findActiveByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]>;
+    countPaymentOrdersWithHumanId(): Promise<number>
     updateShippingCost(paymentOrders: PaymentOrder[], shippingCost: number): Promise<void>;
     existsBy(customerId: CustomerId): Promise<boolean>;
     delete(paymentOrderId: PaymentOrderId): Promise<void>;

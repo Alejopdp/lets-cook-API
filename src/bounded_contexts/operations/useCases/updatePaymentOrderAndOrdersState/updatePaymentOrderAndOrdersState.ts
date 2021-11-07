@@ -21,6 +21,11 @@ export class UpdatePaymentOrderAndOrdersState {
 
         paymentOrder.updateState(dto.paymentOrderState, orders);
 
+        if (dto.paymentOrderState === "PAYMENT_ORDER_BILLED") {
+            const paymentOrdersWithHumanIdCount = await this.paymentOrderRepository.countPaymentOrdersWithHumanId();
+            paymentOrder.addHumanId(paymentOrdersWithHumanIdCount);
+        }
+
         await this.paymentOrderRepository.save(paymentOrder);
         await this.orderRepository.saveOrdersWithNewState(orders);
     }

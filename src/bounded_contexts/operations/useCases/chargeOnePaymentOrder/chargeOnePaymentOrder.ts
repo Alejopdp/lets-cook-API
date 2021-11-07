@@ -51,11 +51,20 @@ export class ChargeOnePaymentOrder {
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(
             orders.map((order) => order.subscriptionId)
         );
-        const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
-        const weeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveWeeksLater();
-        const biweeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveBiweeksLater();
-        const monthlyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveMonthsLater();
+        const [customer, shippingZones, weeklyOrdersWeek, biweeklyOrdersWeek, monthlyOrdersWeek, paymentOrdersWithHumanIdCount] =
+            await Promise.all([
+                await this.customerRepository.findByIdOrThrow(paymentOrder.customerId),
+                await this.shippingZoneRepository.findAll(),
+                await this.weekRepository.findWeekTwelveWeeksLater(),
+                await this.weekRepository.findWeekTwelveBiweeksLater(),
+                await this.weekRepository.findWeekTwelveMonthsLater(),
+                await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+            ]);
+        // const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
+        // const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        // const weeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveWeeksLater();
+        // const biweeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveBiweeksLater();
+        // const monthlyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveMonthsLater();
         const frequencyWeekMap: { [frequency: string]: Week } = {};
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(customer.shippingAddress?.latitude || 0, customer.shippingAddress?.longitude || 0)
@@ -88,6 +97,7 @@ export class ChargeOnePaymentOrder {
         // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
         if (paymentIntent.status === "succeeded") {
             paymentOrder.toBilled(orders);
+            paymentOrder.addHumanId(paymentOrdersWithHumanIdCount);
         } else {
             paymentOrder.toRejected(orders);
         }

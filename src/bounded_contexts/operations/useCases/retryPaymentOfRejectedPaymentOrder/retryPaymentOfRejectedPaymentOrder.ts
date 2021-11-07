@@ -33,7 +33,11 @@ export class RetryPaymentOfRejectedPaymentOrder {
         const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
         if (!customer.getDefaultPaymentMethod()) throw new Error("El cliente no tienen ningún método de pago asociado");
 
-        const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrder.id);
+        const [orders, paymentOrderWithHumanIdCount]: [Order[], number] = await Promise.all([
+            await this.orderRepository.findByPaymentOrderId(paymentOrder.id),
+            await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+        ]);
+        // const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrder.id);
 
         const paymentIntent = await this.paymentService.paymentIntent(
             paymentOrder.getFinalAmount(),
@@ -55,6 +59,7 @@ export class RetryPaymentOfRejectedPaymentOrder {
             throw new Error("Error al procesar el pago, el cliente necesita agregar un método de pago");
 
         paymentOrder.toBilled(orders, customer);
+        paymentOrder.addHumanId(paymentOrderWithHumanIdCount);
 
         await this.paymentOrderRepository.save(paymentOrder);
 

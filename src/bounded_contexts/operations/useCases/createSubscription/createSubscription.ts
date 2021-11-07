@@ -83,15 +83,22 @@ export class CreateSubscription {
         shippingCost: number;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const customerSubscriptionHistory: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
-        const customerSubscriptions: Subscription[] = customerSubscriptionHistory.filter((sub) => sub.isActive());
+        const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount] = await Promise.all([
+            await this.subscriptionRepository.findByCustomerId(customerId),
+            await this.customerRepository.findByIdOrThrow(customerId),
+            await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
+            // await this.paymentOrderRepository.findAnActivePaymentOrder(),
+            await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+        ]);
+        // const customerSubscriptionHistory: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
         const coupon: Coupon | undefined = !!dto.couponId ? await this.couponRepository.findById(new CouponId(dto.couponId)) : undefined;
-        const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
+        // const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
+        // const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
+        // const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
+        const customerSubscriptions: Subscription[] = customerSubscriptionHistory.filter((sub) => sub.isActive());
         const planFrequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(dto.planFrequency);
-        const plan: Plan | undefined = await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
-        const oneActivePaymentOrder: PaymentOrder | undefined = await this.paymentOrderRepository.findAnActivePaymentOrder();
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
         const addressIsChanged: boolean =
             !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
@@ -209,6 +216,7 @@ export class CreateSubscription {
             throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
         } else {
             newPaymentOrders[0]?.toBilled(orders, customer);
+            newPaymentOrders[0] ? newPaymentOrders[0].addHumanId(paymentOrdersWithHumanIdCount) : "";
             if (customerSubscriptionHistory.length === 0) createFriendCode.execute({ customer });
         }
 
@@ -231,12 +239,12 @@ export class CreateSubscription {
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
 
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
-        if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
-            for (let paymentOrder of paymentOrdersToUpdate) {
-                // TO DO: Update Orders shipping cost too
-                paymentOrder.shippingCost = customerShippingZone.cost;
-            }
-        }
+        // if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
+        //     for (let paymentOrder of paymentOrdersToUpdate) {
+        //         // TO DO: Update Orders shipping cost too
+        //         paymentOrder.shippingCost = customerShippingZone.cost;
+        //     }
+        // }
         if (coupon) await this.couponRepository.save(coupon);
         this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
 

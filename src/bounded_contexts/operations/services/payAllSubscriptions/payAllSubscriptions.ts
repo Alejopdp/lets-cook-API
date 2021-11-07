@@ -46,7 +46,7 @@ export class PayAllSubscriptions {
     }
 
     public async execute(): Promise<void> {
-        // const today: Date = new Date(2022, 0, 1);
+        // const today: Date = new Date(2021, 11, 4);
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
         const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
@@ -55,6 +55,7 @@ export class PayAllSubscriptions {
         const paymentOrdersToBill: PaymentOrder[] = await this.paymentOrderRepository.findByBillingDate(today);
         const ordersToBill: Order[] = await this.orderRepository.findByPaymentOrderIdList(paymentOrdersToBill.map((po) => po.id));
         const activeSusbcriptions = await this.subscriptionRepository.findByIdList(ordersToBill.map((order) => order.subscriptionId));
+        var paymentOrdersWithHumanIdCount = await this.paymentOrderRepository.countPaymentOrdersWithHumanId();
         const ordersWIthoutPaymentOrder = [];
         const customerMap: { [customerId: string]: Customer } = {};
         const paymentOrderOrderMap: { [paymentOrderId: string]: Order[] } = {};
@@ -143,6 +144,8 @@ export class PayAllSubscriptions {
                     if (paymentIntent.status === "succeeded") {
                         logger.info(`${paymentOrderId} processing succeeded`);
                         paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
+                        paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
+                        paymentOrdersWithHumanIdCount++;
                         notificationDtos.push({
                             customerEmail: paymentOrderCustomer.email,
                             foodVAT: totalAmount * 0.1,
