@@ -1,3 +1,4 @@
+import { PlanFrequency } from "../../plan/PlanFrequency";
 import { Subscription } from "../Subscription";
 
 export interface ISubscriptionState {
@@ -8,4 +9,5 @@ export interface ISubscriptionState {
     toActive(subscription: Subscription): void;
     isCancelled(): boolean;
     isActive(): boolean;
+    // getHumanTitle(frequency: PlanFrequency, subscriptionCreationDate: Date, firstShippingDate: Date): string;
 }
