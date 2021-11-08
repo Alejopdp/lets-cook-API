@@ -201,12 +201,12 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getFirstOrderShippingDate(shippingDayWeekNumber: number): Date {
-        var today: Date = new Date();
+        // var today: Date = new Date();
         // today.setDate(today.getDate() + 5); // Testing days
-        const deliveryDate: Date = new Date(today.getFullYear(), today.getMonth());
-        const differenceInDays = shippingDayWeekNumber - today.getDay();
+        const deliveryDate: Date = new Date(this.createdAt.getFullYear(), this.createdAt.getMonth());
+        const differenceInDays = shippingDayWeekNumber - this.createdAt.getDay();
 
-        deliveryDate.setDate(today.getDate() + differenceInDays); // Delivery day of this week
+        deliveryDate.setDate(this.createdAt.getDate() + differenceInDays); // Delivery day of this week
 
         if (this.firstShippingDateHasToSkipWeek(shippingDayWeekNumber)) {
             deliveryDate.setDate(deliveryDate.getDate() + 7); // Delivery day of this week
@@ -331,6 +331,10 @@ export class Subscription extends Entity<Subscription> {
 
         if (comment) this.restrictionComment = comment;
     }
+
+    // public getStateHumanTitle(): string {
+    //     return this.state.getHumanTitle(this.frequency, this.creationDate, this.getFirstOrderShippingDate())
+    // }
 
     public changePlanVariant(variantId: PlanVariantId, orders: Order[], paymentOrders: PaymentOrder[]): void {
         // const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(variantId);
