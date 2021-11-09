@@ -8,6 +8,7 @@ import { createSubscriptionController } from "../../useCases/createSubscription"
 import { getNextOrdersBySubscriptionController } from "../../useCases/getNextOrdersBySubscription";
 import { getNextOrdersWithRecipesSelectionExportFiltersController } from "../../useCases/getNextOrdersWithRecipesSelectionExportFilters";
 import { getOrderByIdController } from "../../useCases/getOrderById";
+import { moveOrderShippingDateController } from "../../useCases/moveOrderShippingDate";
 import { skipOrdersController } from "../../useCases/skipOrders";
 
 const options: multer.Options = {
@@ -37,6 +38,7 @@ orderRouter.put("/update-recipes", multer(options).single("recipeSelection"), (r
 orderRouter.put("/update-recipes/:orderId", middleware.ensureAuthenticated(), (req, res) =>
     chooseRecipesForOrderController.execute(req, res)
 );
+orderRouter.put("/move-shipping-date/:orderId", (req, res) => moveOrderShippingDateController.execute(req, res));
 
 // DELETEs
 

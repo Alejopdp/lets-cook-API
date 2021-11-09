@@ -115,6 +115,9 @@ const OrderSchema = new mongoose.Schema(
             type: Number,
             // required: true,
         },
+        isFirstOrderOfSubscription: {
+            type: Boolean,
+        },
 
         deletionFlag: {
             type: Boolean,

@@ -37,6 +37,7 @@ export class Order extends Entity<Order> {
     private _createdAt: Date;
     private _customer: Customer;
     private _counter: number;
+    private _isFirstOrderOfSubscription: boolean;
 
     constructor(
         shippingDate: Date,
@@ -58,7 +59,8 @@ export class Order extends Entity<Order> {
         paymentOrderId?: PaymentOrderId,
         orderId?: OrderId,
         createdAt: Date = new Date(),
-        counter: number = 0
+        counter: number = 0,
+        isFirstOrderOfSubscription: boolean = false
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -80,6 +82,7 @@ export class Order extends Entity<Order> {
         this._createdAt = createdAt;
         this._customer = customer;
         this._counter = counter;
+        this._isFirstOrderOfSubscription = isFirstOrderOfSubscription;
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, restriction?: RecipeVariantRestriction): void {
@@ -161,7 +164,6 @@ export class Order extends Entity<Order> {
 
         if (today > this.shippingDate) throw new Error("No es posible reaundar una orden pasada");
         if (this.isSkipped()) {
-            // TO DO: push it to state
             paymentOrder.addOrder(this);
             this.state.toActive(this);
         }
@@ -514,6 +516,14 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter counter
+     * @return {boolean}
+     */
+    public get isFirstOrderOfSubscription(): boolean {
+        return this._isFirstOrderOfSubscription;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -663,5 +673,13 @@ export class Order extends Entity<Order> {
      */
     public set counter(value: number) {
         this._counter = value;
+    }
+
+    /**
+     * Setter isFirstOrderOfSubscription
+     * @param {boolean} value
+     */
+    public set isFirstOrderOfSubscription(value: boolean) {
+        this._isFirstOrderOfSubscription = value;
     }
 }

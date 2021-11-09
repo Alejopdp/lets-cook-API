@@ -26,12 +26,16 @@ export class Week extends Entity<Week> {
         return new Week(minDay, maxDay, id);
     }
 
+    public containsDate(aDate: Date): boolean {
+        return this.minDay <= aDate && this.maxDay >= aDate;
+    }
+
     public getLabel(): string {
         return MomentTimeService.getHumanWeekRangeLabel(this.minDay, this.maxDay);
     }
 
     public getShorterLabel(): string {
-        return MomentTimeService.getShorterHumanWeekRangeLabel(this.minDay, this.maxDay)
+        return MomentTimeService.getShorterHumanWeekRangeLabel(this.minDay, this.maxDay);
     }
 
     /**

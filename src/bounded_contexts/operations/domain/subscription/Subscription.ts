@@ -91,7 +91,14 @@ export class Subscription extends Entity<Subscription> {
                     [],
                     [],
                     false,
-                    this.customer
+                    this.customer,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    true
                 )
             );
 
@@ -117,7 +124,14 @@ export class Subscription extends Entity<Subscription> {
                         [],
                         [],
                         false,
-                        this.customer
+                        this.customer,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        i === 0
                     )
                 );
                 if (this.getCouponDiscount(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;

@@ -19,6 +19,10 @@ export class WeeklyFrequency implements IPlanFrequency {
         }
     }
 
+    public getNumberOfDays(): number {
+        return 7;
+    }
+
     public value(): string {
         return "weekly";
     }
