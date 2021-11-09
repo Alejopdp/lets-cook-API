@@ -46,6 +46,7 @@ export class GetOrderByIdPresenter {
                 restrictionLabel: subscription.restriction?.label,
             },
             weekLabel: order.getWeekLabel(),
+            isFirstOrderOfSubscription: order.isFirstOrderOfSubscription,
         };
     }
 

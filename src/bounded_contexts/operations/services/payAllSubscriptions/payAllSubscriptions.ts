@@ -46,9 +46,9 @@ export class PayAllSubscriptions {
     }
 
     public async execute(): Promise<void> {
-        // const today: Date = new Date(2021, 11, 4);
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
-        const today: Date = new Date();
+        const today: Date = new Date(2021, 10, 13);
+        // const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
@@ -208,6 +208,8 @@ export class PayAllSubscriptions {
         // NEW PAYMENT ORDERS && PAYMENT ORDER ASSIGNMENT BY BILLINGDATE
 
         for (let customerAndNewOrders of Object.entries(customerNewOrdersMap)) {
+            const customerId = new CustomerId(customerAndNewOrders[0]);
+
             const billingDateOrdersMap: { [billingDate: string]: Order[] } = {};
 
             for (let order of customerAndNewOrders[1]) {
@@ -229,22 +231,37 @@ export class PayAllSubscriptions {
                 ); // TO DO: Use coupons, probably need to pass orders to a subscription
 
                 const hasFreeShipping = billingDateAndOrders[1].some((order) => order.hasFreeShipping);
+                // Validar si para este cliente ya existe una payment order con billingDateAndOrders[0].
+                // Si existe, agregar billingDateAndOrders[1] a la paymentOrder en vez de crear una nueva
 
-                const newPaymentOrder = new PaymentOrder(
-                    new Date(),
-                    new PaymentOrderActive(),
-                    "",
+                const existentPaymentOrder = await this.paymentOrderRepository.findActiveByCustomerAndBillingDate(
                     new Date(billingDateAndOrders[0]),
-                    weeklyOrdersWeek, // TO DO: Week is unnecessary in payment orders
-                    ordersAmount,
-                    ordersDiscount,
-                    customerShippingZoneMap[customerAndNewOrders[0]]?.cost!,
-                    new CustomerId(customerAndNewOrders[0]),
-                    hasFreeShipping
+                    customerId
                 );
 
-                newPaymentOrders.push(newPaymentOrder);
-                billingDateAndOrders[1].forEach((order) => (order.paymentOrderId = newPaymentOrder.id));
+                if (!!existentPaymentOrder) {
+                    logger.info(`Existe una orden para el ${new Date(billingDateAndOrders[0])}`);
+
+                    billingDateAndOrders[1].forEach((order) => existentPaymentOrder.addOrder(order));
+                    // existentPaymentOrder.addOrder()
+                    paymentOrdersToBill.push(existentPaymentOrder); // Is not going to be billed, its just an aweful name for updating the existent PO with the repository
+                } else {
+                    const newPaymentOrder = new PaymentOrder(
+                        billingDateAndOrders[1][0].shippingDate || new Date(),
+                        new PaymentOrderActive(),
+                        "",
+                        new Date(billingDateAndOrders[0]),
+                        weeklyOrdersWeek, // TO DO: Week is unnecessary in payment orders
+                        ordersAmount,
+                        ordersDiscount,
+                        customerShippingZoneMap[customerAndNewOrders[0]]?.cost!,
+                        new CustomerId(customerAndNewOrders[0]),
+                        hasFreeShipping
+                    );
+
+                    newPaymentOrders.push(newPaymentOrder);
+                    billingDateAndOrders[1].forEach((order) => (order.paymentOrderId = newPaymentOrder.id));
+                }
             }
         }
 

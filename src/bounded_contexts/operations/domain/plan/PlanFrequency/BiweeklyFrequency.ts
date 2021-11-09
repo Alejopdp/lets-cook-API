@@ -19,6 +19,10 @@ export class BiweeklyFrequency implements IPlanFrequency {
         }
     }
 
+    public getNumberOfDays(): number {
+        return 14;
+    }
+
     public value(): string {
         return "biweekly";
     }

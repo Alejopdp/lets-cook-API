@@ -49,7 +49,8 @@ export class OrderMapper implements Mapper<Order> {
             paymentOrderId,
             new OrderId(raw._id),
             raw.createdAt,
-            raw.counter
+            raw.counter,
+            raw.isFirstOrderOfSubscription
         );
     }
 
@@ -75,6 +76,7 @@ export class OrderMapper implements Mapper<Order> {
             paymentOrder: t.paymentOrderId?.value,
             _id: t.id.value,
             customer: t.customer.id.value,
+            isFirstOrderOfSubscription: t.isFirstOrderOfSubscription,
         };
     }
 }
