@@ -9,7 +9,7 @@ export interface IPaymentOrderRepository {
     bulkSave(paymentOrders: PaymentOrder[]): Promise<void>;
     updateMany(paymentOrders: PaymentOrder[]): Promise<void>;
     findAll(locale: Locale): Promise<PaymentOrder[]>;
-    findAllSortedByBillingDateDesc(locale: Locale): Promise<PaymentOrder[]>;
+    findAllSortedByBillingDateAsc(locale: Locale): Promise<PaymentOrder[]>;
     findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined>;
     findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder>;
     findBy(conditions: any, locale: Locale): Promise<PaymentOrder[]>;

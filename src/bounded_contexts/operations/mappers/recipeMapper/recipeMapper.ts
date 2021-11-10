@@ -52,8 +52,6 @@ export class RecipeMapper implements Mapper<Recipe> {
         const nutritionalInfo = t.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
         const imageTags = t.recipeImageTags.map((tag) => tag.name);
 
-        console.log("ORDER PRIORITY: ", t.orderPriority);
-
         return {
             recipeGeneralData,
             recipeVariants,
