@@ -49,6 +49,7 @@ export interface OrdersWithRecipeSelectionExport {
     recipeDivision: number;
     recivedOrdersQuantity: number;
     deliveriesUntilWeek: number | string;
+    onlyFirstWeek: boolean;
 }
 
 export interface SubscriptionExport {
