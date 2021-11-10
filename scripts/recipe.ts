@@ -52,7 +52,7 @@ export const getMockRecipes = async (): Promise<Recipe[]> => {
         RecipeDifficultyLevel.Facil,
         new RecipeWeight(250, WeightUnit.Gram),
         new RecipeSku("BRGH"),
-        "development/burger_hallouli.jpg"
+        ["development/burger_hallouli.jpg"]
     );
     const carneBurgerVariant1: RecipeVariant = new RecipeVariant(
         [lechuga, tomate, cebolla, carne, pan, queso],
@@ -84,7 +84,7 @@ export const getMockRecipes = async (): Promise<Recipe[]> => {
         RecipeDifficultyLevel.Alta,
         new RecipeWeight(150, WeightUnit.Gram),
         new RecipeSku("ARP"),
-        "development/arepas.jpg"
+        ["development/arepas.jpg"]
     );
     const simpleArepaVariant: RecipeVariant = new RecipeVariant(
         [pan],

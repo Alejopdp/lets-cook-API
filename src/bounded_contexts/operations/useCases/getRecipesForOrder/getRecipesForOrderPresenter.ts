@@ -33,9 +33,14 @@ export class GetRecipesForOrderPresenter {
     }
 
     private async presentRecipe(recipe: Recipe, subscription: Subscription): Promise<any> {
-        const recipeUrl = recipe.recipeGeneralData.imageUrl
-            ? await this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
-            : "";
+        const recipeUrl = recipe.getMainImageUrl() ? await this.storageService.getPresignedUrlForFile(recipe.getMainImageUrl()) : "";
+
+        const recipeImages: string[] = [];
+
+        for (let imageUrl of recipe.getImagesUrls()) {
+            const presignedUrl = await this.storageService.getPresignedUrlForFile(imageUrl);
+            recipeImages.push(presignedUrl);
+        }
         return {
             id: recipe.id.value,
             name: recipe.recipeGeneralData.name,
@@ -48,6 +53,7 @@ export class GetRecipesForOrderPresenter {
             difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
             orderPriority: recipe.orderPriority,
             imageUrl: recipeUrl,
+            imagesUrls: recipeImages,
             weight: recipe.recipeGeneralData.recipeWeight.value(),
             weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
             backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),

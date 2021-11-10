@@ -69,10 +69,9 @@ export class S3StorageService implements IStorageService {
         try {
             if (!file) return "";
             const recipeNameWithoutSpaces = recipeName.replace(/\s/g, "_");
+            const fileNameWithoutSpaces = fileName.replace(/\s/g, "_");
 
-            const objectKey = `${process.env.NODE_ENV}/recipes/${recipeNameWithoutSpaces}/${recipeNameWithoutSpaces}${path.extname(
-                fileName
-            )}`;
+            const objectKey = `${process.env.NODE_ENV}/recipes/${recipeNameWithoutSpaces}/${fileNameWithoutSpaces}`;
             await this.uploadFile(objectKey, file);
 
             return objectKey;

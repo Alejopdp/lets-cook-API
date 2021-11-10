@@ -53,8 +53,15 @@ const RecipeGeneralData = new mongoose.Schema({
 
     imageUrl: {
         type: String,
-        required: true,
+        // required: true,
     },
+
+    imagesUrls: [
+        {
+            type: String,
+            required: true,
+        },
+    ],
 });
 
 const RecipeVariant = new mongoose.Schema({
@@ -135,7 +142,7 @@ const RecipeSchema = new mongoose.Schema(
         },
 
         orderPriority: {
-            type: Number
+            type: Number,
         },
 
         deletionFlag: {

@@ -17,9 +17,13 @@ export class CreateRecipeController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            if (!this.req.file) throw new Error("No ha ingresado una imagen para la receta");
-            const recipeImagePath = this.req.file.path;
-            const recipeImage: ReadStream = fs.createReadStream(recipeImagePath);
+            if (!this.req.files || this.req.files.length === 0) throw new Error("No ha ingresado una imagen para la receta");
+            const files: Express.Multer.File[] = Array.isArray(this.req.files) ? this.req.files : [];
+            const recipeImagesPaths = files.map((file: any) => file.path);
+            const recipeImages: { file: ReadStream; fileName: string }[] = files.map((file: any) => ({
+                file: fs.createReadStream(file.path),
+                fileName: file.originalname,
+            }));
 
             const dto: CreateRecipeDto = {
                 availableMonths: JSON.parse(this.req.body.availableMonths)
@@ -29,8 +33,8 @@ export class CreateRecipeController extends BaseController {
                 cookTime: this.req.body.cookDuration,
                 difficultyLevel: (<any>RecipeDifficultyLevel)[this.req.body.difficultyLevel],
                 imageTags: JSON.parse(this.req.body.imageTags),
-                recipeImage,
-                recipeImageExtension: path.extname(this.req.file.originalname),
+                recipeImages,
+                // recipeImageExtension: path.extname(this.req.file.originalname),
                 shortDescription: this.req.body.shortDescription,
                 longDescription: this.req.body.longDescription,
                 name: this.req.body.name,
@@ -45,7 +49,10 @@ export class CreateRecipeController extends BaseController {
 
             await this.createRecipe.execute(dto);
 
-            fs.unlinkSync(recipeImagePath);
+            recipeImagesPaths.forEach((path: string) => {
+                fs.unlinkSync(path);
+            });
+            // fs.unlinkSync(recipeImagePath);
 
             return this.ok(this.res);
         } catch (error) {

@@ -16,8 +16,8 @@ export interface CreateRecipeDto {
     cookTime: number;
     difficultyLevel: RecipeDifficultyLevel;
     weight: number;
-    recipeImage: ReadStream;
-    recipeImageExtension: string;
+    recipeImages: { file: ReadStream; fileName: string }[];
+    // recipeImageExtension: string;
     imageTags: string[];
     nutritionalInfo: { key: string; value: string }[];
     availableWeeksIds: number[] | string[];
