@@ -62,7 +62,7 @@ export class RecipeMapper implements Mapper<Recipe> {
             nutritionalInfo,
             backOfficeTags,
             imageTags,
-            orderPriority: t.orderPriority
+            orderPriority: t.orderPriority || 999,
         };
     }
 }
