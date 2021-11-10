@@ -1,8 +1,10 @@
 import _ from "lodash";
+import { stringify } from "querystring";
 import { IExportService, OrdersWithRecipeSelectionExport, RecipeSelectionState } from "../../application/exportService/IExportService";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../../domain/paymentOrder/PaymentOrderId";
@@ -42,6 +44,10 @@ export class ExportNextOrdersWithRecipesSelection {
         this._paymentOrderRepository = paymentOrderRepository;
     }
 
+    // Agregar columna con cantidad de entregas hasta la fecha. N payment orders billed de una semana cuentan como 1 entrega, con que haya solo 1 cuenta como entrega,
+    // Obtener todas las payment orders del customer hasta la fecha mas alta que se ingrese como filtro (El filtro tendrá semanas)
+    // Por cada semana, sumar 1 en cada semana que tenga al menos 1 payment order billed
+
     public async execute(dto: ExportNextOrdersWithRecipesSelectionDto): Promise<void> {
         const weeksIds: WeekId[] = dto.weeks.map((id: string) => new WeekId(id));
         const orders: Order[] =
@@ -71,7 +77,8 @@ export class ExportNextOrdersWithRecipesSelection {
         }
 
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(subscriptionsIds);
-        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(paymentOrdersIds);
+        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findAll(Locale.es);
+        // const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(paymentOrdersIds);
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
         const customerOrdersMap: { [customerId: string]: Order[] } = {};
@@ -84,16 +91,33 @@ export class ExportNextOrdersWithRecipesSelection {
             subscriptionMap[subscription.id.value] = subscription;
         }
 
+        const customerDeliveriesByWeek: { [customerId: string]: { [weekId: string]: number } } = {};
+        const customerIterationCounter: { [customerId: string]: number } = {};
+
         for (let paymentOrder of paymentOrders) {
             const actualPoId: string = paymentOrder.id.value as string;
-            paymentOrderMap[paymentOrder.id.value] = paymentOrder;
+            const customerId: string = paymentOrder.customerId.value.toString();
+            var customerBillingDateMap = customerDeliveriesByWeek[customerId];
+            const paymentOrderWeekId = paymentOrder.week.id.value.toString();
 
-            paymentOrderExportLinesQuantityMap[actualPoId] = paymentOrderOrderMap[actualPoId].reduce(
-                (acc, order) => acc + (order.getNumberOfRecipesOrReturn0() === 0 ? 1 : order.getNumberOfRecipesOrReturn0()),
-                1 // +1 because of the shipping line
-            );
+            paymentOrderMap[actualPoId] = paymentOrder;
 
-            console.log(paymentOrderExportLinesQuantityMap[actualPoId]);
+            if (!!paymentOrderOrderMap[actualPoId]) {
+                paymentOrderExportLinesQuantityMap[actualPoId] = paymentOrderOrderMap[actualPoId].reduce(
+                    (acc, order) => acc + (order.getNumberOfRecipesOrReturn0() === 0 ? 1 : order.getNumberOfRecipesOrReturn0()),
+                    1 // +1 because of the shipping line
+                );
+            }
+
+            if (!!!customerBillingDateMap) customerBillingDateMap = {};
+
+            if (paymentOrder.isBilled() && !!!customerBillingDateMap[paymentOrderWeekId]) {
+                customerIterationCounter[customerId] = (customerIterationCounter[customerId] || 0) + 1;
+                customerBillingDateMap[paymentOrderWeekId] = customerIterationCounter[customerId];
+                customerDeliveriesByWeek[customerId] = customerBillingDateMap;
+            }
+
+            // console.log(paymentOrderExportLinesQuantityMap[actualPoId]);
         }
 
         for (let order of activeOrders) {
@@ -152,6 +176,9 @@ export class ExportNextOrdersWithRecipesSelection {
                         finalPortionPrice: order.getFinalPortionPrice(),
                         recipeDivision: 1 / paymentOrderExportLinesQuantityMap[order.paymentOrderId?.value!],
                         recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
+                        deliveriesUntilWeek: customerDeliveriesByWeek[order.customer.id.toString()]
+                            ? customerDeliveriesByWeek[order.customer.id.toString()][order.week.id.value.toString()]
+                            : "",
                     });
                 }
             }
@@ -161,12 +188,12 @@ export class ExportNextOrdersWithRecipesSelection {
                     ordersExport.push({
                         stripePaymentId:
                             order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
-                                ? paymentOrderMap[order.paymentOrderId.value]?.paymentIntentId || ""
+                                ? paymentOrderMap[order.paymentOrderId.value].paymentIntentId || ""
                                 : "",
                         paymentOrderId: order.paymentOrderId?.value || "",
                         paymentOrderState:
                             order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
-                                ? paymentOrderMap[order.paymentOrderId.value]?.state.title || ""
+                                ? paymentOrderMap[order.paymentOrderId.value].state.title || ""
                                 : "",
                         orderId: order.id.value,
                         orderNumber: order.counter,
@@ -175,8 +202,8 @@ export class ExportNextOrdersWithRecipesSelection {
                         deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
                         customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
                         customerId: subscription.customer.id.value,
-                        customerFirstName: subscription.customer.getPersonalInfo().name!,
-                        customerLastName: subscription.customer.getPersonalInfo().lastName!,
+                        customerFirstName: subscription.customer.getPersonalInfo()?.name!,
+                        customerLastName: subscription.customer.getPersonalInfo()?.lastName!,
                         customerEmail: subscription.customer.email,
                         subscriptionDate: subscription.createdAt,
                         recipeFormSubmissionDate: order.firstDateOfRecipesSelection || "",
@@ -210,6 +237,9 @@ export class ExportNextOrdersWithRecipesSelection {
                         finalPortionPrice: order.getFinalPortionPrice(),
                         recipeDivision: 1 / paymentOrderExportLinesQuantityMap[order.paymentOrderId?.value!],
                         recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
+                        deliveriesUntilWeek: customerDeliveriesByWeek[order.customer.id.toString()]
+                            ? customerDeliveriesByWeek[order.customer.id.toString()][order.week.id.value.toString()]
+                            : "",
                     });
                 }
             }
@@ -223,6 +253,11 @@ export class ExportNextOrdersWithRecipesSelection {
         ordersExport = _.orderBy(ordersExport, ["creationDate"], "desc");
 
         for (let paymentOrder of paymentOrders) {
+            if (!!!paymentOrderOrderMap[paymentOrder.id.value.toString()]) continue;
+
+            const auxOrder: Order | undefined = !!customerOrdersMap[paymentOrder.customerId.value]
+                ? customerOrdersMap[paymentOrder.customerId.value][0]
+                : undefined;
             ordersExport.push({
                 stripePaymentId: paymentOrder.paymentIntentId,
                 paymentOrderId: paymentOrder.id.value,
@@ -231,13 +266,12 @@ export class ExportNextOrdersWithRecipesSelection {
                 orderNumber: "N/A",
                 orderState: "N/A",
                 weekLabel: paymentOrder.week.getShorterLabel(),
-                deliveryDate: MomentTimeService.getDddDdMmmm(customerOrdersMap[paymentOrder.customerId.value][0].shippingDate),
-                customerPreferredShippingHour:
-                    customerOrdersMap[paymentOrder.customerId.value][0].customer.getShippingAddress().preferredShippingHour,
+                deliveryDate: !!auxOrder ? MomentTimeService.getDddDdMmmm(auxOrder.shippingDate) : "",
+                customerPreferredShippingHour: auxOrder?.customer.getShippingAddress().preferredShippingHour || "",
                 customerId: paymentOrder.customerId.value,
-                customerFirstName: customerOrdersMap[paymentOrder.customerId.value][0].customer.getPersonalInfo().name!,
-                customerLastName: customerOrdersMap[paymentOrder.customerId.value][0].customer.getPersonalInfo().lastName!,
-                customerEmail: customerOrdersMap[paymentOrder.customerId.value][0].customer.email,
+                customerFirstName: auxOrder?.customer.getPersonalInfo().name! || "",
+                customerLastName: auxOrder?.customer.getPersonalInfo().lastName! || "",
+                customerEmail: auxOrder?.customer.email || "",
                 subscriptionDate: "N/A",
                 recipeFormSubmissionDate: "N/A",
                 recipeFormUpdateDate: "N/A",
@@ -255,8 +289,7 @@ export class ExportNextOrdersWithRecipesSelection {
                 recipeSku: "",
                 numberOfPersons: 0,
                 numberOfRecipes: 0,
-                customerPreferredLanguage:
-                    customerOrdersMap[paymentOrder.customerId.value][0].customer.getPersonalInfo().preferredLanguage!,
+                customerPreferredLanguage: auxOrder?.customer.getPersonalInfo().preferredLanguage! || "",
                 chooseState: "N/A", // TO DO: Elegido por LC
                 pricePlan: paymentOrder.shippingCost,
                 kitPrice: paymentOrder.shippingCost / 1,
@@ -266,7 +299,8 @@ export class ExportNextOrdersWithRecipesSelection {
                 finalKitPrice: paymentOrder.shippingCost,
                 finalPortionPrice: 0,
                 recipeDivision: 1 / paymentOrderExportLinesQuantityMap[paymentOrder.id.value as string],
-                recivedOrdersQuantity: customerOrdersMap[paymentOrder.customerId.value][0].customer.receivedOrdersQuantity,
+                recivedOrdersQuantity: !!auxOrder && !!auxOrder?.customer ? auxOrder?.customer.receivedOrdersQuantity : 0,
+                deliveriesUntilWeek: "",
             });
         }
 

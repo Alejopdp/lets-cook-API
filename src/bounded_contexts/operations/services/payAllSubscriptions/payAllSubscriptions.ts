@@ -47,8 +47,8 @@ export class PayAllSubscriptions {
 
     public async execute(): Promise<void> {
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
-        const today: Date = new Date(2021, 10, 13);
-        // const today: Date = new Date();
+        // const today: Date = new Date(2021, 11, 11);
+        const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();

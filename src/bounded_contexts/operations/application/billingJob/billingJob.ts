@@ -14,7 +14,7 @@ export class BillingJob {
     public async initialize(): Promise<void> {
         try {
             schedule.scheduleJob("Billing job", "0 2 * * SAT", async () => {
-                // schedule.scheduleJob("Billing job", "* * * * *", async () => {
+            // schedule.scheduleJob("Billing job", "* * * * *", async () => {
                 await this.payAllSubscriptions.execute();
             });
         } catch (error) {

@@ -126,9 +126,9 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         return await this.findBy({}, locale);
     }
 
-    public async findAllSortedByBillingDateDesc(locale: Locale): Promise<PaymentOrder[]> {
+    public async findAllSortedByBillingDateAsc(locale: Locale): Promise<PaymentOrder[]> {
         const paymentOrdersDb = await MongoosePaymentOrder.find({ deletionFlag: false })
-            .sort({ billingDate: -1 })
+            .sort({ billingDate: 1 })
             .populate("week")
             .populate({
                 path: "recipes",
