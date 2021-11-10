@@ -39,7 +39,7 @@ export class RecipeMapper implements Mapper<Recipe> {
             relatedPlansIds,
             recipeTools,
             new RecipeId(raw._id),
-            raw.orderPriority
+            raw.orderPriority || 999
         );
     }
 
@@ -51,6 +51,8 @@ export class RecipeMapper implements Mapper<Recipe> {
         const relatedPlans = t.relatedPlans.map((planId) => planId.value);
         const nutritionalInfo = t.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
         const imageTags = t.recipeImageTags.map((tag) => tag.name);
+
+        console.log("ORDER PRIORITY: ", t.orderPriority);
 
         return {
             recipeGeneralData,
