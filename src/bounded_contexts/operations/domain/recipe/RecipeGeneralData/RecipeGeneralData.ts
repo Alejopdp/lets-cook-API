@@ -12,7 +12,7 @@ export class RecipeGeneralData implements IValueObject<RecipeGeneralData> {
     private _difficultyLevel: RecipeDifficultyLevel;
     private _recipeWeight: RecipeWeight;
     private _recipeSku: RecipeSku;
-    private _imageUrl: string;
+    private _imagesUrls: string[];
 
     constructor(
         name: string,
@@ -21,7 +21,7 @@ export class RecipeGeneralData implements IValueObject<RecipeGeneralData> {
         difficultyLevel: RecipeDifficultyLevel,
         recipeWeight: RecipeWeight,
         recipeSku: RecipeSku,
-        imageUrl: string
+        imagesUrls: string[]
     ) {
         this._name = name;
         this._recipeDescription = recipeDescription;
@@ -29,7 +29,7 @@ export class RecipeGeneralData implements IValueObject<RecipeGeneralData> {
         this._difficultyLevel = difficultyLevel;
         this._recipeWeight = recipeWeight;
         this._recipeSku = recipeSku;
-        this._imageUrl = imageUrl;
+        this._imagesUrls = imagesUrls;
     }
 
     public equals(aRecipeGeneralData: RecipeGeneralData): boolean {
@@ -40,7 +40,7 @@ export class RecipeGeneralData implements IValueObject<RecipeGeneralData> {
             this.difficultyLevel === aRecipeGeneralData.difficultyLevel &&
             this.recipeWeight.equals(aRecipeGeneralData.recipeWeight) &&
             this.recipeSku.equals(aRecipeGeneralData.recipeSku) &&
-            this.imageUrl === aRecipeGeneralData.imageUrl
+            this.imagesUrls === aRecipeGeneralData.imagesUrls
         );
     }
 
@@ -93,11 +93,11 @@ export class RecipeGeneralData implements IValueObject<RecipeGeneralData> {
     }
 
     /**
-     * Getter imageUrl
-     * @return {string}
+     * Getter imagesUrls
+     * @return {string[]}
      */
-    public get imageUrl(): string {
-        return this._imageUrl;
+    public get imagesUrls(): string[] {
+        return this._imagesUrls;
     }
 
     /**
@@ -148,10 +148,10 @@ export class RecipeGeneralData implements IValueObject<RecipeGeneralData> {
         this._recipeSku = value;
     }
     /**
-     * Setter imageUrl
-     * @param {string} value
+     * Setter imagesUrls
+     * @param {string[]} value
      */
-    public set imageUrl(value: string) {
-        this._imageUrl = value;
+    public set imagesUrls(value: string[]) {
+        this._imagesUrls = value;
     }
 }

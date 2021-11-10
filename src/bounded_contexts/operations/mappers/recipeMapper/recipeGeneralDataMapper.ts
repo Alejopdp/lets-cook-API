@@ -22,7 +22,7 @@ export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
             raw.difficultyLevel,
             recipeWeight,
             new RecipeSku(raw.sku),
-            raw.imageUrl
+            raw.imagesUrls
         );
     }
     public toPersistence(t: RecipeGeneralData, locale?: Locale) {
@@ -41,7 +41,7 @@ export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
                 weightUnit: t.recipeWeight.weightUnit,
             },
             sku: t.recipeSku.code,
-            imageUrl: t.imageUrl,
+            imagesUrls: t.imagesUrls,
             difficultyLevel: t.difficultyLevel,
         };
     }

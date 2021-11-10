@@ -79,9 +79,15 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
     }
 
     private async presentRecipe(recipe: Recipe): Promise<any> {
-        const recipeUrl = recipe.recipeGeneralData.imageUrl
-            ? await this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
-            : "";
+        const recipeUrl = recipe.getMainImageUrl() ? await this.storageService.getPresignedUrlForFile(recipe.getMainImageUrl()) : "";
+
+        const recipeImages: string[] = [];
+
+        for (let imageUrl of recipe.getImagesUrls()) {
+            const presignedUrl = await this.storageService.getPresignedUrlForFile(imageUrl);
+            recipeImages.push(presignedUrl);
+        }
+
         return {
             id: recipe.id.value,
             name: recipe.recipeGeneralData.name,
@@ -94,6 +100,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             orderPriority: recipe.orderPriority,
             difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
             imageUrl: recipeUrl,
+            imagesUrls: recipeImages,
             weight: recipe.recipeGeneralData.recipeWeight.value(),
             weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
             backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
