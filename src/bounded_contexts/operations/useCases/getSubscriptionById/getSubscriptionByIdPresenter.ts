@@ -135,11 +135,21 @@ export class GetSubscriptionByIdPresenter {
         const presentedRecipes = [];
 
         for (let selection of order.recipeSelection) {
+            const recipeUrl = selection.recipe.getMainImageUrl()
+                ? await this.storageService.getPresignedUrlForFile(selection.recipe.getMainImageUrl())
+                : "";
+
+            const recipeImages: string[] = [];
+
+            for (let imageUrl of selection.recipe.getImagesUrls()) {
+                const presignedUrl = await this.storageService.getPresignedUrlForFile(imageUrl);
+                recipeImages.push(presignedUrl);
+            }
             presentedRecipes.push({
                 id: selection.recipe.id.value,
                 name: selection.recipe.recipeGeneralData.name,
-                imageUrl: await this.storageService.getPresignedUrlForFile(selection.recipe.recipeGeneralData.imageUrl),
-                images: [],
+                imageUrl: recipeUrl,
+                imagesUrls: recipeImages,
                 sku: selection.recipe.recipeGeneralData.recipeSku.code,
                 shortDescription: selection.recipe.recipeGeneralData.recipeDescription.shortDescription,
                 longDescription: selection.recipe.recipeGeneralData.recipeDescription.longDescription,

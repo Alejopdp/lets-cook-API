@@ -59,6 +59,10 @@ export class Recipe extends Entity<Recipe> {
         return this.recipeGeneralData.imagesUrls[0];
     }
 
+    public getImagesUrls(): string[] {
+        return this.recipeGeneralData.imagesUrls || [];
+    }
+
     public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]): string {
         const variant: RecipeVariant | undefined = this.recipeVariants.find((variant) => variantIds.some((id) => id.equals(variant.id)));
         if (!!!variant) return "";

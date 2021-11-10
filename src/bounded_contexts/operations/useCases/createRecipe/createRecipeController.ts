@@ -18,8 +18,9 @@ export class CreateRecipeController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             if (!this.req.files || this.req.files.length === 0) throw new Error("No ha ingresado una imagen para la receta");
-            const recipeImagesPaths = (this.req.files || []).map((file: any) => file.path);
-            const recipeImages: { file: ReadStream; fileName: string }[] = this.req.files.map((file: any) => ({
+            const files: Express.Multer.File[] = Array.isArray(this.req.files) ? this.req.files : [];
+            const recipeImagesPaths = files.map((file: any) => file.path);
+            const recipeImages: { file: ReadStream; fileName: string }[] = files.map((file: any) => ({
                 file: fs.createReadStream(file.path),
                 fileName: file.originalname,
             }));
