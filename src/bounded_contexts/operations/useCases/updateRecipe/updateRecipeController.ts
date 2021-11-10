@@ -17,15 +17,12 @@ export class UpdateRecipeController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            var recipeImagePath = "";
-            var recipeImage: ReadStream | undefined;
-            var recipeImageFileName: string = "";
-
-            if (this.req.file) {
-                recipeImagePath = this.req.file.path;
-                recipeImage = fs.createReadStream(recipeImagePath);
-                recipeImageFileName = this.req.file.originalname;
-            }
+            if (!this.req.files || this.req.files.length === 0) throw new Error("No ha ingresado una imagen para la receta");
+            const recipeImagesPaths = (this.req.files || []).map((file: any) => file.path);
+            const recipeImages: { file: ReadStream; fileName: string }[] = this.req.files.map((file: any) => ({
+                file: fs.createReadStream(file.path),
+                fileName: file.originalname,
+            }));
 
             const dto: UpdateRecipeDto = {
                 recipeId: this.req.params.id,
@@ -36,8 +33,7 @@ export class UpdateRecipeController extends BaseController {
                 cookTime: this.req.body.cookDuration,
                 difficultyLevel: (<any>RecipeDifficultyLevel)[this.req.body.difficultyLevel],
                 imageTags: JSON.parse(this.req.body.imageTags),
-                recipeImage,
-                recipeImageExtension: recipeImageFileName,
+                recipeImages,
                 shortDescription: this.req.body.shortDescription,
                 longDescription: this.req.body.longDescription,
                 name: this.req.body.name,
@@ -53,9 +49,9 @@ export class UpdateRecipeController extends BaseController {
 
             await this.updateRecipe.execute(dto);
 
-            if (recipeImagePath) {
-                fs.unlinkSync(recipeImagePath);
-            }
+            recipeImagesPaths.forEach((path: string) => {
+                fs.unlinkSync(path);
+            });
 
             return this.ok(this.res);
         } catch (error) {

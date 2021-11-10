@@ -13,7 +13,7 @@ export interface UpdateRecipeDto {
     difficultyLevel: RecipeDifficultyLevel;
     weight: number;
     recipeImage?: ReadStream;
-    recipeImageExtension: string;
+    // recipeImageExtension: string;
     imageTags: string[];
     nutritionalInfo: { key: string; value: string }[];
     relatedPlans: number[] | string[];
@@ -23,4 +23,5 @@ export interface UpdateRecipeDto {
     tools: string[];
     variants: NewVariant[];
     orderPriority: number;
+    recipeImages: { file: ReadStream; fileName: string }[];
 }

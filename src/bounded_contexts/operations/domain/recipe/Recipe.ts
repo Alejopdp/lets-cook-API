@@ -56,7 +56,7 @@ export class Recipe extends Entity<Recipe> {
     }
 
     public getMainImageUrl(): string {
-        return this.recipeGeneralData.imageUrl;
+        return this.recipeGeneralData.imagesUrls[0];
     }
 
     public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]): string {

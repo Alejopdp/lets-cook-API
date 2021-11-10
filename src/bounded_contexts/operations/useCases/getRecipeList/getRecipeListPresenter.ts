@@ -19,9 +19,10 @@ export class GetRecipeListPresenter {
                 cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
                 difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
                 orderPriority: recipe.orderPriority,
-                imageUrl: recipe.recipeGeneralData.imageUrl
-                    ? await s3Service.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
-                    : "",
+                imageUrl:
+                    Array.isArray(recipe.recipeGeneralData.imagesUrls) && recipe.recipeGeneralData.imagesUrls.length > 0
+                        ? await s3Service.getPresignedUrlForFile(recipe.getMainImageUrl())
+                        : "",
                 weight: recipe.recipeGeneralData.recipeWeight.value(),
                 weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
                 backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),

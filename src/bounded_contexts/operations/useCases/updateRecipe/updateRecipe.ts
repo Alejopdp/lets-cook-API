@@ -48,10 +48,13 @@ export class UpdateRecipe {
         //@ts-ignore
         const weeksIds: WeekId[] = dto.availableWeeksIds.map((weekId) => new WeekId(weekId));
         const weeks: Week[] = await this.weekRepository.findAllById(weeksIds);
+        const imagesUrls: string[] = [];
 
-        var imageUrl: string = recipe.recipeGeneralData.imageUrl;
-        if (dto.recipeImage) {
-            imageUrl = await this.storageService.saveRecipeImage(dto.name, dto.recipeImageExtension, dto.recipeImage);
+        for (let img of dto.recipeImages) {
+            // const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, dto.recipeImageExtension, img);
+            const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, img.fileName, img.file);
+
+            imagesUrls.push(imageUrl);
         }
 
         const recipeSku: RecipeSku = new RecipeSku(dto.sku);
@@ -65,7 +68,7 @@ export class UpdateRecipe {
             dto.difficultyLevel,
             recipeWeight,
             recipeSku,
-            imageUrl
+            imagesUrls
         );
         const recipeImageTags: RecipeTag[] = dto.imageTags.map((tag: string) => new RecipeTag(tag));
         const recipeBackOfficeTags: RecipeTag[] = dto.backOfficeTags.map((tag: string) => new RecipeTag(tag));

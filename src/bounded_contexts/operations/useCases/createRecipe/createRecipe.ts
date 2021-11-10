@@ -44,7 +44,14 @@ export class CreateRecipe {
         const recipeCreatorDto: RecipeVariantCreatorDto = {
             variants: dto.variants,
         };
-        const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, dto.recipeImageExtension, dto.recipeImage);
+        const imagesUrls: string[] = [];
+        for (let img of dto.recipeImages) {
+            // const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, dto.recipeImageExtension, img);
+            const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, img.fileName, img.file);
+
+            imagesUrls.push(imageUrl);
+        }
+
         const recipeSku: RecipeSku = new RecipeSku(dto.sku);
         const recipeDescription: RecipeDescription = new RecipeDescription(dto.shortDescription, dto.longDescription);
         const recipeCookTime: RecipeCookDuration = new RecipeCookDuration(dto.cookTime);
@@ -56,7 +63,7 @@ export class CreateRecipe {
             dto.difficultyLevel,
             recipeWeight,
             recipeSku,
-            imageUrl
+            imagesUrls
         );
         const recipeImageTags: RecipeTag[] = dto.imageTags.map((tag: string) => new RecipeTag(tag));
         const recipeBackOfficeTags: RecipeTag[] = dto.backOfficeTags.map((tag: string) => new RecipeTag(tag));
