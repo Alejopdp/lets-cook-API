@@ -174,7 +174,7 @@ export class CreateSubscription {
 
         const hasFreeShipping =
             // TO DO: Validar que la semana proxima tiene al menos 1 envio
-            // paymentOrdersToUpdate.some(po => po.)Z
+            // paymentOrdersToUpdate.some(po => po.)
             coupon?.type.type === "free" ||
             customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
             customerSubscriptions.length > 0;
@@ -190,7 +190,7 @@ export class CreateSubscription {
             ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
             : newPaymentOrders[0].getTotalAmount();
 
-        if (Math.round(newPaymentOrders[0].getFinalAmount()) >= 50) {
+        if (Math.round(newPaymentOrders[0].getFinalAmount()) >= 0.5) {
             paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
                 amountToBill,
                 dto.stripePaymentMethodId
