@@ -1,3 +1,4 @@
+import { Day } from "../../../domain/day/Day";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
 import { Order } from "../../../domain/order/Order";
@@ -32,6 +33,8 @@ export interface IOrderRepository {
     findByBillingDates(billingDates: Date[]): Promise<Order[]>;
     findByShippingDates(shippingDates: Date[]): Promise<Order[]>;
     findCurrentWeekOrders(): Promise<Order[]>;
+    findFutureOrders(): Promise<Order[]>;
+    findFutureOrdersByShippingDayOfWeek(shippingDay: Day): Promise<Order[]>;
     findAllByCustomersIds(customersIds: CustomerId[]): Promise<Order[]>;
     getFirstOrderOfSubscription(subscriptionId: SubscriptionId): Promise<Order | undefined>;
     saveCancelledOrders(orders: Order[]): Promise<void>;

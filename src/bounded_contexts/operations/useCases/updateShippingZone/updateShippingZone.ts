@@ -8,6 +8,7 @@ import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShip
 import { UpdateShippingZoneDto } from "./updateShippingZoneDto";
 import { updatePaymentOrdersShippingCost } from "../../services/updatePaymentOrdersShippingCost";
 import { Day } from "../../domain/day/Day";
+import { updateOrdersShippingDateAfterUpdatingAShippingZoneDay } from "../../services/updateOrdersShippingDateAfterUpdatingAShippingZoneDay";
 
 export class UpdateShippingZone {
     private _shippingZoneRepository: IShippingZoneRepository;
@@ -20,10 +21,16 @@ export class UpdateShippingZone {
 
     public async execute(dto: UpdateShippingZoneDto): Promise<void> {
         const shippingZoneId: ShippingZoneId = new ShippingZoneId(dto.id);
-        const shipping: ShippingZone | undefined = await this.shippingZoneRepository.findById(shippingZoneId);
-        if (!shipping) throw new Error("La zona de envío indicada no existe");
-        const shippingCostHasChanged = shipping.cost !== dto.cost;
-        var shippingDayOfWeek: Day = new Day(dto.day);
+        const shippingZone: ShippingZone | undefined = await this.shippingZoneRepository.findById(shippingZoneId);
+        if (!shippingZone) throw new Error("La zona de envío indicada no existe");
+
+        const shippingCostHasChanged = shippingZone.cost !== dto.cost;
+        const newShippingDayOfWeek: Day = new Day(dto.day);
+        const oldShippingDayOfWeek: Day = new Day(shippingZone.getDayNumberOfWeek());
+        const shippingDayOfWeekHasChanged = !newShippingDayOfWeek.equals(oldShippingDayOfWeek);
+
+        console.log("Old day: ", oldShippingDayOfWeek.dayNumberOfWeek);
+        console.log("NEw day: ", newShippingDayOfWeek.dayNumberOfWeek);
 
         var shippingRadio: ShippingZoneRadio | undefined = undefined;
 
@@ -39,15 +46,25 @@ export class UpdateShippingZone {
             shippingRadio = new ShippingZoneRadio(coordinatesRadio.map((value: any) => new Coordinates(value.latitude, value.longitude)));
         }
 
-        shipping.name = dto.name;
-        shipping.reference = dto.reference;
-        shipping.cost = dto.cost;
-        shipping.state = dto.state || shipping.state;
-        if (!!shippingRadio) shipping.updateShippingRadio(shippingRadio);
+        shippingZone.name = dto.name;
+        shippingZone.reference = dto.reference;
+        shippingZone.cost = dto.cost;
+        shippingZone.state = dto.state || shippingZone.state;
+        if (!!shippingRadio) shippingZone.updateShippingRadio(shippingRadio);
+        if (shippingDayOfWeekHasChanged) shippingZone.shippingDayOfWeek = newShippingDayOfWeek;
 
-        await this.shippingZoneRepository.save(shipping);
+        await this.shippingZoneRepository.save(shippingZone);
+
         if (shippingCostHasChanged) {
-            await updatePaymentOrdersShippingCost.execute(shipping, dto.cost);
+            await updatePaymentOrdersShippingCost.execute(shippingZone, dto.cost);
+        }
+
+        if (shippingDayOfWeekHasChanged) {
+            shippingZone.shippingDayOfWeek = oldShippingDayOfWeek;
+            await updateOrdersShippingDateAfterUpdatingAShippingZoneDay.execute({
+                shippingZone,
+                newShippingDayOfWeek,
+            });
         }
     }
 

@@ -46,11 +46,11 @@ export class GetSubscriptionByIdPresenter {
 
         const nextActiveOrder: Order | undefined = subscription.getNextOrderToShip(orders);
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondOrderToShip(orders);
-        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? nextActiveOrder : null;
+        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isGoingToBeShippedThisWeek() ? nextActiveOrder : null;
         const nextWeekOrder =
-            nextActiveOrder && nextActiveOrder.isNextWeek()
+            nextActiveOrder && nextActiveOrder.isGoingToBeShippedNextWeek()
                 ? nextActiveOrder
-                : nextSecondActiveOrder && nextSecondActiveOrder.isNextWeek()
+                : nextSecondActiveOrder && nextSecondActiveOrder.isGoingToBeShippedNextWeek()
                 ? nextSecondActiveOrder
                 : null; // TO DO: Get 2nd Next Active order
         const hasChosenRecipesForActualWeek = !!!actualWeekOrder ? false : actualWeekOrder.hasChosenRecipes();
