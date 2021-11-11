@@ -1,7 +1,7 @@
 import * as express from "express";
 import { logger } from "../../../config";
 import { sentryService } from "../../shared/monitoring";
-
+import { awsSesService } from "../../shared/notificationService";
 export abstract class BaseController {
     // or even private
     protected req: express.Request = {} as express.Request;
@@ -15,13 +15,13 @@ export abstract class BaseController {
         const service = `${this.req.method} ${this.req.protocol}://${this.req.get("host")}${this.req.originalUrl}`;
         logger.debug(service);
 
-        const sentryTransaction = sentryService.createTransaction(this.req.method, this.req.originalUrl);
+        // const sentryTransaction = sentryService.createTransaction(this.req.method, this.req.originalUrl);
         try {
             await this.executeImpl();
         } catch (error) {
-            sentryService.catchException(error);
+            // sentryService.catchException(error);
         } finally {
-            sentryService.endTransaction(sentryTransaction);
+            // sentryService.endTransaction(sentryTransaction);
         }
 
         // this.executeImpl();
@@ -77,6 +77,7 @@ export abstract class BaseController {
 
     public fail(error: Error | string) {
         logger.error(error.toString());
+        awsSesService.sendErrorEmail(error.toString());
         return this.res.status(500).json({
             message: error.toString(),
         });
