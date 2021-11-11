@@ -12,6 +12,7 @@ import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Week } from "../../../domain/week/Week";
 import { PaymentOrderId } from "../../../domain/paymentOrder/PaymentOrderId";
 import { WeekId } from "../../../domain/week/WeekId";
+import { Day } from "../../../domain/day/Day";
 
 export class MongooseOrderRepository implements IOrderRepository {
     public async save(order: Order): Promise<void> {
@@ -261,6 +262,120 @@ export class MongooseOrderRepository implements IOrderRepository {
             });
 
         return ordersDb.map((order: any) => orderMapper.toDomain(order));
+    }
+
+    public async findFutureOrders(): Promise<Order[]> {
+        return await this.findBy({ shippingDate: { $gt: new Date() } });
+    }
+    public async findFutureOrdersByShippingDayOfWeek(shippingDay: Day): Promise<Order[]> {
+        const ordersDb = await MongooseOrder.aggregate([
+            {
+                $project: {
+                    shippingDate: 1,
+                    plan: 1,
+                    planVariant: 1,
+                    state: 1,
+                    billingDate: 1,
+                    week: 1,
+                    price: 1,
+                    discountAmount: 1,
+                    hasFreeShipping: 1,
+                    subscription: 1,
+                    recipeVariants: 1,
+                    recipeSelection: 1,
+                    choseByAdmin: 1,
+                    firstDateOfRecipesSelection: 1,
+                    lastDateOfRecipesSelection: 1,
+                    paymentOrder: 1,
+                    _id: 1,
+                    customer: 1,
+                    isFirstOrderOfSubscription: 1,
+                    shippingDayOfWeek: {
+                        $dayOfWeek: "$shippingDate",
+                    },
+                },
+            },
+            {
+                $match: {
+                    shippingDayOfWeek: 3,
+                    _id: "c1736b79-b097-4fa2-bf38-ba4b70eefb81",
+                },
+            },
+            {
+                $lookup: {
+                    from: "Customer",
+                    localField: "customer",
+                    foreignField: "_id",
+                    as: "customer",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$customer",
+                    includeArrayIndex: "_id",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: "Plan",
+                    localField: "plan",
+                    foreignField: "_id",
+                    as: "plan",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$plan",
+                    includeArrayIndex: "_id",
+                    preserveNullAndEmptyArrays: false,
+                },
+            },
+            {
+                $lookup: {
+                    from: "Plan",
+                    localField: "plan.additionalPlans",
+                    foreignField: "_id",
+                    as: "plan.additionalPlans",
+                },
+            },
+            {
+                $lookup: {
+                    from: "Recipe",
+                    localField: "recipeSelection.recipe",
+                    foreignField: "_id",
+                    as: "recipeSelection.recipe",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$recipeSelection.recipe",
+                },
+            },
+            {
+                $lookup: {
+                    from: "RecipeVariantRestriction",
+                    localField: "recipeSelection.recipe.recipeVariants.restriction",
+                    foreignField: "_id",
+                    as: "recipeSelection.recipe.recipeVariants.restriction",
+                },
+            },
+            {
+                $lookup: {
+                    from: "Week",
+                    localField: "week",
+                    foreignField: "_id",
+                    as: "week",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$week",
+                },
+            },
+        ]);
+
+        return ordersDb.map((orderDb: any) => orderMapper.toDomain(orderDb));
     }
 
     public async addCustomerToOrderOfSubscription(subscriptionId: SubscriptionId, customerId: CustomerId): Promise<void> {

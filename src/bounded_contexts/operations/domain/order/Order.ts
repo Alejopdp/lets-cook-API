@@ -318,7 +318,7 @@ export class Order extends Entity<Order> {
         return Utils.roundTwoDecimals(this.getFinalKitPrice() / ((planVariant.numberOfPersons || 1) * (planVariant.numberOfRecipes || 1)));
     }
 
-    public isActualWeek(): boolean {
+    public isGoingToBeShippedThisWeek(): boolean {
         const today: Date = new Date();
         const auxMinDay = new Date(this.week.minDay);
         auxMinDay.setDate(auxMinDay.getDate() - 1);
@@ -344,11 +344,11 @@ export class Order extends Entity<Order> {
             today < fridayAt2359 &&
             todayWithDummyHours < weekMinDayWithDummyHours &&
             (this.isActive() || this.isBilled()) &&
-            this.isNextWeek()
+            this.isGoingToBeShippedNextWeek()
         );
     }
 
-    public isNextWeek(): boolean {
+    public isGoingToBeShippedNextWeek(): boolean {
         const today: Date = new Date();
         const auxMinDay = new Date(this.week.minDay);
         auxMinDay.setDate(auxMinDay.getDate() - 1);
