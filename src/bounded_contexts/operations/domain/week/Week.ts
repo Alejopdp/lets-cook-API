@@ -38,6 +38,20 @@ export class Week extends Entity<Week> {
         return MomentTimeService.getShorterHumanWeekRangeLabel(this.minDay, this.maxDay);
     }
 
+    public isPreviousWeekOf(aWeek: Week): boolean {
+        const auxDate: Date = new Date(aWeek.minDay);
+        auxDate.setDate(auxDate.getDate() - 7);
+
+        return this.minDay.getTime() === auxDate.getTime();
+    }
+
+    public isTheNextWeekAfter(aWeek: Week): boolean {
+        const auxDate: Date = new Date(this.minDay);
+        auxDate.setDate(auxDate.getDate() + 7);
+
+        return aWeek.minDay.getTime() === auxDate.getTime();
+    }
+
     /**
      * Getter minDay
      * @return {Date}
