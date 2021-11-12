@@ -114,7 +114,7 @@ export class ExportNextOrdersWithRecipesSelection {
             if (!!paymentOrderOrderMap[actualPoId]) {
                 paymentOrderExportLinesQuantityMap[actualPoId] = paymentOrderOrderMap[actualPoId].reduce(
                     (acc, order) => acc + (order.getNumberOfRecipesOrReturn0() === 0 ? 1 : order.getNumberOfRecipesOrReturn0()),
-                    1 // +1 because of the shipping line
+                    paymentOrder.shippingCost === 0 || paymentOrder.hasFreeShipping ? 0 : 1 // +1 because of the shipping line
                 );
             }
 
@@ -269,6 +269,7 @@ export class ExportNextOrdersWithRecipesSelection {
 
         for (let paymentOrder of paymentOrders) {
             if (!!!paymentOrderOrderMap[paymentOrder.id.value.toString()]) continue;
+            if (paymentOrder.shippingCost === 0 || paymentOrder.hasFreeShipping) continue;
 
             const auxOrder: Order | undefined = !!customerOrdersMap[paymentOrder.customerId.value]
                 ? customerOrdersMap[paymentOrder.customerId.value][0]
