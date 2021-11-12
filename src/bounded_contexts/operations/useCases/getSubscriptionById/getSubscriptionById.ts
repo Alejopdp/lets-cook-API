@@ -44,8 +44,6 @@ export class GetSubscriptionById {
         );
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByWeeks(currentAndNextWeeksIds);
 
-        console.log("PaymentOrders: ", paymentOrders);
-
         return { subscription, orders, customer: subscription.customer, paymentOrders };
     }
 
