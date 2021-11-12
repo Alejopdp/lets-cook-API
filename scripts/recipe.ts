@@ -81,7 +81,7 @@ export const getMockRecipes = async (): Promise<Recipe[]> => {
         "Arepas de Crhistian",
         new RecipeDescription("Las mejores arepas de Colombia", "Las mejores arepas hechas por el mejor dev de Colombia"),
         new RecipeCookDuration(50),
-        RecipeDifficultyLevel.Alta,
+        RecipeDifficultyLevel.Dificil,
         new RecipeWeight(150, WeightUnit.Gram),
         new RecipeSku("ARP"),
         ["development/arepas.jpg"]
