@@ -1,3 +1,4 @@
+import { WeekId } from "@src/bounded_contexts/operations/domain/week/WeekId";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
 import { PaymentOrder } from "../../../domain/paymentOrder/PaymentOrder";
@@ -24,6 +25,7 @@ export interface IPaymentOrderRepository {
     findByIdList(paymentOrdersIds: PaymentOrderId[]): Promise<PaymentOrder[]>;
     findAnActivePaymentOrder(): Promise<PaymentOrder | undefined>;
     findActiveByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]>;
+    findByWeeks(weekIds: WeekId[]): Promise<PaymentOrder[]>;
     countPaymentOrdersWithHumanId(): Promise<number>;
     updateShippingCost(paymentOrders: PaymentOrder[], shippingCost: number): Promise<void>;
     existsBy(customerId: CustomerId): Promise<boolean>;

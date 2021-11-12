@@ -26,9 +26,14 @@ export class GetCouponValidation {
         const planId: PlanId = new PlanId(dto.planId);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const plan: Plan = await this.planRepository.findByIdOrThrow(planId, Locale.es);
-
+        const planPrice = plan.getPlanVariantPrice(planVariantId);
+        console.log("Is free shipping: ", coupon?.isFreeShippingCoupon());
         if (!coupon) throw new Error("El cupón de descuento ingresado es incorrecto");
-        if (coupon.getDiscount(plan, planVariantId, dto.shippingCost) <= 0) throw new Error("El cupón no es aplicable al monto del plan");
+        if (
+            !coupon.isFreeShippingCoupon() &&
+            (Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)) / 100 <= 0
+        )
+            throw new Error("El cupón no es aplicable al monto del plan");
 
         if (!coupon.hasStarted()) throw new Error("El cupón ingresado no es válido");
         if (coupon.isExpiredByEndDate()) throw new Error("El cupón de descuento ingresado ha expirado");

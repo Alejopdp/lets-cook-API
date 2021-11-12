@@ -7,6 +7,7 @@ import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Subscription } from "../../../domain/subscription/Subscription";
+import { WeekId } from "@src/bounded_contexts/operations/domain/week/WeekId";
 
 export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async save(paymentOrder: PaymentOrder): Promise<void> {
@@ -49,6 +50,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
 
     public async findFutureOrdersByCustomer(customerId: CustomerId): Promise<PaymentOrder[]> {
         return await this.findBy({ billingDate: { $gte: new Date() }, customer: customerId.value });
+    }
+
+    public async findByWeeks(weeksIds: WeekId[]): Promise<PaymentOrder[]> {
+        return await this.findBy({ week: weeksIds.map((id) => id.toString()) });
     }
 
     public async findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {

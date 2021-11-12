@@ -9,6 +9,7 @@ import { Week } from "../../domain/week/Week";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { Locale } from "../../domain/locale/Locale";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -17,7 +18,7 @@ export class GetSubscriptionByIdPresenter {
         this._storageService = storageService;
     }
 
-    public async present(subscription: Subscription, orders: Order[], customer: Customer): Promise<any> {
+    public async present(subscription: Subscription, orders: Order[], customer: Customer, paymentOrders: PaymentOrder[]): Promise<any> {
         const presentedPlan = await this.presentPlan(subscription);
 
         const shippingAddress = {
@@ -65,6 +66,11 @@ export class GetSubscriptionByIdPresenter {
 
         const canChooseRecipes = subscription.plan.abilityToChooseRecipes;
         const nextTwelveOrders = this.presentOrders(orders);
+        const nextPaymentOrderWithShippingCost: PaymentOrder | undefined = !!actualWeekOrder
+            ? paymentOrders.find((po) => po.week.equals(actualWeekOrder.week) && !po.hasFreeShipping && po.shippingCost > 0)
+            : !!nextWeekOrder
+            ? paymentOrders.find((po) => po.week.equals(nextWeekOrder.week) && !po.hasFreeShipping && po.shippingCost > 0)
+            : undefined;
 
         return {
             subscriptionId: subscription.id.value,
@@ -85,6 +91,7 @@ export class GetSubscriptionByIdPresenter {
             canChooseRecipes,
             nextTwelveOrders,
             hasRecipes: subscription.plan.hasRecipes,
+            shippingCost: !!nextPaymentOrderWithShippingCost ? nextPaymentOrderWithShippingCost.shippingCost : 0,
         };
     }
 
