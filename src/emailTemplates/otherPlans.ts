@@ -1,6 +1,6 @@
 import { RecipeSelection } from "@src/bounded_contexts/operations/domain/order/RecipeSelection";
 
-export const otherPlans = (name: string, recipeSelection: RecipeSelection[] = []) => {
+export const otherPlans = (name: string, planName: string, recipeSelection: RecipeSelection[] = []) => {
     return `
     <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <html lang="es">
@@ -407,194 +407,6 @@ export const otherPlans = (name: string, recipeSelection: RecipeSelection[] = []
 <!-- Make your email an accessible article. -->
 <div role="article" aria-roledescription="email" aria-label="Hola+%7B%24name%7D%2C+%C2%A1Gracias+por+tu+compra%21">
 
-
-
-  
-    
-
-  
-
-  
-    
-    
-  
-
-  
-    
-    
-    
-  
-
-
-
-
-
-  
-    
-      
-  
-
-  
-    
-    
-    
-      
-  
-
-  
-
-    
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-  
-
-  
-    
-    
-  
-
-  
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-  
-
-  
-    
-    
-    
-    
-  
-
-
-
-
-
-  
-
-  
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-  
-
-
-
-
-
-  
-    
-    
-  
-
-  
-    
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-  
-
-  
-    
-    
-    
-    
-  
-
-  
-    
-    
-    
-  
-
-
-
 <!--[if !mso]><!-- -->
 <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#ffffff" class="mainTable mlBodyBackgroundImageTable" dir="ltr" background="https://bucket.mlcdn.com/a/1966/1966360/images/458a3e2a9cefdfc02c5bdbe2e5648187276656c2.jpeg" style="background-image: url(https://bucket.mlcdn.com/a/1966/1966360/images/458a3e2a9cefdfc02c5bdbe2e5648187276656c2.jpeg);">
   <tr>
@@ -785,7 +597,13 @@ export const otherPlans = (name: string, recipeSelection: RecipeSelection[] = []
 
 						
 						
-						<p style="margin-top: 0px; margin-bottom: 0px; font-size: 14px; line-height: 150%; color: #6f6f6f;">¡Mmmm qué buena pinta! Gracias por apuntarte a este planazo. A partir de ahora, con Let’s Cook, tu rutina y la de los tuyos será mucho más divertida y saludable. Te lo pondremos fácil para que puedas cocinar bueno y rico, aprender nuevas recetas y saborear platos con mucha chispa. ¿Pinta bien no?<br><br>Vemos que ya has elegido tus primeras recetas de tu plan para la semana que viene. ¡Qué rapidez! Se notan las ganas de iniciarse en Let’s Cook. O el hambre…</p>
+						<p style="margin-top: 0px; margin-bottom: 0px; font-size: 14px; line-height: 150%; color: #6f6f6f;">¡Mmmm qué buena pinta! Gracias por apuntarte a este planazo. A partir de ahora, con Let’s Cook, tu rutina y la de los tuyos será mucho más divertida y saludable. Te lo pondremos fácil para que puedas cocinar bueno y rico, aprender nuevas recetas y saborear platos con mucha chispa. ¿Pinta bien no?<br><br>
+            ${
+                Array.isArray(recipeSelection) && recipeSelection.length > 0
+                    ? `Vemos que ya has elegido tus primeras recetas de tu plan para la semana que viene. ¡Qué rapidez! Se notan las ganas de iniciarse en Let’s Cook. O el hambre…`
+                    : `Como te has apuntado al ${planName}, lo primero que debes hacer es elegir tus recetas para la semana que viene. ¿Cuáles serán los platos con los que iniciarás tu carrera de chef en Let’s Cook?`
+            }
+            </p>
 
 					</td>
 				</tr>
@@ -831,10 +649,11 @@ export const otherPlans = (name: string, recipeSelection: RecipeSelection[] = []
 
   		<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%">
   			<tr>
-  				<td class="bodyTitle" id="bodyText-10" style="font-family: 'Lato', Arial, Helvetica, sans-serif; font-size: 14px; line-height: 150%; color: #6f6f6f;"><p style="margin-top: 0px; margin-bottom: 10px; line-height: 150%;">Estas son las recetas que has elegido:</p><ul style="margin-top: 0px; margin-bottom: 10px;">${recipeSelection.map(
-                    (selection) =>
-                        `<li style="margin-top: 0px; margin-bottom: 5px;">${selection.quantity} x ${selection.recipe.getName()}</li>`
-                )}</ul>
+  				<td class="bodyTitle" id="bodyText-10" style="font-family: 'Lato', Arial, Helvetica, sans-serif; font-size: 14px; line-height: 150%; color: #6f6f6f;"><p style="margin-top: 0px; margin-bottom: 10px; line-height: 150%;">${
+                    recipeSelection.length > 0 ? "Estas son las recetas que has elegido:" : ""
+                }</p><ul style="margin-top: 0px; margin-bottom: 10px;">${recipeSelection.map(
+        (selection) => `<li style="margin-top: 0px; margin-bottom: 5px;">${selection.quantity} x ${selection.recipe.getName()}</li>`
+    )}</ul>
 <p style="margin-top: 0px; margin-bottom: 0px; line-height: 150%;"><em><span style="font-size: 10px;"><span style="color: rgb(127, 140, 141);">Si has marcado algún tipo de intolerancia o dieta especial, adaptaremos tu kit a tu perfil. Por ejemplo, sustituyendo el cuscús (gluten) por quinoa o el yogur (lactosa) por yogur sin lactosa.</span></span></em></p></td>
   			</tr>
   		</table>
