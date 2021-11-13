@@ -1,6 +1,6 @@
 import { RecipeSelection } from "../bounded_contexts/operations/domain/order/RecipeSelection";
 
-export const vegPlans = (name: string, recipeSelection: RecipeSelection[]) => {
+export const vegPlans = (name: string, planName: string, recipeSelection: RecipeSelection[]) => {
     return `
     <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <html lang="es">
@@ -595,7 +595,12 @@ export const vegPlans = (name: string, recipeSelection: RecipeSelection[]) => {
 
 						
 						
-						<p style="margin-top: 0px; margin-bottom: 0px; font-size: 14px; line-height: 150%; color: #6f6f6f;">¡Mmmm qué buena pinta! Gracias por apuntarte a este planazo. A partir de ahora, con Let’s Cook, tu rutina y la de los tuyos será mucho más divertida y saludable. Te lo pondremos fácil para que puedas cocinar bueno y rico, aprender nuevas recetas y saborear platos con mucha chispa. ¿Pinta bien no?<br><br>Vemos que ya has elegido tus primeras recetas de tu plan para la semana que viene. ¡Qué rapidez! Se notan las ganas de iniciarse en Let’s Cook. O el hambre…</p>
+						<p style="margin-top: 0px; margin-bottom: 0px; font-size: 14px; line-height: 150%; color: #6f6f6f;">¡Mmmm qué buena pinta! Gracias por apuntarte a este planazo. A partir de ahora, con Let’s Cook, tu rutina y la de los tuyos será mucho más divertida y saludable. Te lo pondremos fácil para que puedas cocinar bueno y rico, aprender nuevas recetas y saborear platos con mucha chispa. ¿Pinta bien no?<br><br>
+            ${
+                Array.isArray(recipeSelection) && recipeSelection.length > 0
+                    ? `Vemos que ya has elegido tus primeras recetas de tu plan para la semana que viene. ¡Qué rapidez! Se notan las ganas de iniciarse en Let’s Cook. O el hambre…`
+                    : `Como te has apuntado al ${planName}, lo primero que debes hacer es elegir tus recetas para la semana que viene. ¿Cuáles serán los platos con los que iniciarás tu carrera de chef en Let’s Cook?`
+            }</p>
 
 					</td>
 				</tr>
@@ -640,7 +645,9 @@ export const vegPlans = (name: string, recipeSelection: RecipeSelection[]) => {
 
   		<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" width="100%">
   			<tr>
-  				<td class="bodyTitle" id="bodyText-10" style="font-family: 'Lato', Arial, Helvetica, sans-serif; font-size: 14px; line-height: 150%; color: #6f6f6f;"><p style="margin-top: 0px; margin-bottom: 10px; line-height: 150%;">Estas son las recetas que has elegido:</p>
+  				<td class="bodyTitle" id="bodyText-10" style="font-family: 'Lato', Arial, Helvetica, sans-serif; font-size: 14px; line-height: 150%; color: #6f6f6f;"><p style="margin-top: 0px; margin-bottom: 10px; line-height: 150%;">${
+                    recipeSelection.length > 0 ? "Estas son las recetas que has elegido:" : ""
+                }</p>
           <ul style="margin-top: 0px; margin-bottom: 10px;">${recipeSelection.map(
               (selection) => `<li style="margin-top: 0px; margin-bottom: 5px;">${selection.quantity} x ${selection.recipe.getName()}</li>`
           )}</ul>
