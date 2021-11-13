@@ -70,7 +70,7 @@ export class Subscription extends Entity<Subscription> {
         const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek());
         const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
         const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
-        const skipWeek: boolean = new Date().getDay() === 0 || new Date().getDay() === 6;
+        const skipWeek: boolean = new Date().getDay() === 0;
         if (this.coupon) this.coupon.addApplication(this.customer);
 
         if (!this.firstShippingDateHasToSkipWeek(shippingZone.getDayNumberOfWeek())) billingDate.setDate(billingDate.getDate() - 7);
@@ -233,10 +233,8 @@ export class Subscription extends Entity<Subscription> {
         var todayDayNumber: number = new Date().getDay();
 
         return (
-            todayDayNumber >= shippingWeekDayNumber ||
-            shippingWeekDayNumber - todayDayNumber <= 2 ||
-            todayDayNumber === 0 ||
-            todayDayNumber === 6
+            todayDayNumber >= shippingWeekDayNumber || shippingWeekDayNumber - todayDayNumber <= 2 || todayDayNumber === 0
+            // todayDayNumber === 6
         );
     }
 
