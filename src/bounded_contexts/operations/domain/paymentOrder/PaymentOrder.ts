@@ -188,6 +188,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         return !!this.humanId ? `#${this.humanId.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}` : this.id.value;
     }
 
+    public getPlansAmountMinusDiscount(): number {
+        return (Math.round(this.amount * 100) - Math.round(this.discountAmount * 100)) / 100;
+    }
+
     /**
      * Getter shippingDate
      * @return {Date}

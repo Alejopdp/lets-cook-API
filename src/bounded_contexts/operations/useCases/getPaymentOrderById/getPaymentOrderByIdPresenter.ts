@@ -29,7 +29,7 @@ export class GetPaymentOrderByIdPresenter {
             orders: presentedOrders,
             totalAmount: paymentOrder.getFinalAmount(),
             subtotal: paymentOrder.amount,
-            taxes: paymentOrder.shippingCost * 0.21 + paymentOrder.amount * 0.1,
+            taxes: paymentOrder.shippingCost * 0.21 + paymentOrder.getPlansAmountMinusDiscount() * 0.1,
             paymentIntentId: paymentOrder.paymentIntentId,
             quantityRefunded: paymentOrder.quantityRefunded,
             humanId: paymentOrder.getHumanIdOrIdValue(),
