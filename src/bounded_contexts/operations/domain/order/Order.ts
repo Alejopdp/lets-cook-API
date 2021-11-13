@@ -315,7 +315,7 @@ export class Order extends Entity<Order> {
         if (!!!planVariant) return 0;
 
         //@ts-ignore
-        return Utils.roundTwoDecimals(this.getFinalKitPrice() / ((planVariant.numberOfPersons || 1) * (planVariant.numberOfRecipes || 1)));
+        return Utils.roundTwoDecimals(this.getTotalPrice() / ((planVariant.numberOfPersons || 1) * (planVariant.numberOfRecipes || 1)));
     }
 
     public isGoingToBeShippedThisWeek(): boolean {
