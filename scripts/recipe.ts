@@ -5057,12 +5057,12 @@ const baseProdRecipes = [
 ];
 
 const prodRestrictionMapIds: { [prodId: string]: string } = {
-    "13a03b53-c5e7-4e91-818d-93454ea7610c": "adea4fe4-9035-4a05-b949-a11c5a19b602", // Apto vegano sin gluten
-    "0a4823ca-f92d-420e-8df0-fd5585a74e96": "942427fa-ed16-4c68-8405-9f20120e8a9c", // Sin lactosa
-    "395ea2e5-23cb-44a9-8aa5-f7c89194e141": "0edcf8bf-36de-4dbe-8014-b2362ab5c410", // Sin gluten
-    "fa2244c2-b6c5-43a3-9fdf-3b04c1f55685": "8481477b-5357-428f-ba5e-3f9d14124296", // Sin gluten y sin lactosa
-    "27b8f2f5-4741-4cb5-9c05-4928c2d62928": "c83e061f-fa18-4387-81a9-f738f6dafff3", // Apto todo
-    "3ace8c1c-d5e9-4e68-b6c8-1f8f7533101c": "dadd02d4-b83e-4c2a-a8b5-8b0dda114fce", // Apto vegano
+    "13a03b53-c5e7-4e91-818d-93454ea7610c": "7f293e6c-c05b-4348-93a6-6b23f1caa4ab", // Apto vegano sin gluten
+    "0a4823ca-f92d-420e-8df0-fd5585a74e96": "40fa2daf-4853-44a6-a365-857bf50a81e9", // Sin lactosa
+    "395ea2e5-23cb-44a9-8aa5-f7c89194e141": "f15c1e96-db74-4342-83f6-1b5a7e5a90a6", // Sin gluten
+    "fa2244c2-b6c5-43a3-9fdf-3b04c1f55685": "3ee6ca13-bc2c-4580-be90-8ddd184b3fbc", // Sin gluten y sin lactosa
+    "27b8f2f5-4741-4cb5-9c05-4928c2d62928": "e8a9ee3c-5122-4ddf-9386-1dd613f7ee22", // Apto todo
+    "3ace8c1c-d5e9-4e68-b6c8-1f8f7533101c": "bc7f9a2a-5574-4872-9a2e-4daa7777dee5", // Apto vegano
 };
 
 export const uploadProdRecipes = async () => {
@@ -5081,7 +5081,8 @@ export const uploadProdRecipes = async () => {
     }
 
     for (let baseRecipe of baseProdRecipes) {
-        // baseRecipe.recipeGeneralData.imagesUrls = [baseRecipe.recipeGeneralData.imageUrl];
+        //@ts-ignore
+        baseRecipe.recipeGeneralData.imagesUrls = [baseRecipe.recipeGeneralData.imageUrl];
         const recipeGeneralData = recipeGeneralDataMapper.toDomain(baseRecipe.recipeGeneralData);
         const recipeVariants: RecipeVariant[] = [];
         const recipeTags: RecipeTag[] = [];

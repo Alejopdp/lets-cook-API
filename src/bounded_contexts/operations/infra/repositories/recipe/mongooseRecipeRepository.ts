@@ -30,7 +30,6 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     }
 
     public async findAll(locale: Locale = Locale.es): Promise<Recipe[]> {
-        console.log("LOCALE: ", locale);
         return await this.findBy({}, locale);
     }
 
