@@ -34,7 +34,13 @@ export class GetPaymentOrdersAsAdminPresenter {
                     ? -1
                     : po2.lastRecipeSelectionDate.getTime() - po1.lastRecipeSelectionDate.getTime()
             ),
-            billedOrders: _.orderBy(billedOrders, ["originalBillingDate"], ["desc"]),
+            billedOrders: billedOrders.sort((po1, po2) =>
+                !!!po1.lastRecipeSelectionDate
+                    ? 1
+                    : !!!po2.lastRecipeSelectionDate
+                    ? -1
+                    : po2.lastRecipeSelectionDate.getTime() - po1.lastRecipeSelectionDate.getTime()
+            ),
             rejectedOrders,
         };
     }

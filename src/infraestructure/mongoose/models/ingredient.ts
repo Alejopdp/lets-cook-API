@@ -18,6 +18,11 @@ const IngredientSchema = new mongoose.Schema(
                 // required: true,
                 // unique: true,
             },
+            ca: {
+                type: String,
+                // required: true,
+                // unique: true,
+            },
         },
 
         deletionFlag: {

@@ -16,7 +16,7 @@ import { Week } from "../../domain/week/Week";
 export class RecipeMapper implements Mapper<Recipe> {
     public toDomain(raw: any, locale?: Locale): Recipe {
         const recipeGeneralData: RecipeGeneralData = recipeGeneralDataMapper.toDomain(raw.recipeGeneralData, locale);
-        const recipeVariants: RecipeVariant[] = raw.recipeVariants.map((variant: any) => recipeVariantMapper.toDomain(variant));
+        const recipeVariants: RecipeVariant[] = raw.recipeVariants.map((variant: any) => recipeVariantMapper.toDomain(variant, locale));
         const imageTags: RecipeTag[] = raw.imageTags.map((tag: any) => new RecipeTag(tag));
         const backOfficeImageTags: RecipeTag[] = raw.imageTags.map((tag: any) => new RecipeTag(tag));
         const availableWeeks: Week[] = raw.availableWeeks.map((rawWeek: any) => weekMapper.toDomain(rawWeek));
@@ -45,7 +45,7 @@ export class RecipeMapper implements Mapper<Recipe> {
 
     public toPersistence(t: Recipe, locale?: Locale) {
         const recipeGeneralData = recipeGeneralDataMapper.toPersistence(t.recipeGeneralData);
-        const recipeVariants = t.recipeVariants.map((variant) => recipeVariantMapper.toPersistence(variant));
+        const recipeVariants = t.recipeVariants.map((variant) => recipeVariantMapper.toPersistence(variant, locale));
         const availableWeeks = t.availableWeeks.map((week) => week.id.value);
         const backOfficeTags = t.recipeBackOfficeTags.map((tag) => tag.name);
         const relatedPlans = t.relatedPlans.map((planId) => planId.value);
