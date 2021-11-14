@@ -6,8 +6,10 @@ import { Locale } from "../../../domain/locale/Locale";
 
 export class MongooseIngredientRepository implements IIngredientRepository {
     public async save(ingredient: Ingredient, locale: Locale = Locale.es): Promise<void> {
-        const ingredientToSave = ingredientMapper.toPersistence(ingredient);
-        if (await IngredientModel.exists({ _id: ingredient.id.value })) {
+        const ingredientToSave = ingredientMapper.toPersistence(ingredient, locale);
+        const exists: boolean = await IngredientModel.exists({ _id: ingredientToSave._id });
+
+        if (exists) {
             const nameLocaleKey = `name.${locale}`;
 
             await IngredientModel.updateOne(

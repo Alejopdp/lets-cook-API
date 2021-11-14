@@ -85,12 +85,12 @@ export class CreateSubscription {
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount, shippingZones] = await Promise.all([
-            await this.subscriptionRepository.findByCustomerId(customerId),
-            await this.customerRepository.findByIdOrThrow(customerId),
-            await this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
+            this.subscriptionRepository.findByCustomerId(customerId),
+            this.customerRepository.findByIdOrThrow(customerId),
+            this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
             // await this.paymentOrderRepository.findAnActivePaymentOrder(),
-            await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
-            await this.shippingZoneRepository.findAll(),
+            this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+            this.shippingZoneRepository.findAll(),
         ]);
         const coupon: Coupon | undefined = !!dto.couponId ? await this.couponRepository.findById(new CouponId(dto.couponId)) : undefined;
         const customerSubscriptions: Subscription[] = customerSubscriptionHistory.filter((sub) => sub.isActive());

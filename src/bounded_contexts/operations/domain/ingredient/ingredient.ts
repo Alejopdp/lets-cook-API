@@ -5,9 +5,9 @@ export class Ingredient implements IValueObject<Ingredient> {
     private _name: string;
     private _id: IngredientId;
 
-    constructor(name: string, id?: IngredientId) {
+    constructor(name: string, id?: string | number) {
         this._name = name;
-        this._id = id ? id : new IngredientId();
+        this._id = id ? new IngredientId(id) : new IngredientId();
     }
 
     public equals(anIngredient: Ingredient): boolean {
@@ -28,5 +28,13 @@ export class Ingredient implements IValueObject<Ingredient> {
      */
     public get id(): IngredientId {
         return this._id;
+    }
+
+    /**
+     * Setter name
+     * @param {string} value
+     */
+    public set name(value: string) {
+        this._name = value;
     }
 }

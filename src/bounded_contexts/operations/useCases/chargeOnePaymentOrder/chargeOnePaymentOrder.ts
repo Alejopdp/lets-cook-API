@@ -53,12 +53,12 @@ export class ChargeOnePaymentOrder {
         );
         const [customer, shippingZones, weeklyOrdersWeek, biweeklyOrdersWeek, monthlyOrdersWeek, paymentOrdersWithHumanIdCount] =
             await Promise.all([
-                await this.customerRepository.findByIdOrThrow(paymentOrder.customerId),
-                await this.shippingZoneRepository.findAll(),
-                await this.weekRepository.findWeekTwelveWeeksLater(),
-                await this.weekRepository.findWeekTwelveBiweeksLater(),
-                await this.weekRepository.findWeekTwelveMonthsLater(),
-                await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+                this.customerRepository.findByIdOrThrow(paymentOrder.customerId),
+                this.shippingZoneRepository.findAll(),
+                this.weekRepository.findWeekTwelveWeeksLater(),
+                this.weekRepository.findWeekTwelveBiweeksLater(),
+                this.weekRepository.findWeekTwelveMonthsLater(),
+                this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
             ]);
         // const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
         // const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();

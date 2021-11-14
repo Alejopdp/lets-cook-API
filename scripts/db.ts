@@ -17,14 +17,13 @@ import { adminUser1, adminUser2 } from "./user";
 import { getArrayOfFutureWeeks } from "./week";
 
 export const loadMockData = async () => {
-    await mongooseRoleRepository.save(adminRole);
+    // await mongooseRoleRepository.save(adminRole);
     logger.info("Roles loaded");
     await mongooseUserRepository.save(adminUser1);
     await mongooseUserRepository.save(adminUser2);
     logger.info("Users loaded");
     await mongooseWeekRepository.bulkSave(getArrayOfFutureWeeks());
     logger.info("Weeks loaded");
-    // await mongooseIngredientRepository.bulkSave(getIngredients());
     await saveIngredients();
     logger.info("Ingredients loaded");
     await mongoosePlanRepository.bulkSave(getMockPlans());
