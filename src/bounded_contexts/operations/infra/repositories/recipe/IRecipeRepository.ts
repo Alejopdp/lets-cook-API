@@ -8,7 +8,7 @@ import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe
 import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
 
 export interface IRecipeRepository {
-    save(recipe: Recipe): Promise<void>;
+    save(recipe: Recipe, locale?: Locale): Promise<void>;
     bulkSave(recipes: Recipe[]): Promise<void>;
     findAll(locale?: Locale): Promise<Recipe[]>;
     findAllBackOfficeTags(locale?: Locale): Promise<RecipeTag[]>;

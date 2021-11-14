@@ -1,4 +1,5 @@
 import { ReadStream } from "fs";
+import { Locale } from "../../domain/locale/Locale";
 import { Month } from "../../domain/recipe/Months";
 import { RecipeDifficultyLevel } from "../../domain/recipe/RecipeGeneralData/RecipeDifficultyLevel";
 import { NewVariant } from "../createRecipe/createRecipeDto";
@@ -24,4 +25,5 @@ export interface UpdateRecipeDto {
     variants: NewVariant[];
     orderPriority: number;
     recipeImages: { file: ReadStream; fileName: string }[];
+    locale: Locale;
 }

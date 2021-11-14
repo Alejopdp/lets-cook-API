@@ -13,11 +13,39 @@ import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe
 import { Locale } from "../../../domain/locale/Locale";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
-    public async save(recipe: Recipe): Promise<void> {
-        const recipeDb = recipeMapper.toPersistence(recipe);
+    public async save(recipe: Recipe, locale: Locale = Locale.es): Promise<void> {
+        const recipeDb = recipeMapper.toPersistence(recipe, locale);
 
         if (await RecipeModel.exists({ _id: recipe.id.value })) {
-            await RecipeModel.updateOne({ _id: recipe.id.value }, recipeDb);
+            const auxRecipeGeneralData = { ...recipeDb.recipeGeneralData };
+            delete recipeDb.recipeGeneralData;
+            const nameWithLocaleKey = `recipeGeneralData.name.${locale}`;
+            const shortDescriptionWithLocaleKey = `recipeGeneralData.recipeDescription.shortDescription.${locale}`;
+            const longDescriptionWithLocaleKey = `recipeGeneralData.recipeDescription.longDescription.${locale}`;
+
+            await RecipeModel.updateOne(
+                { _id: recipe.id.value },
+                {
+                    ...recipeDb,
+                    $set: {
+                        ...auxRecipeGeneralData,
+                        [nameWithLocaleKey]: auxRecipeGeneralData.name[locale],
+                        [shortDescriptionWithLocaleKey]: auxRecipeGeneralData.recipeDescription.shortDescription[locale],
+                        [longDescriptionWithLocaleKey]: auxRecipeGeneralData.recipeDescription.longDescription[locale],
+                        recipeCookDuration: {
+                            timeValue: auxRecipeGeneralData.recipeCookDuration.timeValue,
+                            timeUnit: auxRecipeGeneralData.recipeCookDuration.timeUnit,
+                        },
+                        recipeWeight: {
+                            weightValue: auxRecipeGeneralData.recipeWeight.weightValue,
+                            weightUnit: auxRecipeGeneralData.recipeWeight.weightUnit,
+                        },
+                        sku: auxRecipeGeneralData.sku,
+                        imagesUrls: auxRecipeGeneralData.imagesUrls,
+                        difficultyLevel: auxRecipeGeneralData.difficultyLevel,
+                    },
+                }
+            );
         } else {
             await RecipeModel.create(recipeDb);
         }

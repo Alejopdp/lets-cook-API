@@ -88,7 +88,7 @@ export class UpdateRecipe {
         recipe.availableMonths = dto.availableMonths;
         recipe.orderPriority = dto.orderPriority;
 
-        await this.recipeRepository.save(recipe);
+        await this.recipeRepository.save(recipe, dto.locale);
     }
 
     /**

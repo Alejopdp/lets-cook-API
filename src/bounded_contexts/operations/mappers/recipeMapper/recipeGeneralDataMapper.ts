@@ -7,16 +7,16 @@ import { RecipeSku } from "../../domain/recipe/RecipeGeneralData/RecipeSku";
 import { RecipeWeight } from "../../domain/recipe/RecipeGeneralData/RecipeWeight";
 
 export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
-    public toDomain(raw: any, locale?: Locale): RecipeGeneralData {
+    public toDomain(raw: any, locale: Locale = Locale.es): RecipeGeneralData {
         const recipeDescription: RecipeDescription = new RecipeDescription(
-            raw.recipeDescription.shortDescription,
-            raw.recipeDescription.longDescription
+            raw.recipeDescription.shortDescription[locale],
+            raw.recipeDescription.longDescription[locale]
         );
         const cookDuration: RecipeCookDuration = new RecipeCookDuration(raw.recipeCookDuration.timeValue);
         const recipeWeight: RecipeWeight = new RecipeWeight(raw.recipeWeight.weightValue, raw.recipeWeight.weightUnit);
 
         return new RecipeGeneralData(
-            raw.name,
+            raw.name[locale],
             recipeDescription,
             cookDuration,
             raw.difficultyLevel,
@@ -25,12 +25,12 @@ export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
             raw.imagesUrls
         );
     }
-    public toPersistence(t: RecipeGeneralData, locale?: Locale) {
+    public toPersistence(t: RecipeGeneralData, locale: Locale = Locale.es) {
         return {
-            name: t.name,
+            name: { [locale]: t.name },
             recipeDescription: {
-                shortDescription: t.recipeDescription.shortDescription,
-                longDescription: t.recipeDescription.longDescription,
+                shortDescription: { [locale]: t.recipeDescription.shortDescription },
+                longDescription: { [locale]: t.recipeDescription.longDescription },
             },
             recipeCookDuration: {
                 timeValue: t.cookDuration.timeValue,
