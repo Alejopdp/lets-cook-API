@@ -6,6 +6,7 @@ import { UpdateRecipe } from "./updateRecipe";
 import { UpdateRecipeDto } from "./updateRecipeDto";
 import fs from "fs";
 import path from "path";
+import { Locale } from "../../domain/locale/Locale";
 
 export class UpdateRecipeController extends BaseController {
     private _updateRecipe: UpdateRecipe;
@@ -27,7 +28,6 @@ export class UpdateRecipeController extends BaseController {
                 file: fs.createReadStream(file.path),
                 fileName: file.originalname,
             }));
-
             const dto: UpdateRecipeDto = {
                 recipeId: this.req.params.id,
                 availableMonths: JSON.parse(this.req.body.availableMonths)
@@ -49,6 +49,7 @@ export class UpdateRecipeController extends BaseController {
                 variants: JSON.parse(this.req.body.variants),
                 availableWeeksIds: JSON.parse(this.req.body.availableWeeksIds),
                 orderPriority: this.req.body.orderPriority,
+                locale: (<any>Locale)[(this.req.query.locale as string) || "es"],
             };
 
             await this.updateRecipe.execute(dto);

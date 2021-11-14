@@ -3,13 +3,15 @@ import * as uuid from "uuid";
 
 const RecipeDescription = new mongoose.Schema({
     shortDescription: {
-        type: String,
-        required: true,
+        es: { type: String, required: true },
+        en: { type: String, required: true },
+        ca: { type: String, required: true },
     },
 
     longDescription: {
-        type: String,
-        required: true,
+        es: { type: String, required: true },
+        en: { type: String, required: true },
+        ca: { type: String, required: true },
     },
 });
 
@@ -38,7 +40,11 @@ const RecipeWeight = new mongoose.Schema({
 });
 
 const RecipeGeneralData = new mongoose.Schema({
-    name: { type: String, required: true },
+    name: {
+        es: { type: String, required: true },
+        en: { type: String, required: true },
+        ca: { type: String, required: true },
+    },
     recipeDescription: RecipeDescription,
     recipeCookDuration: RecipeCookDuration,
     recipeWeight: RecipeWeight,
