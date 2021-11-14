@@ -36,13 +36,14 @@ export class AwsSesService implements INotificationService {
         customerEmail: string,
         customerName: string,
         planName: string,
-        recipeSelection: RecipeSelection[]
+        recipeSelection: RecipeSelection[],
+        hasIndicatedRestrictions: boolean
     ): Promise<void> {
         await this.sendMail(
             [customerEmail],
             `Hola ${customerName}, ¡Gracias por tu compra!`,
             "",
-            vegPlans(customerName, planName, recipeSelection)
+            vegPlans(customerName, planName, recipeSelection, hasIndicatedRestrictions)
         );
     }
 
@@ -50,13 +51,14 @@ export class AwsSesService implements INotificationService {
         customerEmail: string,
         customerName: string,
         planName: string,
-        recipeSelection: RecipeSelection[]
+        recipeSelection: RecipeSelection[],
+        hasIndicatedRestrictions: boolean
     ): Promise<void> {
         await this.sendMail(
             [customerEmail],
             `Hola ${customerName}, ¡Gracias por tu compra!`,
             "",
-            otherPlans(customerName, planName, recipeSelection)
+            otherPlans(customerName, planName, recipeSelection, hasIndicatedRestrictions)
         );
     }
 
@@ -134,8 +136,21 @@ export class AwsSesService implements INotificationService {
     public async notifyCustomerAboutNewSubscriptionSuccessfullyCreated(dto: NewSubscriptionNotificationDto): Promise<void> {
         if (dto.planSku === "PLAHOR") await this.sendPlanAhorroMail(dto.customerEmail, dto.customerFirstName);
         else if (dto.planSku === "PLFML2" || dto.planSku === "PLVEGE")
-            await this.sendVegPlanMail(dto.customerEmail, dto.customerFirstName, dto.planName, dto.recipeSelection);
-        else await this.sendOtherPlanMail(dto.customerEmail, dto.customerFirstName, dto.planName, dto.recipeSelection);
+            await this.sendVegPlanMail(
+                dto.customerEmail,
+                dto.customerFirstName,
+                dto.planName,
+                dto.recipeSelection,
+                !!dto.hasIndicatedRestrictions
+            );
+        else
+            await this.sendOtherPlanMail(
+                dto.customerEmail,
+                dto.customerFirstName,
+                dto.planName,
+                dto.recipeSelection,
+                !!dto.hasIndicatedRestrictions
+            );
         // else {
         //     await this.sendMail(
         //         [dto.customerEmail],
