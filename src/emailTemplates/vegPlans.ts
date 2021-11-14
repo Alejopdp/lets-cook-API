@@ -1,6 +1,6 @@
 import { RecipeSelection } from "../bounded_contexts/operations/domain/order/RecipeSelection";
 
-export const vegPlans = (name: string, planName: string, recipeSelection: RecipeSelection[]) => {
+export const vegPlans = (name: string, planName: string, recipeSelection: RecipeSelection[], hasIndicatedRestrictions: boolean) => {
     return `
     <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
 <html lang="es">
@@ -651,7 +651,11 @@ export const vegPlans = (name: string, planName: string, recipeSelection: Recipe
           <ul style="margin-top: 0px; margin-bottom: 10px;">${recipeSelection.map(
               (selection) => `<li style="margin-top: 0px; margin-bottom: 5px;">${selection.quantity} x ${selection.recipe.getName()}</li>`
           )}</ul>
-<p style="margin-top: 0px; margin-bottom: 0px; line-height: 150%;"><em><span style="font-size: 10px;"><span style="color: rgb(127, 140, 141);">Si has marcado algún tipo de intolerancia o dieta especial, adaptaremos tu kit a tu perfil. Por ejemplo, sustituyendo el cuscús (gluten) por quinoa.</span></span></em></p></td>
+${
+    hasIndicatedRestrictions
+        ? `<p style="margin-top: 0px; margin-bottom: 0px; line-height: 150%;"><em><span style="font-size: 10px;"><span style="color: rgb(127, 140, 141);">Si has marcado algún tipo de intolerancia o dieta especial, adaptaremos tu kit a tu perfil. Por ejemplo, sustituyendo el cuscús (gluten) por quinoa.</span></span></em></p>`
+        : ""
+}</td>
   			</tr>
   		</table>
 			
