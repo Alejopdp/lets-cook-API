@@ -6,13 +6,8 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 export const connectToDatabase = async () => {
-<<<<<<< HEAD
     // const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
     const mongoUri: string = ((process.env.URLDB as string) + "staging") as string;
-=======
-    const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
-    // const mongoUri: string = ((process.env.URLDB as string) + "-ingredients-test") as string;
->>>>>>> development
 
     try {
         await mongoose.connect(mongoUri, {
