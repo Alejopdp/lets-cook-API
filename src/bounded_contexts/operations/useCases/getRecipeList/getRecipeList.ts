@@ -1,6 +1,7 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeRepository";
+import { GetRecipeListDto } from "./getRecipeListDto";
 import { GetRecipeListPresenter } from "./getRecipeListPresenter";
 
 export class GetRecipeList {
@@ -12,8 +13,8 @@ export class GetRecipeList {
         this._storageService = storageService;
     }
 
-    public async execute(): Promise<void> {
-        const recipeList: Recipe[] = await this.recipeRepository.findAll();
+    public async execute(dto: GetRecipeListDto): Promise<void> {
+        const recipeList: Recipe[] = await this.recipeRepository.findAll(dto.locale);
 
         return await GetRecipeListPresenter.present(recipeList);
     }

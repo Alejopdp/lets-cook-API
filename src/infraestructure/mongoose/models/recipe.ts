@@ -73,6 +73,7 @@ const RecipeVariant = new mongoose.Schema({
     ingredients: [
         {
             type: String,
+            ref: "Ingredient",
             required: true,
         },
     ],

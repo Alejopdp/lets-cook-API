@@ -40,7 +40,7 @@ export class MongooseIngredientRepository implements IIngredientRepository {
         // },})
     }
 
-    public async findAll(): Promise<Ingredient[]> {
+    public async findAll(locale: Locale = Locale.es): Promise<Ingredient[]> {
         return await this.findBy({});
     }
 
@@ -57,7 +57,7 @@ export class MongooseIngredientRepository implements IIngredientRepository {
         return ingredientDb ? ingredientMapper.toDomain(ingredientDb) : undefined;
     }
 
-    public async findBy(conditions: any, locale?: Locale): Promise<Ingredient[]> {
+    public async findBy(conditions: any, locale: Locale = Locale.es): Promise<Ingredient[]> {
         const ingredientsDb = await IngredientModel.find({ ...conditions, deletionFlag: false });
 
         return ingredientsDb.map((raw: any) => ingredientMapper.toDomain(raw, locale));
