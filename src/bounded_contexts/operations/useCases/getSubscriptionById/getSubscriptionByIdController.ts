@@ -1,4 +1,5 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { GetSubscriptionById } from "./getSubscriptionById";
 import { GetSubscriptionByIdDto } from "./getSubscriptionByIdDto";
 import { GetSubscriptionByIdPresenter } from "./getSubscriptionByIdPresenter";
@@ -17,6 +18,7 @@ export class GetSubscriptionByIdController extends BaseController {
         try {
             const dto: GetSubscriptionByIdDto = {
                 subscriptionId: this.req.params.id,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
             const result = await this.getSubscriptionById.execute(dto);
             const presented = await this.getSubscriptionByIdPresenter.present(

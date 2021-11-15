@@ -32,7 +32,7 @@ export class GetPaymentOrderById {
     ): Promise<{ paymentOrder: PaymentOrder; orders: Order[]; customer: Customer; subscriptions: Subscription[] }> {
         const paymentOrderId: PaymentOrderId = new PaymentOrderId(dto.paymentOrderId);
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
-        const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId);
+        const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId, dto.locale);
         const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(
             orders.filter((order) => order.discountAmount > 0).map((order) => order.subscriptionId)

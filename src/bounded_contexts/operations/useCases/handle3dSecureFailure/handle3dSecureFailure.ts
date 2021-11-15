@@ -10,6 +10,7 @@ import { CancellationReason } from "../../domain/cancellationReason/Cancellation
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
+import { Locale } from "../../domain/locale/Locale";
 
 export class Handle3dSecureFailure {
     private _subscriptionRepository: ISubscriptionRepository;
@@ -38,7 +39,7 @@ export class Handle3dSecureFailure {
         const subscription: Subscription | undefined = customerSubscriptions.find((sub) => sub.id.equals(subscriptionId));
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");
 
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
         subscription.cancel(new CancellationReason("Método de pago no confirmado", ""), orders, paymentOrders);

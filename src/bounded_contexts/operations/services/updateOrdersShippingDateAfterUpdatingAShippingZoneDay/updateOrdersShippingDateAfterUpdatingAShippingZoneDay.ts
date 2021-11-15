@@ -14,7 +14,7 @@ export class UpdateOrdersShippingDateAfterUpdatingAShippingZoneDay {
         // const futureOrdersWithActualDayOfWeek: Order[] = await this.orderRepository.findFutureOrdersByShippingDayOfWeek(
         //     dto.shippingZone.shippingDayOfWeek
         // );
-        const futureOrdersWithActualDayOfWeek: Order[] = await this.orderRepository.findFutureOrders();
+        const futureOrdersWithActualDayOfWeek: Order[] = await this.orderRepository.findFutureOrders(Locale.es);
         for (let order of futureOrdersWithActualDayOfWeek) {
             if (order.isGoingToBeShippedThisWeek()) continue;
             if (order.shippingDate.getDay() === dto.newShippingDayOfWeek.dayNumberOfWeek) continue;

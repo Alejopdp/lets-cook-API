@@ -20,7 +20,7 @@ export class GetCustomerSubscriptions {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
         const subscriptionsIds: SubscriptionId[] = subscriptions.map((subscription) => subscription.id);
-        const nextOrders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(subscriptionsIds);
+        const nextOrders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(subscriptionsIds, dto.locale);
 
         return { subscriptions, nextOrders };
     }

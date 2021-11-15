@@ -18,6 +18,7 @@ export class GetOrderByIdController extends BaseController {
         try {
             const dto: GetOrderByIdDto = {
                 orderId: this.req.params.id,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             const result = await this.getOrderById.execute(dto);

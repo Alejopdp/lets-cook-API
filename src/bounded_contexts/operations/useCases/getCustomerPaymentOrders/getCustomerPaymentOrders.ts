@@ -21,7 +21,8 @@ export class GetCustomerPaymentOrders {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(customerId);
         const ordersCountMap: { [key: string]: number } = await this.orderRepository.getCountByPaymentOrderIdMap(
-            paymentOrders.map((paymentOrder) => paymentOrder.id)
+            paymentOrders.map((paymentOrder) => paymentOrder.id),
+            dto.locale
         );
 
         return { paymentOrders, ordersCountMap };

@@ -4,6 +4,7 @@ import { IOrderRepository } from "../../infra/repositories/order/IOrderRepositor
 import { PaymentOrderId } from "../../domain/paymentOrder/PaymentOrderId";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Order } from "../../domain/order/Order";
+import { Locale } from "../../domain/locale/Locale";
 
 export class UpdatePaymentOrderAndOrdersState {
     private _paymentOrderRepository: IPaymentOrderRepository;
@@ -17,7 +18,7 @@ export class UpdatePaymentOrderAndOrdersState {
     public async execute(dto: UpdatePaymentOrderAndOrdersStateDto): Promise<{ billedPaymentOrderHumanId: string | number }> {
         const paymentOrderId: PaymentOrderId = new PaymentOrderId(dto.paymentOrderId);
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
-        const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId);
+        const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId, Locale.es);
 
         paymentOrder.updateState(dto.paymentOrderState, orders);
 

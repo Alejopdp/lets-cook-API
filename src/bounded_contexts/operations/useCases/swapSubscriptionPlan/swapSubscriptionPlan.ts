@@ -49,7 +49,7 @@ export class SwapSubscriptionPlan {
         const newPlan: Plan | undefined = await this.planRepository.findById(newPlanId, Locale.es);
         if (!!!newPlan) throw new Error("El nuevo plan al que te quieres suscribir no existe");
 
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
 
         subscription.swapPlan(orders, newPlan, newPlanVariantId);
 

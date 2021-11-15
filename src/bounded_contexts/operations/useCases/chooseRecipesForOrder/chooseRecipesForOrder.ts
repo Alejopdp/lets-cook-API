@@ -1,3 +1,4 @@
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { OrderId } from "../../domain/order/OrderId";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
@@ -23,7 +24,7 @@ export class ChooseRecipesForOrder {
     public async execute(dto: ChooseRecipesForOrderDto): Promise<any> {
         const orderId: OrderId = new OrderId(dto.orderId);
         const recipesIds: RecipeId[] = dto.recipeSelection.map((selection) => new RecipeId(selection.recipeId));
-        const order: Order = await this.orderRepository.findByIdOrThrow(orderId);
+        const order: Order = await this.orderRepository.findByIdOrThrow(orderId, Locale.es);
         const paymentOrder = await this.paymentOrderRepository.findByIdOrThrow(order.paymentOrderId!);
         const recipes: Recipe[] = await this.recipeRepository.findByIdList(recipesIds);
         const newRecipeSelection: RecipeSelection[] = [];
