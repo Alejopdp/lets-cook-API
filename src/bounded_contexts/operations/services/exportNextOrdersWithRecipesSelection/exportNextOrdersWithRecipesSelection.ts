@@ -148,8 +148,8 @@ export class ExportNextOrdersWithRecipesSelection {
                             order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
                                 ? paymentOrderMap[order.paymentOrderId.value]?.state.title || ""
                                 : "",
+                        paymentOrderNumber: paymentOrderMap[order.paymentOrderId!.value].humanId || "",
                         orderId: order.id.value,
-                        orderNumber: order.counter,
                         orderState: order.state.title,
                         weekLabel: order.week.getShorterLabel(),
                         deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
@@ -211,7 +211,7 @@ export class ExportNextOrdersWithRecipesSelection {
                                 ? paymentOrderMap[order.paymentOrderId.value].state.title || ""
                                 : "",
                         orderId: order.id.value,
-                        orderNumber: order.counter,
+                        paymentOrderNumber: paymentOrderMap[order.paymentOrderId!.value].humanId || "",
                         orderState: order.state.title,
                         weekLabel: order.week.getShorterLabel(),
                         deliveryDate: MomentTimeService.getDddDdMmmm(order.shippingDate),
@@ -282,7 +282,7 @@ export class ExportNextOrdersWithRecipesSelection {
                 paymentOrderId: paymentOrder.id.value,
                 paymentOrderState: paymentOrder.state.title,
                 orderId: "N/A",
-                orderNumber: "N/A",
+                paymentOrderNumber: "N/A",
                 orderState: "N/A",
                 weekLabel: paymentOrder.week.getShorterLabel(),
                 deliveryDate: !!auxOrder ? MomentTimeService.getDddDdMmmm(auxOrder.shippingDate) : "",
