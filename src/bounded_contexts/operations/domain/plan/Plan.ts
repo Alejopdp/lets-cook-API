@@ -28,6 +28,7 @@ export class Plan extends Entity<Plan> {
     private _abilityToChooseRecipes: boolean;
     private _iconLinealUrl: string;
     private _iconLinealColorUrl: string;
+    private _isDefaultAtCheckout: boolean;
 
     protected constructor(
         name: string,
@@ -45,7 +46,8 @@ export class Plan extends Entity<Plan> {
         abilityToChooseRecipes: boolean,
         iconLinealUrl: string,
         iconLinealColorUrl: string,
-        id?: PlanId
+        id?: PlanId,
+        isDefaultAtCheckout?: boolean
     ) {
         super(id);
         this._name = name;
@@ -63,6 +65,7 @@ export class Plan extends Entity<Plan> {
         this._abilityToChooseRecipes = abilityToChooseRecipes;
         this._iconLinealUrl = iconLinealUrl;
         this._iconLinealColorUrl = iconLinealColorUrl;
+        this._isDefaultAtCheckout = !!isDefaultAtCheckout;
     }
 
     public static create(
@@ -81,7 +84,8 @@ export class Plan extends Entity<Plan> {
         abilityToChooseRecipes: boolean,
         iconLinealUrl: string,
         iconLinealColorUrl: string,
-        id?: PlanId
+        id?: PlanId,
+        isDefaultAtCheckout?: boolean
     ): Plan {
         const guardedProps = [
             { argument: name, argumentName: "Nombre" },
@@ -117,7 +121,8 @@ export class Plan extends Entity<Plan> {
             abilityToChooseRecipes,
             iconLinealUrl,
             iconLinealColorUrl,
-            id
+            id,
+            isDefaultAtCheckout
         );
     }
 
@@ -391,6 +396,22 @@ export class Plan extends Entity<Plan> {
      */
     public get iconLinealColorUrl(): string {
         return this._iconLinealColorUrl;
+    }
+
+    /**
+     * Getter isDefaultAtCheckout
+     * @return {boolean}
+     */
+    public get isDefaultAtCheckout(): boolean {
+        return this._isDefaultAtCheckout;
+    }
+
+    /**
+     * Setter isDefaultAtCheckout
+     * @param {boolean} value
+     */
+    public set isDefaultAtCheckout(value: boolean) {
+        this._isDefaultAtCheckout = value;
     }
 
     /**
