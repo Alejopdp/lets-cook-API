@@ -41,6 +41,9 @@ export class UpdatePlan {
 
         for (let variant of dto.planVariants) {
             var attributes: PlanVariantAttribute[] = [];
+            if (variant.id === variant.auxId) {
+                variant.id = "";
+            }
 
             attributes = Object.entries(variant).map((entry) => new PlanVariantAttribute(entry[0], entry[1] as string));
 
