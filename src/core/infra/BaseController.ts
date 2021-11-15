@@ -76,7 +76,8 @@ export abstract class BaseController {
     }
 
     public fail(error: Error | string) {
-        logger.error(error.toString());
+        //@ts-ignore
+        logger.error(`${error.toString()} at line ${error.lineNumber} of file ${error.fileName}`);
         return this.res.status(500).json({
             message: error.toString(),
         });
