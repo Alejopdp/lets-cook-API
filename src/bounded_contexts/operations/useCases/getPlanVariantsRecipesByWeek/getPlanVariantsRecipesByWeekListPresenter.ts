@@ -188,6 +188,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             icon,
             iconWithColor,
             minimumVariantPrice: plan.getMinimumVariantPrice(),
+            isDefaultAtCheckout: plan.isDefaultAtCheckout,
         };
     }
 

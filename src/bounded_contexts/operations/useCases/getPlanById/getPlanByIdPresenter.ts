@@ -97,6 +97,7 @@ export class GetPlanByIdPresenter {
             iconWithColor: plan.iconLinealColorUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl) : "",
             abilityToChooseRecipes: plan.abilityToChooseRecipes,
             slug: plan.planSlug.slug,
+            isDefaultAtCheckout: plan.isDefaultAtCheckout,
             // newAttributes: plan.getAttirbutesAndValues(),
         };
     }

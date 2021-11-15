@@ -33,6 +33,7 @@ export class GetPlanListPresenter {
                 slug: plan.planSlug.slug,
                 icon: await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl),
                 iconWithColor: await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl),
+                isDefaultAtCheckout: plan.isDefaultAtCheckout,
             });
         }
 

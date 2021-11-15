@@ -145,6 +145,12 @@ const PlanSchema = new mongoose.Schema(
             required: true,
         },
 
+        isDefaultAtCheckout: {
+            type: Boolean,
+            required: true,
+            default: false,
+        },
+
         deletionFlag: {
             type: Boolean,
             isRequired: true,
