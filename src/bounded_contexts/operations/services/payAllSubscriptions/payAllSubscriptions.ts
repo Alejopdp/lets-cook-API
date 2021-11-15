@@ -4,6 +4,7 @@ import { logger } from "../../../../../config";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderActive } from "../../domain/paymentOrder/paymentOrderState/PaymentOrderActive";
@@ -53,7 +54,10 @@ export class PayAllSubscriptions {
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const paymentOrdersToBill: PaymentOrder[] = await this.paymentOrderRepository.findByBillingDate(today);
-        const ordersToBill: Order[] = await this.orderRepository.findByPaymentOrderIdList(paymentOrdersToBill.map((po) => po.id));
+        const ordersToBill: Order[] = await this.orderRepository.findByPaymentOrderIdList(
+            paymentOrdersToBill.map((po) => po.id),
+            Locale.es
+        );
         const activeSusbcriptions = await this.subscriptionRepository.findByIdList(ordersToBill.map((order) => order.subscriptionId));
         var paymentOrdersWithHumanIdCount = await this.paymentOrderRepository.countPaymentOrdersWithHumanId();
         const ordersWIthoutPaymentOrder = [];

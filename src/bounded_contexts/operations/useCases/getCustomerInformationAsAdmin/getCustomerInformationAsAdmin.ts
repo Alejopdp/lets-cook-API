@@ -1,6 +1,7 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Subscription } from "../../domain/subscription/Subscription";
@@ -39,7 +40,10 @@ export class GetCustomerInformationAsAdmin {
         const customer: Customer = await this.customerRepository.findByIdOrThrow(customerId);
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(customerId);
-        const orders: Order[] = await this.orderRepository.findByPaymentOrderIdList(paymentOrders.map((po) => po.id));
+        const orders: Order[] = await this.orderRepository.findByPaymentOrderIdList(
+            paymentOrders.map((po) => po.id),
+            Locale.es
+        );
 
         return { customer, subscriptions, paymentOrders, orders };
     }

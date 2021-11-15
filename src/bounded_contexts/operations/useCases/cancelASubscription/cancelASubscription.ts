@@ -1,6 +1,7 @@
 import { INotificationService } from "@src/shared/notificationService/INotificationService";
 import { IMailingListService } from "../../application/mailingListService/IMailingListService";
 import { CancellationReason } from "../../domain/cancellationReason/CancellationReason";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Subscription } from "../../domain/subscription/Subscription";
@@ -37,7 +38,7 @@ export class CancelASubscription {
         const subscription: Subscription | undefined = await this.subscriptionRepository.findByIdOrThrow(subscriptionId);
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(subscription.customer.id);
 
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
         subscription.cancel(cancellationReason, orders, paymentOrders);

@@ -13,6 +13,7 @@ import { IsCouponValid } from "../../services/isCouponValid/isCouponValid";
 import { IsCouponValidDto } from "../../services/isCouponValid/isCouponValidDto";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
+import { Locale } from "../../domain/locale/Locale";
 
 export class ApplyCouponToSubscription {
     private _subscriptionRepository: ISubscriptionRepository;
@@ -67,7 +68,7 @@ export class ApplyCouponToSubscription {
         };
         await this.couponValidationService.execute(isCouponValidDto);
 
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
         subscription.addCoupon(orders, paymentOrders, coupon, customerShippingZone.cost);

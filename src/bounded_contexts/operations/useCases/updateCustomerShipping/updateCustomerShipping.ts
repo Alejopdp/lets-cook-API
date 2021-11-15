@@ -13,6 +13,7 @@ import { Order } from "../../domain/order/Order";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { INotificationService } from "@src/shared/notificationService/INotificationService";
+import { Locale } from "../../domain/locale/Locale";
 
 export class UpdateCustomerShipping {
     private _customerRepository: ICustomerRepository;
@@ -47,7 +48,10 @@ export class UpdateCustomerShipping {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findFutureOrdersByCustomer(customerId);
-        const orders: Order[] = await this.orderRepository.findACtiveOrdersByPaymentOrderIdList(paymentOrders.map((po) => po.id));
+        const orders: Order[] = await this.orderRepository.findACtiveOrdersByPaymentOrderIdList(
+            paymentOrders.map((po) => po.id),
+            Locale.es
+        );
         const preferredDeliveryTime = dto.deliveryTime ? PreferredDeliveryTimeFactory.createDeliveryTime(dto.deliveryTime) : undefined;
 
         customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, preferredDeliveryTime);

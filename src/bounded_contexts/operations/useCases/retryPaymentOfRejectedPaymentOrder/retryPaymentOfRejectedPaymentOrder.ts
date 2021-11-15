@@ -7,6 +7,7 @@ import { RetryPaymentOfRejectedPaymentOrderDto } from "./retryPaymentOfRejectedP
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { Order } from "../../domain/order/Order";
+import { Locale } from "../../domain/locale/Locale";
 
 export class RetryPaymentOfRejectedPaymentOrder {
     private _paymentOrderRepository: IPaymentOrderRepository;
@@ -34,7 +35,7 @@ export class RetryPaymentOfRejectedPaymentOrder {
         if (!customer.getDefaultPaymentMethod()) throw new Error("El cliente no tienen ningún método de pago asociado");
 
         const [orders, paymentOrderWithHumanIdCount]: [Order[], number] = await Promise.all([
-            await this.orderRepository.findByPaymentOrderId(paymentOrder.id),
+            await this.orderRepository.findByPaymentOrderId(paymentOrder.id, Locale.es),
             await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
         ]);
         // const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrder.id);

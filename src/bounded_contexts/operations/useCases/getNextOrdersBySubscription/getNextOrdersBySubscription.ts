@@ -13,7 +13,7 @@ export class GetNextOrdersBySubscription {
 
     public async execute(dto: GetNextOrdersBySubscriptionDto): Promise<any> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, dto.locale);
 
         return GetNextOrdersBySubscriptionPresenter.present(orders);
     }

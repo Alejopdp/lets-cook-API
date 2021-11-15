@@ -30,7 +30,10 @@ export class ExportCustomers {
         const customers: Customer[] = await this.customerRepository.findAll();
         const customersIds: CustomerId[] = customers.map((customer) => customer.id);
         const subscriptions: Subscription[] = await this.subscriptionRepository.findAll(Locale.es);
-        const pastOrders: Order[] = await this.orderRepository.findPastOrdersByCustomerIdList(subscriptions.map((sub) => sub.id));
+        const pastOrders: Order[] = await this.orderRepository.findPastOrdersByCustomerIdList(
+            subscriptions.map((sub) => sub.id),
+            Locale.es
+        );
         const customersExport: CustomerExport[] = [];
         const customerSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
         const customerActiveSubscriptionsMap: { [customerId: string]: Subscription[] } = {};

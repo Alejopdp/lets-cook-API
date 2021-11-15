@@ -32,7 +32,7 @@ export class SendNewSubscriptionEmail {
     public async execute(dto: SendNewSubscriptionEmailDto): Promise<any> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(subscriptionId);
-        const firstOrder: Order | undefined = await this.orderRepository.getFirstOrderOfSubscription(subscriptionId);
+        const firstOrder: Order | undefined = await this.orderRepository.getFirstOrderOfSubscription(subscriptionId, dto.locale);
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
 
         const customerShippingZone = shippingZones.find((zone) =>

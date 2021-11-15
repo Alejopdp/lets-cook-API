@@ -1,3 +1,4 @@
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { OrderId } from "../../domain/order/OrderId";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
@@ -29,12 +30,12 @@ export class MoveOrderShippingDate {
     }
     public async execute(dto: MoveOrderShippingDateDto): Promise<Order> {
         const firstOrderId: OrderId = new OrderId(dto.orderId);
-        const order: Order = await this.orderRepository.findByIdOrThrow(firstOrderId);
+        const order: Order = await this.orderRepository.findByIdOrThrow(firstOrderId, Locale.es);
         if (!order.isFirstOrderOfSubscription) throw new Error("No adelantar un pedido que no es el 1ro de una suscripción");
 
         const [subscription, ordersOfSubscription]: [Subscription, Order[]] = await Promise.all([
             await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId),
-            await this.orderRepository.findNextTwelveBySubscription(order.subscriptionId),
+            await this.orderRepository.findNextTwelveBySubscription(order.subscriptionId, Locale.es),
         ]);
         const newShippingDateOfFirstOrder = new Date(order.shippingDate);
         newShippingDateOfFirstOrder.setDate(order.shippingDate.getDate() - subscription.frequency.getNumberOfDays());

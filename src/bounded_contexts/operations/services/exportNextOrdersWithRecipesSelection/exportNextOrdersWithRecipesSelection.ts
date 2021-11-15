@@ -52,14 +52,17 @@ export class ExportNextOrdersWithRecipesSelection {
         const weeksIds: WeekId[] = dto.weeks.map((id: string) => new WeekId(id));
         const orders: Order[] =
             weeksIds.length > 0
-                ? await this.orderRepository.findByWeekList(weeksIds)
+                ? await this.orderRepository.findByWeekList(weeksIds, Locale.es)
                 : dto.billingDates.length > 0
-                ? await this.orderRepository.findByBillingDates(dto.billingDates)
+                ? await this.orderRepository.findByBillingDates(dto.billingDates, Locale.es)
                 : dto.shippingDates.length > 0
-                ? await this.orderRepository.findByShippingDates(dto.shippingDates)
+                ? await this.orderRepository.findByShippingDates(dto.shippingDates, Locale.es)
                 : dto.customers.length > 0
-                ? await this.orderRepository.findAllByCustomersIds(dto.customers.map((id) => new CustomerId(id)))
-                : await this.orderRepository.findCurrentWeekOrders();
+                ? await this.orderRepository.findAllByCustomersIds(
+                      dto.customers.map((id) => new CustomerId(id)),
+                      Locale.es
+                  )
+                : await this.orderRepository.findCurrentWeekOrders(Locale.es);
         const activeOrders: Order[] = orders.filter((order) => !order.isSkipped() && !order.isCancelled());
         const paymentOrderOrderMap: { [paymentOrderId: string]: Order[] } = {};
         const subscriptionsIds: SubscriptionId[] = [];

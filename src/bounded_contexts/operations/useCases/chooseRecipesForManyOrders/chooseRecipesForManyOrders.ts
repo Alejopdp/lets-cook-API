@@ -1,4 +1,5 @@
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { OrderId } from "../../domain/order/OrderId";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
@@ -57,7 +58,7 @@ export class ChooseRecipesForManyOrders {
             }));
         }
 
-        const orders: Order[] = await this.orderRepository.findByIdList(orderIds);
+        const orders: Order[] = await this.orderRepository.findByIdList(orderIds, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(orders.map((order) => order.subscriptionId));
         const recipes: Recipe[] = await this.recipeRepository.findByRecipeVariantSkuList(recipeVariantSkus);

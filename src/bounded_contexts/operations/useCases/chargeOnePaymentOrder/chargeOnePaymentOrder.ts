@@ -1,5 +1,6 @@
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { Customer } from "../../domain/customer/Customer";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../../domain/paymentOrder/PaymentOrderId";
@@ -47,7 +48,7 @@ export class ChargeOnePaymentOrder {
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
         if (paymentOrder.state.isBilled()) throw new Error("La orden ya fue cobrada");
 
-        const orders: Order[] = await this.orderRepository.findActiveOrdersByPaymentOrderId(paymentOrderId);
+        const orders: Order[] = await this.orderRepository.findActiveOrdersByPaymentOrderId(paymentOrderId, Locale.es);
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(
             orders.map((order) => order.subscriptionId)
         );

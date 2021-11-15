@@ -18,6 +18,7 @@ export class GetPaymentOrderByIdController extends BaseController {
         try {
             const dto: GetPaymentOrderByIdDto = {
                 paymentOrderId: this.req.params.id,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             const result = await this.getPaymentOrderById.execute(dto);
