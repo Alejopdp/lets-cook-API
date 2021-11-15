@@ -7,7 +7,7 @@ import { recipeMapper } from "./recipeMapper";
 
 export class RecipeSelectionMapper implements Mapper<RecipeSelection> {
     public toDomain(raw: any, locale?: Locale): RecipeSelection {
-        const recipe: Recipe = recipeMapper.toDomain(raw.recipe);
+        const recipe: Recipe = recipeMapper.toDomain(raw.recipe, locale);
 
         return new RecipeSelection(recipe, raw.quantity, new RecipeVariantId(raw.recipeVariantId));
     }

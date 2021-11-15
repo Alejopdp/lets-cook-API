@@ -25,7 +25,7 @@ export class GetShippingRate {
         var nextCustomerOrder: Order | undefined = undefined;
 
         if (!!dto.currentUser) {
-            const orders: Order[] = await this.orderRepository.findByShippingDates([shippingZone?.nextShippingDate()!]);
+            const orders: Order[] = await this.orderRepository.findByShippingDates([shippingZone?.nextShippingDate()!], dto.locale);
             nextCustomerOrder = orders.find(
                 (order) => order.customer.id.equals(dto.currentUser?.id) && (order.isActive() || order.isBilled())
             );

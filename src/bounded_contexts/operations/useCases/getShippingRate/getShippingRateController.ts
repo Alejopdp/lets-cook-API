@@ -22,6 +22,7 @@ export class GetShippingRateController extends BaseController {
                 longitude: parseFloat(this.req.params.longitude),
                 //@ts-ignore
                 currentUser: this.req.currentUser,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
             const result = await this.getShippingRate.execute(dto);
             const presented = this.getShippingRatePresenter.present(result.shippingZone, result.hasNextShipping);
