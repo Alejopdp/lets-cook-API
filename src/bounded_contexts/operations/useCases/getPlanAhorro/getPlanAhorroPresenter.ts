@@ -32,7 +32,7 @@ export class GetPlanAhorroPresenter {
             if (plan.hasRecipes) {
                 presentedVariants.push({
                     id: variant.id.value,
-                    oldId: variant.id.value,
+                    // oldId: variant.id.value,
                     isDefault: variant.isDefault,
                     sku: variant.sku.code,
                     price: variant.price,
@@ -48,12 +48,12 @@ export class GetPlanAhorroPresenter {
                     //@ts-ignore
                     Recetas: variant.numberOfRecipes,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
-                    auxId:
-                        variant.attributes.reduce((acc, attribute) => acc + attribute.value, "") +
-                        //@ts-ignore
-                        (variant.numberOfPersons?.toString() || "") +
-                        //@ts-ignore
-                        (variant.numberOfRecipes?.toString() || ""),
+                    // auxId:
+                    //     variant.attributes.reduce((acc, attribute) => acc + attribute.value, "") +
+                    //     //@ts-ignore
+                    //     (variant.numberOfPersons?.toString() || "") +
+                    //     //@ts-ignore
+                    //     (variant.numberOfRecipes?.toString() || ""),
                 });
             } else {
                 presentedVariants.push({
