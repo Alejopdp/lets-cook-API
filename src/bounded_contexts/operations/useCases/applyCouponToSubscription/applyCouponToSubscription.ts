@@ -57,7 +57,7 @@ export class ApplyCouponToSubscription {
         if (!!!customerShippingZone) throw new Error("El cliente no está dentro de ninguna zona de envío habilitada");
 
         const coupon: Coupon | undefined = await this.couponRepository.findActiveByCode(dto.couponCode);
-        if (!!!coupon) throw new Error("El cupón ingresado no existe");
+        if (!!!coupon) throw new Error("El cupón ingresado no existe o está desactivado");
 
         const isCouponValidDto: IsCouponValidDto = {
             coupon,
