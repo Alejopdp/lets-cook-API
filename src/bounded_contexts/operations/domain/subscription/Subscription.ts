@@ -161,6 +161,8 @@ export class Subscription extends Entity<Subscription> {
         for (let order of orders) {
             this.applyCoupon(order, paymentOrders.find((po) => po.id.equals(order.paymentOrderId!))!, shippingCost);
         }
+
+        coupon.addApplication(this.customer);
     }
 
     private applyCoupon(order: Order, paymentOrder: PaymentOrder, shippingCost: number): void {

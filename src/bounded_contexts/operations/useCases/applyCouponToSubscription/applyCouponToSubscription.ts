@@ -76,6 +76,7 @@ export class ApplyCouponToSubscription {
         await this.orderRepository.updateMany(orders); // TO DO: Transaction / Queue
         await this.paymentOrderRepository.updateMany(paymentOrders); // TO DO: Transaction / Queue
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
+        await this.couponRepository.save(coupon);
     }
 
     /**
