@@ -1,3 +1,4 @@
+import { CouponId } from "@src/bounded_contexts/operations/domain/cupons/CouponId";
 import { QueryOptions } from "mongoose";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
@@ -19,6 +20,7 @@ export interface ISubscriptionRepository {
     findActiveSusbcriptionsByCustomerId(customerId: CustomerId): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerIdList(customersIds: CustomerId[]): Promise<Subscription[]>;
     findAllCancelledSubscriptions(): Promise<Subscription[]>;
+    findByCouponId(couponId: CouponId): Promise<Subscription[]>;
     delete(subscriptionId: SubscriptionId): Promise<void>;
     destroy(subscriptionId: SubscriptionId): Promise<void>;
 }

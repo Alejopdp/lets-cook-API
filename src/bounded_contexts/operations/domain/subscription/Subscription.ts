@@ -1,6 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CancellationReason } from "../cancellationReason/CancellationReason";
+import { CouponState } from "../cupons/CouponState";
 import { Coupon } from "../cupons/Cupon";
 import { Customer } from "../customer/Customer";
 import { Order } from "../order/Order";
@@ -143,14 +144,16 @@ export class Subscription extends Entity<Subscription> {
 
     public getCouponDiscount(shippingCost: number): number {
         if (!!!this.coupon) return 0;
-        if (!!!this.isCouponApplyable()) return 0;
+        if (!this.isCouponApplyable()) return 0;
 
         return this.coupon.getDiscount(this.plan, this.planVariantId, shippingCost);
     }
 
     private isCouponApplyable(): boolean {
         return (
-            (!!this.coupon && this.couponChargesQtyApplied < this.coupon.maxChargeQtyValue) || this.coupon?.maxChargeQtyType === "all_fee"
+            ((!!this.coupon && this.couponChargesQtyApplied < this.coupon.maxChargeQtyValue) ||
+                this.coupon?.maxChargeQtyType === "all_fee") &&
+            this.coupon.state !== CouponState.DELETED
         );
     }
 
@@ -182,7 +185,7 @@ export class Subscription extends Entity<Subscription> {
     public getNewOrderAfterBilling(billedOrder: Order, newOrderWeek: Week, shippingZone: ShippingZone): Order {
         const newBillingDate: Date = this.getNewOrderDateFrom(billedOrder.billingDate);
         const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
-        const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
+        const hasFreeShipping = this._coupon?.type.type === "free" && this.isCouponApplyable(); // TO DO: Add coupon isType methods
 
         if (this.getCouponDiscount(shippingZone.cost) !== 0 || hasFreeShipping)
             this.couponChargesQtyApplied = this.couponChargesQtyApplied + 1;
