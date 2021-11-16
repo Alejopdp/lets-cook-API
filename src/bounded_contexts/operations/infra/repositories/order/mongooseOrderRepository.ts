@@ -231,6 +231,16 @@ export class MongooseOrderRepository implements IOrderRepository {
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
 
+    public async findActiveBySubscriptionIdList(subscriptionsIds: SubscriptionId[]): Promise<Order[]> {
+        return await this.findBy({
+            $and: [
+                { subscription: subscriptionsIds.map((id) => id.toString()) },
+                { state: ["ORDER_ACTIVE", "ORDER_SKIPPED"] },
+                { billingDate: { $gt: new Date() } },
+            ],
+        });
+    }
+
     public async findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[], locale: Locale = Locale.es): Promise<Order[]> {
         return await this.findByLimited({ subscription: { $in: subscriptionsIds.map((id) => id.value) } }, locale);
     }

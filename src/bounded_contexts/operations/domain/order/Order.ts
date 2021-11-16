@@ -258,6 +258,20 @@ export class Order extends Entity<Order> {
         }
     }
 
+    public removeDiscountAmount(paymentOrder: PaymentOrder): void {
+        if (!!!this.paymentOrderId)
+            throw new Error(`La orden a la cual se le quiere remover el descuento (${this.id.toString()}), no tiene ningún pago asociado`);
+        if (!this.paymentOrderId.equals(paymentOrder.id))
+            throw new Error(
+                `La orden a la cual se le quiere remover el descuento (${this.id.toString()}), tiene el pago ${this.paymentOrderId.toString()} en vez de ${
+                    paymentOrder.id.toString
+                }`
+            );
+
+        paymentOrder.discountAmount = (Math.round(paymentOrder.discountAmount * 100) - Math.round(this.discountAmount * 100)) / 100;
+        this.discountAmount = 0;
+    }
+
     public getPlanName(): string {
         return this.plan.name;
     }
