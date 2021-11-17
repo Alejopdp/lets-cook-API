@@ -8,6 +8,8 @@ import { MomentTimeService } from "../../application/timeService/momentTimeServi
 import { Week } from "../../domain/week/Week";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
+import { Locale } from "../../domain/locale/Locale";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -16,13 +18,13 @@ export class GetSubscriptionByIdPresenter {
         this._storageService = storageService;
     }
 
-    public async present(subscription: Subscription, orders: Order[], customer: Customer): Promise<any> {
+    public async present(subscription: Subscription, orders: Order[], customer: Customer, paymentOrders: PaymentOrder[]): Promise<any> {
         const presentedPlan = await this.presentPlan(subscription);
 
         const shippingAddress = {
             addressName: customer.shippingAddress?.name,
             addressDetails: customer.shippingAddress?.details,
-            preferredSchedule: "Hardcoded",
+            preferredSchedule: customer.shippingAddress?.deliveryTime?.getLabel(Locale.es) || "Sin seleccionar",
         };
 
         const billingData = {
@@ -45,11 +47,11 @@ export class GetSubscriptionByIdPresenter {
 
         const nextActiveOrder: Order | undefined = subscription.getNextOrderToShip(orders);
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondOrderToShip(orders);
-        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isActualWeek() ? nextActiveOrder : null;
+        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isGoingToBeShippedThisWeek() ? nextActiveOrder : null;
         const nextWeekOrder =
-            nextActiveOrder && nextActiveOrder.isNextWeek()
+            nextActiveOrder && nextActiveOrder.isGoingToBeShippedNextWeek()
                 ? nextActiveOrder
-                : nextSecondActiveOrder && nextSecondActiveOrder.isNextWeek()
+                : nextSecondActiveOrder && nextSecondActiveOrder.isGoingToBeShippedNextWeek()
                 ? nextSecondActiveOrder
                 : null; // TO DO: Get 2nd Next Active order
         const hasChosenRecipesForActualWeek = !!!actualWeekOrder ? false : actualWeekOrder.hasChosenRecipes();
@@ -64,6 +66,11 @@ export class GetSubscriptionByIdPresenter {
 
         const canChooseRecipes = subscription.plan.abilityToChooseRecipes;
         const nextTwelveOrders = this.presentOrders(orders);
+        const nextPaymentOrderWithShippingCost: PaymentOrder | undefined = !!actualWeekOrder
+            ? paymentOrders.find((po) => po.week.equals(actualWeekOrder.week) && !po.hasFreeShipping && po.shippingCost > 0 && po.customerId.equals(actualWeekOrder.customer.id))
+            : !!nextWeekOrder
+            ? paymentOrders.find((po) => po.week.equals(nextWeekOrder.week) && !po.hasFreeShipping && po.shippingCost > 0 && po.customerId.equals(nextWeekOrder.customer.id))
+            : undefined;
 
         return {
             subscriptionId: subscription.id.value,
@@ -84,6 +91,7 @@ export class GetSubscriptionByIdPresenter {
             canChooseRecipes,
             nextTwelveOrders,
             hasRecipes: subscription.plan.hasRecipes,
+            shippingCost: !!nextPaymentOrderWithShippingCost ? nextPaymentOrderWithShippingCost.shippingCost : 0,
         };
     }
 
@@ -134,11 +142,21 @@ export class GetSubscriptionByIdPresenter {
         const presentedRecipes = [];
 
         for (let selection of order.recipeSelection) {
+            const recipeUrl = selection.recipe.getMainImageUrl()
+                ? await this.storageService.getPresignedUrlForFile(selection.recipe.getMainImageUrl())
+                : "";
+
+            const recipeImages: string[] = [];
+
+            for (let imageUrl of selection.recipe.getImagesUrls()) {
+                const presignedUrl = await this.storageService.getPresignedUrlForFile(imageUrl);
+                recipeImages.push(presignedUrl);
+            }
             presentedRecipes.push({
                 id: selection.recipe.id.value,
                 name: selection.recipe.recipeGeneralData.name,
-                imageUrl: await this.storageService.getPresignedUrlForFile(selection.recipe.recipeGeneralData.imageUrl),
-                images: [],
+                imageUrl: recipeUrl,
+                imagesUrls: recipeImages,
                 sku: selection.recipe.recipeGeneralData.recipeSku.code,
                 shortDescription: selection.recipe.recipeGeneralData.recipeDescription.shortDescription,
                 longDescription: selection.recipe.recipeGeneralData.recipeDescription.longDescription,

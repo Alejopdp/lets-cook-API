@@ -6,8 +6,10 @@ import { Locale } from "../../../domain/locale/Locale";
 
 export class MongooseIngredientRepository implements IIngredientRepository {
     public async save(ingredient: Ingredient, locale: Locale = Locale.es): Promise<void> {
-        const ingredientToSave = ingredientMapper.toPersistence(ingredient);
-        if (await IngredientModel.exists({ _id: ingredient.id.value })) {
+        const ingredientToSave = ingredientMapper.toPersistence(ingredient, locale);
+        const exists: boolean = await IngredientModel.exists({ _id: ingredientToSave._id });
+
+        if (exists) {
             const nameLocaleKey = `name.${locale}`;
 
             await IngredientModel.updateOne(
@@ -38,7 +40,7 @@ export class MongooseIngredientRepository implements IIngredientRepository {
         // },})
     }
 
-    public async findAll(): Promise<Ingredient[]> {
+    public async findAll(locale: Locale = Locale.es): Promise<Ingredient[]> {
         return await this.findBy({});
     }
 
@@ -55,7 +57,7 @@ export class MongooseIngredientRepository implements IIngredientRepository {
         return ingredientDb ? ingredientMapper.toDomain(ingredientDb) : undefined;
     }
 
-    public async findBy(conditions: any, locale?: Locale): Promise<Ingredient[]> {
+    public async findBy(conditions: any, locale: Locale = Locale.es): Promise<Ingredient[]> {
         const ingredientsDb = await IngredientModel.find({ ...conditions, deletionFlag: false });
 
         return ingredientsDb.map((raw: any) => ingredientMapper.toDomain(raw, locale));

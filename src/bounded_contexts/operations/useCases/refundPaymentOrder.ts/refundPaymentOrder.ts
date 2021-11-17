@@ -16,7 +16,8 @@ export class RefundPaymentOrder {
     public async execute(dto: RefundPaymentOrderDto): Promise<PaymentOrder> {
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(new PaymentOrderId(dto.paymentOrderId));
 
-        await this.paymentService.refund(paymentOrder.paymentIntentId, dto.amount);
+        if (!!paymentOrder.paymentIntentId) await this.paymentService.refund(paymentOrder.paymentIntentId, dto.amount);
+
         paymentOrder.refund(dto.amount);
 
         await this.paymentOrderRepository.save(paymentOrder);

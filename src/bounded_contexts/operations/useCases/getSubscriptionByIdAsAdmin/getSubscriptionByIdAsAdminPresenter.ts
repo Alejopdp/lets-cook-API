@@ -60,13 +60,26 @@ export class GetSubscriptionByIdAsAdminPresenter {
             },
             state: subscription.state.title,
             customerName: customer.getPersonalInfo().fullName || customer.email,
+            customerId: customer.id.value,
             restrictionComment: subscription.restrictionComment,
+            coupon: {
+                id: subscription.coupon?.id.value,
+                code: subscription.coupon?.couponCode,
+            },
             amountDetails: {
                 subtotal: nextActiveOrder?.price,
                 shippingCost: nextPaymentOrder?.shippingCost,
                 discount: subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
-                taxes: 6,
-                total: nextActiveOrder?.getTotalPrice(),
+                taxes:
+                    (Math.round(
+                        (Math.round((nextActiveOrder?.price || 0) * 100) - Math.round((nextActiveOrder?.discountAmount || 0) * 100)) * 0.1
+                    ) +
+                        Math.round((nextPaymentOrder?.shippingCost || 0) * 0.21 * 100)) /
+                    100,
+                total:
+                    (nextActiveOrder?.getTotalPrice() || subscription.getPrice()) +
+                    (nextPaymentOrder?.shippingCost || 0) -
+                    subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
             },
             frequency: subscription.frequency.value(),
             plan: presentedPlan,
@@ -116,11 +129,21 @@ export class GetSubscriptionByIdAsAdminPresenter {
         const presentedRecipes = [];
 
         for (let selection of order.recipeSelection) {
+            const recipeUrl = selection.recipe.getMainImageUrl()
+                ? await this.storageService.getPresignedUrlForFile(selection.recipe.getMainImageUrl())
+                : "";
+
+            const recipeImages: string[] = [];
+
+            for (let imageUrl of selection.recipe.getImagesUrls()) {
+                const presignedUrl = await this.storageService.getPresignedUrlForFile(imageUrl);
+                recipeImages.push(presignedUrl);
+            }
             presentedRecipes.push({
                 id: selection.recipe.id.value,
                 name: selection.recipe.recipeGeneralData.name,
-                imageUrl: await this.storageService.getPresignedUrlForFile(selection.recipe.recipeGeneralData.imageUrl),
-                images: [],
+                imageUrl: recipeUrl,
+                imagesUrls: recipeImages,
             });
         }
 

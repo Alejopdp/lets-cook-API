@@ -29,7 +29,8 @@ export class CustomerMapper implements Mapper<Customer> {
             raw.state,
             raw.codeToRecoverPassword,
             personalInfo,
-            new CustomerId(raw._id)
+            new CustomerId(raw._id),
+            raw.friendCode || undefined
         );
     }
     public toPersistence(t: Customer): any {
@@ -48,6 +49,7 @@ export class CustomerMapper implements Mapper<Customer> {
             shippingAddress: t.shippingAddress ? addressMapper.toPersistence(t.shippingAddress) : null,
             personalInfo: t.personalInfo ? personalInfoMapper.toPersistence(t.personalInfo) : null,
             _id: t.id.value,
+            friendCode: t.friendCode,
         };
     }
 }

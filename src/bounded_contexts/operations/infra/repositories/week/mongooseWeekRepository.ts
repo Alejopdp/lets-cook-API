@@ -63,22 +63,22 @@ export class MongooseWeekRepository implements IWeekRepository {
         if (frequency.isOneTime()) {
             weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
-                .limit(12);
+                .limit(13);
         }
 
         if (frequency.isWeekly()) {
             weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
-                .limit(12);
+                .limit(13);
         }
 
         if (frequency.isBiweekly()) {
             const biWeekly = [];
             weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
-                .limit(24);
+                .limit(26);
 
-            for (let i = 0; i < 24; i++) {
+            for (let i = 0; i < 26; i++) {
                 const addWeek = skipWeek ? i % 2 == 1 : i % 2 == 0;
                 if (addWeek) {
                     biWeekly.push(weeksDb[i]);
@@ -92,9 +92,9 @@ export class MongooseWeekRepository implements IWeekRepository {
             const monthly = [];
             weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
-                .limit(48);
+                .limit(52);
 
-            for (let i = 0; i < 48; i++) {
+            for (let i = 0; i < 52; i++) {
                 if (i % 4 == 1 || i === 1) {
                     monthly.push(weeksDb[i]);
                 }
@@ -107,7 +107,7 @@ export class MongooseWeekRepository implements IWeekRepository {
     }
 
     public async findCurrentWeek(date: Date): Promise<Week | undefined> {
-        const weekDb = await WeekModel.findOne({ minDay: { $lte: date }, maxDay: { $gte: date } });
+        const weekDb = await WeekModel.findOne({ $and: [{ minDay: { $lte: date } }, { maxDay: { $gte: date } }] });
 
         return weekDb ? weekMapper.toDomain(weekDb) : undefined;
     }

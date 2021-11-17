@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { INotificationService } from "../../../../shared/notificationService/INotificationService";
+import { INotificationService, PaymentOrderBilledNotificationDto } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
@@ -100,15 +100,18 @@ export class ReorderPlan {
 
         const hasFreeShipping =
             customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
-            customerSubscriptions.length > 0;
+            (customerSubscriptions.length > 0 && customerSubscriptions.some((subscription) => subscription.isActive()));
+
+        const amountToBill = hasFreeShipping
+            ? subscription.plan.getPlanVariantPrice(subscription.planVariantId)
+            : subscription.plan.getPlanVariantPrice(subscription.planVariantId) + customerShippingZone.cost;
 
         const paymentIntent = await this.paymentService.paymentIntent(
-            hasFreeShipping
-                ? subscription.plan.getPlanVariantPrice(subscription.planVariantId) - customerShippingZone.cost
-                : subscription.plan.getPlanVariantPrice(subscription.planVariantId),
+            amountToBill,
             subscription.customer.getDefaultPaymentMethod()?.stripeId || "",
             subscription.customer.email,
-            subscription.customer.stripeId
+            subscription.customer.stripeId,
+            true
         );
 
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
@@ -122,7 +125,7 @@ export class ReorderPlan {
             newPaymentOrders[0]?.toBilled(orders, subscription.customer);
         }
 
-        // await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
+        await this.notificationService.notifyAdminAboutAPlanReactivation(subscription);
         // @ts-ignore
         // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated({});
         await this.subscriptionRepository.save(subscription);
@@ -130,6 +133,21 @@ export class ReorderPlan {
         await this.customerRepository.save(subscription.customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+
+        const ticketDto: PaymentOrderBilledNotificationDto = {
+            customerEmail: subscription.customer.email,
+            foodVAT: Math.round((amountToBill * 0.1 + Number.EPSILON) * 100) / 100,
+            orders: [orders[0]],
+            paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
+            phoneNumber: subscription.customer.personalInfo?.phone1 || "",
+            shippingAddressCity: "",
+            shippingAddressName: subscription.customer.getShippingAddress().name || "",
+            shippingCost: newPaymentOrders[0].shippingCost,
+            shippingCustomerName: subscription.customer.getPersonalInfo().fullName || "",
+            shippingDate: orders[0].getHumanShippmentDay(),
+            totalAmount: amountToBill,
+        };
+        this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
 
         return { subscription, paymentIntent, firstOrder: orders[0] };
     }

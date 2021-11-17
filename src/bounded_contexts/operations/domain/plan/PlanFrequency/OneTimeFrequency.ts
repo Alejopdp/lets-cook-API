@@ -18,6 +18,9 @@ export class OneTimeFrequency implements IPlanFrequency {
                 throw new Error("Idioma no valido para la frecuencia");
         }
     }
+    public getNumberOfDays(): number {
+        return 7;
+    }
 
     public value(): string {
         return "one_time";

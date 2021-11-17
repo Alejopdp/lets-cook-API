@@ -3,6 +3,7 @@ import { Locale } from "../../locale/Locale";
 
 export interface IPlanFrequency extends IValueObject<IPlanFrequency> {
     getLabel(locale?: Locale): string;
+    getNumberOfDays(): number;
     value(): string;
     isOneTime(): boolean;
     isWeekly(): boolean;

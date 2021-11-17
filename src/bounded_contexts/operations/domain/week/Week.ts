@@ -26,12 +26,30 @@ export class Week extends Entity<Week> {
         return new Week(minDay, maxDay, id);
     }
 
+    public containsDate(aDate: Date): boolean {
+        return this.minDay <= aDate && this.maxDay >= aDate;
+    }
+
     public getLabel(): string {
         return MomentTimeService.getHumanWeekRangeLabel(this.minDay, this.maxDay);
     }
 
     public getShorterLabel(): string {
-        return MomentTimeService.getShorterHumanWeekRangeLabel(this.minDay, this.maxDay)
+        return MomentTimeService.getShorterHumanWeekRangeLabel(this.minDay, this.maxDay);
+    }
+
+    public isPreviousWeekOf(aWeek: Week): boolean {
+        const auxDate: Date = new Date(aWeek.minDay);
+        auxDate.setDate(auxDate.getDate() - 7);
+
+        return this.minDay.getTime() === auxDate.getTime();
+    }
+
+    public isTheNextWeekAfter(aWeek: Week): boolean {
+        const auxDate: Date = new Date(this.minDay);
+        auxDate.setDate(auxDate.getDate() + 7);
+
+        return aWeek.minDay.getTime() === auxDate.getTime();
     }
 
     /**

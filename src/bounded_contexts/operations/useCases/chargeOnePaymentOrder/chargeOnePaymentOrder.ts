@@ -1,5 +1,6 @@
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { Customer } from "../../domain/customer/Customer";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderId } from "../../domain/paymentOrder/PaymentOrderId";
@@ -47,15 +48,24 @@ export class ChargeOnePaymentOrder {
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
         if (paymentOrder.state.isBilled()) throw new Error("La orden ya fue cobrada");
 
-        const orders: Order[] = await this.orderRepository.findActiveOrdersByPaymentOrderId(paymentOrderId);
+        const orders: Order[] = await this.orderRepository.findActiveOrdersByPaymentOrderId(paymentOrderId, Locale.es);
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(
             orders.map((order) => order.subscriptionId)
         );
-        const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
-        const weeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveWeeksLater();
-        const biweeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveBiweeksLater();
-        const monthlyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveMonthsLater();
+        const [customer, shippingZones, weeklyOrdersWeek, biweeklyOrdersWeek, monthlyOrdersWeek, paymentOrdersWithHumanIdCount] =
+            await Promise.all([
+                this.customerRepository.findByIdOrThrow(paymentOrder.customerId),
+                this.shippingZoneRepository.findAll(),
+                this.weekRepository.findWeekTwelveWeeksLater(),
+                this.weekRepository.findWeekTwelveBiweeksLater(),
+                this.weekRepository.findWeekTwelveMonthsLater(),
+                this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+            ]);
+        // const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
+        // const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        // const weeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveWeeksLater();
+        // const biweeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveBiweeksLater();
+        // const monthlyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveMonthsLater();
         const frequencyWeekMap: { [frequency: string]: Week } = {};
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(customer.shippingAddress?.latitude || 0, customer.shippingAddress?.longitude || 0)
@@ -81,12 +91,14 @@ export class ChargeOnePaymentOrder {
             totalAmount,
             customer.getDefaultPaymentMethod()?.stripeId!,
             customer.email,
-            customer.stripeId as string
+            customer.stripeId as string,
+            true
         );
 
         // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
         if (paymentIntent.status === "succeeded") {
             paymentOrder.toBilled(orders);
+            paymentOrder.addHumanId(paymentOrdersWithHumanIdCount);
         } else {
             paymentOrder.toRejected(orders);
         }
@@ -140,7 +152,8 @@ export class ChargeOnePaymentOrder {
                 ordersAmount,
                 ordersDiscount,
                 customerShippingZone.cost,
-                customer.id
+                customer.id,
+                false // TO DO: Calculate
             );
 
             newPaymentOrders.push(newPaymentOrder);

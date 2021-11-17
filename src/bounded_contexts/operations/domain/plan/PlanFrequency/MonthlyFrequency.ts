@@ -19,6 +19,10 @@ export class MonthlyFrequency implements IPlanFrequency {
         }
     }
 
+    public getNumberOfDays(): number {
+        return 28;
+    }
+
     public value(): string {
         return "monthly";
     }

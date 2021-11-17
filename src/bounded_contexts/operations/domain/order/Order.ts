@@ -14,6 +14,8 @@ import { Week } from "../week/Week";
 import { OrderId } from "./OrderId";
 import { IOrderState } from "./orderState/IOrderState";
 import { RecipeSelection } from "./RecipeSelection";
+import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
+import { RecipeVariant } from "../recipe/RecipeVariant/RecipeVariant";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -35,6 +37,7 @@ export class Order extends Entity<Order> {
     private _createdAt: Date;
     private _customer: Customer;
     private _counter: number;
+    private _isFirstOrderOfSubscription: boolean;
 
     constructor(
         shippingDate: Date,
@@ -56,7 +59,8 @@ export class Order extends Entity<Order> {
         paymentOrderId?: PaymentOrderId,
         orderId?: OrderId,
         createdAt: Date = new Date(),
-        counter: number = 0
+        counter: number = 0,
+        isFirstOrderOfSubscription: boolean = false
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -78,16 +82,40 @@ export class Order extends Entity<Order> {
         this._createdAt = createdAt;
         this._customer = customer;
         this._counter = counter;
+        this._isFirstOrderOfSubscription = isFirstOrderOfSubscription;
     }
 
-    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean): void {
+    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, restriction?: RecipeVariantRestriction): void {
+        // TO DO: Search for a better guard?
+        recipeSelection = recipeSelection.filter((selection) => selection.quantity > 0);
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
 
-        if (totalIncomingRecipes > planVariant.getServingsQuantity())
-            throw new Error(`No puedes elegir mas de ${planVariant.getServingsQuantity()}`);
+        if (totalIncomingRecipes > planVariant.getNumberOfRecipes())
+            throw new Error(
+                `No puedes elegir mas de ${planVariant.getNumberOfRecipes()} recetas para el plan ${
+                    this.plan.name
+                } y variante de ${planVariant.getLabel()}`
+            );
 
         for (let selection of recipeSelection) {
+            if (selection.recipe.relatedPlans.every((planId) => !planId.equals(this.plan.id))) {
+                throw new Error(
+                    `La receta ${selection.recipe.getName()} (variante con SKU ${selection.recipe.getVariantSkuByVariantsIds([
+                        selection.recipeVariantId,
+                    ])}) no está asociada al ${this.plan.name}`
+                );
+            }
+
+            const recipeVariantRestriction: RecipeVariantRestriction | undefined = selection.recipe.getVariantRestriction(
+                selection.recipeVariantId
+            );
+            if (!!restriction && !restriction.equals(recipeVariantRestriction) && !restriction.acceptsEveryRecipe())
+                throw new Error(
+                    `El cliente ${this.customer.getFullNameOrEmail()} no puede consumir una receta que no cumpla con ${
+                        restriction.label
+                    } en la suscripción ${this.subscriptionId.value}`
+                );
             if (selection.recipe.availableWeeks.every((week) => !week.id.equals(this.week.id))) {
                 // TO DO: Available weeks could grow too big
                 throw new Error(`La receta ${selection.recipe.getName()} no está disponible en la semana ${this.week.getLabel()}`);
@@ -137,8 +165,10 @@ export class Order extends Entity<Order> {
         const today = new Date();
 
         if (today > this.shippingDate) throw new Error("No es posible reaundar una orden pasada");
-        paymentOrder.addOrder(this);
-        this.state.toActive(this);
+        if (this.isSkipped()) {
+            paymentOrder.addOrder(this);
+            this.state.toActive(this);
+        }
     }
 
     public toPaymentPending(): void {
@@ -154,10 +184,13 @@ export class Order extends Entity<Order> {
     }
 
     public bill(customer?: Customer): void {
+        if (this.isCancelled()) return;
+        if (this.isSkipped()) return;
+        if (this.isBilled()) return;
+
         this.state.toBilled(this);
         if (!!customer) {
             customer.countOneReceivedOrder();
-            console.log("Updated customer: ", customer.receivedOrdersQuantity);
         }
     }
 
@@ -165,6 +198,7 @@ export class Order extends Entity<Order> {
         // if (paymentOrder && (this.isActive() || this.isPaymentPending())) {
         if (paymentOrder && this.isActive()) {
             paymentOrder.discountOrderAmount(this); // Cancels payment ordeer if amount === 0
+            // if (this.hasFreeShipping) paymentOrder.shippingCost = customerShippingCost
         }
 
         // if (
@@ -183,6 +217,7 @@ export class Order extends Entity<Order> {
     }
 
     public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId): void {
+        if (this.isBilled()) return;
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
@@ -225,6 +260,20 @@ export class Order extends Entity<Order> {
         }
     }
 
+    public removeDiscountAmount(paymentOrder: PaymentOrder): void {
+        if (!!!this.paymentOrderId)
+            throw new Error(`La orden a la cual se le quiere remover el descuento (${this.id.toString()}), no tiene ningún pago asociado`);
+        if (!this.paymentOrderId.equals(paymentOrder.id))
+            throw new Error(
+                `La orden a la cual se le quiere remover el descuento (${this.id.toString()}), tiene el pago ${this.paymentOrderId.toString()} en vez de ${
+                    paymentOrder.id.toString
+                }`
+            );
+
+        paymentOrder.discountAmount = (Math.round(paymentOrder.discountAmount * 100) - Math.round(this.discountAmount * 100)) / 100;
+        this.discountAmount = 0;
+    }
+
     public getPlanName(): string {
         return this.plan.name;
     }
@@ -244,9 +293,9 @@ export class Order extends Entity<Order> {
 
         return Utils.roundTwoDecimals(
             //@ts-ignore
-            planVariant.numberOfPersons
+            planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  this.getTotalPrice() / planVariant.numberOfPersons
+                  this.getTotalPrice() / planVariant.numberOfRecipes
                 : this.getTotalPrice()
         );
     }
@@ -257,9 +306,9 @@ export class Order extends Entity<Order> {
 
         return Utils.roundTwoDecimals(
             //@ts-ignore
-            planVariant.numberOfPersons
+            planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  Math.round(this.discountAmount * 100) / planVariant.numberOfPersons / 100
+                  Math.round(this.discountAmount * 100) / planVariant.numberOfRecipes / 100
                 : this.discountAmount
         );
     }
@@ -270,9 +319,9 @@ export class Order extends Entity<Order> {
 
         return Utils.roundTwoDecimals(
             //@ts-ignore
-            planVariant.numberOfPersons
+            planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfPersons / 100
+                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfRecipes / 100
                 : (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / 100
         );
     }
@@ -282,10 +331,10 @@ export class Order extends Entity<Order> {
         if (!!!planVariant) return 0;
 
         //@ts-ignore
-        return Utils.roundTwoDecimals(this.getFinalKitPrice() / (planVariant.numberOfPersons || 1));
+        return Utils.roundTwoDecimals(this.getFinalKitPrice() / ((planVariant.numberOfPersons || 1) * (planVariant.numberOfRecipes || 1)));
     }
 
-    public isActualWeek(): boolean {
+    public isGoingToBeShippedThisWeek(): boolean {
         const today: Date = new Date();
         const auxMinDay = new Date(this.week.minDay);
         auxMinDay.setDate(auxMinDay.getDate() - 1);
@@ -311,17 +360,24 @@ export class Order extends Entity<Order> {
             today < fridayAt2359 &&
             todayWithDummyHours < weekMinDayWithDummyHours &&
             (this.isActive() || this.isBilled()) &&
-            this.isNextWeek()
+            this.isGoingToBeShippedNextWeek()
         );
     }
 
-    public isNextWeek(): boolean {
+    public isGoingToBeShippedNextWeek(): boolean {
         const today: Date = new Date();
         const auxMinDay = new Date(this.week.minDay);
         auxMinDay.setDate(auxMinDay.getDate() - 1);
         const minDayDifferenceInDays = (auxMinDay.getTime() - today.getTime()) / (1000 * 3600 * 24);
 
         return minDayDifferenceInDays < 7 && today <= auxMinDay;
+    }
+
+    public moveShippingDateToDIfferentDayNumberOfSameWeek(newDayNumber: number): void {
+        if (this.shippingDate.getDay() === newDayNumber) return;
+        const differenceInDays = newDayNumber - this.shippingDate.getDay();
+
+        this.shippingDate.setDate(this.shippingDate.getDate() + differenceInDays);
     }
     /**
      * Getter shippingDate
@@ -476,6 +532,14 @@ export class Order extends Entity<Order> {
     }
 
     /**
+     * Getter counter
+     * @return {boolean}
+     */
+    public get isFirstOrderOfSubscription(): boolean {
+        return this._isFirstOrderOfSubscription;
+    }
+
+    /**
      * Setter shippingDate
      * @param {Date} value
      */
@@ -625,5 +689,13 @@ export class Order extends Entity<Order> {
      */
     public set counter(value: number) {
         this._counter = value;
+    }
+
+    /**
+     * Setter isFirstOrderOfSubscription
+     * @param {boolean} value
+     */
+    public set isFirstOrderOfSubscription(value: boolean) {
+        this._isFirstOrderOfSubscription = value;
     }
 }

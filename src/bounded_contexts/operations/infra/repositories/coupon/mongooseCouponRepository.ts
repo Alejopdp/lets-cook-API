@@ -21,10 +21,23 @@ export class MongooseCouponRepository implements ICouponRepository {
         }
     }
 
+    public async saveMany(coupons: Coupon[]): Promise<void> {
+        const couponsDb = coupons.map((coupon) => couponMapper.toPersistence(coupon));
+
+        await MongooseCoupon.insertMany(couponsDb);
+    }
+
     public async findById(couponId: CouponId): Promise<Coupon | undefined> {
         const couponDb = await MongooseCoupon.findById(couponId.value, { deletionFlag: false });
 
         return couponDb ? couponMapper.toDomain(couponDb) : undefined;
+    }
+
+    public async findByIdOrThrow(couponId: CouponId): Promise<Coupon> {
+        const couponDb = await MongooseCoupon.findById(couponId.value, { deletionFlag: false });
+        if (!!!couponDb) throw new Error("El cupón ingresado no existe");
+
+        return couponMapper.toDomain(couponDb);
     }
 
     public async findByCode(couponCode: string): Promise<Coupon | undefined> {
@@ -44,11 +57,15 @@ export class MongooseCouponRepository implements ICouponRepository {
     }
 
     public async findAll(): Promise<Coupon[]> {
-        return await this.findBy({});
+        return await this.findBy({ state: { $not: { $in: [CouponState.DELETED] } } });
     }
 
     public async findBy(conditions: any): Promise<Coupon[]> {
-        const couponsDb = await MongooseCoupon.find({ ...conditions, deletionFlag: false });
+        const couponsDb = await MongooseCoupon.find({ ...conditions, deletionFlag: false }).sort({ createdAt: -1 });
         return couponsDb.map((raw: any) => couponMapper.toDomain(raw));
+    }
+
+    public async deleteByCode(couponCode: string): Promise<void> {
+        await MongooseCoupon.findOneAndUpdate({ couponCode }, { state: CouponState.DELETED });
     }
 }

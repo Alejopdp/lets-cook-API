@@ -31,7 +31,7 @@ export class GetOrderById {
         dto: GetOrderByIdDto
     ): Promise<{ paymentOrder: PaymentOrder; order: Order; customer: Customer; subscription: Subscription }> {
         const orderId: OrderId = new OrderId(dto.orderId);
-        const order: Order = await this.orderRepository.findByIdOrThrow(orderId);
+        const order: Order = await this.orderRepository.findByIdOrThrow(orderId, dto.locale);
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(order.paymentOrderId!);
         const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
         const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId);

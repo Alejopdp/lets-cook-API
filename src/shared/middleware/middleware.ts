@@ -1,3 +1,9 @@
+import { User } from "@src/bounded_contexts/IAM/domain/user/User";
+import { UserId } from "../../bounded_contexts/IAM/domain/user/UserId";
+import { IUserRepository } from "@src/bounded_contexts/IAM/infra/repositories/user/IUserRepository";
+import { Customer } from "@src/bounded_contexts/operations/domain/customer/Customer";
+import { CustomerId } from "../../bounded_contexts/operations/domain/customer/CustomerId";
+import { ICustomerRepository } from "@src/bounded_contexts/operations/infra/repositories/customer/ICustomerRepository";
 import { Request, Response } from "express";
 import { logger } from "../../../config";
 import { jwtTokenService } from "../../bounded_contexts/IAM/application/tokenService";
@@ -6,9 +12,13 @@ const rateLimit = require("express-rate-limit");
 
 export class Middleware {
     private _tokenService: ITokenService;
+    private _userRepository: IUserRepository;
+    private _customerRepository: ICustomerRepository;
 
-    constructor(tokenService: ITokenService) {
+    constructor(tokenService: ITokenService, userRepository: IUserRepository, customerRepository: ICustomerRepository) {
         this._tokenService = tokenService;
+        this._userRepository = userRepository;
+        this._customerRepository = customerRepository;
     }
 
     private endRequest(status: 400 | 401 | 403, message: string, res: any): any {
@@ -44,6 +54,32 @@ export class Middleware {
     //     }
     //   }
 
+    private async getCurrentUser(isAdmin: boolean, customerOrUserId: string): Promise<User | Customer> {
+        if (isAdmin) {
+            const user: User | undefined = await this.userRepository.findById(new UserId(customerOrUserId));
+
+            if (!!!user) throw new Error("El usuario que está intentando realizar la solicitud no existe");
+
+            return user;
+        }
+
+        return await this.customerRepository.findByIdOrThrow(new CustomerId(customerOrUserId));
+    }
+
+    public addCurrentUser() {
+        return async (req: Request, res: Response, next: Function) => {
+            const token = req.headers["authorization"];
+
+            if (token) {
+                const decoded = await this.tokenService.isTokenVerified(token);
+
+                //@ts-ignore
+                req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
+                next();
+            }
+        };
+    }
+
     public ensureAuthenticated() {
         return async (req: Request, res: Response, next: Function) => {
             const token = req.headers["authorization"];
@@ -56,7 +92,12 @@ export class Middleware {
                     return this.endRequest(403, "La sesión ha expirado.", res);
                 }
 
+                //@ts-ignore
                 req["decode"] = decoded;
+                //@ts-ignore
+                console.log("A VER EL DECODED: ", req["decode"]);
+                //@ts-ignore
+                req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
                 next();
             } else {
                 return this.endRequest(403, "No se brindó ningún token", res);
@@ -78,6 +119,7 @@ export class Middleware {
                 if (decoded.roleTitle !== "Processer" && decoded.roleTitle !== "Admin")
                     return this.endRequest(401, "No estás autorizado", res);
 
+                //@ts-ignore
                 req["decode"] = decoded;
                 next();
             } else {
@@ -99,10 +141,11 @@ export class Middleware {
                 }
 
                 //@ts-ignore
-                if (decoded.roleTitle! !== "Admin") {
+                if (decoded.roleTitle! !== "Administrador") {
                     return this.endRequest(401, "No estás autorizado", res);
                 }
 
+                //@ts-ignore
                 req["decode"] = decoded;
                 next();
             } else {
@@ -125,6 +168,7 @@ export class Middleware {
                 const token: string | object = await jwtTokenService.isTokenVerified(req.headers["authorization"] || "");
 
                 if (!token) throw new Error();
+                //@ts-ignore
                 req["decode"] = token;
 
                 next();
@@ -162,5 +206,21 @@ export class Middleware {
      */
     public get tokenService(): ITokenService {
         return this._tokenService;
+    }
+
+    /**
+     * Getter userRepository
+     * @return {IUserRepository}
+     */
+    public get userRepository(): IUserRepository {
+        return this._userRepository;
+    }
+
+    /**
+     * Getter customerRepository
+     * @return {ICustomerRepository}
+     */
+    public get customerRepository(): ICustomerRepository {
+        return this._customerRepository;
     }
 }

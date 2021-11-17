@@ -1,9 +1,21 @@
 import { Customer } from "../../domain/customer/Customer";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
+import { Subscription } from "../../domain/subscription/Subscription";
 
 export class GetCouponListPresenter {
-    public static present(customers: Customer[]): any {
+    public static present(customers: Customer[], activeSubscriptions: Subscription[]): any {
+        const customerActiveSubscriptionMap: { [customerId: string]: number } = {};
         const presentedCustomers = [];
+
+        for (let subscription of activeSubscriptions) {
+            const actualKey = customerActiveSubscriptionMap[subscription.customer.id.value];
+
+            if (!!actualKey) {
+                customerActiveSubscriptionMap[subscription.customer.id.value] = actualKey + 1;
+            } else {
+                customerActiveSubscriptionMap[subscription.customer.id.value] = 1;
+            }
+        }
 
         for (let customer of customers) {
             presentedCustomers.push({
@@ -16,7 +28,7 @@ export class GetCouponListPresenter {
                 firstName: customer.personalInfo?.name || "N/A",
                 lastName: customer.personalInfo?.lastName || "N/A",
                 phone1: customer.personalInfo?.phone1 || "N/A",
-
+                activeSubscriptions: customerActiveSubscriptionMap[customer.id.value],
                 payment_methods: customer.paymentMethods.map((payment: PaymentMethod) => {
                     return {
                         id: payment.id.value,

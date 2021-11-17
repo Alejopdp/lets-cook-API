@@ -43,10 +43,10 @@ export class CouponMapper implements Mapper<Coupon> {
             raw.maxChargeQtyType,
             raw.maxChargeQtyValue,
             raw.startDate,
-            raw.endDate,
             raw.state,
             raw.quantityApplied,
             raw.customersWhoHaveApplied.map((id: any) => new CustomerId(id)),
+            raw.endDate,
             new CouponId(raw._id)
         );
     }

@@ -26,6 +26,7 @@ export class SignUpController extends BaseController {
                 isEmailVerified: false,
                 password: this.req.body.password,
                 state: "active",
+                isInCheckout: !!this.req.body.isInCheckout,
             };
 
             const result = await this.signUp.execute(dto);

@@ -29,9 +29,9 @@ export class AssignOrdersToPaymentOrders {
 
         if (paymentOrdersToUpdate.length === 0) {
             const createPaymentOrdersServiceDto: CreatePaymentOrdersDto = {
-                orders: [...dto.orders],
+                orders: dto.orders,
                 // shippingCost: dto.hasFreeShipping ? 0 : dto.shippingCost,
-                shippingCost:  dto.shippingCost,
+                shippingCost: dto.shippingCost,
                 subscription: dto.subscription,
             };
 

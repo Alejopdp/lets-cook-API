@@ -26,6 +26,7 @@ export class Customer extends Entity<Customer> {
     private _codeToRecoverPassword?: string;
     private _personalInfo?: PersonalInfo;
     private _receivedOrdersQuantity: number;
+    private _friendCode?: string;
 
     protected constructor(
         email: string,
@@ -39,7 +40,8 @@ export class Customer extends Entity<Customer> {
         state?: string,
         codeToRecoverPassword?: string,
         personalInfo?: PersonalInfo,
-        id?: CustomerId
+        id?: CustomerId,
+        friendCode?: string
     ) {
         super(id);
         this._email = email;
@@ -53,6 +55,7 @@ export class Customer extends Entity<Customer> {
         this._state = state;
         this._codeToRecoverPassword = codeToRecoverPassword;
         this._personalInfo = personalInfo;
+        this._friendCode = friendCode;
     }
 
     public static create(
@@ -67,7 +70,8 @@ export class Customer extends Entity<Customer> {
         state?: string,
         codeToRecoverPassword?: string,
         personalInfo?: PersonalInfo,
-        id?: CustomerId
+        id?: CustomerId,
+        friendCode?: string
     ): Customer {
         return new Customer(
             email,
@@ -81,8 +85,13 @@ export class Customer extends Entity<Customer> {
             state,
             codeToRecoverPassword,
             personalInfo,
-            id
+            id,
+            friendCode
         );
+    }
+
+    public createFriendCode(codeNumber: number): void {
+        this.friendCode = `LETSCOOK${codeNumber}`;
     }
 
     public changePassword(newPassword: UserPassword): void {
@@ -391,6 +400,14 @@ export class Customer extends Entity<Customer> {
     }
 
     /**
+     * Getter friendCode
+     * @return {string | undefined}
+     */
+    public get friendCode(): string | undefined {
+        return this._friendCode;
+    }
+
+    /**
      * Setter email
      * @param {string} value
      */
@@ -476,5 +493,13 @@ export class Customer extends Entity<Customer> {
      */
     public set personalInfo(value: PersonalInfo | undefined) {
         this._personalInfo = value;
+    }
+
+    /**
+     * Setter friendCode
+     * @param {string | undefined} value
+     */
+    public set friendCode(value: string | undefined) {
+        this._friendCode = value;
     }
 }

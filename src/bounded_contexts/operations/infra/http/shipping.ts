@@ -7,6 +7,7 @@ import { deleteShippingZoneController } from "../../useCases/deleteShippingZone"
 import { updateShippingZoneController } from "../../useCases/updateShippingZone";
 import { updateShippingZoneStateController } from "../../useCases/updateShippingZoneState";
 import { getShippingRateController } from "../../useCases/getShippingRate";
+import { middleware } from "../../../../shared/middleware";
 
 const shippingRouter = express.Router();
 
@@ -16,7 +17,9 @@ const options: multer.Options = {
 
 // // GETs
 shippingRouter.get("/", (req, res) => getShippingListController.execute(req, res));
-shippingRouter.get("/shipping-rate/:latitude/:longitude", (req, res) => getShippingRateController.execute(req, res));
+shippingRouter.get("/shipping-rate/:latitude/:longitude", middleware.addCurrentUser(), (req, res) =>
+    getShippingRateController.execute(req, res)
+);
 
 shippingRouter.get("/:id", (req, res) => getShippingZoneByIdController.execute(req, res));
 

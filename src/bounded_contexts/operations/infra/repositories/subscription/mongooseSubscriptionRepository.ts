@@ -8,6 +8,7 @@ import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Query, QueryOptions } from "mongoose";
 import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
+import { CouponId } from "../../../domain/cupons/CouponId";
 
 export class MongooseSubscriptionRepository implements ISubscriptionRepository {
     public async save(subscription: Subscription): Promise<void> {
@@ -57,6 +58,10 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return await this.findBy({}, locale);
     }
 
+    public async findAllCancelledSubscriptions(): Promise<Subscription[]> {
+        return await this.findBy({ state: "SUBSCRIPTION_CANCELLED" });
+    }
+
     public async findBy(conditions: any, locale: Locale = Locale.es, options?: QueryOptions): Promise<Subscription[]> {
         const subscriptionsDb = await MongooseSubscription.find({ ...conditions, deletionFlag: false }, null, options)
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
@@ -88,7 +93,15 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return await this.findBy({ customer: customerId.value }, Locale.es, options);
     }
 
+    public async findByCouponId(couponId: CouponId): Promise<Subscription[]> {
+        return await this.findBy({ coupon: couponId.toString() });
+    }
+
     public async delete(subscriptionId: SubscriptionId): Promise<void> {
         await MongooseSubscription.updateOne({ _id: subscriptionId.value }, { deletionFlag: true });
+    }
+
+    public async destroy(subscriptionId: SubscriptionId): Promise<void> {
+        await MongooseSubscription.deleteOne({ _id: subscriptionId.value });
     }
 }

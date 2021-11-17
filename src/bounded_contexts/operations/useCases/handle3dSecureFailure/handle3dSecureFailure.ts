@@ -7,33 +7,52 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { CancellationReason } from "../../domain/cancellationReason/CancellationReason";
+import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
+import { CustomerId } from "../../domain/customer/CustomerId";
+import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
+import { Locale } from "../../domain/locale/Locale";
 
 export class Handle3dSecureFailure {
     private _subscriptionRepository: ISubscriptionRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _orderRepository: IOrderRepository;
+    private _customerRepository: ICustomerRepository;
+    private _couponRepository: ICouponRepository;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
         paymentOrderRepository: IPaymentOrderRepository,
-        orderRepository: IOrderRepository
+        orderRepository: IOrderRepository,
+        customerRepository: ICustomerRepository,
+        couponRepository: ICouponRepository
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._paymentOrderRepository = paymentOrderRepository;
         this._orderRepository = orderRepository;
+        this._customerRepository = customerRepository;
+        this._couponRepository = couponRepository;
     }
 
     public async execute(dto: Handle3dSecureFailureDto): Promise<void> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(subscriptionId);
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(dto.currentCustomer.id);
+        const subscription: Subscription | undefined = customerSubscriptions.find((sub) => sub.id.equals(subscriptionId));
+        if (!!!subscription) throw new Error("La suscripción ingresada no existe");
+
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
         subscription.cancel(new CancellationReason("Método de pago no confirmado", ""), orders, paymentOrders);
+        if (customerSubscriptions.length === 1) {
+            await this.couponRepository.deleteByCode(subscription.customer.friendCode!);
+            subscription.customer.friendCode = undefined;
+        }
 
-        await this.subscriptionRepository.save(subscription);
+        await this.subscriptionRepository.destroy(subscription.id);
         await this.paymentOrderRepository.updateMany(paymentOrders);
-        await this.orderRepository.saveCancelledOrders(orders);
+        // await this.orderRepository.saveCancelledOrders(orders);
+        await this.orderRepository.destroyManyBySubscriptionId(subscription.id);
+        await this.customerRepository.save(subscription.customer);
     }
 
     /**
@@ -58,5 +77,21 @@ export class Handle3dSecureFailure {
      */
     public get orderRepository(): IOrderRepository {
         return this._orderRepository;
+    }
+
+    /**
+     * Getter customerRepository
+     * @return {ICustomerRepository}
+     */
+    public get customerRepository(): ICustomerRepository {
+        return this._customerRepository;
+    }
+
+    /**
+     * Getter couponRepository
+     * @return {ICouponRepository}
+     */
+    public get couponRepository(): ICouponRepository {
+        return this._couponRepository;
     }
 }

@@ -16,14 +16,16 @@ import { Week } from "../domain/week/Week";
 import { customerMapper } from "./customerMapper";
 
 export class OrderMapper implements Mapper<Order> {
-    public toDomain(raw: any, locale?: Locale): Order {
+    public toDomain(raw: any, locale: Locale = Locale.es): Order {
         const state: IOrderState = OrderStateFactory.createState(raw.state);
         const week: Week = weekMapper.toDomain(raw.week);
         const planVariantId: PlanVariantId = new PlanVariantId(raw.planVariant);
-        const plan: Plan = planMapper.toDomain(raw.plan, Locale.es);
+        const plan: Plan = planMapper.toDomain(raw.plan, locale);
         const subscriptionId: SubscriptionId = new SubscriptionId(raw.subscription);
         const recipeVariantsIds: RecipeVariantId[] = raw.recipeVariants.map((id: string) => new RecipeVariantId(id));
-        const recipeSelection: RecipeSelection[] = raw.recipeSelection.map((selection: any) => recipeSelectionMapper.toDomain(selection));
+        const recipeSelection: RecipeSelection[] = raw.recipeSelection.map((selection: any) =>
+            recipeSelectionMapper.toDomain(selection, locale)
+        );
         const paymentOrderId: PaymentOrderId | undefined = raw.paymentOrder ? new PaymentOrderId(raw.paymentOrder) : undefined;
         const customer: Customer = customerMapper.toDomain(raw.customer);
 
@@ -49,7 +51,8 @@ export class OrderMapper implements Mapper<Order> {
             paymentOrderId,
             new OrderId(raw._id),
             raw.createdAt,
-            raw.counter
+            raw.counter,
+            raw.isFirstOrderOfSubscription
         );
     }
 
@@ -75,6 +78,7 @@ export class OrderMapper implements Mapper<Order> {
             paymentOrder: t.paymentOrderId?.value,
             _id: t.id.value,
             customer: t.customer.id.value,
+            isFirstOrderOfSubscription: t.isFirstOrderOfSubscription,
         };
     }
 }

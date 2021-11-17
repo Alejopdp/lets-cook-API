@@ -19,7 +19,7 @@ export class GetPaymentOrderByIdPresenter {
             id: paymentOrder.id.value,
             amount: paymentOrder.amount,
             billingDate: paymentOrder.getHumanBillingDate(),
-            discountAmount: paymentOrder.discountAmount,
+            discountAmount: paymentOrder.getDiscountAmountOrShippingCostIfHasFreeShipping(),
             couponCodes: subscriptions.map((subscription) => subscription.coupon?.couponCode),
             shippingCost: paymentOrder.shippingCost,
             customer: paymentOrder.customerId.value,
@@ -27,14 +27,12 @@ export class GetPaymentOrderByIdPresenter {
             // state: paymentOrder.state.humanTitle,
             state: paymentOrder.state.title,
             orders: presentedOrders,
-            totalAmount: Math.round((paymentOrder.getTotalAmount() + Number.EPSILON) * 100) / 100,
+            totalAmount: paymentOrder.getFinalAmount(),
             subtotal: paymentOrder.amount,
-            taxes:
-                paymentOrder.shippingCost +
-                paymentOrder.amount -
-                (paymentOrder.shippingCost / (1 + 0.21) + paymentOrder.amount / (1 + 0.1)),
+            taxes: paymentOrder.shippingCost * 0.21 + paymentOrder.getPlansAmountMinusDiscount() * 0.1,
             paymentIntentId: paymentOrder.paymentIntentId,
             quantityRefunded: paymentOrder.quantityRefunded,
+            humanId: paymentOrder.getHumanIdOrIdValue(),
         };
     }
 

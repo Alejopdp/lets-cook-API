@@ -1,6 +1,6 @@
 import _ from "lodash";
 import Stripe from "stripe";
-import { INotificationService } from "../../../../shared/notificationService/INotificationService";
+import { INotificationService, PaymentOrderBilledNotificationDto } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Customer } from "../../domain/customer/Customer";
@@ -75,9 +75,14 @@ export class CreateManySubscriptions {
         paymentOrder: PaymentOrder;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
+        // const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const plansIds: PlanId[] = dto.plans.map((plan) => new PlanId(plan.planId));
-        const plans: Plan[] = await this.planRepository.findAdditionalPlanListById(plansIds, dto.locale);
+        // const plans: Plan[] = await this.planRepository.findAdditionalPlanListById(plansIds, dto.locale);
+        const [customer, plans, paymentOrderWithHumanIdCount] = await Promise.all([
+            await this.customerRepository.findByIdOrThrow(customerId),
+            await this.planRepository.findAdditionalPlanListById(plansIds, dto.locale),
+            await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
+        ]);
         const plansMap: { [planId: string]: Plan } = {};
         const plansDtoPlanVariantMap: { [planId: string]: PlanVariant } = {};
         var totalPrice: number = 0;
@@ -157,7 +162,8 @@ export class CreateManySubscriptions {
             totalPrice,
             dto.stripePaymentMethodId ? dto.stripePaymentMethodId : customer.getDefaultPaymentMethod()?.stripeId!,
             customer.email,
-            customer.stripeId
+            customer.stripeId,
+            false
         );
 
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
@@ -167,11 +173,16 @@ export class CreateManySubscriptions {
             newPaymentOrders[0].toPendingConfirmation(orders);
         } else {
             newPaymentOrders[0]?.toBilled(orders, customer);
+            newPaymentOrders[0] ? newPaymentOrders[0].addHumanId(paymentOrderWithHumanIdCount) : "";
         }
 
         const subscriptions: Subscription[] = _.flatten(frequencySusbcriptionEntries.map((entry) => entry[1]));
 
-        await this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated();
+        await this.notificationService.notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(
+            customer.email,
+            customer.email,
+            dto.plans.map((dtoPlan) => plansMap[dtoPlan.planId].name)
+        );
         // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.bulkSave(subscriptions);
         await this.orderRepository.bulkSave(orders);
@@ -179,6 +190,20 @@ export class CreateManySubscriptions {
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
+        // const ticketDto: PaymentOrderBilledNotificationDto = {
+        //             customerEmail: customer.email,
+        //             foodVAT: Math.round((totalPrice + Number.EPSILON) * 100) / 100,
+        //             orders: [orders[0]],
+        //             paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
+        //             phoneNumber: customer.personalInfo?.phone1 || "",
+        //             shippingAddressCity: "",
+        //             shippingAddressName: customer.getShippingAddress().name || "",
+        //             shippingCost: newPaymentOrders[0].shippingCost,
+        //             shippingCustomerName: customer.getPersonalInfo().fullName || "",
+        //             shippingDate: orders[0].getHumanShippmentDay(),
+        //             totalAmount: totalPrice,
+        //         };
+        //         this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
         return { subscriptions, paymentMethodId: customerDefaultPaymentMethod?.stripeId, paymentIntent, paymentOrder: newPaymentOrders[0] };
     }
 

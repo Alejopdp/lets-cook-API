@@ -13,7 +13,7 @@ export class GetRecipeById {
 
     public async execute(dto: GetRecipeByIdDto): Promise<any> {
         const recipeId: RecipeId = new RecipeId(dto.recipeId);
-        const recipe: Recipe | undefined = await this.recipeRepository.findById(recipeId);
+        const recipe: Recipe | undefined = await this.recipeRepository.findById(recipeId, dto.locale);
 
         if (!recipe) throw new Error("Error al buscar la receta");
 

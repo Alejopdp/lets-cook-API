@@ -5,6 +5,7 @@ import { getCustomerPaymentOrdersController } from "../../useCases/getCustomerPa
 import { getPaymentOrderByIdController } from "../../useCases/getPaymentOrderById";
 import { getPaymentOrdersAsAdminController } from "../../useCases/getPaymentOrdersAsAdmin";
 import { refundPaymentOrderController } from "../../useCases/refundPaymentOrder.ts";
+import { retryPaymentOrderOfRejectedPaymentOrderController } from "../../useCases/retryPaymentOfRejectedPaymentOrder";
 import { updatePaymentOrderAndOrdersStateController } from "../../useCases/updatePaymentOrderAndOrdersState";
 import { UpdatePaymentOrderAndOrdersStateController } from "../../useCases/updatePaymentOrderAndOrdersState/updatePaymentOrderAndOrdersStateController";
 
@@ -22,6 +23,7 @@ paymentOrderRouter.post("/", (req, res) => createSubscriptionController.execute(
 paymentOrderRouter.put("/charge/:id", (req, res) => chargeOnePaymentOrderController.execute(req, res));
 paymentOrderRouter.put("/update-state/:id", (req, res) => updatePaymentOrderAndOrdersStateController.execute(req, res));
 paymentOrderRouter.put("/refund/:id", (req, res) => refundPaymentOrderController.execute(req, res));
+paymentOrderRouter.put("/retry-payment/:id", (req, res) => retryPaymentOrderOfRejectedPaymentOrderController.execute(req, res));
 
 // DELETEs
 

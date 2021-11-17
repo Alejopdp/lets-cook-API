@@ -5,4 +5,5 @@ export interface UpdateSubscriptionRestrictionDto {
     restrictionId: string;
     locale: Locale;
     comment: string;
+    nameOrEmailOfAdminExecutingRequest?: string;
 }

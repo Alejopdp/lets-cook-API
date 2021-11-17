@@ -9,6 +9,7 @@ const PlanVariantSchema = new mongoose.Schema({
     sku: {
         type: String,
         required: true,
+        unique: true,
     },
 
     name: {
@@ -143,6 +144,12 @@ const PlanSchema = new mongoose.Schema(
         iconLinealColorUrl: {
             type: String,
             required: true,
+        },
+
+        isDefaultAtCheckout: {
+            type: Boolean,
+            required: true,
+            default: false,
         },
 
         deletionFlag: {

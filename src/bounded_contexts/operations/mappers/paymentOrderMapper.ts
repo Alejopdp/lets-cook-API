@@ -17,7 +17,7 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             raw.shippingDate,
             state,
             raw.paymentIntentId,
-            raw.billingDate,
+            new Date(raw.billingDate),
             week,
             raw.amount / 100,
             raw.discountAmount / 100,
@@ -25,8 +25,11 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             // raw.discountAmount,
             raw.shippingCost,
             new CustomerId(raw.customer),
+            raw.hasFreeShipping,
             raw.quantityRefunded,
-            new PaymentOrderId(raw._id)
+            new PaymentOrderId(raw._id),
+            raw.lastRecipeSelectionDate ? new Date(raw.lastRecipeSelectionDate) : undefined,
+            raw.humanId ? raw.humanId : undefined
         );
     }
 
@@ -44,7 +47,10 @@ export class PaymentOrderMapper implements Mapper<PaymentOrder> {
             _id: t.id.value,
             state: t.state.title,
             customer: t.customerId.value,
+            hasFreeShipping: t.hasFreeShipping,
             quantityRefunded: t.quantityRefunded,
+            lastRecipeSelectionDate: t.lastRecipeSelectionDate,
+            humanId: t.humanId,
         };
     }
 }

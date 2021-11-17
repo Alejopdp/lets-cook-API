@@ -7,30 +7,30 @@ import { RecipeSku } from "../../domain/recipe/RecipeGeneralData/RecipeSku";
 import { RecipeWeight } from "../../domain/recipe/RecipeGeneralData/RecipeWeight";
 
 export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
-    public toDomain(raw: any, locale?: Locale): RecipeGeneralData {
+    public toDomain(raw: any, locale: Locale = Locale.es): RecipeGeneralData {
         const recipeDescription: RecipeDescription = new RecipeDescription(
-            raw.recipeDescription.shortDescription,
-            raw.recipeDescription.longDescription
+            raw.recipeDescription.shortDescription[locale] || raw.recipeDescription.shortDescription[Locale.es],
+            raw.recipeDescription.longDescription[locale] || raw.recipeDescription.longDescription[Locale.es]
         );
         const cookDuration: RecipeCookDuration = new RecipeCookDuration(raw.recipeCookDuration.timeValue);
         const recipeWeight: RecipeWeight = new RecipeWeight(raw.recipeWeight.weightValue, raw.recipeWeight.weightUnit);
 
         return new RecipeGeneralData(
-            raw.name,
+            raw.name[locale] || raw.name[Locale.es],
             recipeDescription,
             cookDuration,
             raw.difficultyLevel,
             recipeWeight,
             new RecipeSku(raw.sku),
-            raw.imageUrl
+            raw.imagesUrls
         );
     }
-    public toPersistence(t: RecipeGeneralData, locale?: Locale) {
+    public toPersistence(t: RecipeGeneralData, locale: Locale = Locale.es) {
         return {
-            name: t.name,
+            name: { [locale]: t.name },
             recipeDescription: {
-                shortDescription: t.recipeDescription.shortDescription,
-                longDescription: t.recipeDescription.longDescription,
+                shortDescription: { [locale]: t.recipeDescription.shortDescription },
+                longDescription: { [locale]: t.recipeDescription.longDescription },
             },
             recipeCookDuration: {
                 timeValue: t.cookDuration.timeValue,
@@ -41,7 +41,7 @@ export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
                 weightUnit: t.recipeWeight.weightUnit,
             },
             sku: t.recipeSku.code,
-            imageUrl: t.imageUrl,
+            imagesUrls: t.imagesUrls,
             difficultyLevel: t.difficultyLevel,
         };
     }

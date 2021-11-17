@@ -30,7 +30,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
         const plan: Plan = planMapper.toDomain(raw.plan, locale || Locale.es);
         const coupon: Coupon | undefined = !!raw.coupon ? couponMapper.toDomain(raw.coupon) : undefined;
         const cancellation: CancellationReason | undefined = raw.cancellation
-            ? new CancellationReason(raw.cancellation.reason, raw.cancellation.comment)
+            ? new CancellationReason(raw.cancellation.reason, raw.cancellation.comment, new Date(raw.cancellation.date))
             : undefined;
 
         return new Subscription(
@@ -41,7 +41,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             raw.restrictionComment,
             raw.createdAt,
             customer,
-            raw.price,
+            raw.price / 100,
             restriction,
             coupon,
             raw.couponChargesQtyApplied,
@@ -53,7 +53,10 @@ export class SubscriptionMapper implements Mapper<Subscription> {
     }
 
     public toPersistence(t: Subscription, locale?: Locale) {
-        const cancellation = !!t.cancellationReason ? { reason: t.cancellationReason.title, comment: t.cancellationReason.comment } : null;
+        const cancellation = !!t.cancellationReason
+            ? { reason: t.cancellationReason.title, comment: t.cancellationReason.comment, date: t.cancellationReason.date }
+            : null;
+
         return {
             planVariant: t.planVariantId.value,
             plan: t.plan.id.value,
@@ -68,7 +71,7 @@ export class SubscriptionMapper implements Mapper<Subscription> {
             billingStartDate: t.billingStartDate,
             cancellation,
             _id: t.id.value,
-            price: t.price,
+            price: Math.round(t.price * 100),
         };
     }
 }

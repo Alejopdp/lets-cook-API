@@ -22,7 +22,7 @@ export class Coupon extends Entity<Coupon> {
     private _maxChargeQtyType: string;
     private _maxChargeQtyValue: number;
     private _startDate: Date;
-    private _endDate: Date;
+    private _endDate?: Date;
     private _state: CouponState;
     private _quantityApplied: number;
     private _customersWhoHaveApplied: CustomerId[];
@@ -38,10 +38,10 @@ export class Coupon extends Entity<Coupon> {
         maxChargeQtyType: string,
         maxChargeQtyValue: number,
         startDate: Date,
-        endDate: Date,
         state: CouponState,
         quantityApplied: number,
         customersWhoHaveApplied: CustomerId[],
+        endDate?: Date,
         id?: CouponId
     ) {
         super(id);
@@ -72,28 +72,30 @@ export class Coupon extends Entity<Coupon> {
         maxChargeQtyType: string,
         maxChargeQtyValue: number,
         startDate: Date,
-        endDate: Date,
         state: CouponState,
         quantityApplied: number,
         customersWhoHaveApplied: CustomerId[] = [],
+        endDate?: Date,
         id?: CouponId
     ): Coupon {
-        const maxChargesQty = maxChargeQtyType === "only_fee" ? 1 : maxChargeQtyValue;
+        const maxChargesQty = maxChargeQtyType === "only_fee" ? 1 : maxChargeQtyType === "all_fee" ? 0 : maxChargeQtyValue;
+        const minimumRequirementValue = minRequireType === "amount" ? minRequireValue : 0;
+
         return new Coupon(
             couponCode.toUpperCase(),
             type,
             minRequireType,
-            minRequireValue,
+            minimumRequirementValue,
             productsForApplyingType,
             productsForApplyingValue,
             limites,
             maxChargeQtyType,
             maxChargesQty,
             startDate,
-            endDate,
             state,
             quantityApplied,
             customersWhoHaveApplied,
+            endDate,
             id
         );
     }
@@ -102,7 +104,9 @@ export class Coupon extends Entity<Coupon> {
         this.state = state;
     }
 
-    public isValid(subscriptions: Subscription[], plan: Plan, planVariantId: PlanVariantId, shippingCost?: number): boolean {
+    public isValid(customerSubscriptions: Subscription[], plan: Plan, planVariantId: PlanVariantId, shippingCost?: number): boolean {
+        if (this.isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost) && shippingCost === 0)
+            throw new Error("No puedes aplicar un cupón de envío gratis con una dirección sin costo de envío");
         if (this.isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost))
             throw new Error("Para utilizar un cupón de envío gratis primero debes ingresar una dirección de entrega");
         if (this.isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost!))
@@ -116,7 +120,7 @@ export class Coupon extends Entity<Coupon> {
         if (this.state === CouponState.INACTIVE || this.state === CouponState.DELETED || this.state === CouponState.UNAVAILABLE)
             throw new Error("El cupón de descuento no está disponible");
 
-        return this.limites.every((limit) => limit.isValid(subscriptions, this.id)); // Use quantityApplied and customersWhoHaveApplied
+        return this.limites.every((limit) => limit.isValid(customerSubscriptions, this.id)); // Use quantityApplied and customersWhoHaveApplied
     }
 
     private isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost: number): boolean {
@@ -169,6 +173,9 @@ export class Coupon extends Entity<Coupon> {
         return this.customersWhoHaveApplied.length;
     }
 
+    public appliesToSpecificProducts(): boolean {
+        return this.productsForApplyingType === "specific";
+    }
     /**
      * Getter name
      * @return {string}
@@ -250,10 +257,10 @@ export class Coupon extends Entity<Coupon> {
     }
 
     /**
-     * Getter planVariants
-     * @return {Number}
+     * Getter endDate
+     * @return {Date | undefined}
      */
-    public get endDate(): Date {
+    public get endDate(): Date | undefined {
         return this._endDate;
     }
 
@@ -364,9 +371,9 @@ export class Coupon extends Entity<Coupon> {
 
     /**
      * Setter locale
-     * @param {Date} value
+     * @param {Date | undefined} value
      */
-    public set endDate(value: Date) {
+    public set endDate(value: Date | undefined) {
         this._endDate = value;
     }
 

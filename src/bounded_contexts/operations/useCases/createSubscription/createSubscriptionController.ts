@@ -40,7 +40,11 @@ export class CreateSubscriptionController extends BaseController {
                 result.subscription,
                 result.paymentIntent,
                 result.firstOrder,
-                result.customerPaymentMethods
+                result.customerPaymentMethods,
+                result.amountBilled,
+                result.tax,
+                result.shippingCost,
+                result.billedPaymentOrderHumanId
             );
 
             return this.ok(this.res, presented);

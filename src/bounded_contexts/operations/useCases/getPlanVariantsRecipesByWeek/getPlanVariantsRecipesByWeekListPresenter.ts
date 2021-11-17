@@ -79,9 +79,15 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
     }
 
     private async presentRecipe(recipe: Recipe): Promise<any> {
-        const recipeUrl = recipe.recipeGeneralData.imageUrl
-            ? await this.storageService.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
-            : "";
+        const recipeUrl = recipe.getMainImageUrl() ? await this.storageService.getPresignedUrlForFile(recipe.getMainImageUrl()) : "";
+
+        const recipeImages: string[] = [];
+
+        for (let imageUrl of recipe.getImagesUrls()) {
+            const presignedUrl = await this.storageService.getPresignedUrlForFile(imageUrl);
+            recipeImages.push(presignedUrl);
+        }
+
         return {
             id: recipe.id.value,
             name: recipe.recipeGeneralData.name,
@@ -91,8 +97,10 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             cookDuration: recipe.recipeGeneralData.cookDuration.value(),
             cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
             nutritionalInfo: recipe.getPresentedNutritionalInfo(),
+            orderPriority: recipe.orderPriority,
             difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
             imageUrl: recipeUrl,
+            imagesUrls: recipeImages,
             weight: recipe.recipeGeneralData.recipeWeight.value(),
             weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
             backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
@@ -174,12 +182,13 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             hasRecipes: plan.hasRecipes,
             variants: presentedVariants,
             additionalPlans: presentedAdditionalPlans,
-            recipes: presentedRecipes,
+            recipes: (presentedRecipes || []).sort((r1, r2) => r1.orderPriority - r2.orderPriority),
             abilityToChooseRecipes: plan.abilityToChooseRecipes,
             slug: plan.planSlug.slug, // TO DO: Get it from aggregate root
             icon,
             iconWithColor,
             minimumVariantPrice: plan.getMinimumVariantPrice(),
+            isDefaultAtCheckout: plan.isDefaultAtCheckout,
         };
     }
 

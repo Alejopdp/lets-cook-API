@@ -22,7 +22,7 @@ export class GetPlanListPresenter {
                 name: plan.name,
                 sku: plan.planSku.code,
                 description: plan.description,
-                availablePlanFrecuencies: plan.availablePlanFrecuencies,
+                availablePlanFrecuencies: plan.availablePlanFrecuencies.map((freq) => freq.value()),
                 isActive: plan.isActive,
                 type: plan.type,
                 imageUrl: await this.storageService.getPresignedUrlForFile(plan.imageUrl),
@@ -33,6 +33,7 @@ export class GetPlanListPresenter {
                 slug: plan.planSlug.slug,
                 icon: await this.storageService.getPresignedUrlForFile(plan.iconLinealUrl),
                 iconWithColor: await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl),
+                isDefaultAtCheckout: plan.isDefaultAtCheckout,
             });
         }
 
@@ -68,7 +69,8 @@ export class GetPlanListPresenter {
                     Personas: variant.numberOfPersons,
                     //@ts-ignore
                     Recetas: variant.numberOfRecipes,
-                    description: variant.description,
+                    description: variant.getLabel(),
+                    descriptionWithPrice: variant.getLabelWithPrice(),
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
                 });
             } else {
@@ -78,7 +80,8 @@ export class GetPlanListPresenter {
                     price: variant.price,
                     priceWithOffer: variant.priceWithOffer,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
-                    description: variant.description,
+                    description: variant.getLabel(),
+                    descriptionWithPrice: variant.getLabelWithPrice(),
                 });
             }
             counter = 0;

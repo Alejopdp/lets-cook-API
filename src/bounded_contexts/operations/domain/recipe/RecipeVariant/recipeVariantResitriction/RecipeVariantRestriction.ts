@@ -18,6 +18,10 @@ export class RecipeVariantRestriction extends Entity<RecipeVariantRestriction> {
         this._value = value;
     }
 
+    public acceptsEveryRecipe(): boolean {
+        return this.value === "apto_todo";
+    }
+
     /**
      * Getter label
      * @return {string}

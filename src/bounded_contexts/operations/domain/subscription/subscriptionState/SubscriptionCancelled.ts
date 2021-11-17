@@ -1,3 +1,4 @@
+import { PlanFrequency } from "../../plan/PlanFrequency";
 import { Subscription } from "../Subscription";
 import { ISubscriptionState } from "./ISubscriptionState";
 import { SubscriptionActive } from "./SubscriptionActive";
@@ -11,6 +12,10 @@ export class SubscriptionCancelled implements ISubscriptionState {
         this.title = "SUBSCRIPTION_CANCELLED";
         this.humanTitle = "Cancelada";
         this.color = "red";
+    }
+
+    public getHumanTitle(frequency: PlanFrequency): string {
+        return this.humanTitle;
     }
 
     public toCancelled(subscription: Subscription): void {

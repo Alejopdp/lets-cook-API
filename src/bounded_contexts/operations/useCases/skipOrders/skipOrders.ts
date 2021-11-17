@@ -5,6 +5,7 @@ import { SkipOrdersDto } from "./skipOrdersDto";
 import { OrderId } from "../../domain/order/OrderId";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { Locale } from "../../domain/locale/Locale";
 
 export class SkipOrders {
     private _orderRepository: IOrderRepository;
@@ -17,7 +18,7 @@ export class SkipOrders {
 
     public async execute(dto: SkipOrdersDto): Promise<any> {
         const ordersIds: OrderId[] = [...dto.ordersToReactivate, ...dto.ordersToSkip].map((id: any) => new OrderId(id));
-        const orders: Order[] = await this.orderRepository.findByIdList(ordersIds);
+        const orders: Order[] = await this.orderRepository.findByIdList(ordersIds, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
         const ordersMap: { [orderId: string]: Order } = {};
         const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
@@ -44,7 +45,8 @@ export class SkipOrders {
             activeOrdersToSave.push(order);
         }
 
-        await this.orderRepository.saveSkippedAndActiveOrders(skippedOrdersToSave, activeOrdersToSave);
+        // await this.orderRepository.saveSkippedAndActiveOrders(skippedOrdersToSave, activeOrdersToSave);
+        await this.orderRepository.updateMany([...skippedOrdersToSave, ...activeOrdersToSave]);
         await this.paymentOrderRepository.updateMany(paymentOrders);
     }
 

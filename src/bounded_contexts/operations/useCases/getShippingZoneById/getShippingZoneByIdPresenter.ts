@@ -10,6 +10,8 @@ export class GetShippingZoneByIdPresenter {
             cost: shipping.cost,
             state: shipping.state,
             radio: shipping.radio,
+            shippingDayOfWeek: shipping.getDayNumberOfWeek(),
+            shippingDayOfWeekLabel: shipping.getDayLabel(),
         };
     }
 }

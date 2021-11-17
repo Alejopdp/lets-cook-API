@@ -15,7 +15,7 @@ export class SendNewSubscriptionEmailController extends BaseController {
         try {
             const dto: SendNewSubscriptionEmailDto = {
                 subscriptionId: this.req.params.subscriptionId,
-                // locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             await this.sendNewSubscriptionEmail.execute(dto);

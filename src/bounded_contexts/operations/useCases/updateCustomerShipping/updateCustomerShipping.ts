@@ -7,26 +7,36 @@ import { ICustomerRepository } from "../../infra/repositories/customer/ICustomer
 import { UpdateCustomerShippingDto } from "./updateCustomerShippingDto";
 import { PreferredDeliveryTimeFactory } from "../../domain/customer/preferredDeliveryTime/preferredDeliveryTimeFactory";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
+import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { Order } from "../../domain/order/Order";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
+import { INotificationService } from "@src/shared/notificationService/INotificationService";
+import { Locale } from "../../domain/locale/Locale";
 
 export class UpdateCustomerShipping {
     private _customerRepository: ICustomerRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _shippingZoneRepository: IShippingZoneRepository;
     private _storageService: IStorageService;
+    private _notificationService: INotificationService;
+    private _orderRepository: IOrderRepository;
 
     constructor(
         customerRepository: ICustomerRepository,
         paymentOrderRepository: IPaymentOrderRepository,
         shippingZoneRepository: IShippingZoneRepository,
-        storageService: IStorageService
+        storageService: IStorageService,
+        notificationService: INotificationService,
+        orderRepository: IOrderRepository
     ) {
         this._customerRepository = customerRepository;
         this._paymentOrderRepository = paymentOrderRepository;
         this._shippingZoneRepository = shippingZoneRepository;
         this._storageService = storageService;
+        this._notificationService = notificationService;
+        this._orderRepository = orderRepository;
     }
 
     public async execute(dto: UpdateCustomerShippingDto): Promise<void> {
@@ -38,13 +48,22 @@ export class UpdateCustomerShipping {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer | undefined = await this.customerRepository.findByIdOrThrow(customerId);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findFutureOrdersByCustomer(customerId);
+        const orders: Order[] = await this.orderRepository.findACtiveOrdersByPaymentOrderIdList(
+            paymentOrders.map((po) => po.id),
+            Locale.es
+        );
         const preferredDeliveryTime = dto.deliveryTime ? PreferredDeliveryTimeFactory.createDeliveryTime(dto.deliveryTime) : undefined;
 
         customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, preferredDeliveryTime);
-        paymentOrders.forEach((order) => (order.shippingCost = customerNewShippingZone.cost));
+        paymentOrders.forEach((order) =>
+            order.state.isActive() && !order.hasFreeShipping ? (order.shippingCost = customerNewShippingZone.cost) : ""
+        );
+        orders.forEach((order) => order.moveShippingDateToDIfferentDayNumberOfSameWeek(customerNewShippingZone.getDayNumberOfWeek()));
 
         await this.paymentOrderRepository.updateMany(paymentOrders);
         await this.customerRepository.save(customer);
+        await this.orderRepository.updateMany(orders);
+        this.notificationService.notifyAdminAboutAddressChange(customer, dto.nameOrEmailOfAdminExecutingRequest);
     }
 
     /**
@@ -77,5 +96,21 @@ export class UpdateCustomerShipping {
      */
     public get shippingZoneRepository(): IShippingZoneRepository {
         return this._shippingZoneRepository;
+    }
+
+    /**
+     * Getter notificationService
+     * @return {INotificationService}
+     */
+    public get notificationService(): INotificationService {
+        return this._notificationService;
+    }
+
+    /**
+     * Getter orderRepository
+     * @return {IOrderRepository}
+     */
+    public get orderRepository(): IOrderRepository {
+        return this._orderRepository;
     }
 }

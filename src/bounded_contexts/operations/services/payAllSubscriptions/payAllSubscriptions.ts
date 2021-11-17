@@ -1,7 +1,10 @@
+import { INotificationService, PaymentOrderBilledNotificationDto } from "@src/shared/notificationService/INotificationService";
+import Stripe from "stripe";
 import { logger } from "../../../../../config";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderActive } from "../../domain/paymentOrder/paymentOrderState/PaymentOrderActive";
@@ -21,6 +24,7 @@ export class PayAllSubscriptions {
     private _subscriptionRepository: ISubscriptionRepository;
     private _weekRepository: IWeekRepository;
     private _shippingZoneRepository: IShippingZoneRepository;
+    private _notificationService: INotificationService;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -29,7 +33,8 @@ export class PayAllSubscriptions {
         paymentService: IPaymentService,
         subscriptionRepository: ISubscriptionRepository,
         weekRepository: IWeekRepository,
-        shippingZoneRepository: IShippingZoneRepository
+        shippingZoneRepository: IShippingZoneRepository,
+        notificationService: INotificationService
     ) {
         this._customerRepository = customerRepository;
         this._orderRepository = orderRepository;
@@ -38,18 +43,23 @@ export class PayAllSubscriptions {
         this._subscriptionRepository = subscriptionRepository;
         this._weekRepository = weekRepository;
         this._shippingZoneRepository = shippingZoneRepository;
+        this._notificationService = notificationService;
     }
 
     public async execute(): Promise<void> {
-        // const today: Date = new Date(2021, 9, 23);
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
+        // const today: Date = new Date(2021, 11, 25);
         const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const paymentOrdersToBill: PaymentOrder[] = await this.paymentOrderRepository.findByBillingDate(today);
-        const ordersToBill: Order[] = await this.orderRepository.findByPaymentOrderIdList(paymentOrdersToBill.map((po) => po.id));
+        const ordersToBill: Order[] = await this.orderRepository.findByPaymentOrderIdList(
+            paymentOrdersToBill.map((po) => po.id),
+            Locale.es
+        );
         const activeSusbcriptions = await this.subscriptionRepository.findByIdList(ordersToBill.map((order) => order.subscriptionId));
+        var paymentOrdersWithHumanIdCount = await this.paymentOrderRepository.countPaymentOrdersWithHumanId();
         const ordersWIthoutPaymentOrder = [];
         const customerMap: { [customerId: string]: Customer } = {};
         const paymentOrderOrderMap: { [paymentOrderId: string]: Order[] } = {};
@@ -62,6 +72,7 @@ export class PayAllSubscriptions {
         const newOrders: Order[] = [];
         const frequencyWeekMap: { [frequency: string]: Week } = {};
         const customerShippingZoneMap: { [customerId: string]: ShippingZone | undefined } = {};
+        const notificationDtos: PaymentOrderBilledNotificationDto[] = [];
 
         if (!!!weeklyOrdersWeek || !!!biweeklyOrdersWeek || !!!monthlyOrdersWeek)
             throw new Error("Error al obtener las semanas para una nueva orden");
@@ -117,17 +128,41 @@ export class PayAllSubscriptions {
                               Math.round(shippingCost * 100)) /
                           100;
 
-                    const paymentIntent = await this.paymentService.paymentIntent(
-                        totalAmount,
-                        paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
-                        paymentOrderCustomer.email,
-                        paymentOrderCustomer.stripeId as string
-                    );
+                    var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
+                        id: "",
+                        status: "succeeded",
+                        client_secret: "",
+                    };
+
+                    if (totalAmount >= 0.5) {
+                        paymentIntent = await this.paymentService.paymentIntent(
+                            totalAmount,
+                            paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
+                            paymentOrderCustomer.email,
+                            paymentOrderCustomer.stripeId as string,
+                            true
+                        );
+                    }
 
                     // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
                     if (paymentIntent.status === "succeeded") {
                         logger.info(`${paymentOrderId} processing succeeded`);
                         paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
+                        paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
+                        paymentOrdersWithHumanIdCount++;
+                        notificationDtos.push({
+                            customerEmail: paymentOrderCustomer.email,
+                            foodVAT: Math.round((totalAmount * 0.1 + Number.EPSILON) * 100) / 100,
+                            phoneNumber: paymentOrderCustomer.personalInfo?.phone1 || "",
+                            shippingAddressCity: "",
+                            shippingAddressName: paymentOrderCustomer.getShippingAddress().name || "",
+                            shippingCost: customerHasFreeShipping ? 0 : shippingCost,
+                            shippingCustomerName: paymentOrderCustomer.getPersonalInfo().fullName || "",
+                            shippingDate: paymentOrderOrderMap[paymentOrderId][0].getHumanShippmentDay(),
+                            totalAmount,
+                            orders: paymentOrderOrderMap[paymentOrderId],
+                            paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
+                        });
                     } else {
                         logger.info(`${paymentOrderId} processing failed`);
                         paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
@@ -179,6 +214,8 @@ export class PayAllSubscriptions {
         // NEW PAYMENT ORDERS && PAYMENT ORDER ASSIGNMENT BY BILLINGDATE
 
         for (let customerAndNewOrders of Object.entries(customerNewOrdersMap)) {
+            const customerId = new CustomerId(customerAndNewOrders[0]);
+
             const billingDateOrdersMap: { [billingDate: string]: Order[] } = {};
 
             for (let order of customerAndNewOrders[1]) {
@@ -199,20 +236,38 @@ export class PayAllSubscriptions {
                     0
                 ); // TO DO: Use coupons, probably need to pass orders to a subscription
 
-                const newPaymentOrder = new PaymentOrder(
-                    new Date(),
-                    new PaymentOrderActive(),
-                    "",
+                const hasFreeShipping = billingDateAndOrders[1].some((order) => order.hasFreeShipping);
+                // Validar si para este cliente ya existe una payment order con billingDateAndOrders[0].
+                // Si existe, agregar billingDateAndOrders[1] a la paymentOrder en vez de crear una nueva
+
+                const existentPaymentOrder = await this.paymentOrderRepository.findActiveByCustomerAndBillingDate(
                     new Date(billingDateAndOrders[0]),
-                    weeklyOrdersWeek, // TO DO: Week is unnecessary in payment orders
-                    ordersAmount,
-                    ordersDiscount,
-                    customerShippingZoneMap[customerAndNewOrders[0]]?.cost!,
-                    new CustomerId(customerAndNewOrders[0])
+                    customerId
                 );
 
-                newPaymentOrders.push(newPaymentOrder);
-                billingDateAndOrders[1].forEach((order) => (order.paymentOrderId = newPaymentOrder.id));
+                if (!!existentPaymentOrder) {
+                    logger.info(`Existe una orden para el ${new Date(billingDateAndOrders[0])}`);
+
+                    billingDateAndOrders[1].forEach((order) => existentPaymentOrder.addOrder(order));
+                    // existentPaymentOrder.addOrder()
+                    paymentOrdersToBill.push(existentPaymentOrder); // Is not going to be billed, its just an aweful name for updating the existent PO with the repository
+                } else {
+                    const newPaymentOrder = new PaymentOrder(
+                        billingDateAndOrders[1][0].shippingDate || new Date(),
+                        new PaymentOrderActive(),
+                        "",
+                        new Date(billingDateAndOrders[0]),
+                        weeklyOrdersWeek, // TO DO: Week is unnecessary in payment orders
+                        ordersAmount,
+                        ordersDiscount,
+                        customerShippingZoneMap[customerAndNewOrders[0]]?.cost!,
+                        new CustomerId(customerAndNewOrders[0]),
+                        hasFreeShipping
+                    );
+
+                    newPaymentOrders.push(newPaymentOrder);
+                    billingDateAndOrders[1].forEach((order) => (order.paymentOrderId = newPaymentOrder.id));
+                }
             }
         }
 
@@ -226,7 +281,9 @@ export class PayAllSubscriptions {
         await this.paymentOrderRepository.updateMany(paymentOrdersToBill);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         await this.customerRepository.updateMany(customers);
-
+        for (let dto of notificationDtos) {
+            await this.notificationService.notifyCustomerAboutPaymentOrderBilled(dto);
+        }
         logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
     }
 
@@ -284,5 +341,13 @@ export class PayAllSubscriptions {
      */
     public get shippingZoneRepository(): IShippingZoneRepository {
         return this._shippingZoneRepository;
+    }
+
+    /**
+     * Getter notificationService
+     * @return {INotificationService}
+     */
+    public get notificationService(): INotificationService {
+        return this._notificationService;
     }
 }

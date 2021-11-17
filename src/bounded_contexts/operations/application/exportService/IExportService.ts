@@ -11,7 +11,7 @@ export interface OrdersWithRecipeSelectionExport {
     paymentOrderId: string | number;
     paymentOrderState: string;
     orderId: string | number;
-    orderNumber: string | number;
+    paymentOrderNumber: string | number;
     orderState: string;
     weekLabel: string;
     deliveryDate: string;
@@ -48,6 +48,8 @@ export interface OrdersWithRecipeSelectionExport {
     finalPortionPrice: number;
     recipeDivision: number;
     recivedOrdersQuantity: number;
+    deliveriesUntilWeek: number | string;
+    onlyFirstWeek: boolean;
 }
 
 export interface SubscriptionExport {
@@ -122,12 +124,11 @@ export interface CancellationExport {
     customerFirstName: string;
     customerLastName: string;
     customerEmail: string;
-    createdAt: string;
     status: string;
-    shopifyCustomerId: string;
-    pastOrdersCount: number;
-    numberOfActiveSubscriptions: number;
-    numberOfSubscriptions: number;
+    // shopifyCustomerId: string;
+    // pastOrdersCount: number;
+    // numberOfActiveSubscriptions: number;
+    // numberOfSubscriptions: number;
     subscriptionId: string | number;
     subscriptionCreatedAt: string;
     cancellationDate: string;
@@ -160,6 +161,7 @@ export interface CouponExport {
 }
 
 export interface IExportService {
+    parseCsvToJson(csvFilePath: string): string[][];
     exportSubscriptions(subscriptionsExport: SubscriptionExport[]): void;
     exportCustomers(customersExport: CustomerExport[]): void;
     exportCancellations(cancellationExports: CancellationExport[]): void;

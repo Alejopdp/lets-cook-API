@@ -9,6 +9,13 @@ export class GetRecipeListPresenter {
         const presentedRecipes = [];
 
         for (let recipe of recipes) {
+            const recipeImages: string[] = [];
+
+            for (let imageUrl of recipe.getImagesUrls()) {
+                const presignedUrl = await s3Service.getPresignedUrlForFile(imageUrl);
+                recipeImages.push(presignedUrl);
+            }
+
             presentedRecipes.push({
                 id: recipe.id.value,
                 name: recipe.recipeGeneralData.name,
@@ -18,9 +25,12 @@ export class GetRecipeListPresenter {
                 cookDuration: recipe.recipeGeneralData.cookDuration.value(),
                 cookDurationNumberValue: recipe.recipeGeneralData.cookDuration.timeValue,
                 difficultyLevel: recipe.recipeGeneralData.difficultyLevel,
-                imageUrl: recipe.recipeGeneralData.imageUrl
-                    ? await s3Service.getPresignedUrlForFile(recipe.recipeGeneralData.imageUrl)
-                    : "",
+                orderPriority: recipe.orderPriority,
+                imageUrl:
+                    Array.isArray(recipe.recipeGeneralData.imagesUrls) && recipe.recipeGeneralData.imagesUrls.length > 0
+                        ? await s3Service.getPresignedUrlForFile(recipe.getMainImageUrl())
+                        : "",
+                imagesUrls: recipeImages,
                 weight: recipe.recipeGeneralData.recipeWeight.value(),
                 weightNumberValue: recipe.recipeGeneralData.recipeWeight.weightValue,
                 backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
@@ -49,6 +59,6 @@ export class GetRecipeListPresenter {
                 }),
             });
         }
-        return presentedRecipes;
+        return presentedRecipes.sort((r1, r2) => r1.orderPriority! - r2.orderPriority!);
     }
 }

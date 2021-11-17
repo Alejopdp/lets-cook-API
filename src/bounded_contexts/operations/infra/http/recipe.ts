@@ -29,11 +29,11 @@ recipeRouter.get("/:id", (req, res) => getRecipeByIdController.execute(req, res)
 recipeRouter.get("/recipes-list/by-restrictions", (req, res) => getRecipesByRestrictionsController.execute(req, res));
 
 // POSTs
-recipeRouter.post("/", multer(options).single("recipeImage"), (req, res) => createRecipeController.execute(req, res));
+recipeRouter.post("/", multer(options).array("recipeImages"), (req, res) => createRecipeController.execute(req, res));
 
 // PUTs
 recipeRouter.put("/update-weeks/:id", (req, res) => updateRecipeWeeksController.execute(req, res));
-recipeRouter.put("/:id", multer(options).single("recipeImage"), (req, res) => updateRecipeController.execute(req, res));
+recipeRouter.put("/:id", multer(options).array("recipeImages"), (req, res) => updateRecipeController.execute(req, res));
 
 // DELETEs
 recipeRouter.delete("/:id", (req, res) => deleteRecipeController.execute(req, res));

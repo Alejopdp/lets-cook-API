@@ -39,7 +39,8 @@ export class PlanMapper implements Mapper<Plan> {
             raw.abilityToChooseRecipes,
             raw.iconLinealUrl,
             raw.iconLinealColorUrl,
-            new PlanId(raw._id)
+            new PlanId(raw._id),
+            raw.isDefaultAtCheckout
         );
     }
     public toPersistence(t: Plan): any {
@@ -61,6 +62,7 @@ export class PlanMapper implements Mapper<Plan> {
             abilityToChooseRecipes: t.abilityToChooseRecipes,
             iconLinealUrl: t.iconLinealUrl,
             iconLinealColorUrl: t.iconLinealColorUrl,
+            isDefaultAtCheckout: t.isDefaultAtCheckout,
         };
     }
 }

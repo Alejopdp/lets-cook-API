@@ -1,4 +1,5 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { GetRecipeById } from "./getRecipeById";
 import { GetRecipeByIdDto } from "./getRecipeByIdDto";
 
@@ -14,6 +15,7 @@ export class GetRecipeByIdController extends BaseController {
         try {
             const dto: GetRecipeByIdDto = {
                 recipeId: this.req.params.id,
+                locale: (<any>Locale)[(this.req.query.locale as string) || Locale.es],
             };
             const result = await this.getRecipeById.execute(dto);
 

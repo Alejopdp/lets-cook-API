@@ -31,7 +31,7 @@ export class GetPlanByIdPresenter {
             if (plan.hasRecipes) {
                 presentedVariants.push({
                     id: variant.id.value,
-                    oldId: variant.id.value,
+                    // oldId: variant.id.value,
                     isDefault: variant.isDefault,
                     sku: variant.sku.code,
                     price: variant.price,
@@ -60,6 +60,12 @@ export class GetPlanByIdPresenter {
                     priceWithOffer: variant.priceWithOffer,
                     attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
                     isDeleted: variant.isDeleted,
+                    auxId:
+                        variant.attributes.reduce((acc, attribute) => acc + attribute.value, "") +
+                        //@ts-ignore
+                        (variant.numberOfPersons?.toString() || "") +
+                        //@ts-ignore
+                        (variant.numberOfRecipes?.toString() || ""),
                 });
             }
             counter = 0;
@@ -91,6 +97,7 @@ export class GetPlanByIdPresenter {
             iconWithColor: plan.iconLinealColorUrl ? await this.storageService.getPresignedUrlForFile(plan.iconLinealColorUrl) : "",
             abilityToChooseRecipes: plan.abilityToChooseRecipes,
             slug: plan.planSlug.slug,
+            isDefaultAtCheckout: plan.isDefaultAtCheckout,
             // newAttributes: plan.getAttirbutesAndValues(),
         };
     }

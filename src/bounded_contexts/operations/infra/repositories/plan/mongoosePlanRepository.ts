@@ -83,7 +83,9 @@ export class MongoosePlanRepository implements IPlanRepository {
 
         if (!conditions.isActive) delete query.isActive;
 
-        const plansDb = await MongoosePlan.find({ ...query, deletionFlag: false }).populate("additionalPlans");
+        const plansDb = await MongoosePlan.find({ ...query, deletionFlag: false })
+            .sort({ createdAt: 1 })
+            .populate("additionalPlans");
 
         return plansDb.map((raw: any) => planMapper.toDomain(raw, locale));
     }

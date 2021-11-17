@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Customer } from "../../domain/customer/Customer";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
@@ -25,19 +26,38 @@ export class GetPaymentOrdersAsAdminPresenter {
             if (paymentOrder.state.title === "PAYMENT_ORDER_REJECTED") rejectedOrders.push(presentedOrder);
         }
 
-        return { activeOrders, billedOrders, rejectedOrders };
+        return {
+            activeOrders: activeOrders.sort((po1, po2) =>
+                !!!po1.lastRecipeSelectionDate
+                    ? 1
+                    : !!!po2.lastRecipeSelectionDate
+                    ? -1
+                    : po2.lastRecipeSelectionDate.getTime() - po1.lastRecipeSelectionDate.getTime()
+            ),
+            billedOrders: billedOrders.sort((po1, po2) =>
+                !!!po1.lastRecipeSelectionDate
+                    ? 1
+                    : !!!po2.lastRecipeSelectionDate
+                    ? -1
+                    : po2.lastRecipeSelectionDate.getTime() - po1.lastRecipeSelectionDate.getTime()
+            ),
+            rejectedOrders,
+        };
     }
 
     public presentPaymentOrder(paymentOrder: PaymentOrder, customer: Customer): any {
         return {
             id: paymentOrder.id.value,
+            originalBillingDate: paymentOrder.billingDate,
             billingDate: paymentOrder.getDdMmYyyyBillingDate(),
             customerName: customer.getPersonalInfo()?.fullName,
             customerEmail: customer.email,
             customerId: customer.id.value,
             state: paymentOrder.state.title,
-            amount: paymentOrder.getTotalAmount(),
+            amount: paymentOrder.getFinalAmount(),
             paymentIntentId: paymentOrder.paymentIntentId,
+            lastRecipeSelectionDate: paymentOrder.lastRecipeSelectionDate,
+            humanId: paymentOrder.getHumanIdOrIdValue(),
         };
     }
 }

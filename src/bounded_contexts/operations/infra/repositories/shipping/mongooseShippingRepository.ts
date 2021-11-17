@@ -20,6 +20,7 @@ export class MongooseShippingRepository implements IShippingZoneRepository {
                         cost: shippingDb.cost,
                         state: shippingDb.state,
                         radio: shippingDb.radio,
+                        shippingDayOfWeek: shippingDb.shippingDayOfWeek,
                     },
                 }
             );

@@ -49,7 +49,7 @@ export class SwapSubscriptionPlan {
         const newPlan: Plan | undefined = await this.planRepository.findById(newPlanId, Locale.es);
         if (!!!newPlan) throw new Error("El nuevo plan al que te quieres suscribir no existe");
 
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
 
         subscription.swapPlan(orders, newPlan, newPlanVariantId);
 
@@ -63,6 +63,7 @@ export class SwapSubscriptionPlan {
                 : undefined;
 
             for (let paymentOrder of paymentOrders) {
+                if (paymentOrder.state.isBilled()) continue;
                 paymentOrder.amount =
                     (Math.round(paymentOrder.amount * 100) -
                         Math.round(oldSubscriptionPrice * 100) +
@@ -81,7 +82,8 @@ export class SwapSubscriptionPlan {
             await this.paymentOrderRepository.updateMany(paymentOrders);
         }
 
-        await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
+        // await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
+        await this.orderRepository.updateMany(orders);
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
     }
 

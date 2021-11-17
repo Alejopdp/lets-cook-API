@@ -7,10 +7,15 @@ import { Locale } from "../../../domain/locale/Locale";
 import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Subscription } from "../../../domain/subscription/Subscription";
+import { WeekId } from "@src/bounded_contexts/operations/domain/week/WeekId";
 
 export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async save(paymentOrder: PaymentOrder): Promise<void> {
         const paymentOrderDb = paymentOrderMapper.toPersistence(paymentOrder);
+
+        if (paymentOrderDb.humanId === undefined) {
+            delete paymentOrderDb.humanId;
+        }
         if (await MongoosePaymentOrder.exists({ _id: paymentOrder.id.value })) {
             await MongoosePaymentOrder.updateOne({ _id: paymentOrder.id.value }, paymentOrderDb);
         } else {
@@ -45,6 +50,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
 
     public async findFutureOrdersByCustomer(customerId: CustomerId): Promise<PaymentOrder[]> {
         return await this.findBy({ billingDate: { $gte: new Date() }, customer: customerId.value });
+    }
+
+    public async findByWeeks(weeksIds: WeekId[]): Promise<PaymentOrder[]> {
+        return await this.findBy({ week: weeksIds.map((id) => id.toString()) });
     }
 
     public async findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {
@@ -91,6 +100,18 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         return await MongoosePaymentOrder.exists({ customer: customerId.value, state: "PAYMENT_ORDER_ACTIVE" });
     }
 
+    public async findActiveByCustomerAndBillingDate(billingDate: Date, customerId: CustomerId): Promise<PaymentOrder | undefined> {
+        const paymentOrderDb = await MongoosePaymentOrder.findOne({ billingDate, customer: customerId.value })
+            .populate("week")
+            .populate({
+                path: "recipes",
+                populate: { path: "recipeVariants", populate: { path: "restriction" } },
+            })
+            .populate("plan");
+
+        return paymentOrderDb ? paymentOrderMapper.toDomain(paymentOrderDb) : undefined;
+    }
+
     public async findActiveByCustomerAndBillingDateList(billingDates: Date[], customerId: CustomerId): Promise<PaymentOrder[]> {
         return await this.findBy(
             {
@@ -108,6 +129,19 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
 
     public async findAll(locale: Locale): Promise<PaymentOrder[]> {
         return await this.findBy({}, locale);
+    }
+
+    public async findAllSortedByBillingDateAsc(locale: Locale): Promise<PaymentOrder[]> {
+        const paymentOrdersDb = await MongoosePaymentOrder.find({ deletionFlag: false })
+            .sort({ billingDate: 1 })
+            .populate("week")
+            .populate({
+                path: "recipes",
+                populate: { path: "recipeVariants", populate: { path: "restriction" } },
+            })
+            .populate("plan");
+
+        return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
     }
 
     public async findBy(conditions: any, locale: Locale = Locale.es): Promise<PaymentOrder[]> {
@@ -136,6 +170,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
             customer: customerIds.map((id) => id.value),
             state: ["PAYMENT_ORDER_ACTIVE", "PAYMENT_ORDER_REJECTED", "PAYMENT_ORDER_PENDING_CONFIRMATION"],
         });
+    }
+
+    public async countPaymentOrdersWithHumanId(): Promise<number> {
+        return await MongoosePaymentOrder.count({ $and: [{ humanId: { $exists: true } }, { humanId: { $ne: null } }] });
     }
 
     public async updateShippingCost(paymentOrders: PaymentOrder[], shippingCost: number): Promise<void> {

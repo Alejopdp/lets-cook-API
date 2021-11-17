@@ -21,6 +21,7 @@ export class Recipe extends Entity<Recipe> {
     private _availableMonths: Month[];
     private _relatedPlans: PlanId[];
     private _recipeTools: string[];
+    private _orderPriority?: number;
 
     constructor(
         recipeGeneralData: RecipeGeneralData,
@@ -32,7 +33,8 @@ export class Recipe extends Entity<Recipe> {
         availableMonths: Month[],
         relatedPlans: PlanId[],
         recipeTools: string[],
-        id?: RecipeId
+        id?: RecipeId,
+        orderPriority?: number
     ) {
         if (!Array.isArray(recipeVariants) || recipeVariants.length === 0)
             throw new Error("Es necesario agregar al menos una variante a la receta");
@@ -46,6 +48,7 @@ export class Recipe extends Entity<Recipe> {
         this._availableMonths = availableMonths;
         this._relatedPlans = relatedPlans;
         this._recipeTools = recipeTools;
+        this._orderPriority = orderPriority;
     }
 
     public getName(): string {
@@ -53,14 +56,18 @@ export class Recipe extends Entity<Recipe> {
     }
 
     public getMainImageUrl(): string {
-        return this.recipeGeneralData.imageUrl;
+        return this.recipeGeneralData.imagesUrls[0];
     }
 
-    public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]) {
+    public getImagesUrls(): string[] {
+        return this.recipeGeneralData.imagesUrls || [];
+    }
+
+    public getVariantSkuByVariantsIds(variantIds: RecipeVariantId[]): string {
         const variant: RecipeVariant | undefined = this.recipeVariants.find((variant) => variantIds.some((id) => id.equals(variant.id)));
         if (!!!variant) return "";
 
-        return variant.sku;
+        return variant.sku.code;
     }
 
     public updateWeeks(weeks: Week[]): void {
@@ -144,6 +151,14 @@ export class Recipe extends Entity<Recipe> {
     }
 
     /**
+     * Getter orderPriority
+     * @return {number | undefined}
+     */
+    public get orderPriority(): number | undefined {
+        return this._orderPriority;
+    }
+
+    /**
      * Getter recipeTools
      * @return {string[]}
      */
@@ -221,5 +236,13 @@ export class Recipe extends Entity<Recipe> {
      */
     public set recipeTools(value: string[]) {
         this._recipeTools = value;
+    }
+
+    /**
+     * Setter orderPriority
+     * @param {number | undefined} value
+     */
+    public set orderPriority(value: number | undefined) {
+        this._orderPriority = value;
     }
 }

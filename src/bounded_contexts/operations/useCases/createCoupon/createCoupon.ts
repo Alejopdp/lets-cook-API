@@ -27,6 +27,8 @@ export class CreateCoupon {
 
         const productsForApplying: PlanId[] = dto.productsForApplyingValue.map((plan: any) => new PlanId(plan.id));
 
+        if (dto.limites.some((limit) => limit.value < 0)) throw new Error("La cantidad de aplicaciones no puede ser menor a 0");
+
         const coupon: Coupon = Coupon.create(
             dto.couponCode,
             type,
@@ -38,9 +40,10 @@ export class CreateCoupon {
             dto.maxChargeQtyType,
             dto.maxChargeQtyValue,
             dto.startDate,
-            dto.endDate,
             CouponState.ACTIVE,
-            0
+            0,
+            [],
+            dto.endDate
         );
 
         const activeCouponWithSameCode: Coupon | undefined = await this.couponRepository.findActiveByCode(coupon.couponCode);
