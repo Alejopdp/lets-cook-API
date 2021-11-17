@@ -99,12 +99,14 @@ export class Order extends Entity<Order> {
             );
 
         for (let selection of recipeSelection) {
-            if (selection.recipe.relatedPlans.every((planId) => !planId.equals(this.plan.id)))
+            if (selection.recipe.relatedPlans.every((planId) => !planId.equals(this.plan.id))) {
                 throw new Error(
                     `La receta ${selection.recipe.getName()} (variante con SKU ${selection.recipe.getVariantSkuByVariantsIds([
                         selection.recipeVariantId,
                     ])}) no está asociada al ${this.plan.name}`
                 );
+            }
+
             const recipeVariantRestriction: RecipeVariantRestriction | undefined = selection.recipe.getVariantRestriction(
                 selection.recipeVariantId
             );
