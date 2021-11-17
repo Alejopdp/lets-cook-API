@@ -16,6 +16,7 @@ import { sendNewSubscriptionEmailController } from "../../useCases/sendNewSubscr
 import { swapSubscriptionPlanController } from "../../useCases/swapSubscriptionPlan";
 import { updateSubscriptionRestrictionController } from "../../useCases/updateSusbcriptionRestriction";
 import { middleware } from "../../../../shared/middleware";
+import { createSubscriptionAsAdminController } from "../../useCases/createSubscriptionAsAdmin";
 
 const subscriptionRouter = express.Router();
 
@@ -36,12 +37,13 @@ subscriptionRouter.get("/:id", middleware.ensureAuthenticated(), (req, res) => g
 // POSTs
 subscriptionRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
 subscriptionRouter.post("/many", (req, res) => createManySubscriptionsController.execute(req, res));
+subscriptionRouter.post("/as-admin", middleware.ensureAdminAuthenticated(), (req, res) =>
+    createSubscriptionAsAdminController.execute(req, res)
+);
 subscriptionRouter.post("/reorder/:subscriptionId", middleware.ensureAuthenticated(), (req, res) =>
     reorderPlanController.execute(req, res)
 );
-subscriptionRouter.post("/notify-new-subscription/:subscriptionId", (req, res) =>
-    sendNewSubscriptionEmailController.execute(req, res)
-);
+subscriptionRouter.post("/notify-new-subscription/:subscriptionId", (req, res) => sendNewSubscriptionEmailController.execute(req, res));
 
 // PUTs
 subscriptionRouter.put("/cancel/:id", middleware.ensureAuthenticated(), (req, res) => cancelASubscriptionController.execute(req, res));

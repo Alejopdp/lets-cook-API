@@ -151,6 +151,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         );
     }
 
+    public getAmountToBillWithoutShippingCost(): number {
+        return (Math.round(this.amount * 100) + Math.round(this.discountAmount * 100)) / 100;
+    }
+
     public getDiscountAmountOrShippingCostIfHasFreeShipping(): number {
         return this.hasFreeShipping ? this.shippingCost + this.discountAmount : this.discountAmount;
     }

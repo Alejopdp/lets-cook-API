@@ -2,6 +2,7 @@ import { awsSesService } from "../../../../shared/notificationService";
 import { mongooseCouponRepository } from "../../infra/repositories/coupon";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
+import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
 import { SendNewSubscriptionEmail } from "./sendNewSubscriptionEmail";
@@ -12,7 +13,8 @@ export const sendNewSubscriptionEmail: SendNewSubscriptionEmail = new SendNewSub
     mongooseSubscriptionRepository,
     mongooseOrderRepository,
     mongooseShippingZoneRepository,
-    awsSesService
+    awsSesService,
+    mongoosePaymentOrderReposiotry
 );
 
 export const sendNewSubscriptionEmailController: SendNewSubscriptionEmailController = new SendNewSubscriptionEmailController(
