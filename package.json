@@ -8,6 +8,7 @@
         "dev": "node dist/index",
         "webpack": "webpack --config webpack.config.ts",
         "build:staging": "tsc",
+        "build:master": "tsc",
         "lint": "eslint . --ext .ts",
         "test": "mocha -r ts-node/register src/bounded_contexts/**/*.test.ts"
     },
