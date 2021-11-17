@@ -1,0 +1,31 @@
+import { CreateSubscriptionAsAdmin } from "./createSubscriptionAsAdmin";
+import { CreateSubscriptionAsAdminPresenter } from "./createSubscriptionAsAdminPresenter";
+import { CreateSubscriptionAsAdminController } from "./createSubscriptionAsAdminController";
+import { awsSesService } from "../../../../shared/notificationService";
+import { stripeService } from "../../application/paymentService";
+import { mongooseCustomerRepository } from "../../infra/repositories/customer";
+import { mongooseOrderRepository } from "../../infra/repositories/order";
+import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
+import { mongoosePlanRepository } from "../../infra/repositories/plan";
+import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
+import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
+import { mongooseWeekRepository } from "../../infra/repositories/week";
+import { assignOrdersToPaymentOrder } from "../../services/assignOrdersToPaymentOrders";
+
+export const createSubscriptionAsAdmin: CreateSubscriptionAsAdmin = new CreateSubscriptionAsAdmin(
+    mongooseCustomerRepository,
+    mongooseSubscriptionRepository,
+    mongooseShippingZoneRepository,
+    mongoosePlanRepository,
+    mongooseWeekRepository,
+    mongooseOrderRepository,
+    stripeService,
+    awsSesService,
+    assignOrdersToPaymentOrder,
+    mongoosePaymentOrderReposiotry
+);
+export const createSubscriptionAsAdminPresenter: CreateSubscriptionAsAdminPresenter = new CreateSubscriptionAsAdminPresenter();
+export const createSubscriptionAsAdminController: CreateSubscriptionAsAdminController = new CreateSubscriptionAsAdminController(
+    createSubscriptionAsAdmin,
+    createSubscriptionAsAdminPresenter
+);

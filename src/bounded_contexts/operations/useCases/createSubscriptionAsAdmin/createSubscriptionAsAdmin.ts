@@ -1,20 +1,15 @@
-import Stripe from "stripe";
 import {
     INotificationService,
     NewSubscriptionNotificationDto,
     PaymentOrderBilledNotificationDto,
-} from "../../../../shared/notificationService/INotificationService";
+} from "@src/shared/notificationService/INotificationService";
+import Stripe from "stripe";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
-import { CouponId } from "../../domain/cupons/CouponId";
-import { Coupon } from "../../domain/cupons/Cupon";
-import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
-import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
-import { Plan } from "../../domain/plan/Plan";
 import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
 import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../../domain/plan/PlanId";
@@ -24,7 +19,6 @@ import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionActive } from "../../domain/subscription/subscriptionState/SubscriptionActive";
 import { Week } from "../../domain/week/Week";
-import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
@@ -34,18 +28,16 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
-import { UpdatePaymentOrdersShippingCostByCustomer } from "../../services/updatePaymentOrdersShippingCostByCustomer/updatePaymentOrdersShippingCostByCustomer";
-import { CreateSubscriptionDto } from "./createSubscriptionDto";
 import { createFriendCode } from "../../services/createFriendCode";
+import { CreateSubscriptionAsAdminDto } from "./createSubscriptionAsAdminDto";
 
-export class CreateSubscription {
+export class CreateSubscriptionAsAdmin {
     private _customerRepository: ICustomerRepository;
     private _subscriptionRepository: ISubscriptionRepository;
     private _shippingZoneRepository: IShippingZoneRepository;
     private _planRepository: IPlanRepository;
     private _weekRepository: IWeekRepository;
     private _orderRepository: IOrderRepository;
-    private _couponRepository: ICouponRepository;
     private _paymentService: IPaymentService;
     private _notificationService: INotificationService;
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
@@ -58,7 +50,6 @@ export class CreateSubscription {
         planRepository: IPlanRepository,
         weekRepository: IWeekRepository,
         orderRepository: IOrderRepository,
-        couponRepository: ICouponRepository,
         paymentService: IPaymentService,
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
@@ -70,87 +61,45 @@ export class CreateSubscription {
         this._planRepository = planRepository;
         this._weekRepository = weekRepository;
         this._orderRepository = orderRepository;
-        this._couponRepository = couponRepository;
         this._notificationService = notificationService;
         this._paymentService = paymentService;
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
     }
-
-    public async execute(dto: CreateSubscriptionDto): Promise<{
-        subscription: Subscription;
-        paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string };
-        firstOrder: Order;
-        customerPaymentMethods: PaymentMethod[];
-        amountBilled: number;
-        tax: number;
-        shippingCost: number;
-        billedPaymentOrderHumanId: string | number;
-    }> {
+    public async execute(dto: CreateSubscriptionAsAdminDto): Promise<any> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount, shippingZones] = await Promise.all([
             this.subscriptionRepository.findByCustomerId(customerId),
             this.customerRepository.findByIdOrThrow(customerId),
             this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
-            // await this.paymentOrderRepository.findAnActivePaymentOrder(),
             this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
             this.shippingZoneRepository.findAll(),
         ]);
-        const coupon: Coupon | undefined = !!dto.couponId ? await this.couponRepository.findById(new CouponId(dto.couponId)) : undefined;
+        const customerDefaultPaymentMethod: PaymentMethod | undefined = customer.getDefaultPaymentMethod();
+        if (!!!customerDefaultPaymentMethod) throw new Error("El cliente no tiene ningún método de pago ingresado");
+
         const customerSubscriptions: Subscription[] = customerSubscriptionHistory.filter((sub) => sub.isActive());
         const planFrequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(dto.planFrequency);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
-        const addressIsChanged: boolean =
-            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
-
-        customer.changePersonalInfo(
-            dto.customerFirstName,
-            dto.customerLastName,
-            dto.phone1,
-            "",
-            //@ts-ignore
-            customer.personalInfo?.birthDate,
-            dto.locale
-        );
-
-        if (addressIsChanged) {
-            customer.changeShippingAddress(
-                dto.latitude,
-                dto.longitude,
-                dto.addressName,
-                dto.addressName,
-                dto.addressDetails,
-                customer.shippingAddress?.deliveryTime
-            );
-            customer.changeBillingAddress(
-                dto.latitude,
-                dto.longitude,
-                dto.addressName,
-                customer.billingAddress?.customerName || `${dto.customerFirstName} ${dto.customerLastName}`,
-                dto.addressDetails,
-                customer.billingAddress?.identification || ""
-            );
-        }
 
         const subscription: Subscription = new Subscription(
             planVariantId,
             plan,
             planFrequency,
             new SubscriptionActive(),
-            dto.restrictionComment,
+            "",
             new Date(),
             customer,
             plan.getPlanVariantPrice(planVariantId),
             undefined,
-            coupon,
+            undefined,
             undefined,
             undefined,
             new Date() // TO DO: Calculate
         );
 
-        // const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)
         );
@@ -168,26 +117,54 @@ export class CreateSubscription {
             hasFreeShipping: customerSubscriptions.length > 0,
         };
 
-        const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrders.execute(assignOrdersToPaymentOrdersDto);
-
-        if (dto.stripePaymentMethodId) {
-            const newPaymentMethod = await this.paymentService.addPaymentMethodToCustomer(dto.stripePaymentMethodId, customer.stripeId);
-
-            customer.addPaymentMethodAndSetItAsDefault(newPaymentMethod);
-        }
+        const { newPaymentOrders, paymentOrdersToUpdate } = await this.assignOrdersToPaymentOrderService.execute(
+            assignOrdersToPaymentOrdersDto
+        );
 
         const hasFreeShipping =
             // TO DO: Validar que la semana proxima tiene al menos 1 envio
             // paymentOrdersToUpdate.some(po => po.)
-            coupon?.type.type === "free" ||
             customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
             customerSubscriptions.length > 0;
 
-        // newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost;
-        var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
+        var paymentIntent: Stripe.PaymentIntent = {
             id: "",
             status: "succeeded",
             client_secret: "",
+            object: "payment_intent",
+            amount: 0,
+            amount_capturable: 0,
+            amount_received: 0,
+            application: null,
+            application_fee_amount: null,
+            canceled_at: null,
+            cancellation_reason: null,
+            capture_method: "automatic",
+            confirmation_method: "automatic",
+            created: 0,
+            currency: "",
+            customer: null,
+            description: null,
+            invoice: null,
+            last_payment_error: null,
+            livemode: false,
+            next_action: null,
+            on_behalf_of: null,
+            payment_method: null,
+            payment_method_options: null,
+            payment_method_types: [],
+            receipt_email: null,
+            review: null,
+            setup_future_usage: null,
+            shipping: null,
+            source: null,
+            statement_descriptor: null,
+            statement_descriptor_suffix: null,
+            transfer_data: null,
+            transfer_group: null,
+            //@ts-ignore
+            charges: undefined,
+            metadata: {},
         };
 
         const amountToBill = hasFreeShipping
@@ -195,13 +172,12 @@ export class CreateSubscription {
             : newPaymentOrders[0].getTotalAmount();
 
         if (Math.round(newPaymentOrders[0].getFinalAmount()) >= 0.5) {
-            paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
+            paymentIntent = await this.paymentService.paymentIntent(
                 amountToBill,
-                dto.stripePaymentMethodId
-                    ? dto.stripePaymentMethodId
-                    : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
+                customerDefaultPaymentMethod.stripeId,
                 customer.email,
-                customer.stripeId
+                customer.stripeId,
+                true
             );
         }
 
@@ -209,12 +185,8 @@ export class CreateSubscription {
         newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
 
         if (!!paymentIntent && paymentIntent.status === "requires_action") {
-            if (customerSubscriptionHistory.length === 0) createFriendCode.execute({ customer });
-            newPaymentOrders[0].toPendingConfirmation(orders);
+            throw new Error("El método de pago del cliente requiere una confirmación por parte de el");
         } else if (!!paymentIntent && (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled")) {
-            await this.paymentService.removePaymentMethodFromCustomer(
-                dto.stripePaymentMethodId || customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId))
-            );
             throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
         } else {
             newPaymentOrders[0]?.toBilled(orders, customer);
@@ -239,36 +211,29 @@ export class CreateSubscription {
         await this.orderRepository.bulkSave(orders);
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
-
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
-        // if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
-        //     for (let paymentOrder of paymentOrdersToUpdate) {
-        //         // TO DO: Update Orders shipping cost too
-        //         paymentOrder.shippingCost = customerShippingZone.cost;
-        //     }
-        // }
-        if (coupon) await this.couponRepository.save(coupon);
+
         this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
-        if (paymentIntent.status === "succeeded") {
-            const ticketDto: PaymentOrderBilledNotificationDto = {
-                customerEmail: customer.email,
-                foodVAT: Math.round((amountToBill * 0.1 + Number.EPSILON) * 100) / 100,
-                orders: [orders[0]],
-                paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
-                phoneNumber: customer.personalInfo?.phone1 || "",
-                shippingAddressCity: "",
-                shippingAddressName: customer.getShippingAddress().name || "",
-                shippingCost: newPaymentOrders[0].shippingCost,
-                shippingCustomerName: customer.getPersonalInfo().fullName || "",
-                shippingDate: orders[0].getHumanShippmentDay(),
-                totalAmount: amountToBill,
-            };
-            this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
-        }
+
+        const ticketDto: PaymentOrderBilledNotificationDto = {
+            customerEmail: customer.email,
+            foodVAT: Math.round((amountToBill * 0.1 + Number.EPSILON) * 100) / 100,
+            orders: [orders[0]],
+            paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
+            phoneNumber: customer.personalInfo?.phone1 || "",
+            shippingAddressCity: "",
+            shippingAddressName: customer.getShippingAddress().name || "",
+            shippingCost: newPaymentOrders[0].shippingCost,
+            shippingCustomerName: customer.getPersonalInfo().fullName || "",
+            shippingDate: orders[0].getHumanShippmentDay(),
+            totalAmount: amountToBill,
+        };
+        this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
 
         return {
             subscription,
             paymentIntent,
+            // firstOrder: today.getDay() === 0 ? orders[1] : orders[0],
             firstOrder: orders[0],
             billedPaymentOrderHumanId: newPaymentOrders[0].getHumanIdOrIdValue(),
             customerPaymentMethods: customer.paymentMethods,
@@ -287,6 +252,7 @@ export class CreateSubscription {
     public get customerRepository(): ICustomerRepository {
         return this._customerRepository;
     }
+
     /**
      * Getter subscriptionRepository
      * @return {ISubscriptionRepository}
@@ -328,22 +294,6 @@ export class CreateSubscription {
     }
 
     /**
-     * Getter couponRepository
-     * @return {ICouponRepository}
-     */
-    public get couponRepository(): ICouponRepository {
-        return this._couponRepository;
-    }
-
-    /**
-     * Getter assignOrdersToPaymentOrderService
-     * @return {AssignOrdersToPaymentOrders}
-     */
-    public get assignOrdersToPaymentOrderService(): AssignOrdersToPaymentOrders {
-        return this._assignOrdersToPaymentOrderService;
-    }
-
-    /**
      * Getter paymentService
      * @return {IPaymentService}
      */
@@ -360,10 +310,10 @@ export class CreateSubscription {
     }
 
     /**
-     * Getter assignOrdersToPaymentOrder
+     * Getter assignOrdersToPaymentOrderService
      * @return {AssignOrdersToPaymentOrders}
      */
-    public get assignOrdersToPaymentOrders(): AssignOrdersToPaymentOrders {
+    public get assignOrdersToPaymentOrderService(): AssignOrdersToPaymentOrders {
         return this._assignOrdersToPaymentOrderService;
     }
 
