@@ -55,6 +55,7 @@ const RecipeGeneralData = new mongoose.Schema({
     sku: {
         type: String,
         required: true,
+        unique: true,
     },
 
     imageUrl: {
@@ -74,6 +75,7 @@ const RecipeVariant = new mongoose.Schema({
     sku: {
         type: String,
         required: true,
+        unique: true,
     },
 
     ingredients: [
