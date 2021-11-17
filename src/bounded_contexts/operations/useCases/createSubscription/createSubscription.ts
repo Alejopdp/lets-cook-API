@@ -1,5 +1,9 @@
 import Stripe from "stripe";
-import { INotificationService, NewSubscriptionNotificationDto } from "../../../../shared/notificationService/INotificationService";
+import {
+    INotificationService,
+    NewSubscriptionNotificationDto,
+    PaymentOrderBilledNotificationDto,
+} from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Coupon } from "../../domain/cupons/Cupon";
@@ -245,6 +249,20 @@ export class CreateSubscription {
         // }
         if (coupon) await this.couponRepository.save(coupon);
         this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
+        const ticketDto: PaymentOrderBilledNotificationDto = {
+            customerEmail: customer.email,
+            foodVAT: Math.round((amountToBill * 0.1 + Number.EPSILON) * 100) / 100,
+            orders: [orders[0]],
+            paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
+            phoneNumber: customer.personalInfo?.phone1 || "",
+            shippingAddressCity: "",
+            shippingAddressName: customer.getShippingAddress().name || "",
+            shippingCost: newPaymentOrders[0].shippingCost,
+            shippingCustomerName: customer.getPersonalInfo().fullName || "",
+            shippingDate: orders[0].getHumanShippmentDay(),
+            totalAmount: amountToBill,
+        };
+        this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
 
         const today = new Date();
 

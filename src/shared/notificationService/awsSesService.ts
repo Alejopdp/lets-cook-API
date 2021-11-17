@@ -196,7 +196,7 @@ export class AwsSesService implements INotificationService {
     }
 
     public async notifyCustomerAboutPaymentOrderBilled(dto: PaymentOrderBilledNotificationDto): Promise<void> {
-        await this.sendMail([dto.customerEmail], "Tu ticket de Let's Cook", "", ticketTemplate(dto));
+        await this.sendMail([dto.customerEmail], `Tu ticket de Let's Cook ${dto.paymentOrderHumanNumber}`, "", ticketTemplate(dto));
     }
 
     /**
