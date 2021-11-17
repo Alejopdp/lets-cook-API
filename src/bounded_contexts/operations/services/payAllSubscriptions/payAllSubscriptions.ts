@@ -48,8 +48,8 @@ export class PayAllSubscriptions {
 
     public async execute(): Promise<void> {
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
-        const today: Date = new Date(2021, 10, 27);
-        // const today: Date = new Date();
+        // const today: Date = new Date(2021, 11, 25);
+        const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
@@ -152,14 +152,16 @@ export class PayAllSubscriptions {
                         paymentOrdersWithHumanIdCount++;
                         notificationDtos.push({
                             customerEmail: paymentOrderCustomer.email,
-                            foodVAT: totalAmount * 0.1,
+                            foodVAT: Math.round((totalAmount * 0.1 + Number.EPSILON) * 100) / 100,
                             phoneNumber: paymentOrderCustomer.personalInfo?.phone1 || "",
                             shippingAddressCity: "",
                             shippingAddressName: paymentOrderCustomer.getShippingAddress().name || "",
                             shippingCost: customerHasFreeShipping ? 0 : shippingCost,
                             shippingCustomerName: paymentOrderCustomer.getPersonalInfo().fullName || "",
                             shippingDate: paymentOrderOrderMap[paymentOrderId][0].getHumanShippmentDay(),
-                            totalAmount: totalAmount,
+                            totalAmount,
+                            orders: paymentOrderOrderMap[paymentOrderId],
+                            paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
                         });
                     } else {
                         logger.info(`${paymentOrderId} processing failed`);

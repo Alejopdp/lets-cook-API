@@ -1,4 +1,5 @@
 import { Customer } from "@src/bounded_contexts/operations/domain/customer/Customer";
+import { Order } from "@src/bounded_contexts/operations/domain/order/Order";
 import { Subscription } from "@src/bounded_contexts/operations/domain/subscription/Subscription";
 import { RecipeSelection } from "../../bounded_contexts/operations/domain/order/RecipeSelection";
 
@@ -26,6 +27,8 @@ export interface PaymentOrderBilledNotificationDto {
     shippingAddressCity: string;
     phoneNumber: string;
     customerEmail: string;
+    orders: Order[];
+    paymentOrderHumanNumber: string;
 }
 export interface INotificationService {
     notifyNewBackOfficeUserToGeneratePassword(email: string, redirectUrl: string): Promise<void>;

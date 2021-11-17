@@ -1,6 +1,6 @@
 import _ from "lodash";
 import Stripe from "stripe";
-import { INotificationService } from "../../../../shared/notificationService/INotificationService";
+import { INotificationService, PaymentOrderBilledNotificationDto } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Customer } from "../../domain/customer/Customer";
@@ -190,6 +190,20 @@ export class CreateManySubscriptions {
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
 
+        // const ticketDto: PaymentOrderBilledNotificationDto = {
+        //             customerEmail: customer.email,
+        //             foodVAT: Math.round((totalPrice + Number.EPSILON) * 100) / 100,
+        //             orders: [orders[0]],
+        //             paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
+        //             phoneNumber: customer.personalInfo?.phone1 || "",
+        //             shippingAddressCity: "",
+        //             shippingAddressName: customer.getShippingAddress().name || "",
+        //             shippingCost: newPaymentOrders[0].shippingCost,
+        //             shippingCustomerName: customer.getPersonalInfo().fullName || "",
+        //             shippingDate: orders[0].getHumanShippmentDay(),
+        //             totalAmount: totalPrice,
+        //         };
+        //         this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
         return { subscriptions, paymentMethodId: customerDefaultPaymentMethod?.stripeId, paymentIntent, paymentOrder: newPaymentOrders[0] };
     }
 
