@@ -2,6 +2,7 @@ import { Recipe } from "../../domain/recipe/Recipe";
 import { Week } from "../../domain/week/Week";
 import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
+import { GetNextWeekRecipesDto } from "./getNextWeekRecipesDto";
 
 export class GetNextWeekRecipes {
     private _weekRepository: IWeekRepository;
@@ -12,10 +13,10 @@ export class GetNextWeekRecipes {
         this._recipeRepository = recipeRepository;
     }
 
-    public async execute(): Promise<Recipe[]> {
+    public async execute(dto: GetNextWeekRecipesDto): Promise<Recipe[]> {
         const nextWeek: Week | undefined = await this.weekRepository.findNextWeek();
         if (!!!nextWeek) throw new Error("Error al obtener las recetas de la semana que viene");
-        const recipes: Recipe[] = await this.recipeRepository.findByWeekId(nextWeek.id);
+        const recipes: Recipe[] = await this.recipeRepository.findByWeekId(nextWeek.id, dto.locale);
 
         return recipes;
     }
