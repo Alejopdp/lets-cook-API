@@ -44,7 +44,7 @@ export class ShippingZone extends Entity<ShippingZone> {
         const guardedArgs: GuardArgumentCollection = [
             { argument: name, argumentName: "El nombre de zona de envío" },
             { argument: reference, argumentName: "La referencia de zona de envío" },
-            { argument: cost, argumentName: "El costo de envío" },
+            { argument: cost, argumentName: "El coste de envío" },
             { argument: radio, argumentName: "El radio de zona de envío" },
             { argument: shippingDayOfWeek, argumentName: "El día de entrega" },
         ];
