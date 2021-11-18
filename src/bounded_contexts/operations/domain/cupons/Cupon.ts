@@ -106,7 +106,7 @@ export class Coupon extends Entity<Coupon> {
 
     public isValid(customerSubscriptions: Subscription[], plan: Plan, planVariantId: PlanVariantId, shippingCost?: number): boolean {
         if (this.isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost) && shippingCost === 0)
-            throw new Error("No puedes aplicar un cupón de envío gratis con una dirección sin costo de envío");
+            throw new Error("No puedes aplicar un cupón de envío gratis con una dirección sin coste de envío");
         if (this.isValidatingAFreeShippingCouponWithoutHavingAnAddress(shippingCost))
             throw new Error("Para utilizar un cupón de envío gratis primero debes ingresar una dirección de entrega");
         if (this.isValidatingAFreeShippingCouponWithoutShippingCost(shippingCost!))

@@ -1,6 +1,8 @@
 import { BaseController } from "../../../../core/infra/BaseController";
 import { GetNextWeekRecipes } from "./getNextWeekRecipes";
 import { GetNextWeekRecipesPresenter } from "./getNextWeekRecipesPresenter";
+import { GetNextWeekRecipesDto } from "./getNextWeekRecipesDto";
+import { Locale } from "../../domain/locale/Locale";
 
 export class GetNextWeekRecipesController extends BaseController {
     private _getNextWeekRecipes: GetNextWeekRecipes;
@@ -14,7 +16,10 @@ export class GetNextWeekRecipesController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const result = await this.getNextWeekRecipes.execute();
+            const dto: GetNextWeekRecipesDto = {
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+            };
+            const result = await this.getNextWeekRecipes.execute(dto);
             const presentedResult = await this.getNextWeeRecipesPresenter.present(result);
 
             return this.ok(this.res, presentedResult);
