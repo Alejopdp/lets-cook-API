@@ -191,10 +191,10 @@ export class ExportNextOrdersWithRecipesSelection {
                         recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
                         deliveriesUntilWeek: customerDeliveriesByWeek[order.customer.id.toString()]
                             ? customerDeliveriesByWeek[order.customer.id.toString()][order.week.id.value.toString()]
-                            : "",
-                        onlyFirstWeek:
+                            : 0,
+                        onlyFirstWeek: !!(
                             customerDeliveriesByWeek[order.customer.id.toString()] && Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
-                            customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive()),
+                            customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive())),
                     });
                 }
             }
@@ -255,7 +255,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
                         deliveriesUntilWeek: customerDeliveriesByWeek[order.customer.id.toString()]
                             ? customerDeliveriesByWeek[order.customer.id.toString()][order.week.id.value.toString()]
-                            : "",
+                            : 0,
                         onlyFirstWeek:!!(
                             customerDeliveriesByWeek[order.customer.id.toString()] && Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
                             customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive())),
@@ -320,7 +320,7 @@ export class ExportNextOrdersWithRecipesSelection {
                 finalPortionPrice: 0,
                 recipeDivision: 1 / paymentOrderExportLinesQuantityMap[paymentOrder.id.value as string],
                 recivedOrdersQuantity: !!auxOrder && !!auxOrder?.customer ? auxOrder?.customer.receivedOrdersQuantity : 0,
-                deliveriesUntilWeek: "",
+                deliveriesUntilWeek: 0,
                 onlyFirstWeek:
                     !!auxOrder && !!auxOrder?.customer && customerDeliveriesByWeek[auxOrder.customer.id.toString()] 
                         ? Object.entries(customerDeliveriesByWeek[auxOrder.customer.id.toString()]).length === 1 &&
