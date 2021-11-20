@@ -51,6 +51,7 @@ export class UpdateRecipe {
         const imagesUrls: string[] = [];
 
         for (let img of dto.recipeImages) {
+            console.log("Una uneva");
             // const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, dto.recipeImageExtension, img);
             const imageUrl: string = await this.storageService.saveRecipeImage(dto.name, img.fileName, img.file);
 

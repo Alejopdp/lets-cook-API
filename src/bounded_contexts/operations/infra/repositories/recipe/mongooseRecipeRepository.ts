@@ -32,17 +32,17 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                         [nameWithLocaleKey]: auxRecipeGeneralData.name[locale],
                         [shortDescriptionWithLocaleKey]: auxRecipeGeneralData.recipeDescription.shortDescription[locale],
                         [longDescriptionWithLocaleKey]: auxRecipeGeneralData.recipeDescription.longDescription[locale],
-                        recipeCookDuration: {
+                        "recipeGeneralData.recipeCookDuration": {
                             timeValue: auxRecipeGeneralData.recipeCookDuration.timeValue,
                             timeUnit: auxRecipeGeneralData.recipeCookDuration.timeUnit,
                         },
-                        recipeWeight: {
+                        "recipeGeneralData.recipeWeight": {
                             weightValue: auxRecipeGeneralData.recipeWeight.weightValue,
                             weightUnit: auxRecipeGeneralData.recipeWeight.weightUnit,
                         },
-                        sku: auxRecipeGeneralData.sku,
-                        imagesUrls: auxRecipeGeneralData.imagesUrls,
-                        difficultyLevel: auxRecipeGeneralData.difficultyLevel,
+                        "recipeGeneralData.sku": auxRecipeGeneralData.sku,
+                        "recipeGeneralData.imagesUrls": auxRecipeGeneralData.imagesUrls,
+                        "recipeGeneralData.difficultyLevel": auxRecipeGeneralData.difficultyLevel,
                     },
                 }
             );
