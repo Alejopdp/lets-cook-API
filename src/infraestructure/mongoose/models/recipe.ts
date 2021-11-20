@@ -71,6 +71,8 @@ const RecipeGeneralData = new mongoose.Schema({
     ],
 });
 
+RecipeGeneralData.index({ sku: 1 }, { unique: true });
+
 const RecipeVariant = new mongoose.Schema({
     sku: {
         type: String,
@@ -91,6 +93,8 @@ const RecipeVariant = new mongoose.Schema({
         ref: "RecipeVariantRestriction",
     },
 });
+
+RecipeVariant.index({ sku: 1 }, { unique: true });
 
 const RecipeSchema = new mongoose.Schema(
     {
