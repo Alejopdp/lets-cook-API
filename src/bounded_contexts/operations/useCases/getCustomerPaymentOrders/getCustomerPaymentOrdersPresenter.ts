@@ -10,6 +10,7 @@ export class GetCustomerPaymentOrdersPresenter {
         for (let order of orderedPaymentOrders) {
             presentedOrders.push({
                 id: order.id.value,
+                humanId: order.getHumanIdOrIdValue(),
                 billingDate: MomentTimeService.getDdMmYyyy(order.billingDate),
                 amount: order.getFinalAmount(),
                 state: order.state.title,
