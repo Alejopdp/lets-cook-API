@@ -136,6 +136,7 @@ export class ExportNextOrdersWithRecipesSelection {
             const subscription = subscriptionMap[order.subscriptionId.value];
             const orderPlanVariant = order.plan.getPlanVariantById(order.planVariantId);
 
+ 
             if (order.recipeSelection.length === 0) {
                 for (let i = 0; i < (order.getNumberOfRecipesOrReturn0() || 1); i++) {
                     ordersExport.push({
@@ -192,7 +193,7 @@ export class ExportNextOrdersWithRecipesSelection {
                             ? customerDeliveriesByWeek[order.customer.id.toString()][order.week.id.value.toString()]
                             : "",
                         onlyFirstWeek:
-                            Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
+                            customerDeliveriesByWeek[order.customer.id.toString()] && Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
                             customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive()),
                     });
                 }
@@ -255,9 +256,9 @@ export class ExportNextOrdersWithRecipesSelection {
                         deliveriesUntilWeek: customerDeliveriesByWeek[order.customer.id.toString()]
                             ? customerDeliveriesByWeek[order.customer.id.toString()][order.week.id.value.toString()]
                             : "",
-                        onlyFirstWeek:
-                            Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
-                            customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive()),
+                        onlyFirstWeek:!!(
+                            customerDeliveriesByWeek[order.customer.id.toString()] && Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
+                            customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive())),
                     });
                 }
             }
@@ -321,7 +322,7 @@ export class ExportNextOrdersWithRecipesSelection {
                 recivedOrdersQuantity: !!auxOrder && !!auxOrder?.customer ? auxOrder?.customer.receivedOrdersQuantity : 0,
                 deliveriesUntilWeek: "",
                 onlyFirstWeek:
-                    !!auxOrder && !!auxOrder?.customer
+                    !!auxOrder && !!auxOrder?.customer && customerDeliveriesByWeek[auxOrder.customer.id.toString()] 
                         ? Object.entries(customerDeliveriesByWeek[auxOrder.customer.id.toString()]).length === 1 &&
                           customerSubscriptionsMap[auxOrder.customer.id.toString()].every((sub) => !sub.isActive())
                         : false,
