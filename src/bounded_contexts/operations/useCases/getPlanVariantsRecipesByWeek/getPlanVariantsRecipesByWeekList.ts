@@ -1,6 +1,6 @@
 import { Plan } from "../../domain/plan/Plan";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
-import { GetGetPlanVariantsRecipesByWeekListDto } from "./getPlanVariantsRecipesByWeekListDto";
+import { GetPlanVariantsRecipesByWeekListDto } from "./getPlanVariantsRecipesByWeekListDto";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeRepository";
 import { Week } from "../../domain/week/Week";
@@ -18,14 +18,14 @@ export class GetPlanVariantsRecipesByWeekList {
         this._weekRepository = weekRepository;
     }
 
-    public async execute(): Promise<{ plans: Plan[]; recipes: Recipe[]; week: Week }> {
+    public async execute(dto: GetPlanVariantsRecipesByWeekListDto): Promise<{ plans: Plan[]; recipes: Recipe[]; week: Week }> {
         const date_currently = new Date();
         date_currently.setDate(date_currently.getDate() + (date_currently.getDay() === 0 ? 14 : 7));
         const week: Week | undefined = await this.weekRepository.findCurrentWeek(date_currently);
         if (!week) throw new Error("Error al obtener las recetas de la semana");
 
         const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week.id);
-        const plans: Plan[] = await this.planRepository.findAll((<any>Locale)["es" as string] || Locale.es);
+        const plans: Plan[] = await this.planRepository.findAll(dto.locale);
 
         return { plans, recipes, week };
     }

@@ -263,6 +263,7 @@ export class CreateSubscription {
                 shippingDate: orders[0].getHumanShippmentDay(),
                 totalAmount: amountToBill,
             };
+            console.log("a");
             this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
         }
 

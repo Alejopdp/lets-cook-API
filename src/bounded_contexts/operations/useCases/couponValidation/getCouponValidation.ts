@@ -33,7 +33,7 @@ export class GetCouponValidation {
             !coupon.isFreeShippingCoupon() &&
             (Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)) / 100 <= 0
         )
-            throw new Error("El cupón no es aplicable al monto del plan");
+            throw new Error("El cupón no es aplicable al importe del plan");
 
         if (!coupon.hasStarted()) throw new Error("El cupón ingresado no es válido");
         if (coupon.isExpiredByEndDate()) throw new Error("El cupón de descuento ingresado ha expirado");

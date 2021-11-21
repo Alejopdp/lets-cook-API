@@ -175,7 +175,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         if (!!!this.isBilled() && !!!this.isPartiallyRefunded())
             throw new Error("No puede hacer un reembolso de un pago que no fue cobrado o parcialmente reembolsado");
         if ((Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100 > this.getTotalAmount())
-            throw new Error("No puede devolverse una cantidad mayor al total del monto de la orden");
+            throw new Error("No puede devolverse una cantidad mayor al total del importe de la orden");
         if (amount <= 0) throw new Error("No puede devolverse una cantidad negativa");
         if ((Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100 === this.getTotalAmount())
             this.state.toRefunded(this);
