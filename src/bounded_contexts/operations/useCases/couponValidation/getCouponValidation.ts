@@ -31,7 +31,7 @@ export class GetCouponValidation {
         if (!coupon) throw new Error("El cupón de descuento ingresado es incorrecto");
         if (
             !coupon.isFreeShippingCoupon() &&
-            (Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)) / 100 <= 0
+            (Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)) / 100 < 0
         )
             throw new Error("El cupón no es aplicable al monto del plan");
 
