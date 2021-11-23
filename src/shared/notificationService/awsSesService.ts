@@ -112,7 +112,7 @@ export class AwsSesService implements INotificationService {
                     Data: subject,
                 },
                 Body: {
-                    Text: { Data: "Code" },
+                    Text: { Data: textBody },
                     Html: { Data: htmlBody },
                 },
             },
