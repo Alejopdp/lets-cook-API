@@ -209,63 +209,14 @@ export class Plan extends Entity<Plan> {
             attributes["Recetas"] = [];
 
             for (let variant of this.planVariants) {
-                const personasValues = attributes["Personas"];
-                const recetasValues = attributes["Recetas"];
-
-                //@ts-ignore
-                attributes["Personas"] = personasValues.includes(variant.numberOfPersons)
-                    ? personasValues
-                    : //@ts-ignore
-                      [...personasValues, variant.numberOfPersons];
-                //@ts-ignore
-                attributes["Recetas"] = recetasValues.includes(variant.numberOfRecipes)
-                    ? recetasValues
-                    : //@ts-ignore
-                      [...recetasValues, variant.numberOfRecipes];
-                for (let attr of variant.attributes) {
-                    const actualValues = attributes[attr.key];
-
-                    attributes[attr.key] = actualValues.includes(attr.value) ? actualValues : [...actualValues, attr.value];
-                }
-            }
-        } else if (this.hasRecipes && !this.isPrincipal()) {
-            //@ts-ignore
-            const recipesValues = this.planVariants.map((variant) => variant.numberOfRecipes);
-            console.log("Recipes values: ", recipesValues);
-
-            for (let variant of this.planVariants) {
-                //@ts-ignore
-                if (variant.numberOfPersons) {
-                    if (!Array.isArray(attributes["Personas"])) attributes["Personas"] = [];
-                    const numberOfPersonsValues = attributes["Personas"];
-                    //@ts-ignore
-                    attributes["Personas"] = numberOfPersonsValues.includes(variant.numberOfPersons)
-                        ? numberOfPersonsValues
-                        : //@ts-ignore
-                          [...numberOfPersonsValues, variant.numberOfPersons];
-                }
-
-                // if (!Array.isArray(attributes["Recetas"])) attributes["Recetas"] = [];
-                // const recetasValues = attributes["Recetas"];
-                // //@ts-ignore
-                // attributes["Recetas"] = recetasValues.includes(variant.numberOfRecipes)
-                //     ? recetasValues
-                //     : //@ts-ignore
-                //       [...recetasValues, variant.numberOfRecipes];
-
-                for (let attr of variant.attributes) {
-                    const actualValues = attributes[attr.key];
-
-                    attributes[attr.key] = actualValues.includes(attr.value) ? actualValues : [...actualValues, attr.value];
-                }
+                variant.getAttributesAndValues(attributes);
             }
         } else {
-            for (let variant of this.planVariants) {
-                for (let attr of variant.attributes) {
-                    const actualValues = attributes[attr.key];
+            if (this.planVariants.every((variant) => !!variant.numberOfPersons)) attributes["Personas"] = [];
+            if (this.planVariants.every((variant) => !!variant.numberOfRecipes)) attributes["Recetas"] = [];
 
-                    attributes[attr.key] = actualValues.includes(attr.value) ? actualValues : [...actualValues, attr.value];
-                }
+            for (let variant of this.planVariants) {
+                variant.getAttributesAndValues(attributes);
             }
         }
 

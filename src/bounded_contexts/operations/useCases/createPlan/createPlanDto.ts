@@ -13,7 +13,7 @@ export interface CreatePlanDto {
     isActive: boolean;
     availablePlanFrecuencies: string[];
     hasRecipes: boolean;
-    additionalPlansIds: string[] | number[];
+    additionalPlansIds: string[];
     planSlug: string;
     abilityToChooseRecipes: boolean;
     iconLinealFile: ReadStream;

@@ -13,6 +13,8 @@ export class PlanVariant extends Entity<PlanVariant> {
     private _description: string;
     private _isDefault: boolean;
     private _isDeleted: boolean;
+    private _numberOfPersons?: number;
+    private _numberOfRecipes?: number;
 
     constructor(
         sku: PlanSku,
@@ -23,7 +25,9 @@ export class PlanVariant extends Entity<PlanVariant> {
         isDefault: boolean,
         isDeleted: boolean,
         priceWithOffer?: number,
-        planVariantId?: PlanVariantId
+        planVariantId?: PlanVariantId,
+        numberOfPersons?: number,
+        numberOfRecipes?: number
     ) {
         super(planVariantId);
         this._sku = sku;
@@ -34,6 +38,8 @@ export class PlanVariant extends Entity<PlanVariant> {
         this._description = description;
         this._isDefault = isDefault;
         this._isDeleted = isDeleted;
+        this._numberOfPersons = numberOfPersons;
+        this._numberOfRecipes = numberOfRecipes;
     }
 
     public getConcatenatedAttributesAsString(): string {
@@ -59,15 +65,41 @@ export class PlanVariant extends Entity<PlanVariant> {
     }
 
     public getServingsQuantity(): number {
-        return 0;
+        return this.numberOfPersons || 0;
     }
 
     public getNumberOfRecipes(): number {
-        return 0;
+        return this.numberOfRecipes || 0;
     }
 
     public getAuxIdFromAttributes(): string {
         return "";
+    }
+
+    public getAttributesAndValues(attributes: { [key: string]: (string | number)[] }): { [key: string]: (string | number)[] } {
+        if (!!this.numberOfPersons) {
+            const personasValues = attributes["Personas"];
+
+            attributes["Personas"] = personasValues.includes(this.numberOfPersons)
+                ? personasValues
+                : [...personasValues, this.numberOfPersons];
+        }
+        if (!!this.numberOfRecipes) {
+            const recetasValues = attributes["Recetas"];
+
+            //@ts-ignore
+            attributes["Recetas"] = recetasValues.includes(this.numberOfRecipes)
+                ? recetasValues
+                : //@ts-ignore
+                  [...recetasValues, this.numberOfRecipes];
+        }
+        for (let attr of this.attributes) {
+            const actualValues = attributes[attr.key];
+
+            attributes[attr.key] = actualValues.includes(attr.value) ? actualValues : [...actualValues, attr.value];
+        }
+
+        return attributes;
     }
 
     /**
@@ -132,6 +164,38 @@ export class PlanVariant extends Entity<PlanVariant> {
      */
     public get isDeleted(): boolean {
         return this._isDeleted;
+    }
+
+    /**
+     * Getter numberOfPersons
+     * @return {number | undefined}
+     */
+    public get numberOfPersons(): number | undefined {
+        return this._numberOfPersons;
+    }
+
+    /**
+     * Getter numberOfRecipes
+     * @return {number | undefined}
+     */
+    public get numberOfRecipes(): number | undefined {
+        return this._numberOfRecipes;
+    }
+
+    /**
+     * Setter numberOfPersons
+     * @param {number | undefined} value
+     */
+    public set numberOfPersons(value: number | undefined) {
+        this._numberOfPersons = value;
+    }
+
+    /**
+     * Getter numberOfRecipes
+     * @param {number | undefined} value
+     */
+    public set numberOfRecipes(value: number | undefined) {
+        this._numberOfRecipes = value;
     }
 
     /**
