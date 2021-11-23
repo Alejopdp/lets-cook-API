@@ -20,7 +20,6 @@ export class StripeService implements IPaymentService {
             amount: Math.max(Math.trunc(amount * 100), 50),
             currency: "eur",
             payment_method_types: ["card"],
-            receipt_email: "",
             payment_method: paymentMethod,
             customer: customerId,
             confirm: true,
