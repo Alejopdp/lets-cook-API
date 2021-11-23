@@ -10,7 +10,7 @@ export class SubscriptionCancelled implements ISubscriptionState {
 
     constructor() {
         this.title = "SUBSCRIPTION_CANCELLED";
-        this.humanTitle = "Cancelada";
+        this.humanTitle = "Cancelado";
         this.color = "red";
     }
 

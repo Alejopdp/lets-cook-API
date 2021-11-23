@@ -8,7 +8,7 @@ import { PlanSku } from "../../domain/plan/PlanSku";
 import { PlanSlug } from "../../domain/plan/PlanSlug";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../../domain/plan/PlanVariant/PlanVariantAttribute";
-import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
+// import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { CreatePlanDto } from "./createPlanDto";
 
@@ -29,8 +29,7 @@ export class CreatePlan {
         const additionalPlans: Plan[] =
             dto.additionalPlansIds.length > 0
                 ? await this.planRepository.findAdditionalPlanListById(
-                      //@ts-ignore
-                      dto.additionalPlansIds.map((id) => new PlanId(id)),
+                      dto.additionalPlansIds.map((id: string) => new PlanId(id)),
                       dto.locale
                   )
                 : [];
@@ -40,59 +39,34 @@ export class CreatePlan {
 
             attributes = Object.entries(variant).map((entry) => new PlanVariantAttribute(entry[0], entry[1] as string));
 
-            if (dto.hasRecipes) {
-                attributes = attributes.filter(
-                    (attr) =>
-                        attr.key.toLowerCase() !== "personas" &&
-                        attr.key.toLowerCase() !== "recetas" &&
-                        attr.key.toLowerCase() !== "id" &&
-                        attr.key.toLowerCase() !== "sku" &&
-                        attr.key.toLowerCase() !== "price" &&
-                        attr.key.toLowerCase() !== "pricewithoffer" &&
-                        attr.key.toLowerCase() !== "isdefault" &&
-                        attr.key.toLowerCase() !== "isdeleted" &&
-                        attr.key.toLowerCase() !== "deleted" &&
-                        attr.key.toLowerCase() !== "description"
-                );
+            attributes = attributes.filter(
+                (attr) =>
+                    attr.key.toLowerCase() !== "personas" &&
+                    attr.key.toLowerCase() !== "recetas" &&
+                    attr.key.toLowerCase() !== "id" &&
+                    attr.key.toLowerCase() !== "sku" &&
+                    attr.key.toLowerCase() !== "price" &&
+                    attr.key.toLowerCase() !== "pricewithoffer" &&
+                    attr.key.toLowerCase() !== "isdefault" &&
+                    attr.key.toLowerCase() !== "isdeleted" &&
+                    attr.key.toLowerCase() !== "deleted" &&
+                    attr.key.toLowerCase() !== "description"
+            );
 
-                let variantWithRecipe: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-                    variant.Personas,
-                    variant.Recetas,
-                    new PlanSku(variant.sku),
-                    "",
-                    variant.price,
-                    variant.priceWithOffer,
-                    attributes,
-                    variant.description,
-                    variant.isDefault,
-                    variant.isDeleted
-                );
-                planVariants.push(variantWithRecipe);
-            } else {
-                attributes = attributes.filter(
-                    (attr) =>
-                        attr.key.toLowerCase() !== "id" &&
-                        attr.key.toLowerCase() !== "sku" &&
-                        attr.key.toLowerCase() !== "price" &&
-                        attr.key.toLowerCase() !== "pricewithoffer" &&
-                        attr.key.toLowerCase() !== "isdefault" &&
-                        attr.key.toLowerCase() !== "isdeleted" &&
-                        attr.key.toLowerCase() !== "deleted" &&
-                        attr.key.toLowerCase() !== "description"
-                );
-
-                let planVariant: PlanVariant = new PlanVariant(
-                    new PlanSku(variant.sku),
-                    "",
-                    variant.price,
-                    attributes,
-                    variant.description,
-                    variant.isDefault,
-                    variant.isDeleted,
-                    variant.priceWithOffer
-                );
-                planVariants.push(planVariant);
-            }
+            let planVariant: PlanVariant = new PlanVariant(
+                new PlanSku(variant.sku),
+                "",
+                variant.price,
+                attributes,
+                variant.description,
+                variant.isDefault,
+                variant.isDeleted,
+                variant.priceWithOffer,
+                undefined,
+                variant.Personas,
+                variant.Recetas
+            );
+            planVariants.push(planVariant);
         }
 
         const plan: Plan = Plan.create(

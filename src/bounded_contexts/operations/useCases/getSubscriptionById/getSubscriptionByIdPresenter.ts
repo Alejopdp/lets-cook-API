@@ -67,9 +67,21 @@ export class GetSubscriptionByIdPresenter {
         const canChooseRecipes = subscription.plan.abilityToChooseRecipes;
         const nextTwelveOrders = this.presentOrders(orders);
         const nextPaymentOrderWithShippingCost: PaymentOrder | undefined = !!actualWeekOrder
-            ? paymentOrders.find((po) => po.week.equals(actualWeekOrder.week) && !po.hasFreeShipping && po.shippingCost > 0 && po.customerId.equals(actualWeekOrder.customer.id))
+            ? paymentOrders.find(
+                  (po) =>
+                      po.week.equals(actualWeekOrder.week) &&
+                      !po.hasFreeShipping &&
+                      po.shippingCost > 0 &&
+                      po.customerId.equals(actualWeekOrder.customer.id)
+              )
             : !!nextWeekOrder
-            ? paymentOrders.find((po) => po.week.equals(nextWeekOrder.week) && !po.hasFreeShipping && po.shippingCost > 0 && po.customerId.equals(nextWeekOrder.customer.id))
+            ? paymentOrders.find(
+                  (po) =>
+                      po.week.equals(nextWeekOrder.week) &&
+                      !po.hasFreeShipping &&
+                      po.shippingCost > 0 &&
+                      po.customerId.equals(nextWeekOrder.customer.id)
+              )
             : undefined;
 
         return {
@@ -86,7 +98,7 @@ export class GetSubscriptionByIdPresenter {
             hasChosenRecipesForNextWeek,
             actualWeekOrder: actualWeekOrder ? await this.presentWeekRecipes(actualWeekOrder) : null,
             nextWeekOrder: nextWeekOrder ? await this.presentWeekRecipes(nextWeekOrder) : null,
-            canChooseRecipesForNextWeekOrder: nextWeekOrder && nextWeekOrder.isInTimeToChooseRecipes(),
+            canChooseRecipesForNextWeekOrder: nextWeekOrder && nextWeekOrder.isInTimeToChooseRecipes() && canChooseRecipes,
             skippedOrders,
             canChooseRecipes,
             nextTwelveOrders,

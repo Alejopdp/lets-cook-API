@@ -12,7 +12,7 @@ export class OrderBilled implements IOrderState {
 
     constructor() {
         this.title = "ORDER_BILLED";
-        this.humanTitle = "Orden pagada";
+        this.humanTitle = "Pagado";
         this.color = "green";
     }
 

@@ -1,7 +1,7 @@
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
-import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
+// import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 
 export class GetShippingRatePresenter {
     public present(shippingZone: ShippingZone, hasNextShipping: boolean): any {

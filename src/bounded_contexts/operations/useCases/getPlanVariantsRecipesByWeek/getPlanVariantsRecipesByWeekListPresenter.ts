@@ -131,33 +131,27 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
     }
 
     private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean, plan: Plan): any {
-        if (hasRecipes) {
-            return {
-                id: variant.id.value,
-                planId: plan.id.value,
-                sku: variant.sku.code,
-                price: variant.price,
-                priceWithOffer: variant.priceWithOffer,
+        return {
+            id: variant.id.value,
+            planId: plan.id.value,
+            sku: variant.sku.code,
+            price: variant.price,
+            priceWithOffer: variant.priceWithOffer,
+            numberOfPersons: variant.numberOfPersons,
+            numberOfRecipes: variant.numberOfRecipes,
+            Personas: variant.numberOfPersons,
+            Recetas: variant.numberOfRecipes,
+            attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
+            label: variant.getLabel(),
+            isDefault: variant.isDefault,
+            isDeleted: variant.isDeleted,
+            auxId:
+                variant.attributes.reduce((acc, attribute) => acc + attribute.value, "") +
                 //@ts-ignore
-                numberOfPersons: variant.numberOfPersons,
+                (variant.numberOfPersons?.toString() || "") +
                 //@ts-ignore
-                numberOfRecipes: variant.numberOfRecipes,
-                attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
-                label: variant.getLabel(),
-                isDefault: variant.isDefault,
-                isDeleted: variant.isDeleted,
-            };
-        } else {
-            return {
-                id: variant.id.value,
-                sku: variant.sku.code,
-                price: variant.price,
-                priceWithOffer: variant.priceWithOffer,
-                attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
-                isDefault: variant.isDefault,
-                isDeleted: variant.isDeleted,
-            };
-        }
+                (variant.numberOfRecipes?.toString() || ""),
+        };
     }
 
     private async presentPlan(

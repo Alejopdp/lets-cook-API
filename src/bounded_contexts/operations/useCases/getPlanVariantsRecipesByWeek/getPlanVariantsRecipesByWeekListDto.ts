@@ -1,5 +1,5 @@
 import { Locale } from "../../domain/locale/Locale";
 
-export interface GetGetPlanVariantsRecipesByWeekListDto {
+export interface GetPlanVariantsRecipesByWeekListDto {
     locale: Locale;
 }

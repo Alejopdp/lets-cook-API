@@ -14,7 +14,7 @@ export class PaymentOrderBilled implements IPaymentOrderState {
 
     constructor() {
         this.title = "PAYMENT_ORDER_BILLED";
-        this.humanTitle = "Orden pagada";
+        this.humanTitle = "Pagado";
         this.color = "green";
     }
 

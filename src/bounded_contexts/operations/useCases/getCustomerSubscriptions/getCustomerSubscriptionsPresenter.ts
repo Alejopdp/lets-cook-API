@@ -97,6 +97,7 @@ export class GetCustomerSubscriptionsPresenter {
             principalPlanSubscriptions: presentedPrincipalSubscriptions,
             additionalPlanSubscriptions: presentedAdditionalSubscriptions,
             pendingActions,
+            friendCode: subscriptions[0]?.customer.friendCode,
         };
     }
 

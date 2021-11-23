@@ -29,51 +29,36 @@ export class GetPlanAhorroPresenter {
                 counter++;
             }
 
-            if (plan.hasRecipes) {
-                presentedVariants.push({
-                    id: variant.id.value,
-                    // oldId: variant.id.value,
-                    isDefault: variant.isDefault,
-                    sku: variant.sku.code,
-                    price: variant.price,
-                    priceWithOffer: variant.priceWithOffer,
-                    description: variant.getLabel(),
-                    isDeleted: variant.isDeleted,
+            presentedVariants.push({
+                id: variant.id.value,
+                // oldId: variant.id.value,
+                isDefault: variant.isDefault,
+                sku: variant.sku.code,
+                price: variant.price,
+                priceWithOffer: variant.priceWithOffer,
+                description: variant.getLabel(),
+                isDeleted: variant.isDeleted,
+                numberOfPersons: variant.numberOfPersons || 0,
+                numberOfRecipes: variant.numberOfRecipes || 0,
+                Personas: variant.numberOfPersons,
+                Recetas: variant.numberOfRecipes,
+                attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
+                auxId:
+                    variant.attributes.reduce((acc, attribute) => acc + attribute.value, "") +
                     //@ts-ignore
-                    numberOfPersons: variant.numberOfPersons || 0,
+                    (variant.numberOfPersons?.toString() || "") +
                     //@ts-ignore
-                    numberOfRecipes: variant.numberOfRecipes || 0,
-                    //@ts-ignore
-                    Personas: variant.numberOfPersons,
-                    //@ts-ignore
-                    Recetas: variant.numberOfRecipes,
-                    attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
-                    // auxId:
-                    //     variant.attributes.reduce((acc, attribute) => acc + attribute.value, "") +
-                    //     //@ts-ignore
-                    //     (variant.numberOfPersons?.toString() || "") +
-                    //     //@ts-ignore
-                    //     (variant.numberOfRecipes?.toString() || ""),
-                });
-            } else {
-                presentedVariants.push({
-                    id: variant.id.value,
-                    isDefault: variant.isDefault,
-                    description: variant.getLabel(),
-                    sku: variant.sku.code,
-                    price: variant.price,
-                    priceWithOffer: variant.priceWithOffer,
-                    attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
-                    isDeleted: variant.isDeleted,
-                });
-            }
+                    (variant.numberOfRecipes?.toString() || ""),
+            });
+
             counter = 0;
         }
 
-        if (plan.hasRecipes) {
-            //@ts-ignore
+        if (plan.planVariants.every((v) => !!v.numberOfPersons)) {
             attributesAndValues.push(["Personas", _.uniq(plan.planVariants.map((variant) => variant.numberOfPersons))]);
-            //@ts-ignore
+        }
+
+        if (plan.planVariants.every((v) => !!v.numberOfRecipes)) {
             attributesAndValues.push(["Recetas", _.uniq(plan.planVariants.map((variant) => variant.numberOfRecipes))]);
         }
 
