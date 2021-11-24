@@ -1,7 +1,6 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
-import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 import _ from "lodash";
 
 export class GetPlanListPresenter {
@@ -59,38 +58,25 @@ export class GetPlanListPresenter {
                 counter++;
             }
 
-            if (plan.hasRecipes) {
-                presentedVariants.push({
-                    id: variant.id.value,
-                    sku: variant.sku.code,
-                    price: variant.price,
-                    priceWithOffer: variant.priceWithOffer,
-                    //@ts-ignore
-                    Personas: variant.numberOfPersons,
-                    //@ts-ignore
-                    Recetas: variant.numberOfRecipes,
-                    description: variant.getLabel(),
-                    descriptionWithPrice: variant.getLabelWithPrice(),
-                    attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
-                });
-            } else {
-                presentedVariants.push({
-                    id: variant.id.value,
-                    sku: variant.sku.code,
-                    price: variant.price,
-                    priceWithOffer: variant.priceWithOffer,
-                    attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
-                    description: variant.getLabel(),
-                    descriptionWithPrice: variant.getLabelWithPrice(),
-                });
-            }
+            presentedVariants.push({
+                id: variant.id.value,
+                sku: variant.sku.code,
+                price: variant.price,
+                priceWithOffer: variant.priceWithOffer,
+                Personas: variant.numberOfPersons,
+                Recetas: variant.numberOfRecipes,
+                description: variant.getLabel(),
+                descriptionWithPrice: variant.getLabelWithPrice(),
+                attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
+            });
             counter = 0;
         }
 
-        if (plan.hasRecipes) {
-            //@ts-ignore
+        if (plan.planVariants.every((v) => !!v.numberOfPersons)) {
             attributesAndValues.push(["Personas", _.uniq(plan.planVariants.map((variant) => variant.numberOfPersons))]);
-            //@ts-ignore
+        }
+
+        if (plan.planVariants.every((v) => !!v.numberOfRecipes)) {
             attributesAndValues.push(["Recetas", _.uniq(plan.planVariants.map((variant) => variant.numberOfRecipes))]);
         }
 

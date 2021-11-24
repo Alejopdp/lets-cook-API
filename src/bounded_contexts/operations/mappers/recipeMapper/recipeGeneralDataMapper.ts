@@ -9,7 +9,7 @@ import { RecipeWeight } from "../../domain/recipe/RecipeGeneralData/RecipeWeight
 export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
     public toDomain(raw: any, locale: Locale = Locale.es): RecipeGeneralData {
         const recipeDescription: RecipeDescription = new RecipeDescription(
-            raw.recipeDescription.shortDescription[locale] || raw.recipeDescription.shortDescription[Locale.es],
+            raw.recipeDescription.shortDescription[locale] || raw.recipeDescription.shortDescription[Locale.es] || "",
             raw.recipeDescription.longDescription[locale] || raw.recipeDescription.longDescription[Locale.es]
         );
         const cookDuration: RecipeCookDuration = new RecipeCookDuration(raw.recipeCookDuration.timeValue);
@@ -29,7 +29,7 @@ export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
         return {
             name: { [locale]: t.name },
             recipeDescription: {
-                shortDescription: { [locale]: t.recipeDescription.shortDescription },
+                shortDescription: { [locale]: t.recipeDescription.shortDescription || "" },
                 longDescription: { [locale]: t.recipeDescription.longDescription },
             },
             recipeCookDuration: {

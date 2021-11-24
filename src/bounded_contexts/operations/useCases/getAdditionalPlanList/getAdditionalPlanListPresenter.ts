@@ -29,6 +29,7 @@ export class GetAdditionalPlanListPresenter {
                 variants: plan.planVariants.map((variant) => this.presentPlanVariant(variant, plan.hasRecipes, plan.id.value as string)),
                 slug: plan.planSlug.slug,
                 minimumVariantPrice: plan.getMinimumVariantPrice(),
+                attributes: plan.getAttirbutesAndValues(),
             });
         }
 
@@ -36,29 +37,28 @@ export class GetAdditionalPlanListPresenter {
     }
 
     private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean, planId: string): any {
-        if (hasRecipes) {
-            return {
-                id: variant.id.value,
-                planId,
-                sku: variant.sku.code,
-                price: variant.price,
-                priceWithOffer: variant.priceWithOffer,
+        return {
+            id: variant.id.value,
+            // oldId: variant.id.value,
+            isDefault: variant.isDefault,
+            sku: variant.sku.code,
+            price: variant.price,
+            priceWithOffer: variant.priceWithOffer,
+            description: variant.description,
+            isDeleted: variant.isDeleted,
+            Personas: variant.numberOfPersons,
+            Recetas: variant.numberOfRecipes,
+            numberOfPersons: variant.numberOfPersons,
+            numberOfRecipes: variant.numberOfRecipes,
+            attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
+            planId,
+            auxId:
+                variant.attributes.reduce((acc, attribute) => acc + attribute.value, "") +
                 //@ts-ignore
-                numberOfPersons: variant.numberOfPersons,
+                (variant.numberOfPersons?.toString() || "") +
                 //@ts-ignore
-                numberOfRecipes: variant.numberOfRecipes,
-                attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
-            };
-        } else {
-            return {
-                id: variant.id.value,
-                planId,
-                sku: variant.sku.code,
-                price: variant.price,
-                priceWithOffer: variant.priceWithOffer,
-                attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
-            };
-        }
+                (variant.numberOfRecipes?.toString() || ""),
+        };
     }
 
     /**

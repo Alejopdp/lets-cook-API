@@ -77,8 +77,13 @@ export class AwsSesService implements INotificationService {
         await this.sendMailToAdmins("Cambio de restricción", "", restrictionChangeTemplate(subscription, adminNameOrEmail));
     }
 
-    public async sendErrorEmail(errorMessage: string): Promise<void> {
-        this.sendMail(["alejo@novolabs.xyz"], "Lets cook - Error", errorMessage, "");
+    public async sendErrorEmail(errorMessage: string, endpoint: string, userEmail: string = ""): Promise<void> {
+        this.sendMail(
+            ["alejo@novolabs.xyz"],
+            "Lets cook - Error",
+            errorMessage,
+            `<p>${errorMessage}</p><p>Usuario: ${userEmail}</p><p>Servicio: ${endpoint}</p>`
+        );
     }
 
     private async sendMailToAdmins(subject: string, textBody: string, htmlBody: string): Promise<void> {
@@ -112,7 +117,7 @@ export class AwsSesService implements INotificationService {
                     Data: subject,
                 },
                 Body: {
-                    Text: { Data: "Code" },
+                    Text: { Data: textBody },
                     Html: { Data: htmlBody },
                 },
             },

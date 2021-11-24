@@ -1,59 +1,62 @@
 import mongoose, { Mongoose } from "mongoose";
 import * as uuid from "uuid";
-const PlanVariantSchema = new mongoose.Schema({
-    _id: {
-        type: String,
-        default: uuid.v4(),
-    },
-
-    sku: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-
-    name: {
-        type: String,
-    },
-
-    description: {
-        type: String,
-    },
-    price: {
-        type: Number,
-        required: true,
-    },
-
-    priceWithOffer: {
-        type: Number,
-        // required: true,
-    },
-
-    numberOfPersons: {
-        type: Number,
-    },
-
-    numberOfRecipes: {
-        type: Number,
-    },
-
-    isDefault: {
-        type: Boolean,
-        required: true,
-    },
-
-    isDeleted: {
-        type: Boolean,
-        default: false,
-        required: true,
-    },
-    attributes: [
-        {
-            key: String,
-            value: String,
+const PlanVariantSchema = new mongoose.Schema(
+    {
+        _id: {
+            type: String,
+            default: uuid.v4(),
         },
-    ],
-});
+
+        sku: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+
+        name: {
+            type: String,
+        },
+
+        description: {
+            type: String,
+        },
+        price: {
+            type: Number,
+            required: true,
+        },
+
+        priceWithOffer: {
+            type: Number,
+            // required: true,
+        },
+
+        numberOfPersons: {
+            type: Number,
+        },
+
+        numberOfRecipes: {
+            type: Number,
+        },
+
+        isDefault: {
+            type: Boolean,
+            required: true,
+        },
+
+        isDeleted: {
+            type: Boolean,
+            default: false,
+            required: true,
+        },
+        attributes: [
+            {
+                key: String,
+                value: String,
+            },
+        ],
+    },
+    { timestamps: true }
+);
 
 const PlanSchema = new mongoose.Schema(
     {

@@ -5,6 +5,7 @@ export class GetSubscriptionListPresenter {
         const presentedSubscriptions = [];
 
         for (let subscription of subscriptions) {
+            console.log("Sub w error: ", subscription.id.value);
             presentedSubscriptions.push({
                 id: subscription.id.value,
                 customerName: subscription.customer.getPersonalInfo()?.fullName,

@@ -5,7 +5,7 @@ export class FixedPrice implements ICouponType {
     public value: number;
 
     constructor(type: string, value: number) {
-        if (value < 0) throw new Error("El monto fijo a descontar tiene que ser un número positivo");
+        if (value < 0) throw new Error("El importe fijo a descontar tiene que ser un número positivo");
         this.type = "fixed";
         this.value = value;
     }

@@ -1,7 +1,7 @@
 import { BaseController } from "../../../../core/infra/BaseController";
 import { Locale } from "../../domain/locale/Locale";
 import { GetPlanVariantsRecipesByWeekList } from "./getPlanVariantsRecipesByWeekList";
-import { GetGetPlanVariantsRecipesByWeekListDto } from "./getPlanVariantsRecipesByWeekListDto";
+import { GetPlanVariantsRecipesByWeekListDto } from "./getPlanVariantsRecipesByWeekListDto";
 import { GetPlanVariantsRecipesByWeekListPresenter } from "./getPlanVariantsRecipesByWeekListPresenter";
 
 export class GetPlanVariantsRecipesByWeekListController extends BaseController {
@@ -19,11 +19,11 @@ export class GetPlanVariantsRecipesByWeekListController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            // const dto: GetGetPlanVariantsRecipesByWeekListDto = {
-            //     locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
-            // };
+            const dto: GetPlanVariantsRecipesByWeekListDto = {
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+            };
 
-            const result = await this.getPlanVariantsRecipesByWeekList.execute();
+            const result = await this.getPlanVariantsRecipesByWeekList.execute(dto);
             const presented = await this.getPlanVariantsRecipesByWeekListPresenter.present(result.plans, result.recipes, result.week);
 
             return this.ok(this.res, presented);

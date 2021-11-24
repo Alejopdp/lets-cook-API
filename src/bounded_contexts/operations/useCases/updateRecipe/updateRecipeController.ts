@@ -37,7 +37,7 @@ export class UpdateRecipeController extends BaseController {
                 cookTime: this.req.body.cookDuration,
                 difficultyLevel: (<any>RecipeDifficultyLevel)[this.req.body.difficultyLevel],
                 imageTags: JSON.parse(this.req.body.imageTags),
-                recipeImages,
+                recipeImages: Array.isArray(recipeImages) ? recipeImages : [],
                 shortDescription: this.req.body.shortDescription,
                 longDescription: this.req.body.longDescription,
                 name: this.req.body.name,

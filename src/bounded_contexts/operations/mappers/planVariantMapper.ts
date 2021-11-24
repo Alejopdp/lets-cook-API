@@ -4,42 +4,11 @@ import { PlanSku } from "../domain/plan/PlanSku";
 import { PlanVariant } from "../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../domain/plan/PlanVariant/PlanVariantAttribute";
 import { PlanVariantId } from "../domain/plan/PlanVariant/PlanVariantId";
-import { PlanVariantWithRecipe } from "../domain/plan/PlanVariant/PlanVariantWithRecipes";
+// import { PlanVariantWithRecipe } from "../domain/plan/PlanVariant/PlanVariantWithRecipes";
 export class PlanVariantMapper implements Mapper<PlanVariant> {
     public toDomain(raw: any): PlanVariant {
         const attributes: PlanVariantAttribute[] = raw.attributes.map((attr: any) => new PlanVariantAttribute(attr.key, attr.value));
 
-        if (!!raw.numberOfPersons && !!raw.numberOfRecipes) {
-            return new PlanVariantWithRecipe(
-                raw.numberOfPersons,
-                raw.numberOfRecipes,
-                new PlanSku(raw.sku),
-                raw.name,
-                raw.price,
-                raw.priceWithOffer,
-                attributes,
-                raw.description,
-                raw.isDefault,
-                raw.isDeleted,
-                new PlanVariantId(raw._id)
-            );
-        }
-
-        if (!!!raw.numberOfPersons && !!raw.numberOfRecipes) {
-            return new PlanVariant(
-                new PlanSku(raw.sku),
-                raw.name,
-                raw.price,
-                [...attributes, new PlanVariantAttribute("Recetas", raw.numberOfRecipes)], // TO DO: Esto es un asco
-                raw.description,
-                raw.isDefault,
-                raw.isDeleted,
-                raw.priceWithOffer,
-                new PlanVariantId(raw._id)
-            );
-        }
-
-        // return new PlanVariant(raw.sku, raw.name, raw.price, attributes, raw.priceWithOffer);
         return new PlanVariant(
             new PlanSku(raw.sku),
             raw.name,
@@ -49,15 +18,15 @@ export class PlanVariantMapper implements Mapper<PlanVariant> {
             raw.isDefault,
             raw.isDeleted,
             raw.priceWithOffer,
-            new PlanVariantId(raw._id)
+            new PlanVariantId(raw._id),
+            raw.numberOfPersons,
+            raw.numberOfRecipes
         );
     }
 
     public toPersistence(t: PlanVariant) {
         return {
-            // @ts-ignore
             numberOfPersons: t.numberOfPersons,
-            // @ts-ignore
             numberOfRecipes: t.numberOfRecipes,
             sku: t.sku.code,
             name: t.name,

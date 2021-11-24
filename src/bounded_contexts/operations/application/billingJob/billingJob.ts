@@ -18,7 +18,7 @@ export class BillingJob {
                 await this.payAllSubscriptions.execute();
             });
         } catch (error) {
-            this.notificationService.sendErrorEmail(error.message);
+            this.notificationService.sendErrorEmail(error.message, "Billing job", "");
         }
     }
 

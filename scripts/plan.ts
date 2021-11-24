@@ -8,7 +8,6 @@ import { PlanSlug } from "../src/bounded_contexts/operations/domain/plan/PlanSlu
 import { PlanType } from "../src/bounded_contexts/operations/domain/plan/PlanType/PlanType";
 import { PlanVariant } from "../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariantAttribute";
-import { PlanVariantWithRecipe } from "../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariantWithRecipes";
 
 export const getMockPlans = () => {
     const attr1: PlanVariantAttribute = new PlanVariantAttribute("Key 1", "Value 1");
@@ -34,42 +33,45 @@ export const getMockPlans = () => {
         false
     );
 
-    const desayunoVariant1 = new PlanVariantWithRecipe(
-        1,
-        1,
+    const desayunoVariant1 = new PlanVariant(
         new PlanSku("PLDES1"),
         "Desayuno para 1 persona",
         30,
-        20,
         [],
         "PLDES1 Desc",
         true,
-        false
-    );
-    const desayunoVariant2 = new PlanVariantWithRecipe(
-        2,
+        false,
+        20,
+        undefined,
         1,
+        1
+    );
+    const desayunoVariant2 = new PlanVariant(
         new PlanSku("PLDES2"),
         "Desayuno para 2 personas",
         30,
-        20,
         [],
         "PLDES2 Desc",
         false,
-        false
+        false,
+        20,
+        undefined,
+        2,
+        1
     );
 
-    const desayunoVariant3 = new PlanVariantWithRecipe(
-        3,
-        1,
+    const desayunoVariant3 = new PlanVariant(
         new PlanSku("PLDES3"),
         "Desayuno para 3 personas",
         30,
-        20,
         [],
         "PLDES3 Desc",
         false,
-        false
+        false,
+        20,
+        undefined,
+        3,
+        1
     );
 
     const additionalPlan1: Plan = Plan.create(
@@ -113,489 +115,529 @@ export const getMockPlans = () => {
         "development/plan-familiar-color.svg"
     );
 
-    const planGourmetVariant2Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        2,
-        2,
+    const planGourmetVariant2Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("GOUR1"),
         "",
         35.96,
-        27.99,
         [],
         "",
         true,
-        false
-    );
-    const planGourmetVariant2Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        27.99,
+        undefined,
         2,
-        3,
+        2
+    );
+    const planGourmetVariant2Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("GOUR2"),
         "",
         53.94,
-        37.99,
         [],
         "",
         false,
-        false
-    );
-    const planGourmetVariant2Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        37.99,
+        undefined,
         2,
-        4,
+        3
+    );
+    const planGourmetVariant2Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("GOUR3"),
         "",
         71.92,
-        47.99,
         [],
         "",
         false,
-        false
-    );
-    const planGourmetVariant2Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        47.99,
+        undefined,
         2,
-        5,
+        4
+    );
+    const planGourmetVariant2Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("GOUR4"),
         "",
         89.9,
-        58.49,
         [],
         "",
         false,
-        false
-    );
-    const planGourmetVariant4Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
+        false,
+        58.49,
+        undefined,
         2,
+        5
+    );
+    const planGourmetVariant4Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("GOUR5"),
         "",
         71.92,
-        44.99,
         [],
         "",
         false,
-        false
-    );
-    const planGourmetVariant4Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        44.99,
+        undefined,
         4,
-        3,
+        2
+    );
+    const planGourmetVariant4Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("GOUR6"),
         "",
         107.88,
-        62.99,
         [],
         "",
         false,
-        false
+        false,
+        62.99,
+        undefined,
+        4,
+        3
     );
-    const planGourmetVariant4Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
-        4,
+    const planGourmetVariant4Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("GOUR7"),
         "",
         143.84,
-        79.99,
         [],
         "",
         false,
-        false
-    );
-    const planGourmetVariant4Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        79.99,
+        undefined,
         4,
-        5,
+        4
+    );
+    const planGourmetVariant4Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("GOUR8"),
         "",
         179.8,
-        95.99,
         [],
         "",
         false,
-        false
+        false,
+        95.99,
+        undefined,
+        4,
+        5
     );
 
-    const planAhorroVariant2Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        2,
-        2,
+    const planAhorroVariant2Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("AHOR1"),
         "",
         35.96,
-        24.99,
         [],
         "",
         true,
-        false
-    );
-    const planAhorroVariant2Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        24.99,
+        undefined,
         2,
-        3,
+        2
+    );
+    const planAhorroVariant2Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("AHOR2"),
         "",
         53.94,
-        33.99,
         [],
         "",
         false,
-        false
-    );
-    const planAhorroVariant2Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        33.99,
+        undefined,
         2,
-        4,
+        3
+    );
+    const planAhorroVariant2Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("AHOR3"),
         "",
         71.92,
-        41.99,
         [],
         "",
         false,
-        false
-    );
-    const planAhorroVariant2Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        41.99,
+        undefined,
         2,
-        5,
+        4
+    );
+    const planAhorroVariant2Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("AHOR4"),
         "",
         89.9,
-        50.99,
         [],
         "",
         false,
-        false
-    );
-    const planAhorroVariant4Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
+        false,
+        50.99,
+        undefined,
         2,
+        5
+    );
+    const planAhorroVariant4Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("AHOR5"),
         "",
         71.92,
-        37.99,
         [],
         "",
         false,
-        false
-    );
-    const planAhorroVariant4Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        37.99,
+        undefined,
         4,
-        3,
+        2
+    );
+    const planAhorroVariant4Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("AHOR6"),
         "",
         107.88,
-        54.99,
         [],
         "",
         false,
-        false
+        false,
+        54.99,
+        undefined,
+        4,
+        3
     );
-    const planAhorroVariant4Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
-        4,
+    const planAhorroVariant4Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("AHOR7"),
         "",
         143.84,
-        70.99,
         [],
         "",
         false,
-        false
-    );
-    const planAhorroVariant4Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        70.99,
+        undefined,
         4,
-        5,
+        4
+    );
+    const planAhorroVariant4Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("AHOR8"),
         "",
         179.8,
-        82.99,
         [],
         "",
         false,
-        false
+        false,
+        82.99,
+        undefined,
+        4,
+        5
     );
 
-    const planVegetarianoVariant2Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        2,
-        2,
+    const planVegetarianoVariant2Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGE1"),
         "",
         35.96,
-        26.49,
         [],
         "",
         true,
-        false
-    );
-    const planVegetarianoVariant2Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        26.49,
+        undefined,
         2,
-        3,
+        2
+    );
+    const planVegetarianoVariant2Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGE2"),
         "",
         53.94,
-        35.99,
         [],
         "",
         false,
-        false
-    );
-    const planVegetarianoVariant2Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        35.99,
+        undefined,
         2,
-        4,
+        3
+    );
+    const planVegetarianoVariant2Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGE3"),
         "",
         71.92,
-        45.99,
         [],
         "",
         false,
-        false
-    );
-    const planVegetarianoVariant2Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        45.99,
+        undefined,
         2,
-        5,
+        4
+    );
+    const planVegetarianoVariant2Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGE4"),
         "",
         89.9,
-        54.99,
         [],
         "",
         false,
-        false
-    );
-    const planVegetarianoVariant4Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
+        false,
+        54.99,
+        undefined,
         2,
+        5
+    );
+    const planVegetarianoVariant4Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGE5"),
         "",
         71.92,
-        41.99,
         [],
         "",
         false,
-        false
-    );
-    const planVegetarianoVariant4Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        41.99,
+        undefined,
         4,
-        3,
+        2
+    );
+    const planVegetarianoVariant4Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGE6"),
         "",
         107.88,
-        59.99,
         [],
         "",
         false,
-        false
+        false,
+        59.99,
+        undefined,
+        4,
+        3
     );
-    const planVegetarianoVariant4Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
-        4,
+    const planVegetarianoVariant4Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGE7"),
         "",
         143.84,
-        75.99,
         [],
         "",
         false,
-        false
-    );
-    const planVegetarianoVariant4Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        75.99,
+        undefined,
         4,
-        5,
+        4
+    );
+    const planVegetarianoVariant4Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGE8"),
         "",
         179.8,
-        89.99,
         [],
         "",
         false,
-        false
+        false,
+        89.99,
+        undefined,
+        4,
+        5
     );
 
-    const planVeganoVariant2Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        2,
-        2,
+    const planVeganoVariant2Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGA1"),
         "",
         35.96,
-        27.49,
         [],
         "",
         true,
-        false
-    );
-    const planVeganoVariant2Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        27.49,
+        undefined,
         2,
-        3,
+        2
+    );
+    const planVeganoVariant2Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGA2"),
         "",
         53.94,
-        37.99,
         [],
         "",
         false,
-        false
-    );
-    const planVeganoVariant2Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        37.99,
+        undefined,
         2,
-        4,
+        3
+    );
+    const planVeganoVariant2Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGA3"),
         "",
         71.92,
-        47.99,
         [],
         "",
         false,
-        false
-    );
-    const planVeganoVariant2Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        47.99,
+        undefined,
         2,
-        5,
+        4
+    );
+    const planVeganoVariant2Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGA4"),
         "",
         89.9,
-        58.99,
         [],
         "",
         false,
-        false
-    );
-    const planVeganoVariant4Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
+        false,
+        58.99,
+        undefined,
         2,
+        5
+    );
+    const planVeganoVariant4Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGA5"),
         "",
         71.92,
-        44.99,
         [],
         "",
         false,
-        false
-    );
-    const planVeganoVariant4Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        44.99,
+        undefined,
         4,
-        3,
+        2
+    );
+    const planVeganoVariant4Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGA6"),
         "",
         107.88,
-        62.99,
         [],
         "",
         false,
-        false
+        false,
+        62.99,
+        undefined,
+        4,
+        3
     );
-    const planVeganoVariant4Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
-        4,
+    const planVeganoVariant4Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGA7"),
         "",
         143.84,
-        79.99,
         [],
         "",
         false,
-        false
-    );
-    const planVeganoVariant4Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        79.99,
+        undefined,
         4,
-        5,
+        4
+    );
+    const planVeganoVariant4Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("VEGA8"),
         "",
         179.8,
-        95.99,
         [],
         "",
         false,
-        false
+        false,
+        95.99,
+        undefined,
+        4,
+        5
     );
 
-    const planFamiliarVariant2Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        2,
-        2,
+    const planFamiliarVariant2Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("FAMI1"),
         "2 adultos y 1-2 niños 2 recetas",
         53.94,
-        34.49,
         [],
         "",
         true,
-        false
-    );
-    const planFamiliarVariant2Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        34.49,
+        undefined,
         2,
-        3,
+        2
+    );
+    const planFamiliarVariant2Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("FAMI2"),
         "2 adultos y 1-2 niños 3 recetas",
         80.91,
-        49.99,
         [],
         "",
         false,
-        false
-    );
-    const planFamiliarVariant2Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        49.99,
+        undefined,
         2,
-        4,
+        3
+    );
+    const planFamiliarVariant2Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("FAMI3"),
         "2 adultos y 1-2 niños 4 recetas",
         107.88,
-        64.99,
         [],
         "",
         false,
-        false
-    );
-    const planFamiliarVariant2Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        64.99,
+        undefined,
         2,
-        5,
+        4
+    );
+    const planFamiliarVariant2Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("FAMI4"),
         "2 adultos y 1-2 niños 5 recetas",
         134.85,
-        79.99,
         [],
         "",
         false,
-        false
-    );
-    const planFamiliarVariant4Persons2Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
+        false,
+        79.99,
+        undefined,
         2,
+        5
+    );
+    const planFamiliarVariant4Persons2Recipes: PlanVariant = new PlanVariant(
         new PlanSku("FAMI5"),
         "2 adultos y 2-3 niños 2 recetas",
         71.92,
-        44.99,
         [],
         "",
         false,
-        false
-    );
-    const planFamiliarVariant4Persons3Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        44.99,
+        undefined,
         4,
-        3,
+        2
+    );
+    const planFamiliarVariant4Persons3Recipes: PlanVariant = new PlanVariant(
         new PlanSku("FAMI6"),
         "2 adultos y 2-3 niños 3 recetas",
         107.88,
-        62.99,
         [],
         "",
         false,
-        false
+        false,
+        62.99,
+        undefined,
+        4,
+        3
     );
-    const planFamiliarVariant4Persons4Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
-        4,
-        4,
+    const planFamiliarVariant4Persons4Recipes: PlanVariant = new PlanVariant(
         new PlanSku("FAMI7"),
         "2 adultos y 2-3 niños 4 recetas",
         143.84,
-        79.99,
         [],
         "",
         false,
-        false
-    );
-    const planFamiliarVariant4Persons5Recipes: PlanVariantWithRecipe = new PlanVariantWithRecipe(
+        false,
+        79.99,
+        undefined,
         4,
-        5,
+        4
+    );
+    const planFamiliarVariant4Persons5Recipes: PlanVariant = new PlanVariant(
         new PlanSku("FAMI8"),
         "2 adultos y 2-3 niños 5 recetas",
         179.8,
-        95.99,
         [],
         "",
         false,
-        false
+        false,
+        95.99,
+        undefined,
+        4,
+        5
     );
 
     const planGourmet: Plan = Plan.create(
@@ -735,93 +777,3 @@ export const getMockPlans = () => {
 
     return [planGourmet, planVegetariano, planFamiliar, planVegano, planAhorro, additionalPlan1, additionalPlan2];
 };
-
-// const plan1: Plan = Plan.create(
-//     "Plan Familiar",
-//     "Compuesto por recetas deliciosas aprobadas por los niños y que los adultos aman. Cuenta con total libertad para elegir platos equilibrados",
-//     new PlanSku("PLFML1"),
-//     "development/plan-familiar.webp",
-//     true,
-//     PlanType.Principal,
-//     [variantWithoutGluten1, variantWithoutGlutenAndMilk1, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-//     [PlanFrequencyFactory.createPlanFrequency("monthly")],
-//     true,
-//     [additionalPlan1, additionalPlan2],
-//     Locale.es,
-//     new PlanSlug("Plan Familiar"),
-//     true,
-//     "development/plan-familiar.svg",
-//     "development/plan-familiar-color.svg"
-// );
-
-// const plan2: Plan = Plan.create(
-//     "Plan Gourmet",
-//     "Compuesto por la mejor selección de platos de la cocina nacional e internacional, con total libertad para elegir platos sabrosos y saludables.",
-//     new PlanSku("PLVEG1"),
-//     "development/plan-gourmet.webp",
-//     true,
-//     PlanType.Principal,
-//     [variantWithoutGluten2, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-//     [PlanFrequencyFactory.createPlanFrequency("weekly"), PlanFrequencyFactory.createPlanFrequency("biweekly")],
-//     true,
-//     [additionalPlan1, additionalPlan2],
-//     Locale.es,
-//     new PlanSlug("Plan Gourmet"),
-//     true,
-//     "development/plan-gourmet.svg",
-//     "development/plan-gourmet-color.svg"
-// );
-
-// const plan3: Plan = Plan.create(
-//     "Plan Ahorro",
-//     "Cuidamos tu bolsillo decidiendo por ti en base a los gustos e intolerancias que avises a la hora de darte de alta.",
-//     new PlanSku("PLCAR1"),
-//     "development/plan-ahorro.webp",
-//     true,
-//     PlanType.Principal,
-//     [variantWithoutGluten3, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-//     [PlanFrequencyFactory.createPlanFrequency("monthly")],
-//     false,
-//     [additionalPlan1],
-//     Locale.es,
-//     new PlanSlug("Plan Ahorro"),
-//     true,
-//     "development/plan-ahorro.svg",
-//     "development/plan-ahorro-color.svg"
-// );
-
-// const plan4: Plan = Plan.create(
-//     "Plan Vegetariano",
-//     "Incluye una gran diversidad de platos vegetarianos cada semana para poder seguir una dieta rica y variada.",
-//     new PlanSku("PLFML2"),
-//     "development/plan-vegetariano.webp",
-//     true,
-//     PlanType.Principal,
-//     [variantWithoutGluten4, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-//     [PlanFrequencyFactory.createPlanFrequency("monthly")],
-//     true,
-//     [additionalPlan1, additionalPlan2],
-//     Locale.es,
-//     new PlanSlug("Plan vegetariano"),
-//     true,
-//     "development/plan-vegetariano.svg",
-//     "development/plan-vegetariano-color.svg"
-// );
-
-// const plan5: Plan = Plan.create(
-//     "Plan Vegano",
-//     "Adaptamos las recetas para que puedas tener una dieta 100% a base de plantas, eligiendo cada semana platos ricos y sanos.",
-//     new PlanSku("PLFML2"),
-//     "development/plan-vegano.webp",
-//     true,
-//     PlanType.Principal,
-//     [variantWithoutGluten5, variantWithoutGluten1bis, variantWithoutGlutenAndMilk1bis],
-//     [PlanFrequencyFactory.createPlanFrequency("monthly")],
-//     true,
-//     [additionalPlan1, additionalPlan2],
-//     Locale.es,
-//     new PlanSlug("Plan Vegano"),
-//     true,
-//     "development/plan-vegano.svg",
-//     "development/plan-vegano-color.svg"
-// );

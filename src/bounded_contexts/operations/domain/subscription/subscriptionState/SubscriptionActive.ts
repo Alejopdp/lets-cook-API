@@ -10,7 +10,7 @@ export class SubscriptionActive implements ISubscriptionState {
 
     constructor() {
         this.title = "SUBSCRIPTION_ACTIVE";
-        this.humanTitle = "Activa";
+        this.humanTitle = "Activo";
         this.color = "green";
     }
 

@@ -496,11 +496,23 @@ export const newCancellationTemplate = (subscription: Subscription, adminNameOrE
                 <h2 style="color: #00a555; font-size: 24px; font-weight: 800; line-height: 24px; margin: 48px 0;">
                     Nueva cancelación de plan
                 </h2>
-                <p>El cliente ${adminNameOrEmail || subscription.customer.email} ha cancelado su ${
-        subscription.plan.name
-    } ${subscription.getPlanVariantLabel()} con id ${subscription.id.value}</p>
-                <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
-
+                ${
+                    !!adminNameOrEmail
+                        ? `<p>el usuario Admin <b>${adminNameOrEmail}</b> ha cancelado el plan <b>${
+                              subscription.plan.name
+                          } ${subscription.getPlanVariantLabel()}</b> con id ${
+                              subscription.id.value
+                          } del cliente <b>${subscription.customer.getFullNameOrEmail()}</b>. </p>`
+                        : `<p>El cliente <b>${subscription.customer.getFullNameOrEmail()}</b> ha cancelado su <b>${
+                              subscription.plan.name
+                          } ${subscription.getPlanVariantLabel()}</b> con id ${subscription.id.value}</p>`
+                }
+                <p>El motivo de la cancelación es: <b>${subscription.cancellationReason?.getHumanTitle() || ""}</b></p>
+                ${
+                    subscription.cancellationReason?.comment
+                        ? `<p>El cliente dejó el siguiente comentario: <b>${subscription.cancellationReason?.comment || ""}</b></p>`
+                        : ""
+                }
                   </div>
         </main>
 

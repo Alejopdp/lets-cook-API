@@ -2,7 +2,7 @@ import { MomentTimeService } from "../../application/timeService/momentTimeServi
 import { Coupon } from "../../domain/cupons/Cupon";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
-import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
+// import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 
 export class GetCouponListPresenter {
     public static present(coupons: Coupon[]): any {
