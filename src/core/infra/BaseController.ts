@@ -1,4 +1,3 @@
-import { awsSesService } from "../../shared/notificationService";
 import * as express from "express";
 import { logger } from "../../../config";
 import { sentryService } from "../../shared/monitoring";
