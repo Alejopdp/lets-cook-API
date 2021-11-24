@@ -43,6 +43,6 @@ export interface INotificationService {
     notifyAdminAboutAddressChange(customer: Customer, adminNameOrEmail?: string): Promise<void>;
     notifyAdminAboutRestrictionChange(subscription: Subscription): Promise<void>;
     notifyAdminAboutAPlanReactivation(subscription: Subscription): Promise<void>;
-    sendErrorEmail(errorMessage: string): Promise<void>;
+    sendErrorEmail(errorMessage: string, endpoint: string, userEmail: string | undefined): Promise<void>;
     notifyCustomerAboutPaymentOrderBilled(dto: PaymentOrderBilledNotificationDto): Promise<void>;
 }

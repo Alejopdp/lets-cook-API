@@ -1,3 +1,4 @@
+import { awsSesService } from "../../shared/notificationService";
 import * as express from "express";
 import { logger } from "../../../config";
 import { sentryService } from "../../shared/monitoring";
@@ -78,6 +79,11 @@ export abstract class BaseController {
     public fail(error: Error | string) {
         //@ts-ignore
         logger.error(`${error.toString()} at line ${error.lineNumber} of file ${error.fileName}`);
+        const endpoint: string = `${this.req.method} ${this.req.protocol}://${this.req.get("host")}${this.req.originalUrl}`;
+        //@ts-ignore
+        const userEmail: string | undefined = this.req.currentUser?.email;
+        awsSesService.sendErrorEmail(error.toString(), endpoint, userEmail);
+
         return this.res.status(500).json({
             message: error.toString(),
         });
