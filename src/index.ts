@@ -1,3 +1,4 @@
+require("dotenv").config();
 // Infra
 import "./infraestructure/http/app";
 // import "./infraestructure/sequelize" hooks
