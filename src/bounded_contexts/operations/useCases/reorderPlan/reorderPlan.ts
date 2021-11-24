@@ -146,6 +146,7 @@ export class ReorderPlan {
             shippingCustomerName: subscription.customer.getPersonalInfo().fullName || "",
             shippingDate: orders[0].getHumanShippmentDay(),
             totalAmount: amountToBill,
+            discountAmount: newPaymentOrders[0].getDiscountAmountOrShippingCostIfHasFreeShipping(),
         };
         this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
 

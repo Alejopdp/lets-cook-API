@@ -79,6 +79,7 @@ export class SendNewSubscriptionEmail {
             shippingCustomerName: subscription.customer.getPersonalInfo().fullName || "",
             shippingDate: firstOrder!.getHumanShippmentDay(),
             totalAmount: paymentOrder.getAmountToBillWithoutShippingCost(),
+            discountAmount: paymentOrder.getDiscountAmountOrShippingCostIfHasFreeShipping(),
         };
         this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
     }
