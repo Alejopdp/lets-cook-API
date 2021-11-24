@@ -162,6 +162,7 @@ export class PayAllSubscriptions {
                             totalAmount,
                             orders: paymentOrderOrderMap[paymentOrderId],
                             paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
+                            discountAmount: paymentOrderToBill.getDiscountAmountOrShippingCostIfHasFreeShipping(),
                         });
                     } else {
                         logger.info(`${paymentOrderId} processing failed`);

@@ -262,8 +262,8 @@ export class CreateSubscription {
                 shippingCustomerName: customer.getPersonalInfo().fullName || "",
                 shippingDate: orders[0].getHumanShippmentDay(),
                 totalAmount: amountToBill,
+                discountAmount: newPaymentOrders[0].getDiscountAmountOrShippingCostIfHasFreeShipping(),
             };
-            console.log("a");
             this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
         }
 

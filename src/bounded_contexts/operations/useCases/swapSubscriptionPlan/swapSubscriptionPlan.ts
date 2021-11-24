@@ -42,6 +42,8 @@ export class SwapSubscriptionPlan {
         const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId);
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");
 
+        if (subscription.state.isCancelled()) throw new Error("No puedes cambiar el plan de una suscripción cancelada");
+
         const oldSubscriptionPrice = subscription.plan.getPlanVariantPrice(subscription.planVariantId);
         const oldPlan = subscription.plan;
         const oldPlanVariantId = subscription.planVariantId;

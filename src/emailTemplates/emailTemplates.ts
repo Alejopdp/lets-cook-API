@@ -2485,10 +2485,23 @@ export const ticketTemplate = (dto: PaymentOrderBilledNotificationDto) => {
                                                                                             <span style="color: rgb(0, 0, 0)"
                                                                                                 ><span style="color: rgb(127, 140, 141)"
                                                                                                     >Envío (¡Sin cargo en Barcelona y pueblos
-                                                                                                    cercanos!): ${dto.shippingCost}</span
+                                                                                                    cercanos!): ${dto.shippingCost} €</span
                                                                                                 ></span
                                                                                             >
                                                                                         </p>
+                                                                                        <p
+                                                                                        style="
+                                                                                            margin-top: 0px;
+                                                                                            margin-bottom: 10px;
+                                                                                            line-height: 150%;
+                                                                                        "
+                                                                                    >
+                                                                                        <span style="color: rgb(0, 0, 0)"
+                                                                                            ><span style="color: rgb(127, 140, 141)"
+                                                                                                >Descuento: ${dto.discountAmount} €</span
+                                                                                            ></span
+                                                                                        >
+                                                                                    </p>
                                                                                         <p
                                                                                             style="
                                                                                                 margin-top: 0px;
@@ -2498,7 +2511,7 @@ export const ticketTemplate = (dto: PaymentOrderBilledNotificationDto) => {
                                                                                         >
                                                                                             <span style="color: rgb(0, 0, 0)"
                                                                                                 ><span style="color: rgb(127, 140, 141)"
-                                                                                                    >IVA (10%): ${dto.foodVAT}€</span
+                                                                                                    >IVA (10%): ${dto.foodVAT} €</span
                                                                                                 ></span
                                                                                             >
                                                                                         </p>
@@ -2511,7 +2524,7 @@ export const ticketTemplate = (dto: PaymentOrderBilledNotificationDto) => {
                                                                                         >
                                                                                             <span style="color: rgb(127, 140, 141)"
                                                                                                 ><strong
-                                                                                                    >Total: ${dto.totalAmount}€<span
+                                                                                                    >Total: ${dto.totalAmount} €<span
                                                                                                     ></span></strong
                                                                                                 ><br
                                                                                             /></span>

@@ -29,6 +29,7 @@ export interface PaymentOrderBilledNotificationDto {
     customerEmail: string;
     orders: Order[];
     paymentOrderHumanNumber: string;
+    discountAmount: number;
 }
 export interface INotificationService {
     notifyNewBackOfficeUserToGeneratePassword(email: string, redirectUrl: string): Promise<void>;
