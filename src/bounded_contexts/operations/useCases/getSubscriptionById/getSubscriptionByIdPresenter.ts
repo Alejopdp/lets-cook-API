@@ -58,8 +58,17 @@ export class GetSubscriptionByIdPresenter {
         const hasChosenRecipesForNextWeek = !!!nextWeekOrder ? false : nextWeekOrder.hasChosenRecipes();
 
         const schedule = {
-            nextDelivery: !!!nextActiveOrder ? "" : nextActiveOrder.getHumanShippmentDay(),
-            nextPayment: !!!nextSecondActiveOrder ? "" : nextSecondActiveOrder.getHumanBillingDay(),
+            nextDelivery: !!nextActiveOrder
+                ? nextActiveOrder.getHumanShippmentDay()
+                : !!nextSecondActiveOrder
+                ? nextSecondActiveOrder.getHumanShippmentDay()
+                : "",
+            nextPayment:
+                !!nextActiveOrder && nextActiveOrder.billingDate > new Date()
+                    ? nextActiveOrder.getHumanBillingDay()
+                    : !!nextSecondActiveOrder
+                    ? nextSecondActiveOrder.getHumanBillingDay()
+                    : "",
         };
 
         const skippedOrders = this.presentOrders(orders.filter((order) => order.isSkipped()));

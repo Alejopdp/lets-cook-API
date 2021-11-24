@@ -25,7 +25,7 @@ export class OrderCancelled implements IOrderState {
     }
 
     public toSkipped(order: Order): void {
-        throw new Error("No puede saltear una orden cancelada");
+        throw new Error("No puede saltar una orden cancelada");
     }
 
     public toBilled(order: Order): void {
