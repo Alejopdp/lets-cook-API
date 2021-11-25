@@ -85,11 +85,9 @@ export class PlanVariant extends Entity<PlanVariant> {
         return this.numberOfPersons * this.numberOfRecipes;
     }
 
-    public getPortionPrice(): number {
+    public getPortionPrice(discount: number = 0): number {
         // if (!this.numberOfRecipes || !this.numberOfPersons) return 0;
-        console.log("Kit price: ", this.getKitPrice());
-        console.log("Portions quantity: ", this.getPortionsQuantity());
-        return Utils.roundTwoDecimals(this.getKitPrice() / this.getPortionsQuantity());
+        return Utils.roundTwoDecimals(this.getPaymentPrice() / this.getPortionsQuantity());
     }
 
     public getKitPrice(): number {
