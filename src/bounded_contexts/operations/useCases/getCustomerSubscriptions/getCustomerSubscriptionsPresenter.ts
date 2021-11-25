@@ -5,6 +5,7 @@ import { Order } from "../../domain/order/Order";
 import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import _ from "lodash";
+import { Locale } from "../../domain/locale/Locale";
 
 export class GetCustomerSubscriptionsPresenter {
     private _storageService: IStorageService;
@@ -13,7 +14,7 @@ export class GetCustomerSubscriptionsPresenter {
         this._storageService = storageService;
     }
 
-    public async present(subscriptions: Subscription[], nextOrders: Order[]): Promise<any> {
+    public async present(subscriptions: Subscription[], nextOrders: Order[], locale: Locale): Promise<any> {
         const presentedPrincipalSubscriptions = [];
         const presentedAdditionalSubscriptions = [];
         const orderSubscriptionMap: { [key: string]: Order[] } = {};
@@ -45,8 +46,8 @@ export class GetCustomerSubscriptionsPresenter {
                 planVariantPrice: subscription.price,
                 planVariantId: subscription.planVariantId.value,
                 planName: subscription.plan.name,
-                planVariantLabel: subscription.getPlanVariantLabel() || "",
-                nextShippment: subscription.getNextShipmentLabel(orderSubscriptionMap[subscription.id.value]),
+                planVariantLabel: subscription.getPlanVariantLabel(Locale.es) || "",
+                nextShippment: subscription.getNextShipmentLabel(orderSubscriptionMap[subscription.id.value], locale),
                 frequency: subscription.frequency.value(),
                 stateTitle:
                     !!!orderSubscriptionMap[subscription.id.value] && subscription.frequency.isOneTime()
@@ -77,7 +78,7 @@ export class GetCustomerSubscriptionsPresenter {
                 pendingActions.push({
                     type: "choose_recipes",
                     planName: nextOrder.plan.name,
-                    shippment: nextOrder.getPendingRecipeChooseLabel(),
+                    shippment: nextOrder.getPendingRecipeChooseLabel(locale),
                     orderId: nextOrder.id.value,
                 });
             }

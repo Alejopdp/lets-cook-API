@@ -22,7 +22,7 @@ export class GetRecipesForOrderController extends BaseController {
             };
 
             const { recipes, order, subscription } = await this.getRecipesForOrder.execute(dto);
-            const presented = await this.getRecipesForOrderPresenter.present(recipes, order, subscription);
+            const presented = await this.getRecipesForOrderPresenter.present(recipes, order, subscription, dto.locale);
 
             return this.ok(this.res, presented);
         } catch (error) {

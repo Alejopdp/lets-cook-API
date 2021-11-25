@@ -2,6 +2,8 @@ import { IStorageService } from "../../application/storageService/IStorageServic
 import { Plan } from "../../domain/plan/Plan";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import _ from "lodash";
+import { locale } from "moment";
+import { Locale } from "../../domain/locale/Locale";
 
 export class GetPlanListPresenter {
     private _storageService: IStorageService;
@@ -10,11 +12,11 @@ export class GetPlanListPresenter {
         this._storageService = storageService;
     }
 
-    public async present(plans: Plan[]): Promise<any> {
+    public async present(plans: Plan[], locale: Locale): Promise<any> {
         const presentedPlans = [];
 
         for (let plan of plans) {
-            var presentedVariants = this.presentVariants(plan);
+            var presentedVariants = this.presentVariants(plan, locale);
 
             presentedPlans.push({
                 id: plan.id.value,
@@ -39,7 +41,7 @@ export class GetPlanListPresenter {
         return presentedPlans;
     }
 
-    public presentVariants(plan: Plan): any {
+    public presentVariants(plan: Plan, locale: Locale): any {
         var attributes = [];
         var attributesAndValues = [];
         var presentedVariants = [];
@@ -65,8 +67,8 @@ export class GetPlanListPresenter {
                 priceWithOffer: variant.priceWithOffer,
                 Personas: variant.numberOfPersons,
                 Recetas: variant.numberOfRecipes,
-                description: variant.getLabel(),
-                descriptionWithPrice: variant.getLabelWithPrice(),
+                description: variant.getLabel(locale),
+                descriptionWithPrice: variant.getLabelWithPrice(locale),
                 attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
             });
             counter = 0;

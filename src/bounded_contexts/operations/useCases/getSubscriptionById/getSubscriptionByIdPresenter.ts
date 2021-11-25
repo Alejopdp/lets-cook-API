@@ -10,6 +10,7 @@ import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { Locale } from "../../domain/locale/Locale";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { locale } from "moment";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -25,12 +26,12 @@ export class GetSubscriptionByIdPresenter {
         paymentOrders: PaymentOrder[],
         locale: Locale
     ): Promise<any> {
-        const presentedPlan = await this.presentPlan(subscription);
+        const presentedPlan = await this.presentPlan(subscription, locale);
 
         const shippingAddress = {
             addressName: customer.shippingAddress?.name,
             addressDetails: customer.shippingAddress?.details,
-            preferredSchedule: customer.shippingAddress?.deliveryTime?.getLabel(Locale.es) || "Sin seleccionar",
+            preferredSchedule: customer.shippingAddress?.deliveryTime?.getLabel(Locale.es) || "",
         };
 
         const billingData = {
@@ -45,8 +46,8 @@ export class GetSubscriptionByIdPresenter {
         if (!!defaultPaymentMethod) {
             presentedPaymentMethod = {
                 id: defaultPaymentMethod.id.value,
-                cardLabel: customer.getDefaultPaymentMethodCardLabel(),
-                expirationDateLabel: customer.getDefaultPaymentMethodExpirationDateLabel(),
+                cardLabel: customer.getDefaultPaymentMethodCardLabel(locale),
+                expirationDateLabel: customer.getDefaultPaymentMethodExpirationDateLabel(locale),
                 default: true,
             };
         }
@@ -65,22 +66,25 @@ export class GetSubscriptionByIdPresenter {
 
         const schedule = {
             nextDelivery: !!nextActiveOrder
-                ? nextActiveOrder.getHumanShippmentDay()
+                ? nextActiveOrder.getHumanShippmentDay(locale)
                 : !!nextSecondActiveOrder
-                ? nextSecondActiveOrder.getHumanShippmentDay()
+                ? nextSecondActiveOrder.getHumanShippmentDay(locale)
                 : "",
             nextPayment:
                 !!nextActiveOrder && nextActiveOrder.billingDate > new Date()
-                    ? nextActiveOrder.getHumanBillingDay()
+                    ? nextActiveOrder.getHumanBillingDay(locale)
                     : !!nextSecondActiveOrder
-                    ? nextSecondActiveOrder.getHumanBillingDay()
+                    ? nextSecondActiveOrder.getHumanBillingDay(locale)
                     : "",
         };
 
-        const skippedOrders = this.presentOrders(orders.filter((order) => order.isSkipped()));
+        const skippedOrders = this.presentOrders(
+            orders.filter((order) => order.isSkipped()),
+            locale
+        );
 
         const canChooseRecipes = subscription.plan.abilityToChooseRecipes;
-        const nextTwelveOrders = this.presentOrders(orders);
+        const nextTwelveOrders = this.presentOrders(orders, locale);
         const nextPaymentOrderWithShippingCost: PaymentOrder | undefined = !!actualWeekOrder
             ? paymentOrders.find(
                   (po) =>
@@ -103,7 +107,8 @@ export class GetSubscriptionByIdPresenter {
             subscriptionId: subscription.id.value,
             plan: presentedPlan,
             actualPlanVariant: this.presentPlanVariant(
-                subscription.plan.planVariants.find((variant) => subscription.planVariantId.equals(variant.id))!
+                subscription.plan.planVariants.find((variant) => subscription.planVariantId.equals(variant.id))!,
+                locale
             ),
             shippingAddress,
             // billingData,
@@ -111,8 +116,8 @@ export class GetSubscriptionByIdPresenter {
             schedule,
             hasChosenRecipesForActualWeek,
             hasChosenRecipesForNextWeek,
-            actualWeekOrder: actualWeekOrder ? await this.presentWeekRecipes(actualWeekOrder) : null,
-            nextWeekOrder: nextWeekOrder ? await this.presentWeekRecipes(nextWeekOrder) : null,
+            actualWeekOrder: actualWeekOrder ? await this.presentWeekRecipes(actualWeekOrder, locale) : null,
+            nextWeekOrder: nextWeekOrder ? await this.presentWeekRecipes(nextWeekOrder, locale) : null,
             canChooseRecipesForNextWeekOrder: nextWeekOrder && nextWeekOrder.isInTimeToChooseRecipes() && canChooseRecipes,
             skippedOrders,
             canChooseRecipes,
@@ -124,30 +129,30 @@ export class GetSubscriptionByIdPresenter {
         };
     }
 
-    private async presentPlan(subscription: Subscription): Promise<any> {
+    private async presentPlan(subscription: Subscription, locale: Locale): Promise<any> {
         return {
             id: subscription.plan.id.value,
             planName: subscription.plan.name,
-            planVariantDescription: subscription.getPlanVariantLabel(),
+            planVariantDescription: subscription.getPlanVariantLabel(locale),
             variants: subscription.plan.planVariants
                 .filter((variant) => !variant.isDeleted)
-                .map((variant) => this.presentPlanVariant(variant)),
+                .map((variant) => this.presentPlanVariant(variant, locale)),
             state: {
                 state: subscription.state.humanTitle,
                 stateTitle: subscription.state.title,
             },
             servingsLabel: subscription.getServingsLabel(),
             price: subscription.price,
-            priceLabel: subscription.getPriceByFrequencyLabel(),
+            priceLabel: subscription.getPriceByFrequencyLabel(locale),
             icon: await this.storageService.getPresignedUrlForFile(subscription.plan.iconLinealColorUrl),
         };
     }
 
-    private presentPlanVariant(variant: PlanVariant): any {
+    private presentPlanVariant(variant: PlanVariant, locale: Locale): any {
         return {
             id: variant.id.value,
             isDefault: variant.isDefault,
-            description: variant.getLabelWithPrice(),
+            description: variant.getLabelWithPrice(locale),
             price: variant.getPaymentPrice(),
             //@ts-ignore
             numberOfPersons: variant.numberOfPersons || 0,
@@ -156,17 +161,17 @@ export class GetSubscriptionByIdPresenter {
         };
     }
 
-    private presentOrders(orders: Order[]): any {
+    private presentOrders(orders: Order[], locale: Locale): any {
         return orders.map((order) => ({
             id: order.id.value,
             weekLabel: order.getWeekLabel(),
-            shippingDate: order.getHumanShippmentDay(),
+            shippingDate: order.getHumanShippmentDay(locale),
             isSkipped: order.isSkipped(),
             state: order.state.title,
         }));
     }
 
-    private async presentWeekRecipes(order: Order | undefined): Promise<any> {
+    private async presentWeekRecipes(order: Order | undefined, locale: Locale): Promise<any> {
         if (!!!order) return [];
         const presentedRecipes = [];
 
@@ -230,7 +235,7 @@ export class GetSubscriptionByIdPresenter {
             weekLabel: order.getWeekLabel(),
             weekId: order.week.id.value,
             recipes: presentedRecipes,
-            shippingDate: order.getHumanShippmentDay(),
+            shippingDate: order.getHumanShippmentDay(locale),
         };
     }
 

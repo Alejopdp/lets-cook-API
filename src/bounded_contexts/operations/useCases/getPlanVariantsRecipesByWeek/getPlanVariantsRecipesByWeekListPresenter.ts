@@ -5,6 +5,7 @@ import { IStorageService } from "../../application/storageService/IStorageServic
 import { Recipe } from "../../domain/recipe/Recipe";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
+import { Locale } from "../../domain/locale/Locale";
 
 export class GetPlanVariantsRecipesByWeekListPresenter {
     private _storageService: IStorageService;
@@ -13,7 +14,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
         this._storageService = storageService;
     }
 
-    public async present(plans: Plan[], recipes: Recipe[], week: Week): Promise<any> {
+    public async present(plans: Plan[], recipes: Recipe[], week: Week, locale: Locale): Promise<any> {
         const presentedPlans = [];
         const planRecipeMap: { [key: string]: any[] } = {};
         const presentedRecipes = [];
@@ -44,7 +45,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                     var presentedVariants = [];
 
                     for (let variant of plan.planVariants) {
-                        presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes, additionalPlan));
+                        presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes, additionalPlan, locale));
                     }
 
                     presentedAdditionalPlansMap[additionalPlan.id.value] = await this.presentPlan(
@@ -63,7 +64,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                 var presentedVariants = [];
 
                 for (let variant of plan.planVariants) {
-                    if (!variant.isDeleted) presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes, plan));
+                    if (!variant.isDeleted) presentedVariants.push(this.presentPlanVariant(variant, plan.hasRecipes, plan, locale));
                 }
 
                 const presentedAdditionalPlans = plan.additionalPlans.map(
@@ -130,7 +131,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
         };
     }
 
-    private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean, plan: Plan): any {
+    private presentPlanVariant(variant: PlanVariant, hasRecipes: boolean, plan: Plan, locale: Locale): any {
         return {
             id: variant.id.value,
             planId: plan.id.value,
@@ -142,7 +143,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             Personas: variant.numberOfPersons,
             Recetas: variant.numberOfRecipes,
             attributes: variant.attributes.map((attr: any) => [attr.key, attr.value]),
-            label: variant.getLabel(),
+            label: variant.getLabel(locale),
             isDefault: variant.isDefault,
             isDeleted: variant.isDeleted,
             auxId:

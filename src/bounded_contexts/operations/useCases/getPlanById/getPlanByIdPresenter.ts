@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { IStorageService } from "../../application/storageService/IStorageService";
+import { Locale } from "../../domain/locale/Locale";
 import { Plan } from "../../domain/plan/Plan";
 
 export class GetPlanByIdPresenter {
@@ -9,7 +10,7 @@ export class GetPlanByIdPresenter {
         this._storageService = storageService;
     }
 
-    public async present(plan: Plan): Promise<any> {
+    public async present(plan: Plan, locale: Locale): Promise<any> {
         var attributes = [];
         var attributesAndValues = [];
         var presentedVariants = [];
@@ -67,7 +68,7 @@ export class GetPlanByIdPresenter {
             name: plan.name,
             sku: plan.planSku.code,
             description: plan.description,
-            availablePlanFrecuencies: plan.availablePlanFrecuencies.map((freq) => ({ value: freq.value(), label: freq.getLabel() })),
+            availablePlanFrecuencies: plan.availablePlanFrecuencies.map((freq) => ({ value: freq.value(), label: freq.getLabel(locale) })),
             isActive: plan.isActive,
             type: plan.type,
             imageUrl: plan.imageUrl ? await this.storageService.getPresignedUrlForFile(plan.imageUrl) : "",

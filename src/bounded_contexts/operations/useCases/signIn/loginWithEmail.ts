@@ -8,6 +8,7 @@ import { ICustomerRepository } from "../../infra/repositories/customer/ICustomer
 import { LoginWithEmailDto } from "./loginWithEmailDto";
 import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser, accountCreatedWithSocialMedia } from "./loginWithEmailErrors";
 import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
+import { Locale } from "../../domain/locale/Locale";
 
 type Response = Either<
     Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser | LoginWithEmailErrors.AccountCreatedWithSocialMedia>,
@@ -41,7 +42,7 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
             email: customer.email,
         };
 
-        return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer));
+        return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer, Locale.es));
     }
 
     /**

@@ -1,5 +1,6 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Customer } from "../../domain/customer/Customer";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
@@ -12,15 +13,21 @@ export class GetOrderByIdPresenter {
         this._storageService = storageService;
     }
 
-    public async present(paymentOrder: PaymentOrder, order: Order, customer: Customer, subscription: Subscription): Promise<any> {
+    public async present(
+        paymentOrder: PaymentOrder,
+        order: Order,
+        customer: Customer,
+        subscription: Subscription,
+        locale: Locale
+    ): Promise<any> {
         const planIcon = await this.storageService.getPresignedUrlForFile(order.plan.iconLinealColorUrl);
         const presentedRecipes = await this.presentRecipeSelection(order.recipeSelection);
 
         return {
             id: order.id.value,
             number: order.counter,
-            shippingDate: order.getHumanShippmentDay(),
-            billingDate: order.getHumanBillingDay(),
+            shippingDate: order.getHumanShippmentDay(locale),
+            billingDate: order.getHumanBillingDay(locale),
             state: order.state.title,
             isSkipped: order.isSkipped(),
             hasRecipes: order.hasChosenRecipes(),

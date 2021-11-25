@@ -1,4 +1,5 @@
 import { Customer } from "../../domain/customer/Customer";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Subscription } from "../../domain/subscription/Subscription";
@@ -9,11 +10,13 @@ export class GetCustomerInformationAsAdminPresenter {
         subscriptions,
         paymentOrders,
         orders,
+        locale,
     }: {
         customer: Customer;
         subscriptions: Subscription[];
         paymentOrders: PaymentOrder[];
         orders: Order[];
+        locale: Locale;
     }): any {
         return {
             personalData: {
@@ -24,12 +27,12 @@ export class GetCustomerInformationAsAdminPresenter {
                 billingData: customer.getBillingData(),
                 paymentMethods: customer.paymentMethods.map((method) => ({
                     id: method.id.value,
-                    card: method.getCardLabel(),
-                    expirationDate: method.getExpirationDate(),
+                    card: method.getCardLabel(locale),
+                    expirationDate: method.getExpirationDate(locale),
                     isDefault: method.isDefault,
                 })),
             },
-            subscriptions: this.presentSubscriptions(subscriptions),
+            subscriptions: this.presentSubscriptions(subscriptions, locale),
             orders: this.presentOrders(
                 orders
                     .filter((order) => order.shippingDate >= new Date() && (order.isActive() || order.isSkipped() || order.isBilled()))
@@ -48,12 +51,12 @@ export class GetCustomerInformationAsAdminPresenter {
         };
     }
 
-    public presentSubscriptions(subscriptions: Subscription[]): any {
+    public presentSubscriptions(subscriptions: Subscription[], locale: Locale): any {
         return subscriptions.map((subscription) => ({
             id: subscription.id.value,
             plan: subscription.plan.name,
-            variant: subscription.getPlanVariantLabel(),
-            price: subscription.getPriceByFrequencyLabel(),
+            variant: subscription.getPlanVariantLabel(locale),
+            price: subscription.getPriceByFrequencyLabel(locale),
             frequency: subscription.frequency.value(),
             status: subscription.state.title,
         }));

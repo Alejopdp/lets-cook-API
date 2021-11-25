@@ -26,7 +26,8 @@ export class GetOrderByIdController extends BaseController {
                 result.paymentOrder,
                 result.order,
                 result.customer,
-                result.subscription
+                result.subscription,
+                dto.locale
             );
 
             return this.ok(this.res, presented);

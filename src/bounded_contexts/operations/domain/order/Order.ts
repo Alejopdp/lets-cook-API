@@ -16,6 +16,7 @@ import { IOrderState } from "./orderState/IOrderState";
 import { RecipeSelection } from "./RecipeSelection";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariant } from "../recipe/RecipeVariant/RecipeVariant";
+import { Locale } from "../locale/Locale";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -228,24 +229,29 @@ export class Order extends Entity<Order> {
     public getDdMmYyyyShipmentDate(): string {
         return MomentTimeService.getDdMmYyyy(this.shippingDate);
     }
-    public getHumanShippmentDay(): string {
-        return MomentTimeService.getDateHumanLabel(this.shippingDate);
+    public getHumanShippmentDay(locale: Locale): string {
+        return MomentTimeService.getDateHumanLabel(this.shippingDate, locale);
     }
 
     public getDdMmYyyyBillingDate(): string {
         return MomentTimeService.getDdMmYyyy(this.billingDate);
     }
 
-    public getHumanBillingDay(): string {
-        return MomentTimeService.getDateHumanLabel(this.billingDate);
+    public getHumanBillingDay(locale: Locale): string {
+        return MomentTimeService.getDateHumanLabel(this.billingDate, locale);
     }
 
     public hasChosenRecipes(): boolean {
         return this.recipeSelection.length > 0;
     }
 
-    public getPendingRecipeChooseLabel(): string {
-        return `Tienes pendiente elegir las recetas del ${this.plan.name} para la entrega del ${this.getHumanShippmentDay()}`;
+    public getPendingRecipeChooseLabel(locale: Locale): string {
+        const texts = {
+            es: { pendingText: "Tienes pendiente elegir las recetas del", shippmentText: "para la entrega del" },
+            en: { pendingText: "You have to choose the recipes of the", shippmentText: "for the shipment of the" },
+            ca: { pendingText: "Tens pendent triar les receptes del", shippmentText: "per al lliurament del" },
+        };
+        return `${texts[locale].pendingText} ${this.plan.name} ${texts[locale].shippmentText} ${this.getHumanShippmentDay(locale)}`;
     }
 
     public assignPaymentOrder(paymentOrders: PaymentOrder[]): void {

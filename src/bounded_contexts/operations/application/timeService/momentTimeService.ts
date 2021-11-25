@@ -1,4 +1,5 @@
 import { logger } from "../../../../../config";
+import { Locale } from "../../domain/locale/Locale";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
 const moment = require("moment");
@@ -25,8 +26,8 @@ export class MomentTimeService {
         return moment(date).format("MMM");
     }
 
-    public static getDateHumanLabel(date: Date): string {
-        return moment(date).format("dddd Do MMMM");
+    public static getDateHumanLabel(date: Date, locale: Locale = Locale.es): string {
+        return moment(date).locale(locale).format("dddd Do MMMM");
     }
 
     public static getDddDdMmmm(date: Date): string {

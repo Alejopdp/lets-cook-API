@@ -26,7 +26,7 @@ export class GetCustomerInformationAsAdminController extends BaseController {
             };
 
             const result = await this.getCustomerInformationAsAdmin.execute(dto);
-            const presented = this.getCustomerInformationAsAdminPresenter.present(result);
+            const presented = this.getCustomerInformationAsAdminPresenter.present({ ...result, locale: dto.locale });
 
             return this.ok(this.res, presented);
         } catch (error) {

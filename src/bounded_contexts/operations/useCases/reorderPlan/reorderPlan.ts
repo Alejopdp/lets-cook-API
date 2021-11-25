@@ -144,7 +144,7 @@ export class ReorderPlan {
             shippingAddressName: subscription.customer.getShippingAddress().name || "",
             shippingCost: newPaymentOrders[0].shippingCost,
             shippingCustomerName: subscription.customer.getPersonalInfo().fullName || "",
-            shippingDate: orders[0].getHumanShippmentDay(),
+            shippingDate: orders[0].getHumanShippmentDay(dto.locale),
             totalAmount: amountToBill,
             discountAmount: newPaymentOrders[0].getDiscountAmountOrShippingCostIfHasFreeShipping(),
         };

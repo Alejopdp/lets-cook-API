@@ -24,7 +24,12 @@ export class GetPlanVariantsRecipesByWeekListController extends BaseController {
             };
 
             const result = await this.getPlanVariantsRecipesByWeekList.execute(dto);
-            const presented = await this.getPlanVariantsRecipesByWeekListPresenter.present(result.plans, result.recipes, result.week);
+            const presented = await this.getPlanVariantsRecipesByWeekListPresenter.present(
+                result.plans,
+                result.recipes,
+                result.week,
+                dto.locale
+            );
 
             return this.ok(this.res, presented);
         } catch (error) {
