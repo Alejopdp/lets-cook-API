@@ -13,6 +13,7 @@ const firebaseAdminConfig = require("../../../../firebase-admin.json");
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { logger } from "../../../../../config";
 import { IMailingListService } from "../../application/mailingListService/IMailingListService";
+import { Locale } from "../../domain/locale/Locale";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
@@ -68,7 +69,7 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
             // TO DO: Add more info
         };
 
-        return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer));
+        return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer, Locale.es));
     }
 
     /**

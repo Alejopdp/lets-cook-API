@@ -161,10 +161,10 @@ export class Plan extends Entity<Plan> {
         return planVariant.getPaymentPrice();
     }
 
-    public getPlanVariantLabel(planVariantId: PlanVariantId): string {
+    public getPlanVariantLabel(planVariantId: PlanVariantId, locale: Locale = Locale.es): string {
         const planVariant: PlanVariant | undefined = this.getPlanVariantById(planVariantId);
 
-        return !!!planVariant ? "" : planVariant.getLabel();
+        return !!!planVariant ? "" : planVariant.getLabel(locale);
     }
 
     public getPlanVariantLabelWithPrice(planVariantId: PlanVariantId): string {

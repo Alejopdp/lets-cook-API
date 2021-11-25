@@ -158,7 +158,9 @@ export class PayAllSubscriptions {
                             shippingAddressName: paymentOrderCustomer.getShippingAddress().name || "",
                             shippingCost: customerHasFreeShipping ? 0 : shippingCost,
                             shippingCustomerName: paymentOrderCustomer.getPersonalInfo().fullName || "",
-                            shippingDate: paymentOrderOrderMap[paymentOrderId][0].getHumanShippmentDay(),
+                            shippingDate: paymentOrderOrderMap[paymentOrderId][0].getHumanShippmentDay(
+                                (<any>Locale)[paymentOrderCustomer.personalInfo?.preferredLanguage || "es"]
+                            ),
                             totalAmount,
                             orders: paymentOrderOrderMap[paymentOrderId],
                             paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,

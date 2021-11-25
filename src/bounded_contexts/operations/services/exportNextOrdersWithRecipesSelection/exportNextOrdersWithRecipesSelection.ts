@@ -136,7 +136,6 @@ export class ExportNextOrdersWithRecipesSelection {
             const subscription = subscriptionMap[order.subscriptionId.value];
             const orderPlanVariant = order.plan.getPlanVariantById(order.planVariantId);
 
- 
             if (order.recipeSelection.length === 0) {
                 for (let i = 0; i < (order.getNumberOfRecipesOrReturn0() || 1); i++) {
                     ordersExport.push({
@@ -167,7 +166,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         planName: order.plan.name,
                         planVariantId: subscription.planVariantId.value,
                         planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
-                        planVariantDescription: subscription.getPlanVariantLabel(),
+                        planVariantDescription: subscription.getPlanVariantLabel(Locale.es),
                         subscriptionRestrictionComment: subscription.restrictionComment,
                         subscriptionRestriction: RestrictionCodeFactory.createCode(subscription.restriction?.value),
                         recipeVariantSku: "",
@@ -193,8 +192,10 @@ export class ExportNextOrdersWithRecipesSelection {
                             ? customerDeliveriesByWeek[order.customer.id.toString()][order.week.id.value.toString()]
                             : 0,
                         onlyFirstWeek: !!(
-                            customerDeliveriesByWeek[order.customer.id.toString()] && Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
-                            customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive())),
+                            customerDeliveriesByWeek[order.customer.id.toString()] &&
+                            Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
+                            customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive())
+                        ),
                     });
                 }
             }
@@ -229,7 +230,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         planName: order.plan.name,
                         planVariantId: subscription.planVariantId.value,
                         planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
-                        planVariantDescription: subscription.getPlanVariantLabel(),
+                        planVariantDescription: subscription.getPlanVariantLabel(Locale.es),
                         subscriptionRestrictionComment: subscription.restrictionComment,
                         subscriptionRestriction: RestrictionCodeFactory.createCode(subscription.restriction?.value),
                         recipeVariantSku:
@@ -256,9 +257,11 @@ export class ExportNextOrdersWithRecipesSelection {
                         deliveriesUntilWeek: customerDeliveriesByWeek[order.customer.id.toString()]
                             ? customerDeliveriesByWeek[order.customer.id.toString()][order.week.id.value.toString()]
                             : 0,
-                        onlyFirstWeek:!!(
-                            customerDeliveriesByWeek[order.customer.id.toString()] && Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
-                            customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive())),
+                        onlyFirstWeek: !!(
+                            customerDeliveriesByWeek[order.customer.id.toString()] &&
+                            Object.entries(customerDeliveriesByWeek[order.customer.id.toString()]).length === 1 &&
+                            customerSubscriptionsMap[order.customer.id.toString()].every((sub) => !sub.isActive())
+                        ),
                     });
                 }
             }
@@ -322,7 +325,7 @@ export class ExportNextOrdersWithRecipesSelection {
                 recivedOrdersQuantity: !!auxOrder && !!auxOrder?.customer ? auxOrder?.customer.receivedOrdersQuantity : 0,
                 deliveriesUntilWeek: 0,
                 onlyFirstWeek:
-                    !!auxOrder && !!auxOrder?.customer && customerDeliveriesByWeek[auxOrder.customer.id.toString()] 
+                    !!auxOrder && !!auxOrder?.customer && customerDeliveriesByWeek[auxOrder.customer.id.toString()]
                         ? Object.entries(customerDeliveriesByWeek[auxOrder.customer.id.toString()]).length === 1 &&
                           customerSubscriptionsMap[auxOrder.customer.id.toString()].every((sub) => !sub.isActive())
                         : false,

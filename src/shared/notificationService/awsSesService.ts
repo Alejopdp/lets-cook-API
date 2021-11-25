@@ -1,6 +1,6 @@
 import { SES } from "aws-sdk";
 import { SendEmailRequest } from "aws-sdk/clients/ses";
-import { Subscription } from "@src/bounded_contexts/operations/domain/subscription/Subscription";
+import { Subscription } from "../../bounded_contexts/operations/domain/subscription/Subscription";
 import { Customer } from "../../bounded_contexts/operations/domain/customer/Customer";
 import { RecipeSelection } from "../../bounded_contexts/operations/domain/order/RecipeSelection";
 import {
@@ -18,6 +18,7 @@ import { planAhorroMailTemplate } from "../../emailTemplates/planAhorro";
 import { vegPlans } from "../../emailTemplates/vegPlans";
 import { otherPlans } from "../../emailTemplates/otherPlans";
 import { INotificationService, NewSubscriptionNotificationDto, PaymentOrderBilledNotificationDto } from "./INotificationService";
+import { Locale } from "../../bounded_contexts/operations/domain/locale/Locale";
 export class AwsSesService implements INotificationService {
     private _ses: SES;
 
@@ -63,12 +64,12 @@ export class AwsSesService implements INotificationService {
     }
 
     public async notifyAdminAboutAPlanReactivation(subscription: Subscription): Promise<void> {
-        await this.sendMailToAdmins("Reactivación de plan", "", planReactivationTemplate(subscription));
+        await this.sendMailToAdmins("Reactivación de plan", "", planReactivationTemplate(subscription, Locale.es));
     }
     public async notifyAdminAbountNewSale(): Promise<void> {}
 
     public async notifyAdminAboutACancellation(subscription: Subscription, adminNameOrEmail?: string): Promise<void> {
-        await this.sendMailToAdmins("Nueva cancelación de plan", "", newCancellationTemplate(subscription, adminNameOrEmail));
+        await this.sendMailToAdmins("Nueva cancelación de plan", "", newCancellationTemplate(subscription, Locale.es, adminNameOrEmail));
     }
     public async notifyAdminAboutAddressChange(customer: Customer, adminNameOrEmail?: string): Promise<void> {
         await this.sendMailToAdmins("Cambio de dirección", "", addressChangeTemplate(customer, adminNameOrEmail));

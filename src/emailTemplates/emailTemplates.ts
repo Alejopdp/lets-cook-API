@@ -1,4 +1,5 @@
 import { Customer } from "@src/bounded_contexts/operations/domain/customer/Customer";
+import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
 import { Subscription } from "@src/bounded_contexts/operations/domain/subscription/Subscription";
 import { PaymentOrderBilledNotificationDto } from "@src/shared/notificationService/INotificationService";
 import { RecipeSelection } from "../bounded_contexts/operations/domain/order/RecipeSelection";
@@ -11,7 +12,8 @@ export const welcomeTemplate = (
     shippingCost: number,
     firstOrderId: string,
     shippingDay: string,
-    isPlanAhorro: boolean
+    isPlanAhorro: boolean,
+    locale: Locale
 ) => {
     return `
   <!DOCTYPE html>
@@ -403,7 +405,7 @@ export const newSubscriptionsTemplate = (customerName: string, planNames: string
   `;
 };
 
-export const newCancellationTemplate = (subscription: Subscription, adminNameOrEmail?: string) => {
+export const newCancellationTemplate = (subscription: Subscription, locale: Locale, adminNameOrEmail?: string) => {
     return `
  <!DOCTYPE html>
 <html lang="es">
@@ -500,12 +502,12 @@ export const newCancellationTemplate = (subscription: Subscription, adminNameOrE
                     !!adminNameOrEmail
                         ? `<p>el usuario Admin <b>${adminNameOrEmail}</b> ha cancelado el plan <b>${
                               subscription.plan.name
-                          } ${subscription.getPlanVariantLabel()}</b> con id ${
+                          } ${subscription.getPlanVariantLabel(locale)}</b> con id ${
                               subscription.id.value
                           } del cliente <b>${subscription.customer.getFullNameOrEmail()}</b>. </p>`
                         : `<p>El cliente <b>${subscription.customer.getFullNameOrEmail()}</b> ha cancelado su <b>${
                               subscription.plan.name
-                          } ${subscription.getPlanVariantLabel()}</b> con id ${subscription.id.value}</p>`
+                          } ${subscription.getPlanVariantLabel(locale)}</b> con id ${subscription.id.value}</p>`
                 }
                 <p>El motivo de la cancelación es: <b>${subscription.cancellationReason?.getHumanTitle() || ""}</b></p>
                 ${
@@ -527,7 +529,7 @@ export const newCancellationTemplate = (subscription: Subscription, adminNameOrE
  `;
 };
 
-export const planReactivationTemplate = (subscription: Subscription, adminNameOrEmail?: string) => {
+export const planReactivationTemplate = (subscription: Subscription, locale: Locale, adminNameOrEmail?: string) => {
     return `
  <!DOCTYPE html>
 <html lang="es">
@@ -623,9 +625,9 @@ export const planReactivationTemplate = (subscription: Subscription, adminNameOr
                 <h2 style="color: #00a555; font-size: 24px; font-weight: 800; line-height: 24px; margin: 48px 0;">
                     Reactivación de plan
                 </h2>
-                <p>El cliente ${subscription.customer.email} ha reactivado su ${
-        subscription.plan.name
-    } ${subscription.getPlanVariantLabel()} con id ${subscription.id.value}</p>
+                <p>El cliente ${subscription.customer.email} ha reactivado su ${subscription.plan.name} ${subscription.getPlanVariantLabel(
+        locale
+    )} con id ${subscription.id.value}</p>
                 <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
 
                   </div>

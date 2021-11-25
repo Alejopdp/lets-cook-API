@@ -204,7 +204,7 @@ export class CreateSubscriptionAsAdmin {
             planName: subscription.plan.name,
             recipeSelection: [],
             shippingCost: hasFreeShipping ? 0 : customerShippingZone.cost,
-            shippingDay: orders[0].getHumanShippmentDay(),
+            shippingDay: orders[0].getHumanShippmentDay(dto.locale),
             planSku: subscription.plan.planSku.code,
         };
         await this.subscriptionRepository.save(subscription);
@@ -225,7 +225,7 @@ export class CreateSubscriptionAsAdmin {
             shippingAddressName: customer.getShippingAddress().name || "",
             shippingCost: newPaymentOrders[0].shippingCost,
             shippingCustomerName: customer.getPersonalInfo().fullName || "",
-            shippingDate: orders[0].getHumanShippmentDay(),
+            shippingDate: orders[0].getHumanShippmentDay(dto.locale),
             totalAmount: amountToBill,
             discountAmount: newPaymentOrders[0].getDiscountAmountOrShippingCostIfHasFreeShipping(),
         };

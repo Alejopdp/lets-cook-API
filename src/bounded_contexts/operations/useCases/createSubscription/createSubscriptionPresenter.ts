@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { Subscription } from "../../domain/subscription/Subscription";
 
@@ -12,20 +13,21 @@ export class CreateSubscriptionPresenter {
         amountBilled: number,
         tax: number,
         shippingCost: number,
-        billedPaymentOrderHumanId: string | number
+        billedPaymentOrderHumanId: string | number,
+        locale: Locale
     ): any {
         return {
             subscriptionId: subscription.id.value,
             client_secret: paymentIntent?.client_secret || "",
             payment_status: paymentIntent?.status || "",
             firstOrderId: firstOrder.id.value,
-            firstOrderShippingDate: firstOrder.getHumanShippmentDay(),
+            firstOrderShippingDate: firstOrder.getHumanShippmentDay(locale),
             billedPaymentOrderHumanId,
             paymentOrderId: firstOrder.paymentOrderId?.value,
             customerPaymentMethods: customerPaymentMethods.map((pm) => ({
                 id: pm.id.value,
-                card: pm.getCardLabel(),
-                expirationDate: pm.getExpirationDate(),
+                card: pm.getCardLabel(locale),
+                expirationDate: pm.getExpirationDate(locale),
                 isDefault: pm.isDefault,
             })),
             amountBilled,
