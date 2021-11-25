@@ -18,7 +18,13 @@ export class GetSubscriptionByIdPresenter {
         this._storageService = storageService;
     }
 
-    public async present(subscription: Subscription, orders: Order[], customer: Customer, paymentOrders: PaymentOrder[]): Promise<any> {
+    public async present(
+        subscription: Subscription,
+        orders: Order[],
+        customer: Customer,
+        paymentOrders: PaymentOrder[],
+        locale: Locale
+    ): Promise<any> {
         const presentedPlan = await this.presentPlan(subscription);
 
         const shippingAddress = {
@@ -113,6 +119,8 @@ export class GetSubscriptionByIdPresenter {
             nextTwelveOrders,
             hasRecipes: subscription.plan.hasRecipes,
             shippingCost: !!nextPaymentOrderWithShippingCost ? nextPaymentOrderWithShippingCost.shippingCost : 0,
+            portionsQuantity: subscription.getPortionsQuantity(),
+            portionPrice: subscription.getPortionPrice(),
         };
     }
 

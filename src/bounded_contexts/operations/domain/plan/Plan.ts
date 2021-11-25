@@ -194,6 +194,22 @@ export class Plan extends Entity<Plan> {
         return planVariant.getServingsQuantity();
     }
 
+    public getPortionsQuantity(planVariantId: PlanVariantId): number {
+        const variant = this.planVariants.find((variant) => variant.id.equals(planVariantId));
+
+        if (!variant) return 0;
+
+        return variant.getPortionsQuantity();
+    }
+
+    public getPortionPrice(planVariantId: PlanVariantId): number {
+        const variant = this.planVariants.find((variant) => variant.id.equals(planVariantId));
+
+        if (!variant) return 0;
+
+        return variant.getPortionPrice();
+    }
+
     public getAttirbutesAndValues(): [string, (string | number)[]][] {
         var attributes: { [key: string]: (string | number)[] } = {};
         const allAttributesKeyOfVariants = _.uniq(

@@ -318,6 +318,14 @@ export class Subscription extends Entity<Subscription> {
         return this.plan.getServingsQuantity(this.planVariantId);
     }
 
+    public getPortionsQuantity(): number {
+        return this.plan.getPortionsQuantity(this.planVariantId);
+    }
+
+    public getPortionPrice(): number {
+        return this.plan.getPortionPrice(this.planVariantId);
+    }
+
     public getServingsLabel(): string {
         const servingsQty = this.plan.getServingsQuantity(this.planVariantId);
 
