@@ -156,6 +156,8 @@ export class Order extends Entity<Order> {
         if (this.isBilled()) throw new Error("No es posible saltar una orden que ya fue cobrada");
         const today = new Date();
 
+        if (this.isSkipped()) return;
+
         if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
         paymentOrder.discountOrderAmount(this);
 

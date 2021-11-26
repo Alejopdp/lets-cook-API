@@ -75,6 +75,20 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
     }
 
+    public updateAmountsAfterSwappingPlan(
+        oldPlanPrice: number,
+        newPlanPrice: number,
+        oldPlanDiscount: number,
+        newPlanDiscount: number
+    ): void {
+        if (this.state.isBilled() || this.state.isCancelled()) return;
+
+        this.amount = (Math.round(this.amount * 100) - Math.round(oldPlanPrice * 100) + Math.round(newPlanPrice * 100)) / 100;
+        if (this.discountAmount > 0)
+            this.discountAmount =
+                (Math.round(this.discountAmount * 100) - Math.round(oldPlanDiscount * 100) + Math.round(newPlanDiscount * 100)) / 100;
+    }
+
     public discountOrdersAmount(orders: Order[]): void {
         for (let order of orders) {
             this.discountOrderAmount(order);

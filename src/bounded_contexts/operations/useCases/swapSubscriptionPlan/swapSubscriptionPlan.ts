@@ -74,20 +74,10 @@ export class SwapSubscriptionPlan {
                 : undefined;
 
             for (let paymentOrder of paymentOrders) {
-                if (paymentOrder.state.isBilled()) continue;
-                paymentOrder.amount =
-                    (Math.round(paymentOrder.amount * 100) -
-                        Math.round(oldSubscriptionPrice * 100) +
-                        Math.round(subscription.price * 100)) /
-                    100;
-                if (!!coupon) {
-                    // TO DO: ChECK COUPON VALIDATIONS
-                    paymentOrder.discountAmount =
-                        (Math.round(paymentOrder.discountAmount * 100) -
-                            Math.round(coupon.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) * 100) +
-                            Math.round(coupon.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost) * 100)) /
-                        100;
-                }
+                var oldPlanDiscount = !!coupon ? coupon.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) : 0;
+                var newPlanDiscount = !!coupon ? coupon.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost) : 0;
+
+                paymentOrder.updateAmountsAfterSwappingPlan(oldSubscriptionPrice, subscription.price, oldPlanDiscount, newPlanDiscount);
             }
 
             await this.paymentOrderRepository.updateMany(paymentOrders);
