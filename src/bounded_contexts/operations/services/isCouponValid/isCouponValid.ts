@@ -8,7 +8,7 @@ export class IsCouponValid {
         const planPrice = dto.plan.getPlanVariantPrice(dto.planVariantId);
         if (
             !dto.coupon.isFreeShippingCoupon() &&
-            (Math.round(planPrice * 100) - Math.round(dto.coupon.getDiscount(dto.plan, dto.planVariantId, dto.shippingCost) * 100)) / 100 <=
+            (Math.round(planPrice * 100) - Math.round(dto.coupon.getDiscount(dto.plan, dto.planVariantId, dto.shippingCost) * 100)) / 100 <
                 0
         )
             throw new Error("El cupón no es aplicable al importe del plan");
