@@ -12,6 +12,7 @@ import { Locale } from "../../domain/locale/Locale";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
+import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { Coupon } from "../../domain/cupons/Cupon";
 
 export class SwapSubscriptionPlan {
@@ -20,19 +21,22 @@ export class SwapSubscriptionPlan {
     private _planRepository: IPlanRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _couponRepository: ICouponRepository;
+    private _shippingZoneRepository: IShippingZoneRepository;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
         orderRepository: IOrderRepository,
         planRepository: IPlanRepository,
         paymentOrderRepository: IPaymentOrderRepository,
-        couponRepository: ICouponRepository
+        couponRepository: ICouponRepository,
+        shippingZoneRepository: IShippingZoneRepository
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._orderRepository = orderRepository;
         this._planRepository = planRepository;
         this._paymentOrderRepository = paymentOrderRepository;
         this._couponRepository = couponRepository;
+        this._shippingZoneRepository = shippingZoneRepository;
     }
 
     public async execute(dto: SwapSubscriptionPlanDto): Promise<void> {
@@ -41,9 +45,14 @@ export class SwapSubscriptionPlan {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId);
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");
-
         if (subscription.state.isCancelled()) throw new Error("No puedes cambiar el plan de una suscripción cancelada");
 
+        const shippingZones = await this.shippingZoneRepository.findAll();
+
+        const customerShippingZone = shippingZones.find((zone) =>
+            zone.hasAddressInside(subscription.customer.shippingAddress?.latitude!, subscription.customer.shippingAddress?.longitude!)
+        );
+        if (!customerShippingZone) throw new Error("No te encuentras en una zona de envío disponible");
         const oldSubscriptionPrice = subscription.plan.getPlanVariantPrice(subscription.planVariantId);
         const oldPlan = subscription.plan;
         const oldPlanVariantId = subscription.planVariantId;
@@ -53,7 +62,7 @@ export class SwapSubscriptionPlan {
 
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
 
-        subscription.swapPlan(orders, newPlan, newPlanVariantId);
+        subscription.swapPlan(orders, newPlan, newPlanVariantId, customerShippingZone.cost);
 
         // UPDATE PAYEMNT ORDERS COST
         if (oldSubscriptionPrice !== subscription.price) {
@@ -127,5 +136,13 @@ export class SwapSubscriptionPlan {
      */
     public get couponRepository(): ICouponRepository {
         return this._couponRepository;
+    }
+
+    /**
+     * Getter shippingZoneRepository
+     * @return {IShippingZoneRepository}
+     */
+    public get shippingZoneRepository(): IShippingZoneRepository {
+        return this._shippingZoneRepository;
     }
 }

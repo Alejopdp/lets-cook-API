@@ -217,13 +217,15 @@ export class Order extends Entity<Order> {
         return this.price;
     }
 
-    public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId): void {
+    public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId, newCouponDiscount: number): void {
         if (this.isBilled()) return;
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
         this.recipesVariantsIds = [];
         this.price = newPlan.getPlanVariantPrice(newPlanVariantId);
+
+        if (this.discountAmount > 0) this.discountAmount = newCouponDiscount;
     }
 
     public getDdMmYyyyShipmentDate(): string {
