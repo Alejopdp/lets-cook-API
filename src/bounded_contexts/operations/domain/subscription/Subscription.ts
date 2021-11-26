@@ -250,14 +250,17 @@ export class Subscription extends Entity<Subscription> {
         return todayWeekDay !== this.billingDayOfWeek && todayWeekDay >= 1;
     }
 
-    public swapPlan(nextOrders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId): void {
+    public swapPlan(nextOrders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId, shippingCost: number): void {
         // TO DO: Validations
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
         this.price = this.plan.getPlanVariantPrice(this.planVariantId);
+        var couponDiscount = 0;
+
+        if (!!this.coupon) couponDiscount = this.coupon.getDiscount(newPlan, newPlanVariantId, shippingCost);
 
         for (let order of nextOrders) {
-            order.swapPlan(newPlan, newPlanVariantId);
+            order.swapPlan(newPlan, newPlanVariantId, couponDiscount);
         }
     }
 
