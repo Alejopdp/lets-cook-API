@@ -161,10 +161,10 @@ export class Plan extends Entity<Plan> {
         return planVariant.getPaymentPrice();
     }
 
-    public getPlanVariantLabel(planVariantId: PlanVariantId): string {
+    public getPlanVariantLabel(planVariantId: PlanVariantId, locale: Locale = Locale.es): string {
         const planVariant: PlanVariant | undefined = this.getPlanVariantById(planVariantId);
 
-        return !!!planVariant ? "" : planVariant.getLabel();
+        return !!!planVariant ? "" : planVariant.getLabel(locale);
     }
 
     public getPlanVariantLabelWithPrice(planVariantId: PlanVariantId): string {
@@ -192,6 +192,22 @@ export class Plan extends Entity<Plan> {
         if (!!!planVariant) return 0;
 
         return planVariant.getServingsQuantity();
+    }
+
+    public getPortionsQuantity(planVariantId: PlanVariantId): number {
+        const variant = this.planVariants.find((variant) => variant.id.equals(planVariantId));
+
+        if (!variant) return 0;
+
+        return variant.getPortionsQuantity();
+    }
+
+    public getPortionPrice(planVariantId: PlanVariantId): number {
+        const variant = this.planVariants.find((variant) => variant.id.equals(planVariantId));
+
+        if (!variant) return 0;
+
+        return variant.getPortionPrice();
     }
 
     public getAttirbutesAndValues(): [string, (string | number)[]][] {

@@ -28,6 +28,7 @@ export class GetSubscriptionByIdAsAdminController extends BaseController {
                 result.subscription,
                 result.orders,
                 result.customer,
+                dto.locale,
                 result.nextPaymentOrder
             );
 

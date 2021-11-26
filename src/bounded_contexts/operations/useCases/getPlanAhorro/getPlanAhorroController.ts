@@ -22,7 +22,7 @@ export class GetPlanAhorroController extends BaseController {
             };
 
             const result = await this.getPlanAhorro.execute(dto);
-            const presentedResult = await this.getPlanAhorroPresenter.present(result);
+            const presentedResult = await this.getPlanAhorroPresenter.present(result, dto.locale);
 
             return this.ok(this.res, presentedResult);
         } catch (error) {

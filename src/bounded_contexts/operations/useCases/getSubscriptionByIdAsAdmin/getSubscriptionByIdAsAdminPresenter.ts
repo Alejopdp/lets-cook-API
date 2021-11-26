@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { Locale } from "../../domain/locale/Locale";
 
 export class GetSubscriptionByIdAsAdminPresenter {
     private _storageService: IStorageService;
@@ -13,8 +14,14 @@ export class GetSubscriptionByIdAsAdminPresenter {
         this._storageService = storageService;
     }
 
-    public async present(subscription: Subscription, orders: Order[], customer: Customer, nextPaymentOrder?: PaymentOrder): Promise<any> {
-        const presentedPlan = await this.presentPlan(subscription);
+    public async present(
+        subscription: Subscription,
+        orders: Order[],
+        customer: Customer,
+        locale: Locale,
+        nextPaymentOrder?: PaymentOrder
+    ): Promise<any> {
+        const presentedPlan = await this.presentPlan(subscription, locale);
 
         const billingData = {
             addressName: customer.billingAddress?.customerName,
@@ -28,8 +35,8 @@ export class GetSubscriptionByIdAsAdminPresenter {
         if (!!defaultPaymentMethod) {
             presentedPaymentMethod = {
                 id: defaultPaymentMethod.id.value,
-                cardLabel: customer.getDefaultPaymentMethodCardLabel(),
-                expirationDateLabel: customer.getDefaultPaymentMethodExpirationDateLabel(),
+                cardLabel: customer.getDefaultPaymentMethodCardLabel(Locale.es),
+                expirationDateLabel: customer.getDefaultPaymentMethodExpirationDateLabel(Locale.es),
                 default: true,
             };
         }
@@ -38,18 +45,21 @@ export class GetSubscriptionByIdAsAdminPresenter {
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondActiveOrder(orders);
         const hasChosenRecipesForActualWeek = !!!nextActiveOrder ? false : nextActiveOrder.hasChosenRecipes();
         const hasChosenRecipesForNextWeek = !!!nextSecondActiveOrder ? false : nextSecondActiveOrder.hasChosenRecipes();
-        const actualWeekOrder = await this.presentWeekRecipes(nextActiveOrder);
-        const nextWeekOrder = await this.presentWeekRecipes(nextSecondActiveOrder); // TO DO: Get 2nd Next Active order
+        const actualWeekOrder = await this.presentWeekRecipes(locale, nextActiveOrder);
+        const nextWeekOrder = await this.presentWeekRecipes(locale, nextSecondActiveOrder); // TO DO: Get 2nd Next Active order
 
         const schedule = {
-            nextDelivery: !!!nextActiveOrder ? "" : nextActiveOrder.getHumanShippmentDay(),
-            nextPayment: !!!nextSecondActiveOrder ? "" : nextSecondActiveOrder.getHumanBillingDay(),
+            nextDelivery: !!!nextActiveOrder ? "" : nextActiveOrder.getHumanShippmentDay(locale),
+            nextPayment: !!!nextSecondActiveOrder ? "" : nextSecondActiveOrder.getHumanBillingDay(locale),
         };
 
-        const skippedOrders = this.presentOrders(orders.filter((order) => order.isSkipped()));
+        const skippedOrders = this.presentOrders(
+            orders.filter((order) => order.isSkipped()),
+            locale
+        );
 
         const canChooseRecipes = subscription.plan.abilityToChooseRecipes;
-        const nextTwelveOrders = this.presentOrders(orders);
+        const nextTwelveOrders = this.presentOrders(orders, locale);
 
         return {
             subscriptionId: subscription.id.value,
@@ -88,7 +98,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
             paymentMethod: presentedPaymentMethod?.cardLabel,
             schedule,
             nextBillingDate: nextActiveOrder?.getDdMmYyyyBillingDate(),
-            paymentMehod: customer.getDefaultPaymentMethodCardLabel(),
+            paymentMehod: customer.getDefaultPaymentMethodCardLabel(Locale.es),
             hasChosenRecipesForActualWeek,
             hasChosenRecipesForNextWeek,
             actualWeekOrder,
@@ -100,31 +110,31 @@ export class GetSubscriptionByIdAsAdminPresenter {
         };
     }
 
-    private async presentPlan(subscription: Subscription): Promise<any> {
+    private async presentPlan(subscription: Subscription, locale: Locale): Promise<any> {
         return {
             planName: subscription.plan.name,
-            planVariantDescription: subscription.getPlanVariantLabel(),
+            planVariantDescription: subscription.getPlanVariantLabel(Locale.es),
             state: {
                 state: subscription.state.humanTitle,
                 stateTitle: subscription.state.title,
             },
             servingsLabel: subscription.getServingsLabel(),
             price: subscription.price,
-            priceLabel: subscription.getPriceByFrequencyLabel(),
+            priceLabel: subscription.getPriceByFrequencyLabel(locale),
             icon: await this.storageService.getPresignedUrlForFile(subscription.plan.iconLinealColorUrl),
         };
     }
 
-    private presentOrders(orders: Order[]): any {
+    private presentOrders(orders: Order[], locale: Locale): any {
         return orders.map((order) => ({
             id: order.id.value,
             weekLabel: order.getWeekLabel(),
-            shippingDate: order.getHumanShippmentDay(),
+            shippingDate: order.getHumanShippmentDay(locale),
             isSkipped: order.isSkipped(),
         }));
     }
 
-    private async presentWeekRecipes(order: Order | undefined): Promise<any> {
+    private async presentWeekRecipes(locale: Locale, order: Order | undefined): Promise<any> {
         if (!!!order) return [];
         const presentedRecipes = [];
 
@@ -152,7 +162,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
             weekLabel: order.getWeekLabel(),
             weekId: order.week.id.value,
             recipes: presentedRecipes,
-            shippingDate: order.getHumanShippmentDay(),
+            shippingDate: order.getHumanShippmentDay(locale),
         };
     }
 

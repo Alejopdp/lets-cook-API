@@ -1,4 +1,5 @@
 import { Entity } from "../../../../../core/domain/Entity";
+import { Locale } from "../../locale/Locale";
 import { PaymentMethodId } from "./PaymentMethodId";
 
 export class PaymentMethod extends Entity<PaymentMethod> {
@@ -30,12 +31,16 @@ export class PaymentMethod extends Entity<PaymentMethod> {
         this._stripeId = stripeId;
     }
 
-    public getCardLabel(): string {
-        return `${this.brand} terminada en ${this.last4Numbers}`;
+    public getCardLabel(locale: Locale): string {
+        const text = { es: { endsWith: "terminada en " }, en: { endsWith: "that ends with " }, ca: { endsWith: "acabada a " } };
+
+        return `${this.brand} ${text[locale].endsWith} ${this.last4Numbers}`;
     }
 
-    public getExpirationDate(): string {
-        return `Caduca el ${this.exp_month}/${this.exp_year}`;
+    public getExpirationDate(locale: Locale): string {
+        const text = { es: { expiresAt: "Caduca el " }, en: { expiresAt: "Expires at " }, ca: { expiresAt: "Caduca el " } };
+
+        return `${text[locale].expiresAt}${this.exp_month}/${this.exp_year}`;
     }
 
     public changePaymentData(

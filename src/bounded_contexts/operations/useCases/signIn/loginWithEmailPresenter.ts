@@ -1,7 +1,8 @@
 import { Customer } from "../../domain/customer/Customer";
+import { Locale } from "../../domain/locale/Locale";
 
 export class LoginWithEmailPresenter {
-    public static present(token: string, customer: Customer): any {
+    public static present(token: string, customer: Customer, locale: Locale): any {
         return {
             userInfo: {
                 email: customer.email,
@@ -18,7 +19,7 @@ export class LoginWithEmailPresenter {
                 },
                 paymentMethods: customer.paymentMethods.map((method) => ({
                     id: method.id.value,
-                    label: method.getCardLabel(),
+                    label: method.getCardLabel(locale),
                     isDefault: method.isDefault,
                 })),
             },

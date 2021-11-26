@@ -24,7 +24,7 @@ export class GetPlanListController extends BaseController {
                 },
             };
             const result = await this.getPlanList.execute(dto);
-            const presentedResult = await this.getPlanListPresenter.present(result);
+            const presentedResult = await this.getPlanListPresenter.present(result, dto.locale);
 
             return this.ok(this.res, presentedResult);
         } catch (error) {

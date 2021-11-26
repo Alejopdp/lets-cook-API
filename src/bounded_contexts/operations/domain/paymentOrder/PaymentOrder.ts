@@ -7,6 +7,7 @@ import { Week } from "../week/Week";
 import { PaymentOrderId } from "./PaymentOrderId";
 import { IPaymentOrderState } from "./paymentOrderState/IPaymentOrderState";
 import { PaymentOrderStateFactory } from "./paymentOrderState/PaymentOrderFactory";
+import { Locale } from "../locale/Locale";
 
 export class PaymentOrder extends Entity<PaymentOrder> {
     private _shippingDate: Date;
@@ -89,7 +90,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         if (newPaymentOrderState.isRejected()) this.toRejected(orders);
     }
 
-    public getHumanBillingDate(): string {
+    public getHumanBillingDate(locale: Locale): string {
         return MomentTimeService.getDateHumanLabel(this.billingDate);
     }
     public getDdMmYyyyBillingDate(): string {

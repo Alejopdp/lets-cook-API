@@ -1,5 +1,6 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PlanId } from "../../domain/plan/PlanId";
 import { Recipe } from "../../domain/recipe/Recipe";
@@ -12,7 +13,7 @@ export class GetRecipesForOrderPresenter {
     constructor(storageService: IStorageService) {
         this._storageService = storageService;
     }
-    public async present(recipes: Recipe[], order: Order, subscription: Subscription): Promise<any> {
+    public async present(recipes: Recipe[], order: Order, subscription: Subscription, locale: Locale): Promise<any> {
         const presentedRecipes = [];
 
         for (let recipe of recipes) {
@@ -21,7 +22,7 @@ export class GetRecipesForOrderPresenter {
 
         return {
             recipes: presentedRecipes.sort((r1, r2) => r1.orderPriority - r2.orderPriority),
-            nextDeliveryLabel: order.getHumanShippmentDay(),
+            nextDeliveryLabel: order.getHumanShippmentDay(locale),
             maxRecipesQty: subscription.getMaxRecipesQty(),
             subscriptionId: subscription.id.value,
             actualChosenRecipes: order.recipeSelection.map((recipeSelection) => ({

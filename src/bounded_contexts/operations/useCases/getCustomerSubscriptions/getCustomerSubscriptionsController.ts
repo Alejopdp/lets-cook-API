@@ -21,7 +21,11 @@ export class GetCustomersubscriptionsController extends BaseController {
                 customerId: this.req.params.customerId,
             };
             const result = await this.getCustomersubscriptions.execute(dto);
-            const presentedResult = await this.getCustomerSubscriptionsPresenter.present(result.subscriptions, result.nextOrders);
+            const presentedResult = await this.getCustomerSubscriptionsPresenter.present(
+                result.subscriptions,
+                result.nextOrders,
+                dto.locale
+            );
 
             return this.ok(this.res, presentedResult);
         } catch (error) {

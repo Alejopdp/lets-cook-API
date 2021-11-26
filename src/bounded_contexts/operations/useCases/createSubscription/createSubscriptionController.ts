@@ -44,7 +44,8 @@ export class CreateSubscriptionController extends BaseController {
                 result.amountBilled,
                 result.tax,
                 result.shippingCost,
-                result.billedPaymentOrderHumanId
+                result.billedPaymentOrderHumanId,
+                dto.locale
             );
 
             return this.ok(this.res, presented);

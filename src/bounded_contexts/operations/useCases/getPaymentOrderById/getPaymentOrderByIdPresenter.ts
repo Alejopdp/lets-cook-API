@@ -1,5 +1,6 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Customer } from "../../domain/customer/Customer";
+import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
@@ -12,13 +13,19 @@ export class GetPaymentOrderByIdPresenter {
         this._storageService = storageService;
     }
 
-    public async present(paymentOrder: PaymentOrder, orders: Order[], customer: Customer, subscriptions: Subscription[]): Promise<any> {
-        const presentedOrders = await this.presentOrders(orders);
+    public async present(
+        paymentOrder: PaymentOrder,
+        orders: Order[],
+        customer: Customer,
+        subscriptions: Subscription[],
+        locale: Locale
+    ): Promise<any> {
+        const presentedOrders = await this.presentOrders(orders, locale);
 
         return {
             id: paymentOrder.id.value,
             amount: paymentOrder.amount,
-            billingDate: paymentOrder.getHumanBillingDate(),
+            billingDate: paymentOrder.getHumanBillingDate(locale),
             discountAmount: paymentOrder.getDiscountAmountOrShippingCostIfHasFreeShipping(),
             couponCodes: subscriptions.map((subscription) => subscription.coupon?.couponCode),
             shippingCost: paymentOrder.shippingCost,
@@ -36,7 +43,7 @@ export class GetPaymentOrderByIdPresenter {
         };
     }
 
-    public async presentOrders(orders: Order[]): Promise<any> {
+    public async presentOrders(orders: Order[], locale: Locale): Promise<any> {
         const presentedOrders = [];
 
         for (let order of orders) {
@@ -46,7 +53,7 @@ export class GetPaymentOrderByIdPresenter {
             presentedOrders.push({
                 id: order.id.value,
                 number: order.counter,
-                shippingDate: order.getHumanShippmentDay(),
+                shippingDate: order.getHumanShippmentDay(locale),
                 // state: order.state.humanTitle,
                 state: order.state.title,
                 hasRecipes: order.hasChosenRecipes(),

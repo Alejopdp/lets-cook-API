@@ -23,7 +23,7 @@ export class GetPlanByIdController extends BaseController {
             };
 
             const result = await this.getPlanById.execute(dto);
-            const presentedResult = await this.getPlanByIdPresenter.present(result);
+            const presentedResult = await this.getPlanByIdPresenter.present(result, dto.locale);
 
             return this.ok(this.res, presentedResult);
         } catch (error) {

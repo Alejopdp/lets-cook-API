@@ -50,7 +50,7 @@ export class ExportSubscriptions {
                 planName: subscription.plan.name,
                 planVariantId: subscription.planVariantId.value,
                 planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
-                planVariantDescription: subscription.getPlanVariantLabel(),
+                planVariantDescription: subscription.getPlanVariantLabel(Locale.es),
                 price: subscription.plan.getPlanVariantPrice(subscription.planVariantId),
                 billingFirstName: subscription.customer.getBillingData().customerName || "",
                 billingLastName: subscription.customer.billingAddress?.customerName || "",

@@ -77,7 +77,7 @@ export class SendNewSubscriptionEmail {
             shippingAddressName: subscription.customer.getShippingAddress().name || "",
             shippingCost: paymentOrder.shippingCost,
             shippingCustomerName: subscription.customer.getPersonalInfo().fullName || "",
-            shippingDate: firstOrder!.getHumanShippmentDay(),
+            shippingDate: firstOrder!.getHumanShippmentDay(dto.locale),
             totalAmount: paymentOrder.getAmountToBillWithoutShippingCost(),
             discountAmount: paymentOrder.getDiscountAmountOrShippingCostIfHasFreeShipping(),
         };

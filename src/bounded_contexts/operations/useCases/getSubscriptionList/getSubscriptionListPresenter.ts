@@ -1,3 +1,4 @@
+import { Locale } from "../../domain/locale/Locale";
 import { Subscription } from "../../domain/subscription/Subscription";
 
 export class GetSubscriptionListPresenter {
@@ -5,14 +6,13 @@ export class GetSubscriptionListPresenter {
         const presentedSubscriptions = [];
 
         for (let subscription of subscriptions) {
-            console.log("Sub w error: ", subscription.id.value);
             presentedSubscriptions.push({
                 id: subscription.id.value,
                 customerName: subscription.customer.getPersonalInfo()?.fullName,
                 customerEmail: subscription.customer.email,
                 customerId: subscription.customer.id.value,
                 plan: subscription.plan.name,
-                planVariant: subscription.getPlanVariantLabel(),
+                planVariant: subscription.getPlanVariantLabel(Locale.es),
                 frequency: subscription.frequency.value(),
                 amount: subscription.getPrice(),
                 state: subscription.state.title,

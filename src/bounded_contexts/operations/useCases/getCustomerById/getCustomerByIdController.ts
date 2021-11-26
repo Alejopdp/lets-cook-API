@@ -19,9 +19,10 @@ export class GetCustomerByIdController extends BaseController {
         try {
             const dto: GetCustomerByIdDto = {
                 customerId: this.req.params.id,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
             const result = await this.getCustomerById.execute(dto);
-            const presented = this.getCustomerByIdPresenter.present(result);
+            const presented = this.getCustomerByIdPresenter.present(result, dto.locale);
 
             return this.ok(this.res, presented);
         } catch (error) {

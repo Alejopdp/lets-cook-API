@@ -139,16 +139,16 @@ export class Customer extends Entity<Customer> {
         return this.shippingAddress?.latitude !== lat || this.shippingAddress?.longitude !== lng;
     }
 
-    public getDefaultPaymentMethodCardLabel(): string {
+    public getDefaultPaymentMethodCardLabel(locale: Locale): string {
         const defaultMethod: PaymentMethod = this.getDefaultPaymentMethod()!;
 
-        return defaultMethod.getCardLabel();
+        return defaultMethod.getCardLabel(locale);
     }
 
-    public getDefaultPaymentMethodExpirationDateLabel(): string {
+    public getDefaultPaymentMethodExpirationDateLabel(locale: Locale): string {
         const defaultMethod: PaymentMethod = this.getDefaultPaymentMethod()!;
 
-        return defaultMethod.getExpirationDate();
+        return defaultMethod.getExpirationDate(locale);
     }
 
     public getPaymentMethodStripeId(paymentMethodId: PaymentMethodId): string {

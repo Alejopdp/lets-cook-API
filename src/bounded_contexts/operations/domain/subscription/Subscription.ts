@@ -4,6 +4,7 @@ import { CancellationReason } from "../cancellationReason/CancellationReason";
 import { CouponState } from "../cupons/CouponState";
 import { Coupon } from "../cupons/Cupon";
 import { Customer } from "../customer/Customer";
+import { Locale } from "../locale/Locale";
 import { Order } from "../order/Order";
 import { OrderActive } from "../order/orderState/OrderActive";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
@@ -274,8 +275,8 @@ export class Subscription extends Entity<Subscription> {
     public isActive(): boolean {
         return this.state.isActive();
     }
-    public getPlanVariantLabel(): string {
-        return this.plan.getPlanVariantLabel(this.planVariantId);
+    public getPlanVariantLabel(locale: Locale): string {
+        return this.plan.getPlanVariantLabel(this.planVariantId, locale);
     }
 
     public getNextChoosableRecipesOrder(orders: Order[] = []): Order | undefined {
@@ -306,16 +307,24 @@ export class Subscription extends Entity<Subscription> {
         return orders.find((order) => (order.isActive() || order.isBilled()) && !order.id.equals(nextOrder.id)); // TO DO: It works if orders is sorted ASC
     }
 
-    public getNextShipmentLabel(orders: Order[] = []): string {
+    public getNextShipmentLabel(orders: Order[] = [], locale: Locale): string {
         const nextOrder = orders.find((order) => order.isActive() || order.isBilled());
 
         if (!!!nextOrder) return "No tienes una próxima entrega";
 
-        return nextOrder.getHumanShippmentDay();
+        return nextOrder.getHumanShippmentDay(locale);
     }
 
     public getServingsQuantity(): number {
         return this.plan.getServingsQuantity(this.planVariantId);
+    }
+
+    public getPortionsQuantity(): number {
+        return this.plan.getPortionsQuantity(this.planVariantId);
+    }
+
+    public getPortionPrice(): number {
+        return this.plan.getPortionPrice(this.planVariantId);
     }
 
     public getServingsLabel(): string {
@@ -326,8 +335,10 @@ export class Subscription extends Entity<Subscription> {
         return `${servingsQty} raciones a ${Math.round((this.price / servingsQty + Number.EPSILON) * 100) / 100} € por ración`;
     }
 
-    public getPriceByFrequencyLabel(): string {
-        return `Valor total: ${this.price} €/ ${this.frequency.getLabel()}`;
+    public getPriceByFrequencyLabel(locale: Locale): string {
+        const text = { es: { totalValue: "Valor total:" }, en: { totalValue: "Total value:" }, ca: { totalValue: "Valor total:" } };
+
+        return `${text[locale].totalValue} ${this.price} €/ ${this.frequency.getLabel(locale)}`;
     }
 
     public getPrice(): number {

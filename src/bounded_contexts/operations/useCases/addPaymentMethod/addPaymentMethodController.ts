@@ -3,6 +3,7 @@ import { AddPaymentMethod } from "./addPaymentMethod";
 import { AddPaymentMethodDto } from "./addPaymentMethodDto";
 import { AddPaymentMethodPresenter } from "./addPaymentMethodPresenter";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
+import { Locale } from "../../domain/locale/Locale";
 
 export class AddPaymentMethodController extends BaseController {
     private _addPaymentMethod: AddPaymentMethod;
@@ -19,10 +20,11 @@ export class AddPaymentMethodController extends BaseController {
             const dto: AddPaymentMethodDto = {
                 customerId: this.req.params.id,
                 stripeId: this.req.body.stripePaymentMethodId,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             const paymentMethod: PaymentMethod = await this.addPaymentMethod.execute(dto);
-            const presented = this.addPaymentMethodPresenter.present(paymentMethod);
+            const presented = this.addPaymentMethodPresenter.present(paymentMethod, dto.locale);
 
             return this.ok(this.res, presented);
         } catch (error) {

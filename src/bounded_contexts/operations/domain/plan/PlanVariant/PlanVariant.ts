@@ -3,6 +3,7 @@ import { Entity } from "../../../../../core/domain/Entity";
 import { PlanSku } from "../PlanSku";
 import { PlanVariantAttribute } from "./PlanVariantAttribute";
 import { PlanVariantId } from "./PlanVariantId";
+import { Locale } from "../../locale/Locale";
 
 export class PlanVariant extends Entity<PlanVariant> {
     private _sku: PlanSku;
@@ -50,22 +51,55 @@ export class PlanVariant extends Entity<PlanVariant> {
         return this.priceWithOffer || this.price;
     }
 
-    public getLabel(): string {
-        return (
-            this.description ||
-            this.attributes.reduce(
-                (acc: string, attribute: PlanVariantAttribute) => (acc = `${acc} / ${attribute.key} ${attribute.value}`),
-                ""
-            )
+    public getLabel(locale: Locale = Locale.es): string {
+        const texts = {
+            es: { recipesFor: "recetas para", persons: "personas" },
+            en: { recipesFor: "recipes for", persons: "persons" },
+            ca: { recipesFor: "receptes per", persons: "persones" },
+        };
+        if (!!this.description) return this.description;
+        var concatenatedAttributes = this.attributes.reduce(
+            (acc: string, attribute: PlanVariantAttribute) => (acc = `${acc} / ${attribute.key} ${attribute.value}`),
+            ""
         );
+
+        if (!!this.numberOfPersons && !!this.numberOfRecipes)
+            return `${this.numberOfRecipes} ${texts[locale].recipesFor} ${this.numberOfPersons} ${texts[locale].persons}`;
+        if (!!this.numberOfPersons) concatenatedAttributes = `${this.numberOfPersons} / ${concatenatedAttributes}`;
+        if (!!this.numberOfRecipes) concatenatedAttributes = `${this.numberOfRecipes} / ${concatenatedAttributes}`;
+
+        return concatenatedAttributes;
     }
 
-    public getLabelWithPrice(): string {
-        return `${this.getLabel()} / ${this.getPaymentPrice()} €`;
+    public getLabelWithPrice(locale: Locale = Locale.es): string {
+        return `${this.getLabel(locale)} / ${this.getPaymentPrice()} €`;
     }
 
     public getServingsQuantity(): number {
         return this.numberOfPersons || 0;
+    }
+
+    public getPortionsQuantity(): number {
+        if (!this.numberOfRecipes || !this.numberOfPersons) return 0;
+
+        return this.numberOfPersons * this.numberOfRecipes;
+    }
+
+    public getPortionPrice(discount: number = 0): number {
+        // if (!this.numberOfRecipes || !this.numberOfPersons) return 0;
+        return Utils.roundTwoDecimals(this.getPaymentPrice() / this.getPortionsQuantity());
+    }
+
+    public getKitPrice(): number {
+        return !!this.numberOfRecipes ? this.getPaymentPrice() / this.numberOfRecipes : this.getPaymentPrice();
+    }
+
+    public getFinalKitPrice(): number {
+        return Utils.roundTwoDecimals(
+            !!this.numberOfRecipes
+                ? Math.round(this.getPaymentPrice() * 100) / this.numberOfRecipes / 100
+                : Math.round(this.getPaymentPrice() * 100) / 100
+        );
     }
 
     public getNumberOfRecipes(): number {
