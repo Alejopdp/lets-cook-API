@@ -1,3 +1,5 @@
+import { IngredientId } from "@src/bounded_contexts/operations/domain/ingredient/ingredientId";
+import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
 import { Ingredient } from "../../../domain/ingredient/ingredient";
 import { IIngredientRepository } from "./IIngredientRepository";
 
@@ -6,6 +8,9 @@ export class MockIngredientRepository implements IIngredientRepository {
 
     constructor(database: Ingredient[]) {
         this._database = database;
+    }
+    findAllByIdList(ids: IngredientId[], locale: Locale): Promise<Ingredient[]> {
+        throw new Error("Method not implemented.");
     }
 
     public async save(ingredient: Ingredient): Promise<void> {

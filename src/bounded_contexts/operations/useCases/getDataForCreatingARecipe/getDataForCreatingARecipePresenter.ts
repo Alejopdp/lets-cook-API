@@ -26,7 +26,7 @@ export class GetDataForCreatingARecipePresenter {
         }
 
         for (let ingredient of ingredients) {
-            presentedIngredients.push(ingredient.name);
+            presentedIngredients.push({ name: ingredient.name, id: ingredient.id.toString() });
         }
 
         for (let week of weeks) {
