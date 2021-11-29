@@ -13,6 +13,7 @@ import { paymentOrderRouter } from "../../../bounded_contexts/operations/infra/h
 import { restrictionRouter } from "../../../bounded_contexts/operations/infra/http/restriction";
 import { mailingListRouter } from "../../../bounded_contexts/operations/infra/http/mailingList";
 
+console.log("A ver gabriel: ", process.env.NODE_ENV);
 const v1Router = express.Router();
 
 v1Router.use("/user", userRouter);
