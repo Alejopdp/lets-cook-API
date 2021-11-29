@@ -46,6 +46,7 @@ export class GetRecipeByIdPresenter {
             relatedPlans: recipe.relatedPlans.map((planId) => planId.value),
             recipeVariants: recipe.recipeVariants.map((variant) => {
                 return {
+                    rawIngredients: variant.ingredients.map((ing) => ({ id: ing.id.toString(), name: ing.name })),
                     ingredients: variant.ingredients.map((ing) => ing.name),
                     restriction: {
                         id: variant.restriction.id.value,
