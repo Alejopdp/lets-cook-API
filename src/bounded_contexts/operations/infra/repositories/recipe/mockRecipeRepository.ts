@@ -1,3 +1,4 @@
+import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
 import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariantSku";
 import _ from "lodash";
 import { Order } from "../../../domain/order/Order";
@@ -13,6 +14,9 @@ export class MockRecipeRepository implements IRecipeRepository {
 
     constructor(database: Recipe[]) {
         this._database = database;
+    }
+    findByRecipeVariantSkuOrThrow(recipeVariantId: string, locale: Locale): Promise<Recipe> {
+        throw new Error("Method not implemented.");
     }
     findByRecipeVariantSkuList(recipeVariantSkus: RecipeVariantSku[]): Promise<Recipe[]> {
         throw new Error("Method not implemented.");

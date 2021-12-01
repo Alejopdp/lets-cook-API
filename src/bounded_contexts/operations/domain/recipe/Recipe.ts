@@ -10,6 +10,7 @@ import { Week } from "../week/Week";
 import { PlanId } from "../plan/PlanId";
 import { RecipeVariantId } from "./RecipeVariant/RecipeVariantId";
 import { RecipeVariantRestriction } from "./RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
+import { RecipeVariantSku } from "./RecipeVariant/RecipeVariantSku";
 
 export class Recipe extends Entity<Recipe> {
     private _recipeGeneralData: RecipeGeneralData;
@@ -78,12 +79,20 @@ export class Recipe extends Entity<Recipe> {
         return this.recipeVariants.find((variant) => variant.id.equals(recipeVariantId))?.restriction;
     }
 
+    public getVariantRestrictionByVariantSku(variantSku: RecipeVariantSku): RecipeVariantRestriction | undefined {
+        return this.recipeVariants.find((variant) => variant.sku.equals(variantSku))?.restriction;
+    }
+
     public getPresentedNutritionalInfo(): { key: string; value: string }[] {
         return this.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
     }
 
     public getDefaultVariantSku(): string {
         return this.recipeVariants[0].sku.code;
+    }
+
+    public deleteRecipeVariant(variantSku: RecipeVariantSku): void {
+        this.recipeVariants = this.recipeVariants.filter((variant) => !variant.sku.equals(variantSku));
     }
 
     /**
