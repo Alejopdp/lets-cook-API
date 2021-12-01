@@ -124,6 +124,10 @@ export class MongooseOrderRepository implements IOrderRepository {
         return await this.findBy({ paymentOrder: paymentOrdersIds.map((id) => id.value), state: "ORDER_ACTIVE" }, locale);
     }
 
+    public async findByChosenRecipeAndFutureShippingDate(recipeId: string): Promise<Order[]> {
+        return await this.findBy({ "recipeSelection.recipe": recipeId, shippingDate: { $gte: new Date() } });
+    }
+
     public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
         const orderDb = await MongooseOrder.findById(orderId.value, { deletionFlag: false })
             .populate("customer")

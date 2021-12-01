@@ -20,4 +20,5 @@ export interface IRecipeRepository {
     findForOrder(order: Order, restrictionId?: RecipeRestrictionId, locale?: Locale): Promise<Recipe[]>;
     findByRecipeVariantSkuList(recipeVariantSkus: RecipeVariantSku[], locale?: Locale): Promise<Recipe[]>;
     findNextWeekRecipes(locale?: Locale): Promise<Recipe[]>;
+    findByRecipeVariantSkuOrThrow(recipeVariantSku: string, locale: Locale): Promise<Recipe>;
 }
