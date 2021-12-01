@@ -57,13 +57,13 @@ export class CreateManyCouponsWithCsvController extends BaseController {
                         maxChargeQtyValue: parseInt(matrix[i][10]),
                         startDate: new Date(
                             parseInt(matrix[i][11].split("/")[2]),
-                            parseInt(matrix[i][11].split("/")[1]),
+                            parseInt(matrix[i][11].split("/")[1]) - 1,
                             parseInt(matrix[i][11].split("/")[0])
                         ),
                         endDate: !!matrix[i][12]
                             ? new Date(
                                   parseInt(matrix[i][12].split("/")[2]),
-                                  parseInt(matrix[i][12].split("/")[1]),
+                                  parseInt(matrix[i][12].split("/")[1]) - 1,
                                   parseInt(matrix[i][12].split("/")[0])
                               )
                             : undefined,
