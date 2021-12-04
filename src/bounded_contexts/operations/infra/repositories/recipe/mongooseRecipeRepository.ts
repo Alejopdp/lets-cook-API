@@ -71,6 +71,19 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         return await this.findBy({ "recipeVariants.sku": recipeVariantSkus.map((sku) => sku.code) }, locale);
     }
 
+    public async findByRecipeVariantSkuOrThrow(recipeVariantSku: string, locale: Locale): Promise<Recipe> {
+        const recipe = await RecipeModel.findOne({ "recipeVariants.sku": recipeVariantSku })
+            .populate("availableWeeks")
+            .populate({
+                path: "recipeVariants",
+                populate: [{ path: "restriction" }, { path: "ingredients" }],
+            });
+
+        if (!!!recipe) throw new Error("La variante ingresada no pertenece a ninguna receta");
+
+        return recipeMapper.toDomain(recipe);
+    }
+
     public async findByWeekId(weekId: WeekId, locale: Locale = Locale.es): Promise<Recipe[]> {
         return await this.findBy({ availableWeeks: weekId }, locale);
     }

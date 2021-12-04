@@ -3,6 +3,7 @@ import { Ingredient as IngredientModel } from "../../../../../infraestructure/mo
 import { IIngredientRepository } from "./IIngredientRepository";
 import { ingredientMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
+import { IngredientId } from "@src/bounded_contexts/operations/domain/ingredient/ingredientId";
 
 export class MongooseIngredientRepository implements IIngredientRepository {
     public async save(ingredient: Ingredient, locale: Locale = Locale.es): Promise<void> {
@@ -42,6 +43,10 @@ export class MongooseIngredientRepository implements IIngredientRepository {
 
     public async findAll(locale: Locale = Locale.es): Promise<Ingredient[]> {
         return await this.findBy({});
+    }
+
+    public async findAllByIdList(ids: IngredientId[], locale: Locale = Locale.es): Promise<Ingredient[]> {
+        return await this.findBy({ _id: ids.map((id) => id.toString()) }, locale);
     }
 
     public async findAllByName(names: string[], locale: Locale = Locale.es): Promise<Ingredient[]> {

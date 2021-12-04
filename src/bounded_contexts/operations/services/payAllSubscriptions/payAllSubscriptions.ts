@@ -162,7 +162,7 @@ export class PayAllSubscriptions {
                                 (<any>Locale)[paymentOrderCustomer.personalInfo?.preferredLanguage || "es"]
                             ),
                             totalAmount,
-                            orders: paymentOrderOrderMap[paymentOrderId],
+                            orders: paymentOrderOrderMap[paymentOrderId].filter((order) => !order.isCancelled()),
                             paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
                             discountAmount: paymentOrderToBill.getDiscountAmountOrShippingCostIfHasFreeShipping(),
                         });
@@ -284,8 +284,10 @@ export class PayAllSubscriptions {
         await this.paymentOrderRepository.updateMany(paymentOrdersToBill);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         await this.customerRepository.updateMany(customers);
-        for (let dto of notificationDtos) {
-            await this.notificationService.notifyCustomerAboutPaymentOrderBilled(dto);
+        if (process.env.NODE_ENV !== "staging") {
+            for (let dto of notificationDtos) {
+                await this.notificationService.notifyCustomerAboutPaymentOrderBilled(dto);
+            }
         }
         logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
     }

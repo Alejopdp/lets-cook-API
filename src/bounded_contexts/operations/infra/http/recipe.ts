@@ -12,6 +12,7 @@ import { updateRecipeController } from "../../useCases/updateRecipe";
 import { updateRecipeWeeksController } from "../../useCases/updateRecipeWeeks";
 import { getRecipesForOrderController } from "../../useCases/getRecipesForOrder";
 import { getNextWeekRecipesController } from "../../useCases/getNextWeekRecipes";
+import { deleteRecipeVariantController } from "../../useCases/deleteRecipeVariant";
 
 const recipeRouter = express.Router();
 
@@ -33,6 +34,7 @@ recipeRouter.post("/", multer(options).array("recipeImages"), (req, res) => crea
 
 // PUTs
 recipeRouter.put("/update-weeks/:id", (req, res) => updateRecipeWeeksController.execute(req, res));
+recipeRouter.put("/delete-variant/:variantSku", (req, res) => deleteRecipeVariantController.execute(req, res));
 recipeRouter.put("/:id", multer(options).array("recipeImages"), (req, res) => updateRecipeController.execute(req, res));
 
 // DELETEs

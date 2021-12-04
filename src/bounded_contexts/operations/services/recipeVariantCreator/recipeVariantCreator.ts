@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { logger } from "../../../../../config";
 import { Ingredient } from "../../domain/ingredient/ingredient";
+import { IngredientId } from "../../domain/ingredient/ingredientId";
 import { Locale } from "../../domain/locale/Locale";
 import { RecipeVariant } from "../../domain/recipe/RecipeVariant/RecipeVariant";
 import { RecipeRestrictionId } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
@@ -20,14 +21,16 @@ export class RecipeVariantCreator {
     }
 
     public async execute(dto: RecipeVariantCreatorDto): Promise<RecipeVariant[]> {
-        const allIngredientsName: string[] = _.uniq(_.flatten(dto.variants.map((variant) => variant.ingredients)));
+        const allIngredientsIds: IngredientId[] = _.uniq(_.flatten(dto.variants.map((variant) => variant.ingredients))).map(
+            (ing) => new IngredientId(ing)
+        );
         const restrictions: RecipeVariantRestriction[] = await this.recipeRestrictionRepository.findAll();
-        const ingredients: Ingredient[] = await this.ingredientRepository.findAllByName(allIngredientsName, Locale.es);
+        const ingredients: Ingredient[] = await this.ingredientRepository.findAllByIdList(allIngredientsIds, Locale.es);
         const variants: RecipeVariant[] = [];
 
         for (let v of dto.variants) {
             const variantIngredients: Ingredient[] = ingredients.filter((ingredient) =>
-                v.ingredients.some((ingredientName) => ingredientName === ingredient.name)
+                v.ingredients.some((id) => ingredient.id.equals(new IngredientId(id)))
             );
             const variantRestriction: RecipeVariantRestriction | undefined = restrictions.find((r) =>
                 r.id.equals(new RecipeRestrictionId(v.restriction))

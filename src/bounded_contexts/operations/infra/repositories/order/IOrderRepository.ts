@@ -43,6 +43,7 @@ export interface IOrderRepository {
     saveSkippedAndActiveOrders(skippedOrders: Order[], activeOrders: Order[]): Promise<void>;
     saveOrdersWithNewState(orders: Order[]): Promise<void>;
     addCustomerToOrderOfSubscription(subscriptionId: SubscriptionId, customerId: CustomerId): Promise<void>;
+    findByChosenRecipeAndFutureShippingDate(recipeId: string): Promise<Order[]>;
     delete(orderId: OrderId): Promise<void>;
     destroyManyBySubscriptionId(subscriptionId: SubscriptionId): Promise<void>;
 }
