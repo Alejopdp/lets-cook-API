@@ -168,6 +168,7 @@ export class GetSubscriptionByIdPresenter {
             shippingDate: order.getHumanShippmentDay(locale),
             isSkipped: order.isSkipped(),
             state: order.state.title,
+            isReanudable: order.isReanudable(),
         }));
     }
 

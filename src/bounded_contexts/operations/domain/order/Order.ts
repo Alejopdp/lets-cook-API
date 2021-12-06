@@ -165,13 +165,21 @@ export class Order extends Entity<Order> {
     }
 
     public reactivate(paymentOrder: PaymentOrder): void {
+        if (!this.isSkipped()) return;
         const today = new Date();
 
-        if (today > this.shippingDate) throw new Error("No es posible reaundar una orden pasada");
+        if (today > this.billingDate) throw new Error("No es posible reanudar una orden cuya fecha de pago haya pasado");
+        if (today > this.shippingDate) throw new Error("No es posible reanudar una orden pasada");
         if (this.isSkipped()) {
             paymentOrder.addOrder(this);
             this.state.toActive(this);
         }
+    }
+
+    public isReanudable(): boolean {
+        const today = new Date();
+
+        return this.isSkipped() && today < this.billingDate && today < this.shippingDate;
     }
 
     public toPaymentPending(): void {
