@@ -21,7 +21,7 @@ export class CreateFriendCode {
         const customer = dto.customer;
         const customersWithFriendCodeNumber = await this.customerRepository.countCustomersWithFriendCode();
 
-        customer.createFriendCode(customersWithFriendCodeNumber + 1); // TO DO: Change logic, count coupons with same criteria
+        customer.createFriendCode(customersWithFriendCodeNumber + 301); // TO DO: Change logic, count coupons with same criteria
 
         const friendCodeCoupon: Coupon = Coupon.create(
             customer.friendCode!,
