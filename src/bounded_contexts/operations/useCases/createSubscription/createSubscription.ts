@@ -92,7 +92,6 @@ export class CreateSubscription {
             this.subscriptionRepository.findByCustomerId(customerId),
             this.customerRepository.findByIdOrThrow(customerId),
             this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
-            // await this.paymentOrderRepository.findAnActivePaymentOrder(),
             this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
             this.shippingZoneRepository.findAll(),
         ]);

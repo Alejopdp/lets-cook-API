@@ -1,5 +1,5 @@
-import { Customer } from "@src/bounded_contexts/operations/domain/customer/Customer";
-import { ICustomerRepository } from "@src/bounded_contexts/operations/infra/repositories/customer/ICustomerRepository";
+import { Customer } from "../../domain/customer/Customer";
+import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { CheckIfEmailExistsDto } from "./checkIfEmailExistsDto";
 
 export class CheckIfEmailExists {
