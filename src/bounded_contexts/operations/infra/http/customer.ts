@@ -21,6 +21,7 @@ import { createCustomerByAdminController } from "../../useCases/createCustomerBy
 import { getCustomerInformationAsAdminController } from "../../useCases/getCustomerInformationAsAdmin";
 import { exportCustomersController } from "../../services/exportCustomers";
 import { addPaymentMethodController } from "../../useCases/addPaymentMethod";
+import { checkIfEmailExistsController } from "../../useCases/checkIfEmailExists";
 import { futurePaymentSetupController } from "../../application/futurePaymentSetup";
 
 const customerRouter = express.Router();
@@ -57,5 +58,6 @@ customerRouter.post("/sign-in", (req, res) => signInController.execute(req, res)
 customerRouter.post("/validation/:code", (req, res) => codeValidationController.execute(req, res));
 customerRouter.post("/social-auth/:token", (req, res) => socialNetworkAuthController.execute(req, res));
 customerRouter.post("/setup-future-payment-method/:id", (req, res) => futurePaymentSetupController.execute(req, res));
+customerRouter.post("/check-if-email-exists", (req, res) => checkIfEmailExistsController.execute(req, res));
 
 export { customerRouter as customerRouter };
