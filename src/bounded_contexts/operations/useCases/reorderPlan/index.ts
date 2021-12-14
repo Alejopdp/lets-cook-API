@@ -10,6 +10,7 @@ import { assignOrdersToPaymentOrder } from "../../services/assignOrdersToPayment
 import { ReorderPlan } from "./reorderPlan";
 import { ReorderPlanController } from "./reorderPlanController";
 import { ReorderPlanPresenter } from "./reorderPlanPresenter";
+import { mongooseLogRepository } from "../../infra/repositories/log";
 
 export const reorderPlan: ReorderPlan = new ReorderPlan(
     mongooseSubscriptionRepository,
@@ -20,7 +21,8 @@ export const reorderPlan: ReorderPlan = new ReorderPlan(
     awsSesService,
     assignOrdersToPaymentOrder,
     mongoosePaymentOrderReposiotry,
-    mongooseCustomerRepository
+    mongooseCustomerRepository,
+    mongooseLogRepository
 );
 export const reorderPlanPresenter: ReorderPlanPresenter = new ReorderPlanPresenter();
 export const reorderPlanController: ReorderPlanController = new ReorderPlanController(reorderPlan, reorderPlanPresenter);

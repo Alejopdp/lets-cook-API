@@ -12,3 +12,4 @@ export * from "./subscription";
 export * from "./order";
 export * from "./PaymentOrder";
 export * from "./rate";
+export * from "./log";

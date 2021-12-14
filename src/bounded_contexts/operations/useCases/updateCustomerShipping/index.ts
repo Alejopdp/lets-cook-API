@@ -1,6 +1,7 @@
 import { awsSesService } from "../../../../shared/notificationService";
 import { s3Service } from "../../application/storageService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
+import { mongooseLogRepository } from "../../infra/repositories/log";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
@@ -13,6 +14,7 @@ export const updateShippingCustomer: UpdateCustomerShipping = new UpdateCustomer
     mongooseShippingZoneRepository,
     s3Service,
     awsSesService,
-    mongooseOrderRepository
+    mongooseOrderRepository,
+    mongooseLogRepository
 );
 export const updateShippingCustomerController = new UpdateCustomerShippingController(updateShippingCustomer);
