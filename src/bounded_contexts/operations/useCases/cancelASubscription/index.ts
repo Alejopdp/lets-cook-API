@@ -1,5 +1,6 @@
 import { awsSesService } from "../../../../shared/notificationService";
 import { mailerLiteService } from "../../application/mailingListService";
+import { mongooseLogRepository } from "../../infra/repositories/log";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
@@ -11,6 +12,7 @@ export const cancelASubscription: CancelASubscription = new CancelASubscription(
     mongooseOrderRepository,
     mongoosePaymentOrderReposiotry,
     awsSesService,
-    mailerLiteService
+    mailerLiteService,
+    mongooseLogRepository
 );
 export const cancelASubscriptionController: CancelASubscriptionController = new CancelASubscriptionController(cancelASubscription);

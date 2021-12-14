@@ -14,6 +14,9 @@ import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShip
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { INotificationService } from "@src/shared/notificationService/INotificationService";
 import { Locale } from "../../domain/locale/Locale";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 
 export class UpdateCustomerShipping {
     private _customerRepository: ICustomerRepository;
@@ -22,6 +25,7 @@ export class UpdateCustomerShipping {
     private _storageService: IStorageService;
     private _notificationService: INotificationService;
     private _orderRepository: IOrderRepository;
+    private _logRepository: ILogRepository;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -29,7 +33,8 @@ export class UpdateCustomerShipping {
         shippingZoneRepository: IShippingZoneRepository,
         storageService: IStorageService,
         notificationService: INotificationService,
-        orderRepository: IOrderRepository
+        orderRepository: IOrderRepository,
+        logRepository: ILogRepository
     ) {
         this._customerRepository = customerRepository;
         this._paymentOrderRepository = paymentOrderRepository;
@@ -37,6 +42,7 @@ export class UpdateCustomerShipping {
         this._storageService = storageService;
         this._notificationService = notificationService;
         this._orderRepository = orderRepository;
+        this._logRepository = logRepository;
     }
 
     public async execute(dto: UpdateCustomerShippingDto): Promise<void> {
@@ -64,6 +70,16 @@ export class UpdateCustomerShipping {
         await this.customerRepository.save(customer);
         await this.orderRepository.updateMany(orders);
         this.notificationService.notifyAdminAboutAddressChange(customer, dto.nameOrEmailOfAdminExecutingRequest);
+        const log: Log = new Log(
+            LogType.ADRESS_UPDATED,
+            dto.nameOrEmailOfAdminExecutingRequest || customer.getFullNameOrEmail(),
+            !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "Usuario",
+            `El usuario cambió su dirección a ${customer.shippingAddress?.fullName}`,
+            `El usuario cambió su dirección a ${customer.shippingAddress?.fullName}`,
+            new Date(),
+            customer.id
+        );
+        this.logRepository.save(log);
     }
 
     /**
@@ -112,5 +128,13 @@ export class UpdateCustomerShipping {
      */
     public get orderRepository(): IOrderRepository {
         return this._orderRepository;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }

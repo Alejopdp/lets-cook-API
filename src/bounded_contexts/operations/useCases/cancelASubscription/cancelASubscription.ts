@@ -1,11 +1,14 @@
 import { INotificationService } from "@src/shared/notificationService/INotificationService";
 import { IMailingListService } from "../../application/mailingListService/IMailingListService";
 import { CancellationReason } from "../../domain/cancellationReason/CancellationReason";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
@@ -17,19 +20,22 @@ export class CancelASubscription {
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _notificationService: INotificationService;
     private _mailingListService: IMailingListService;
+    private _logRepository: ILogRepository;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
         orderRepository: IOrderRepository,
         paymentOrderRepository: IPaymentOrderRepository,
         notificationService: INotificationService,
-        mailingListService: IMailingListService
+        mailingListService: IMailingListService,
+        logRepository: ILogRepository
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._orderRepository = orderRepository;
         this._paymentOrderRepository = paymentOrderRepository;
         this._notificationService = notificationService;
         this._mailingListService = mailingListService;
+        this._logRepository = logRepository;
     }
 
     public async execute(dto: CancelASubscriptionDto): Promise<void> {
@@ -50,6 +56,16 @@ export class CancelASubscription {
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
         await this.paymentOrderRepository.updateMany(paymentOrders); // TO DO: Transaction / Queue
         this.notificationService.notifyAdminAboutACancellation(subscription, dto.nameOrEmailOfAdminExecutingRequest);
+        const log: Log = new Log(
+            LogType.SUBSCRIPTION_CANCELLED,
+            dto.nameOrEmailOfAdminExecutingRequest || subscription.customer.getFullNameOrEmail(),
+            !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "Usuario",
+            `Suscripción de ${subscription.plan.name} y variante ${subscription.getPlanVariantLabel(Locale.es)} cancelada`,
+            `Suscripción ${subscription.id.toString()} cancelada`,
+            new Date(),
+            subscription.customer.id
+        );
+        this.logRepository.save(log);
     }
 
     /**
@@ -90,5 +106,13 @@ export class CancelASubscription {
      */
     public get mailingListService(): IMailingListService {
         return this._mailingListService;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }

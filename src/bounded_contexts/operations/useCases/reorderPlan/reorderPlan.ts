@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { INotificationService, PaymentOrderBilledNotificationDto } from "../../../../shared/notificationService/INotificationService";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
@@ -10,6 +12,7 @@ import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { SubscriptionActive } from "../../domain/subscription/subscriptionState/SubscriptionActive";
 import { Week } from "../../domain/week/Week";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
@@ -31,6 +34,7 @@ export class ReorderPlan {
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _customerRepository: ICustomerRepository;
+    private _logRepository: ILogRepository;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
@@ -41,7 +45,8 @@ export class ReorderPlan {
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
         paymentOrderRepository: IPaymentOrderRepository,
-        customerRepository: ICustomerRepository
+        customerRepository: ICustomerRepository,
+        logRepository: ILogRepository
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._shippingZoneRepository = shippingZoneRepository;
@@ -52,6 +57,7 @@ export class ReorderPlan {
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
         this._customerRepository = customerRepository;
+        this._logRepository = logRepository;
     }
 
     public async execute(
@@ -149,6 +155,17 @@ export class ReorderPlan {
             discountAmount: newPaymentOrders[0].getDiscountAmountOrShippingCostIfHasFreeShipping(),
         };
         this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
+        const log: Log = new Log(
+            LogType.PLAN_REACTIVATED,
+            subscription.customer.getFullNameOrEmail(),
+            "Usuario",
+            `El usuario reactivó el ${subscription.plan.name} con la variante ${subscription.getPlanVariantLabel(Locale.es)}`,
+            `Suscripción reactivada (${subscription.id.toString()})`,
+            new Date(),
+            subscription.customer.id
+        );
+
+        this.logRepository.save(log);
 
         return { subscription, paymentIntent, firstOrder: orders[0] };
     }
@@ -223,5 +240,13 @@ export class ReorderPlan {
      */
     public get customerRepository(): ICustomerRepository {
         return this._customerRepository;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }

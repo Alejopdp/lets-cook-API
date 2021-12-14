@@ -2,6 +2,7 @@ import { awsSesService } from "../../../../shared/notificationService";
 import { stripeService } from "../../application/paymentService";
 import { mongooseCouponRepository } from "../../infra/repositories/coupon";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
+import { mongooseLogRepository } from "../../infra/repositories/log";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongoosePlanRepository } from "../../infra/repositories/plan";
@@ -24,7 +25,8 @@ export const createSubscription: CreateSubscription = new CreateSubscription(
     stripeService,
     awsSesService,
     assignOrdersToPaymentOrder,
-    mongoosePaymentOrderReposiotry
+    mongoosePaymentOrderReposiotry,
+    mongooseLogRepository
 );
 export const createSubscriptionPresenter: CreateSubscriptionPresenter = new CreateSubscriptionPresenter();
 export const createSubscriptionController: CreateSubscriptionController = new CreateSubscriptionController(
