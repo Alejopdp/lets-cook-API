@@ -37,6 +37,9 @@ import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPay
 import { UpdatePaymentOrdersShippingCostByCustomer } from "../../services/updatePaymentOrdersShippingCostByCustomer/updatePaymentOrdersShippingCostByCustomer";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
 import { createFriendCode } from "../../services/createFriendCode";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
 
 export class CreateSubscription {
     private _customerRepository: ICustomerRepository;
@@ -50,6 +53,7 @@ export class CreateSubscription {
     private _notificationService: INotificationService;
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
+    private _logRepository: ILogRepository;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -62,7 +66,8 @@ export class CreateSubscription {
         paymentService: IPaymentService,
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
-        paymentOrderRepository: IPaymentOrderRepository
+        paymentOrderRepository: IPaymentOrderRepository,
+        logRepository: ILogRepository
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -75,6 +80,7 @@ export class CreateSubscription {
         this._paymentService = paymentService;
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
+        this._logRepository = logRepository;
     }
 
     public async execute(dto: CreateSubscriptionDto): Promise<{
@@ -92,7 +98,6 @@ export class CreateSubscription {
             this.subscriptionRepository.findByCustomerId(customerId),
             this.customerRepository.findByIdOrThrow(customerId),
             this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
-            // await this.paymentOrderRepository.findAnActivePaymentOrder(),
             this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
             this.shippingZoneRepository.findAll(),
         ]);
@@ -267,6 +272,18 @@ export class CreateSubscription {
             this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
         }
 
+        const log: Log = new Log(
+            LogType.NEW_SUBSCRIPTION,
+            customer.getFullNameOrEmail(),
+            "Usuario",
+            `Nueva suscripción para el plan ${subscription.plan.name} y variante ${subscription.getPlanVariantLabel(Locale.es)}`,
+            `Subscription ${subscription.id.toString()} of ${
+                subscription.plan.name
+            } (${subscription.plan.id.toString()}) with variant ${subscription.planVariantId.toString()}`,
+            new Date(),
+            customer.id
+        );
+        this.logRepository.save(log);
         return {
             subscription,
             paymentIntent,
@@ -374,5 +391,13 @@ export class CreateSubscription {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }
