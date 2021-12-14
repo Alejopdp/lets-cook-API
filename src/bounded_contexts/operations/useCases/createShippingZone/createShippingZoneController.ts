@@ -1,14 +1,8 @@
-import { createShippingZone } from "./index";
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CreateShippingZoneDto } from "./createShippingZoneDto";
 import fs from "fs";
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
-import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { CreateShippingZone } from "./createShippingZone";
 import { logger } from "../../../../../config";
-import { Locale } from "../../domain/locale/Locale";
-import { PlanId } from "../../domain/plan/PlanId";
 // import { kml } from '@mapbox/togeojson';
 var tj = require("@mapbox/togeojson");
 const DOMParser = require("xmldom").DOMParser;
@@ -25,7 +19,6 @@ export class CreateShippingZoneController extends BaseController {
         try {
             if (!this.req.file) throw new Error("No ha ingresado un archivo kml");
             const shippingZoneKmlPath = this.req.file.path;
-            // const shippingZoneFile = thi
             var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
             var converted = tj.kml(kml);
 

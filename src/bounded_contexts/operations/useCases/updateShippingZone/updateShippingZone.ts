@@ -29,16 +29,13 @@ export class UpdateShippingZone {
         const oldShippingDayOfWeek: Day = new Day(shippingZone.getDayNumberOfWeek());
         const shippingDayOfWeekHasChanged = !newShippingDayOfWeek.equals(oldShippingDayOfWeek);
 
-        console.log("Old day: ", oldShippingDayOfWeek.dayNumberOfWeek);
-        console.log("NEw day: ", newShippingDayOfWeek.dayNumberOfWeek);
-
         var shippingRadio: ShippingZoneRadio | undefined = undefined;
 
         if (dto.radio.length > 0) {
             let coordinatesRadio = dto.radio.map((val: any, i: number) => {
                 let aux = {
-                    latitude: val[0],
-                    longitude: val[1],
+                    latitude: val[1],
+                    longitude: val[0],
                 };
                 return aux;
             });
