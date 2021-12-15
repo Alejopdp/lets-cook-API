@@ -13,6 +13,7 @@ import { updateRecipeWeeksController } from "../../useCases/updateRecipeWeeks";
 import { getRecipesForOrderController } from "../../useCases/getRecipesForOrder";
 import { getNextWeekRecipesController } from "../../useCases/getNextWeekRecipes";
 import { deleteRecipeVariantController } from "../../useCases/deleteRecipeVariant";
+import { getActualWeekRecipesController } from "../../useCases/getActualWeekRecipes";
 
 const recipeRouter = express.Router();
 
@@ -25,6 +26,7 @@ recipeRouter.get("/", (req, res) => getRecipeListController.execute(req, res));
 recipeRouter.get("/get-data-for-creation", (req, res) => getDataForCreatingARecipeController.execute(req, res));
 recipeRouter.get("/for-order/:orderId", (req, res) => getRecipesForOrderController.execute(req, res));
 recipeRouter.get("/filters", (req, res) => getRecipeFiltersController.execute(req, res));
+recipeRouter.get("/actual-week", (req, res) => getActualWeekRecipesController.execute(req, res));
 recipeRouter.get("/next-week", (req, res) => getNextWeekRecipesController.execute(req, res));
 recipeRouter.get("/:id", (req, res) => getRecipeByIdController.execute(req, res));
 recipeRouter.get("/recipes-list/by-restrictions", (req, res) => getRecipesByRestrictionsController.execute(req, res));
