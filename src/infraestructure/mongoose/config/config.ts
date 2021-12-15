@@ -26,7 +26,7 @@ export const connectToDatabase = async () => {
 const resetDatabase = async () => {
     if (restoreDb) {
         // await mongoose.connection.db.dropDatabase();
-        logger.info("Database dropped");
+        // logger.info("Database dropped");
         await loadMockData();
         logger.info("Data correctly loaded");
     }
