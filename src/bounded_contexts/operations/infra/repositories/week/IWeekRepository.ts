@@ -13,6 +13,7 @@ export interface IWeekRepository {
     findNextTwelve(skipOneWeek: boolean): Promise<Week[]>;
     findNextTwelveByFrequency(frequency: IPlanFrequency, skipWeek?: boolean): Promise<Week[]>;
     findCurrentWeek(date: Date): Promise<Week | undefined>;
+    findActualWeek(): Promise<Week | undefined>;
     findNextWeek(): Promise<Week | undefined>;
     findLastAndNextEight(): Promise<Week[]>;
     findWeekTwelveWeeksLater(): Promise<Week | undefined>;
