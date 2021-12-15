@@ -8,4 +8,5 @@ export interface UpdatePaymentMethodDto {
     stripeId: string;
     isDefault: boolean;
     paymentId: string;
+    nameOrEmailOfAdminExecutingRequest: string | undefined;
 }

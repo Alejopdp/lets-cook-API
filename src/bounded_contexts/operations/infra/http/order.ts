@@ -30,7 +30,7 @@ orderRouter.post("/export-next-with-recipes-selection", (req, res) => exportNext
 orderRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
 
 // PUTs
-orderRouter.put("/skip", (req, res) => skipOrdersController.execute(req, res));
+orderRouter.put("/skip", middleware.ensureAuthenticated(), (req, res) => skipOrdersController.execute(req, res));
 orderRouter.put("/cancel/:id", (req, res) => res.json({}));
 orderRouter.put("/update-recipes", multer(options).single("recipeSelection"), (req, res) =>
     chooseRecipesForManyOrdersController.execute(req, res)

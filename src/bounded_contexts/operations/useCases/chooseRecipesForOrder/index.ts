@@ -1,3 +1,4 @@
+import { mongooseLogRepository } from "../../infra/repositories/log";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongooseRecipeRepository } from "../../infra/repositories/recipe";
@@ -7,6 +8,7 @@ import { ChooseRecipesForOrderController } from "./chooseRecipesForOrderControll
 export const chooseRecipesForOrder: ChooseRecipesForOrder = new ChooseRecipesForOrder(
     mongooseOrderRepository,
     mongooseRecipeRepository,
-    mongoosePaymentOrderReposiotry
+    mongoosePaymentOrderReposiotry,
+    mongooseLogRepository
 );
 export const chooseRecipesForOrderController: ChooseRecipesForOrderController = new ChooseRecipesForOrderController(chooseRecipesForOrder);

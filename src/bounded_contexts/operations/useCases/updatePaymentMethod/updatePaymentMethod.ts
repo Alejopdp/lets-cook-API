@@ -3,14 +3,19 @@ import { CustomerId } from "../../domain/customer/CustomerId";
 import { Customer } from "../../domain/customer/Customer";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { UpdatePaymentMethodDto } from "./updatePaymentMethodDto";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
 
 export class UpdatePaymentMethod {
     private _customerRepository: ICustomerRepository;
     private _storageService: IStorageService;
+    private _logRepository: ILogRepository;
 
-    constructor(customerRepository: ICustomerRepository, storageService: IStorageService) {
+    constructor(customerRepository: ICustomerRepository, storageService: IStorageService, logRepository: ILogRepository) {
         this._customerRepository = customerRepository;
         this._storageService = storageService;
+        this._logRepository = logRepository;
     }
 
     public async execute(dto: UpdatePaymentMethodDto): Promise<void> {
@@ -29,6 +34,17 @@ export class UpdatePaymentMethod {
             dto.isDefault
         );
         await this.customerRepository.save(customer);
+        this.logRepository.save(
+            new Log(
+                LogType.CREDIT_CARD_UPDATED,
+                dto.nameOrEmailOfAdminExecutingRequest || customer.getFullNameOrEmail(),
+                !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "User",
+                `Se marcó la tarjeta terminada en ${customer.getDefaultPaymentMethod()?.last4Numbers} como default`,
+                `Se marcó el método ${customer.getDefaultPaymentMethod()?.id.toString()} como default`,
+                new Date(),
+                customer.id
+            )
+        );
     }
 
     /**
@@ -45,5 +61,13 @@ export class UpdatePaymentMethod {
      */
     public get storageService(): IStorageService {
         return this._storageService;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }

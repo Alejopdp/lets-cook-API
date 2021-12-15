@@ -74,8 +74,8 @@ export class UpdateCustomerShipping {
             LogType.ADRESS_UPDATED,
             dto.nameOrEmailOfAdminExecutingRequest || customer.getFullNameOrEmail(),
             !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "Usuario",
-            `El usuario cambió su dirección a ${customer.shippingAddress?.fullName}`,
-            `El usuario cambió su dirección a ${customer.shippingAddress?.fullName}`,
+            `El usuario cambió su dirección a ${customer.shippingAddress?.name}`,
+            `El usuario cambió su dirección a ${customer.shippingAddress?.name}`,
             new Date(),
             customer.id
         );

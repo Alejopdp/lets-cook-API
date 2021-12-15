@@ -1,3 +1,5 @@
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { OrderId } from "../../domain/order/OrderId";
@@ -5,6 +7,7 @@ import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { RecipeId } from "../../domain/recipe/RecipeId";
 import { RecipeVariantId } from "../../domain/recipe/RecipeVariant/RecipeVariantId";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeRepository";
@@ -14,11 +17,18 @@ export class ChooseRecipesForOrder {
     private _orderRepository: IOrderRepository;
     private _recipeRepository: IRecipeRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
+    private _logRepository: ILogRepository;
 
-    constructor(orderRepository: IOrderRepository, recipeRepository: IRecipeRepository, paymentOrderRepository: IPaymentOrderRepository) {
+    constructor(
+        orderRepository: IOrderRepository,
+        recipeRepository: IRecipeRepository,
+        paymentOrderRepository: IPaymentOrderRepository,
+        logRepository: ILogRepository
+    ) {
         this._orderRepository = orderRepository;
         this._recipeRepository = recipeRepository;
         this._paymentOrderRepository = paymentOrderRepository;
+        this._logRepository = logRepository;
     }
 
     public async execute(dto: ChooseRecipesForOrderDto): Promise<any> {
@@ -43,6 +53,17 @@ export class ChooseRecipesForOrder {
 
         await this.orderRepository.save(order);
         await this.paymentOrderRepository.save(paymentOrder);
+        this.logRepository.save(
+            new Log(
+                LogType.RECIPES_CHOSEN,
+                dto.isAdminChoosing ? "Admin" : order.customer.getFullNameOrEmail(),
+                dto.isAdminChoosing ? "Admin" : "Usuario",
+                `Se han elegido recetas`,
+                `Se han elegido recetas para la orden ${order.id.toString()}`,
+                new Date(),
+                order.customer.id
+            )
+        );
     }
 
     /**
@@ -67,5 +88,13 @@ export class ChooseRecipesForOrder {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }

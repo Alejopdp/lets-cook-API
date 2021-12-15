@@ -21,6 +21,8 @@ export class AddPaymentMethodController extends BaseController {
                 customerId: this.req.params.id,
                 stripeId: this.req.body.stripePaymentMethodId,
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                //@ts-ignore
+                nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
             };
 
             const paymentMethod: PaymentMethod = await this.addPaymentMethod.execute(dto);

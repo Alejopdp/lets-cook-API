@@ -7,4 +7,5 @@ export interface UpdateCustomerBillingDto {
     customerName: string;
     billingId: string;
     identification: string;
+    nameOrEmailOfAdminExecutingRequest: string | undefined;
 }

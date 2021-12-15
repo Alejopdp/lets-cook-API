@@ -14,6 +14,9 @@ import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { Coupon } from "../../domain/cupons/Cupon";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
 
 export class SwapSubscriptionPlan {
     private _subscriptionRepository: ISubscriptionRepository;
@@ -22,6 +25,7 @@ export class SwapSubscriptionPlan {
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _couponRepository: ICouponRepository;
     private _shippingZoneRepository: IShippingZoneRepository;
+    private _logRepository: ILogRepository;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
@@ -29,7 +33,8 @@ export class SwapSubscriptionPlan {
         planRepository: IPlanRepository,
         paymentOrderRepository: IPaymentOrderRepository,
         couponRepository: ICouponRepository,
-        shippingZoneRepository: IShippingZoneRepository
+        shippingZoneRepository: IShippingZoneRepository,
+        logRepository: ILogRepository
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._orderRepository = orderRepository;
@@ -37,6 +42,7 @@ export class SwapSubscriptionPlan {
         this._paymentOrderRepository = paymentOrderRepository;
         this._couponRepository = couponRepository;
         this._shippingZoneRepository = shippingZoneRepository;
+        this._logRepository = logRepository;
     }
 
     public async execute(dto: SwapSubscriptionPlanDto): Promise<void> {
@@ -86,6 +92,19 @@ export class SwapSubscriptionPlan {
         // await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
         await this.orderRepository.updateMany(orders);
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
+        this.logRepository.save(
+            new Log(
+                LogType.PURCHASE_ITEM_SWAP,
+                subscription.customer.getFullNameOrEmail(),
+                "Usuario",
+                `El usuario cambió la suscripción del ${oldPlan.name} al ${
+                    subscription.plan.name
+                } con variante ${subscription.getPlanVariantLabel(Locale.es)}`,
+                `El usuario cambió la suscripción (${subscription.id.toString()}) del plan ${oldPlan.id.toString()} al plan ${subscription.plan.id.toString()} con variante ${subscription.planVariantId.toString()}`,
+                new Date(),
+                subscription.customer.id
+            )
+        );
     }
 
     /**
@@ -134,5 +153,13 @@ export class SwapSubscriptionPlan {
      */
     public get shippingZoneRepository(): IShippingZoneRepository {
         return this._shippingZoneRepository;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }

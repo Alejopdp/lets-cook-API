@@ -5,6 +5,8 @@ import { IPaymentService } from "../../application/paymentService/IPaymentServic
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
@@ -22,6 +24,7 @@ import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionActive } from "../../domain/subscription/subscriptionState/SubscriptionActive";
 import { Week } from "../../domain/week/Week";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
@@ -43,6 +46,7 @@ export class CreateManySubscriptions {
     private _notificationService: INotificationService;
     private _assignOrdersWithDifferentFreqToPaymentOrders: AssignOrdersWithDifferentFreqToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
+    private _logRepository: ILogRepository;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -54,7 +58,8 @@ export class CreateManySubscriptions {
         paymentService: IPaymentService,
         notificationService: INotificationService,
         AasignOrdersWithDifferentFreqToPaymentOrders: AssignOrdersWithDifferentFreqToPaymentOrders,
-        paymentOrderRepository: IPaymentOrderRepository
+        paymentOrderRepository: IPaymentOrderRepository,
+        logRepository: ILogRepository
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -66,6 +71,7 @@ export class CreateManySubscriptions {
         this._paymentService = paymentService;
         this._assignOrdersWithDifferentFreqToPaymentOrders = AasignOrdersWithDifferentFreqToPaymentOrders;
         this._paymentOrderRepository = paymentOrderRepository;
+        this._logRepository = logRepository;
     }
 
     public async execute(dto: CreateManySubscriptionsDto): Promise<{
@@ -189,6 +195,15 @@ export class CreateManySubscriptions {
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+        new Log(
+            LogType.NEW_SUBSCRIPTION,
+            customer.getFullNameOrEmail(),
+            "Usuario",
+            `El usuario ha agregado ${subscriptions.length} planes adicionales`,
+            `El usuario ha agregado ${subscriptions.length} planes adicionales`,
+            new Date(),
+            customer.id
+        );
 
         // const ticketDto: PaymentOrderBilledNotificationDto = {
         //             customerEmail: customer.email,
@@ -284,5 +299,13 @@ export class CreateManySubscriptions {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }
