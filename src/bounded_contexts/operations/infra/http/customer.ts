@@ -23,6 +23,7 @@ import { exportCustomersController } from "../../services/exportCustomers";
 import { addPaymentMethodController } from "../../useCases/addPaymentMethod";
 import { checkIfEmailExistsController } from "../../useCases/checkIfEmailExists";
 import { futurePaymentSetupController } from "../../application/futurePaymentSetup";
+import { middleware } from "../../../../shared/middleware";
 
 const customerRouter = express.Router();
 
@@ -44,11 +45,15 @@ customerRouter.put("/reset-password/:email", (req, res) => updatePasswordControl
 customerRouter.put("/update/:id", (req, res) => updateCustomerController.execute(req, res));
 // customerRouter.put("/update-customer/:id", (req, res) => updateCustomerController.execute(req, res));
 customerRouter.put("/update-email/:id", (req, res) => updateCustomerEmailController.execute(req, res));
-customerRouter.put("/update-shipping/:id", (req, res) => updateShippingCustomerController.execute(req, res));
-customerRouter.put("/update-billing/:id", (req, res) => updateCustomerBillingController.execute(req, res));
+customerRouter.put("/update-shipping/:id", middleware.ensureAuthenticated(), (req, res) =>
+    updateShippingCustomerController.execute(req, res)
+);
+customerRouter.put("/update-billing/:id", middleware.ensureAuthenticated(), (req, res) =>
+    updateCustomerBillingController.execute(req, res)
+);
 customerRouter.put("/update-info/:id", (req, res) => updateCustomerInfoController.execute(req, res));
-customerRouter.put("/update-payment/:id", (req, res) => updatePaymentMethodController.execute(req, res));
-customerRouter.put("/add-payment-method/:id", (req, res) => addPaymentMethodController.execute(req, res));
+customerRouter.put("/update-payment/:id", middleware.ensureAuthenticated(), (req, res) => updatePaymentMethodController.execute(req, res));
+customerRouter.put("/add-payment-method/:id", middleware.ensureAuthenticated(), (req, res) => addPaymentMethodController.execute(req, res));
 customerRouter.put("/delete/:id", (req, res) => deleteCustomerController.execute(req, res));
 
 // // POSTs

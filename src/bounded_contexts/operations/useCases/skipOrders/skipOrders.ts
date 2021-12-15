@@ -6,14 +6,19 @@ import { OrderId } from "../../domain/order/OrderId";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Locale } from "../../domain/locale/Locale";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
 
 export class SkipOrders {
     private _orderRepository: IOrderRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
+    private _logRepository: ILogRepository;
 
-    constructor(orderRepository: IOrderRepository, paymentOrderRepository: IPaymentOrderRepository) {
+    constructor(orderRepository: IOrderRepository, paymentOrderRepository: IPaymentOrderRepository, logRepository: ILogRepository) {
         this._orderRepository = orderRepository;
         this._paymentOrderRepository = paymentOrderRepository;
+        this._logRepository = logRepository;
     }
 
     public async execute(dto: SkipOrdersDto): Promise<any> {
@@ -24,6 +29,10 @@ export class SkipOrders {
         const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
         const skippedOrdersToSave: Order[] = [];
         const activeOrdersToSave: Order[] = [];
+        var ordersSkippedLogString: string = "";
+        var ordersSkippedDebugLogString: string = "";
+        var ordersUnskippedLogString: string = "";
+        var ordersUnskippedDebugLogString: string = "";
 
         for (let order of orders) {
             ordersMap[order.id.value] = order;
@@ -35,12 +44,22 @@ export class SkipOrders {
 
         for (let orderId of dto.ordersToSkip) {
             const order = ordersMap[orderId];
+            if (!order.isSkipped() && !order.isBilled()) {
+                ordersSkippedLogString = `${ordersSkippedLogString}, ${order.getWeekLabel()}`;
+                ordersSkippedDebugLogString = `${ordersSkippedLogString} | ${order.id.toString()}`;
+            }
+
             order.skip(paymentOrdersMap[order.paymentOrderId?.value!]);
             skippedOrdersToSave.push(order);
         }
 
         for (let orderId of dto.ordersToReactivate) {
             const order = ordersMap[orderId];
+            if (!order.isActive() && !order.isBilled()) {
+                ordersUnskippedLogString = `${ordersUnskippedLogString}, ${order.getWeekLabel()}`;
+                ordersUnskippedDebugLogString = `${ordersUnskippedDebugLogString} | ${order.id.toString()}`;
+            }
+
             order.reactivate(paymentOrdersMap[order.paymentOrderId?.value!]);
             activeOrdersToSave.push(order);
         }
@@ -48,6 +67,34 @@ export class SkipOrders {
         // await this.orderRepository.saveSkippedAndActiveOrders(skippedOrdersToSave, activeOrdersToSave);
         await this.orderRepository.updateMany([...skippedOrdersToSave, ...activeOrdersToSave]);
         await this.paymentOrderRepository.updateMany(paymentOrders);
+
+        if (!!ordersSkippedLogString) {
+            this.logRepository.save(
+                new Log(
+                    LogType.ITEM_SKIP_COMPLETED,
+                    dto.nameOrEmailOfAdminExecutingRequest || orders[0].customer.getFullNameOrEmail(),
+                    !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "Usuario",
+                    `Se saltaron las semanas ${ordersSkippedLogString}`,
+                    `Se saltaron las semanas ${ordersSkippedDebugLogString}`,
+                    new Date(),
+                    orders[0].customer.id
+                )
+            );
+        }
+
+        if (!!ordersUnskippedLogString) {
+            this.logRepository.save(
+                new Log(
+                    LogType.ITEM_UNSKIPPED_COMPLETED,
+                    dto.nameOrEmailOfAdminExecutingRequest || orders[0].customer.getFullNameOrEmail(),
+                    !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "Usuario",
+                    `Se reanudaron las semanas ${ordersUnskippedLogString}`,
+                    `Se reanudaron las semanas ${ordersUnskippedDebugLogString}`,
+                    new Date(),
+                    orders[0].customer.id
+                )
+            );
+        }
     }
 
     /**
@@ -64,5 +111,13 @@ export class SkipOrders {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
     }
 }

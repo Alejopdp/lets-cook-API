@@ -1,6 +1,7 @@
 import { awsSesService } from "../../../../shared/notificationService";
 import { stripeService } from "../../application/paymentService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
+import { mongooseLogRepository } from "../../infra/repositories/log";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongoosePlanRepository } from "../../infra/repositories/plan";
@@ -23,7 +24,8 @@ export const createManySubscriptions: CreateManySubscriptions = new CreateManySu
     stripeService,
     awsSesService,
     assignOrdersWithDifferentFreqToPaymentOrders,
-    mongoosePaymentOrderReposiotry
+    mongoosePaymentOrderReposiotry,
+    mongooseLogRepository
 );
 
 export const createManySubscriptionsPresenter: CreateManySubscriptionsPresenter = new CreateManySubscriptionsPresenter();
