@@ -15,10 +15,12 @@ const options: multer.Options = {
 rateRouter.get("/", (req, res) => getRateListController.execute(req, res));
 
 // PUT
-rateRouter.put("/:id", multer(options).single(""), (req, res) => updateRateController.execute(req, res));
-rateRouter.put("/delete-rate/:id", (req, res) => deleteRateController.execute(req, res));
+rateRouter.put("/:id", (req, res) => updateRateController.execute(req, res));
 
 // POSTs
 rateRouter.post("/", multer(options).single(""), (req, res) => createRateController.execute(req, res));
+
+// DELETE
+rateRouter.delete("/:id", (req, res) => deleteRateController.execute(req, res));
 
 export { rateRouter as recipeRatingRouter };

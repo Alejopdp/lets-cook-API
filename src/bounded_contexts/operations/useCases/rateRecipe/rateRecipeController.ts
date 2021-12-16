@@ -18,7 +18,7 @@ export class RateRecipeController extends BaseController {
                 comment: this.req.body.comment,
             };
 
-            // await this.rateRecipe.execute(dto);
+            await this.rateRecipe.execute(dto);
 
             return this.ok(this.res);
         } catch (error) {

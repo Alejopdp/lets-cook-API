@@ -9,30 +9,45 @@ import { Locale } from "../../domain/locale/Locale";
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
+import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 
 export class SkipOrders {
     private _orderRepository: IOrderRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _logRepository: ILogRepository;
+    private _recipeRatingRepository: IRateRepository;
 
-    constructor(orderRepository: IOrderRepository, paymentOrderRepository: IPaymentOrderRepository, logRepository: ILogRepository) {
+    constructor(
+        orderRepository: IOrderRepository,
+        paymentOrderRepository: IPaymentOrderRepository,
+        logRepository: ILogRepository,
+        recipeRatingRepository: IRateRepository
+    ) {
         this._orderRepository = orderRepository;
         this._paymentOrderRepository = paymentOrderRepository;
         this._logRepository = logRepository;
+        this._recipeRatingRepository = recipeRatingRepository;
     }
 
     public async execute(dto: SkipOrdersDto): Promise<any> {
         const ordersIds: OrderId[] = [...dto.ordersToReactivate, ...dto.ordersToSkip].map((id: any) => new OrderId(id));
         const orders: Order[] = await this.orderRepository.findByIdList(ordersIds, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
+        const customerRatings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(orders[0].customer.id, Locale.es);
         const ordersMap: { [orderId: string]: Order } = {};
         const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
         const skippedOrdersToSave: Order[] = [];
         const activeOrdersToSave: Order[] = [];
+        const ratingMap: { [ratingId: string]: RecipeRating } = {};
         var ordersSkippedLogString: string = "";
         var ordersSkippedDebugLogString: string = "";
         var ordersUnskippedLogString: string = "";
         var ordersUnskippedDebugLogString: string = "";
+
+        for (let rating of customerRatings) {
+            ratingMap[rating.recipe.id.value] = rating;
+        }
 
         for (let order of orders) {
             ordersMap[order.id.value] = order;
@@ -51,6 +66,12 @@ export class SkipOrders {
 
             order.skip(paymentOrdersMap[order.paymentOrderId?.value!]);
             skippedOrdersToSave.push(order);
+
+            for (let selection of order.recipeSelection) {
+                var recipeRating = ratingMap[selection.recipe.id.toString()];
+
+                recipeRating.removeOneDelivery(order.shippingDate);
+            }
         }
 
         for (let orderId of dto.ordersToReactivate) {
@@ -64,7 +85,6 @@ export class SkipOrders {
             activeOrdersToSave.push(order);
         }
 
-        // await this.orderRepository.saveSkippedAndActiveOrders(skippedOrdersToSave, activeOrdersToSave);
         await this.orderRepository.updateMany([...skippedOrdersToSave, ...activeOrdersToSave]);
         await this.paymentOrderRepository.updateMany(paymentOrders);
 
@@ -82,6 +102,7 @@ export class SkipOrders {
             );
         }
 
+        this.recipeRatingRepository.updateMany(customerRatings);
         if (!!ordersUnskippedLogString) {
             this.logRepository.save(
                 new Log(
@@ -119,5 +140,13 @@ export class SkipOrders {
      */
     public get logRepository(): ILogRepository {
         return this._logRepository;
+    }
+
+    /**
+     * Getter recipeRatingRepository
+     * @return {IRateRepository}
+     */
+    public get recipeRatingRepository(): IRateRepository {
+        return this._recipeRatingRepository;
     }
 }

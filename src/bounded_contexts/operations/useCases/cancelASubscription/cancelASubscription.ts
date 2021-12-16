@@ -6,11 +6,13 @@ import { LogType } from "../../domain/customer/log/LogType";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
+import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { CancelASubscriptionDto } from "./cancelASubscriptionDto";
 
@@ -21,6 +23,7 @@ export class CancelASubscription {
     private _notificationService: INotificationService;
     private _mailingListService: IMailingListService;
     private _logRepository: ILogRepository;
+    private _recipeRatingRepository: IRateRepository;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
@@ -28,7 +31,8 @@ export class CancelASubscription {
         paymentOrderRepository: IPaymentOrderRepository,
         notificationService: INotificationService,
         mailingListService: IMailingListService,
-        logRepository: ILogRepository
+        logRepository: ILogRepository,
+        recipeRatingRepository: IRateRepository
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._orderRepository = orderRepository;
@@ -36,6 +40,7 @@ export class CancelASubscription {
         this._notificationService = notificationService;
         this._mailingListService = mailingListService;
         this._logRepository = logRepository;
+        this._recipeRatingRepository = recipeRatingRepository;
     }
 
     public async execute(dto: CancelASubscriptionDto): Promise<void> {
@@ -43,9 +48,22 @@ export class CancelASubscription {
         const cancellationReason: CancellationReason = new CancellationReason(dto.cancellationReason, dto.cancellationComment, new Date());
         const subscription: Subscription | undefined = await this.subscriptionRepository.findByIdOrThrow(subscriptionId);
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(subscription.customer.id);
-
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
+        const customerRatings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(subscription?.customer.id!, Locale.es);
+        const recipeRatingsMap: { [recipeId: string]: RecipeRating } = {};
+
+        for (let rating of customerRatings) {
+            recipeRatingsMap[rating.recipe.id.toString()] = rating;
+        }
+
+        for (let order of orders) {
+            for (let selection of order.recipeSelection) {
+                var rating = recipeRatingsMap[selection.recipe.id.toString()];
+
+                rating?.removeOneDelivery(order.shippingDate);
+            }
+        }
 
         subscription.cancel(cancellationReason, orders, paymentOrders);
         if (customerSubscriptions.every((sub) => sub.state.isCancelled() || sub.id.equals(subscriptionId))) {
@@ -56,6 +74,8 @@ export class CancelASubscription {
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
         await this.paymentOrderRepository.updateMany(paymentOrders); // TO DO: Transaction / Queue
         this.notificationService.notifyAdminAboutACancellation(subscription, dto.nameOrEmailOfAdminExecutingRequest);
+        this.recipeRatingRepository.updateMany(customerRatings);
+
         const log: Log = new Log(
             LogType.SUBSCRIPTION_CANCELLED,
             dto.nameOrEmailOfAdminExecutingRequest || subscription.customer.getFullNameOrEmail(),
@@ -114,5 +134,13 @@ export class CancelASubscription {
      */
     public get logRepository(): ILogRepository {
         return this._logRepository;
+    }
+
+    /**
+     * Getter recipeRatingRepository
+     * @return {IRateRepository}
+     */
+    public get recipeRatingRepository(): IRateRepository {
+        return this._recipeRatingRepository;
     }
 }

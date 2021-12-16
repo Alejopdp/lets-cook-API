@@ -24,7 +24,8 @@ export class GetCustomersubscriptionsController extends BaseController {
             const presentedResult = await this.getCustomerSubscriptionsPresenter.present(
                 result.subscriptions,
                 result.nextOrders,
-                dto.locale
+                dto.locale,
+                result.ratings
             );
 
             return this.ok(this.res, presentedResult);

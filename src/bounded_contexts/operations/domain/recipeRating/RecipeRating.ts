@@ -7,16 +7,20 @@ import { RecipeRatingId } from "./RecipeRatingId";
 export class RecipeRating extends Entity<RecipeRating> {
     private _recipe: Recipe;
     private _customerId: CustomerId;
-    private _order: Order;
     private _qtyDelivered: number;
+    private _lastShippingDate: Date;
+    private _beforeLastShippingDate: Date;
+    private _shippingDates: Date[];
     private _rating?: number;
     private _comment?: string;
 
     constructor(
         recipe: Recipe,
         customerId: CustomerId,
-        order: Order,
         qtyDelivered: number,
+        lastShippingDate: Date,
+        beforeLastShippingDate: Date,
+        shippingDates: Date[],
         rating?: number,
         comment?: string,
         id?: RecipeRatingId
@@ -25,9 +29,76 @@ export class RecipeRating extends Entity<RecipeRating> {
         this._recipe = recipe;
         this._customerId = customerId;
         this._rating = rating;
+        this._lastShippingDate = lastShippingDate;
+        this._beforeLastShippingDate = beforeLastShippingDate;
+        this._shippingDates = shippingDates;
         this._comment = comment;
-        this._order = order;
         this._qtyDelivered = qtyDelivered;
+    }
+
+    public updateRating(rating: number, comment: string): void {
+        if (rating > 5) throw new Error("La calificación no puede ser mayor a 5");
+        // TO DO: Agregar validación para que no se pueda ratear si shippingDate > today
+
+        this.rating = rating;
+        this.comment = comment;
+    }
+
+    public addOneDelivery(lastShippingDate: Date, beforeLastShippingDate?: Date): void {
+        this.shippingDates.push(lastShippingDate);
+        // if (this.qtyDelivered === 0 && !!beforeLastShippingDate) {
+        //     this.lastShippingDate = lastShippingDate;
+        //     this.beforeLastShippingDate = beforeLastShippingDate;
+        //     this.qtyDelivered = 1;
+        //     return;
+        // }
+
+        // this.beforeLastShippingDate = new Date(this.lastShippingDate);
+        // this.lastShippingDate = new Date(lastShippingDate);
+        // this.qtyDelivered = this.qtyDelivered + 1;
+    }
+
+    public removeOneDelivery(shippingDate: Date): void {
+        const today = new Date();
+        if (shippingDate.getTime() < today.getTime()) return;
+        var idx = this.shippingDates.findIndex((date) => date.getTime() === shippingDate.getTime());
+        this.shippingDates.splice(idx, 1);
+
+        // const today = new Date();
+        // if (this.qtyDelivered === 0 || this.lastShippingDate < today || (this.isRated() && this.qtyDelivered === 1)) return;
+        // this.lastShippingDate = this.beforeLastShippingDate;
+        // this.qtyDelivered = this.qtyDelivered - 1;
+    }
+
+    public getQtyDelivered(): number {
+        return this.shippingDates.length;
+        const today = new Date();
+
+        return this.shippingDates.filter((date) => today > date).length;
+        // const today = new Date();
+        // if (this.qtyDelivered === 0) return 0;
+        // if (this.lastShippingDate < today) return this.qtyDelivered - 1;
+
+        // return this.qtyDelivered;
+    }
+
+    public isRateable(): boolean {
+        return true;
+        return this.getQtyDelivered() > 0;
+        // return this.getQtyDelivered() > 0; USAR ESTE
+    }
+
+    public isRated(): boolean {
+        return !!this.rating && this.rating > 0;
+    }
+
+    public getLastShippingDate(): Date | undefined {
+        if (this.shippingDates.length === 0) return undefined;
+        const baseDate = new Date(1970, 1);
+
+        return this.shippingDates.reduce(function (a, b) {
+            return a > b ? a : b;
+        }, baseDate);
     }
 
     /**
@@ -63,14 +134,6 @@ export class RecipeRating extends Entity<RecipeRating> {
     }
 
     /**
-     * Getter order
-     * @return {Order}
-     */
-    public get order(): Order {
-        return this._order;
-    }
-
-    /**
      * Getter qtyDelivered
      * @return {number}
      */
@@ -79,11 +142,27 @@ export class RecipeRating extends Entity<RecipeRating> {
     }
 
     /**
-     * Setter order
-     * @param {Order} value
+     * Getter lastShippingDate
+     * @return {Date}
      */
-    public set order(value: Order) {
-        this._order = value;
+    public get lastShippingDate(): Date {
+        return this._lastShippingDate;
+    }
+
+    /**
+     * Getter beforeLastShippingDate
+     * @return {Date}
+     */
+    public get beforeLastShippingDate(): Date {
+        return this._beforeLastShippingDate;
+    }
+
+    /**
+     * Getter shippingDates
+     * @return {Date[]}
+     */
+    public get shippingDates(): Date[] {
+        return this._shippingDates;
     }
 
     /**
@@ -124,5 +203,29 @@ export class RecipeRating extends Entity<RecipeRating> {
      */
     public set comment(value: string | undefined) {
         this._comment = value;
+    }
+
+    /**
+     * Setter lastShippingDate
+     * @param {Date} value
+     */
+    public set lastShippingDate(value: Date) {
+        this._lastShippingDate = value;
+    }
+
+    /**
+     * Setter beforeLastShippingDate
+     * @param {Date} value
+     */
+    public set beforeLastShippingDate(value: Date) {
+        this._beforeLastShippingDate = value;
+    }
+
+    /**
+     * Setter shippingDates
+     * @param {Date[]} value
+     */
+    public set shippingDates(value: Date[]) {
+        this._shippingDates = value;
     }
 }
