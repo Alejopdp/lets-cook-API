@@ -25,7 +25,9 @@ export class UpdatePaymentMethodController extends BaseController {
                 cvc: this.req.body.cvc,
                 stripeId: this.req.body.stripeId,
                 isDefault: this.req.body.isDefault,
-                paymentId: this.req.body.id ? this.req.body.id : null
+                paymentId: this.req.body.id ? this.req.body.id : null,
+                //@ts-ignore
+                nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
             };
 
             await this.updateCustomer.execute(dto);

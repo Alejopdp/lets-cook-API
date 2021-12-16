@@ -24,8 +24,8 @@ export const loadMockData = async () => {
     // logger.info("Users loaded");
     // await mongooseWeekRepository.bulkSave(getArrayOfFutureWeeks());
     // logger.info("Weeks loaded");
-    // await saveIngredients();
-    // logger.info("Ingredients loaded");
+    await saveIngredients();
+    logger.info("Ingredients loaded");
     // await mongoosePlanRepository.bulkSave(getMockPlans());
     // logger.info("Plans loaded");
     // await mongooseRecipeVariantRestrictionRepository.bulkSave(getMockRecipeVartiantRestrictions());

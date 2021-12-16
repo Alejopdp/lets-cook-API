@@ -1,11 +1,9 @@
-import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
-import { Rate } from "../../domain/rate/Rate";
-import { RateId } from "../../domain/rate/RateId";
-import { CustomerId } from "../../domain/customer/CustomerId";
-import { RecipeId } from "../../domain/recipe/RecipeId";
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
 import { UpdateRateDto } from "./updateRateDto";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
+import { RecipeRatingId } from "../../domain/recipeRating/RecipeRatingId";
+import { Locale } from "../../domain/locale/Locale";
 
 export class UpdateRate {
     private _rateRepository: IRateRepository;
@@ -17,14 +15,16 @@ export class UpdateRate {
     }
 
     public async execute(dto: UpdateRateDto): Promise<void> {
-        if(dto.rateValue > 5) throw new Error("La calificación no puede ser mayor a 5");
+        if (dto.rateValue > 5) throw new Error("La calificación no puede ser mayor a 5");
 
-        const rateId: RateId = new RateId(dto.rateId);
-        const rate: Rate | undefined = await this.rateRepository.findById(rateId);
+        const rateId: RecipeRatingId = new RecipeRatingId(dto.rateId);
+        const rating: RecipeRating | undefined = await this.rateRepository.findById(rateId, Locale.es);
 
-        rate?.addRate(dto.rateValue, dto.commentRate);
-        
-        await this.rateRepository.save(rate);
+        if (!!!rating) throw new Error("No se encontró la receta para valorarla");
+
+        rating.updateRating(dto.rateValue, dto.commentRate);
+
+        await this.rateRepository.save(rating);
     }
 
     /**

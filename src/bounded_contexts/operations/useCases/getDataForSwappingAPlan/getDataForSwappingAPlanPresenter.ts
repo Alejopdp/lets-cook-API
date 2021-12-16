@@ -14,6 +14,7 @@ export class GetDataForSwappingAPlanPresenter {
             });
 
             for (let variant of plan.planVariants) {
+                if (variant.isDeleted) continue;
                 presentedVariants.push({
                     planId: plan.id.value,
                     planVariantId: variant.id.value,

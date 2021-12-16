@@ -10,7 +10,7 @@ export class CheckIfEmailExists {
     }
 
     public async execute(dto: CheckIfEmailExistsDto): Promise<any> {
-        const customer: Customer | undefined = await this.customerRepository.findByEmail(dto.email);
+        const customer: Customer | undefined = await this.customerRepository.findByEmail(dto.email.toLowerCase());
 
         return !!customer;
     }

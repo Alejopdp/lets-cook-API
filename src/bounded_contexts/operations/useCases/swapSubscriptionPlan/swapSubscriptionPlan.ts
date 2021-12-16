@@ -14,6 +14,11 @@ import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { Coupon } from "../../domain/cupons/Cupon";
+import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
+import { Log } from "../../domain/customer/log/Log";
+import { LogType } from "../../domain/customer/log/LogType";
+import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 
 export class SwapSubscriptionPlan {
     private _subscriptionRepository: ISubscriptionRepository;
@@ -22,6 +27,8 @@ export class SwapSubscriptionPlan {
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _couponRepository: ICouponRepository;
     private _shippingZoneRepository: IShippingZoneRepository;
+    private _logRepository: ILogRepository;
+    private _recipesRatingRepository: IRateRepository;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
@@ -29,7 +36,9 @@ export class SwapSubscriptionPlan {
         planRepository: IPlanRepository,
         paymentOrderRepository: IPaymentOrderRepository,
         couponRepository: ICouponRepository,
-        shippingZoneRepository: IShippingZoneRepository
+        shippingZoneRepository: IShippingZoneRepository,
+        logRepository: ILogRepository,
+        recipesRatingRepository: IRateRepository
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._orderRepository = orderRepository;
@@ -37,6 +46,8 @@ export class SwapSubscriptionPlan {
         this._paymentOrderRepository = paymentOrderRepository;
         this._couponRepository = couponRepository;
         this._shippingZoneRepository = shippingZoneRepository;
+        this._logRepository = logRepository;
+        this._recipesRatingRepository = recipesRatingRepository;
     }
 
     public async execute(dto: SwapSubscriptionPlanDto): Promise<void> {
@@ -44,6 +55,8 @@ export class SwapSubscriptionPlan {
         const newPlanVariantId: PlanVariantId = new PlanVariantId(dto.newPlanVariantId);
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId);
+        const customerRatings: RecipeRating[] = await this.recipesRatingRepository.findAllByCustomer(subscription?.customer.id!, Locale.es);
+        const recipeRatingsMap: { [recipeId: string]: RecipeRating } = {};
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");
         if (subscription.state.isCancelled()) throw new Error("No puedes cambiar el plan de una suscripción cancelada");
 
@@ -61,6 +74,18 @@ export class SwapSubscriptionPlan {
         if (!!!newPlan) throw new Error("El nuevo plan al que te quieres suscribir no existe");
 
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
+
+        for (let rating of customerRatings) {
+            recipeRatingsMap[rating.recipe.id.value] = rating;
+        }
+
+        for (let order of orders) {
+            for (let selection of order.recipeSelection) {
+                const rating = recipeRatingsMap[selection.recipe.id.value];
+
+                rating?.removeOneDelivery(order.shippingDate);
+            }
+        }
 
         subscription.swapPlan(orders, newPlan, newPlanVariantId, customerShippingZone.cost);
 
@@ -83,9 +108,22 @@ export class SwapSubscriptionPlan {
             await this.paymentOrderRepository.updateMany(paymentOrders);
         }
 
-        // await this.orderRepository.saveSwappedPlanOrders(orders, newPlan, newPlanVariantId); // TO DO: Transaction / Queue
         await this.orderRepository.updateMany(orders);
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
+        this.recipesRatingRepository.updateMany(customerRatings);
+        this.logRepository.save(
+            new Log(
+                LogType.PURCHASE_ITEM_SWAP,
+                subscription.customer.getFullNameOrEmail(),
+                "Usuario",
+                `El usuario cambió la suscripción del ${oldPlan.name} al ${
+                    subscription.plan.name
+                } con variante ${subscription.getPlanVariantLabel(Locale.es)}`,
+                `El usuario cambió la suscripción (${subscription.id.toString()}) del plan ${oldPlan.id.toString()} al plan ${subscription.plan.id.toString()} con variante ${subscription.planVariantId.toString()}`,
+                new Date(),
+                subscription.customer.id
+            )
+        );
     }
 
     /**
@@ -134,5 +172,21 @@ export class SwapSubscriptionPlan {
      */
     public get shippingZoneRepository(): IShippingZoneRepository {
         return this._shippingZoneRepository;
+    }
+
+    /**
+     * Getter logRepository
+     * @return {ILogRepository}
+     */
+    public get logRepository(): ILogRepository {
+        return this._logRepository;
+    }
+
+    /**
+     * Getter recipesRatingRepository
+     * @return {IRateRepository}
+     */
+    public get recipesRatingRepository(): IRateRepository {
+        return this._recipesRatingRepository;
     }
 }

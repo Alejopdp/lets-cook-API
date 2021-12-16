@@ -1,30 +1,34 @@
 import { IStorageService } from "../../application/storageService/IStorageService";
-import { Rate } from "../../domain/rate/Rate";
+import { CustomerId } from "../../domain/customer/CustomerId";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
+import { GetRateListDto } from "./getRateListDto";
 import { GetRateListPresenter } from "./getRateListPresenter";
 
 export class GetRateList {
-    private _recipeRepository: IRateRepository;
+    private _recipeRatingRepository: IRateRepository;
     private _storageService: IStorageService;
 
-    constructor(recipeRepository: IRateRepository, storageService: IStorageService) {
-        this._recipeRepository = recipeRepository;
+    constructor(recipeRatingRepository: IRateRepository, storageService: IStorageService) {
+        this._recipeRatingRepository = recipeRatingRepository;
         this._storageService = storageService;
     }
 
-    public async execute(): Promise<void> {
-        const recipeList: Rate[] = await this.recipeRepository.findAll();
+    public async execute(dto: GetRateListDto): Promise<void> {
+        var ratings: RecipeRating[] = [];
 
-        return await GetRateListPresenter.present(recipeList);
+        if (!!dto.customerId) ratings = await this.recipeRatingRepository.findAllByCustomer(new CustomerId(dto.customerId), dto.locale);
+        else ratings = await this.recipeRatingRepository.findAll(dto.locale);
 
+        return await GetRateListPresenter.present(ratings);
     }
 
     /**
-     * Getter recipeRepository
+     * Getter recipeRatingRepository
      * @return {IRateRepository}
      */
-    public get recipeRepository(): IRateRepository {
-        return this._recipeRepository;
+    public get recipeRatingRepository(): IRateRepository {
+        return this._recipeRatingRepository;
     }
 
     /**

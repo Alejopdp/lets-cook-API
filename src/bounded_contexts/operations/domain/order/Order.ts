@@ -160,6 +160,7 @@ export class Order extends Entity<Order> {
 
         if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
         paymentOrder.discountOrderAmount(this);
+        this.recipeSelection = [];
 
         this.state.toSkipped(this);
     }

@@ -4,4 +4,5 @@ export interface AddPaymentMethodDto {
     customerId: string;
     stripeId: string;
     locale: Locale;
+    nameOrEmailOfAdminExecutingRequest: string | undefined;
 }

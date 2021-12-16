@@ -16,13 +16,13 @@ export class UpdateRateController extends BaseController {
         try {
             const dto: UpdateRateDto = {
                 rateId: this.req.params.id,
-                rateValue: this.req.body.value,
-                commentRate: this.req.body.comment
+                rateValue: this.req.body.rating,
+                commentRate: this.req.body.comment,
             };
 
+            console.log("Rate value: ", this.req.body.rating);
+            console.log("Comment value: ", this.req.body.comment);
             await this.updateRate.execute(dto);
-
-            // fs.unlinkSync(planImagePath);
 
             return this.ok(this.res);
         } catch (error) {
