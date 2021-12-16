@@ -10,7 +10,6 @@ import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { Locale } from "../../domain/locale/Locale";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
-import { locale } from "moment";
 
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
@@ -110,6 +109,7 @@ export class GetSubscriptionByIdPresenter {
                 subscription.plan.planVariants.find((variant) => subscription.planVariantId.equals(variant.id))!,
                 locale
             ),
+            isOneTime: subscription.frequency.isOneTime(),
             shippingAddress,
             // billingData,
             paymentMethod: presentedPaymentMethod,
