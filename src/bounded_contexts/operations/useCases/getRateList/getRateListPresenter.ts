@@ -1,20 +1,25 @@
 import { s3Service } from "../../application/storageService";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
-import { PlanId } from "../../domain/plan/PlanId";
-import { Rate } from "../../domain/rate/Rate";
-import { Week } from "../../domain/week/Week";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 
 export class GetRateListPresenter {
-    public static async present(rates: Rate[]): Promise<any> {
+    public static async present(rates: RecipeRating[]): Promise<any> {
         const presentedRates = [];
 
         for (let rate of rates) {
+            const recipeImageUrl = await s3Service.getPresignedUrlForFile(rate.recipe.getMainImageUrl());
             presentedRates.push({
                 id: rate.id.value,
-                customer: rate.customerId.value,
-                recipe: rate.recipeId.value,
-                rate_value: rate.rateValue,
-                comment_rate: rate.comment
+                customer: rate.customerId.toString(),
+                recipeId: rate.recipe.id.toString(),
+                recipeName: rate.recipe.getName(),
+                recipeImageUrl,
+                rating: rate.rating,
+                comment: rate.comment,
+                lastShippingDate: !!rate.getLastShippingDate() ? MomentTimeService.getDdMmYyyy(rate.getLastShippingDate()!) : "",
+                qtyDelivered: rate.getQtyDelivered(),
+                isRated: !!rate.rating && rate.rating > 0,
+                isRateable: rate.isRateable(),
             });
         }
         return presentedRates;

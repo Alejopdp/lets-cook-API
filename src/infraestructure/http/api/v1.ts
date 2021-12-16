@@ -14,7 +14,6 @@ import { restrictionRouter } from "../../../bounded_contexts/operations/infra/ht
 import { mailingListRouter } from "../../../bounded_contexts/operations/infra/http/mailingList";
 import { logRouter } from "../../../bounded_contexts/operations/infra/http/log";
 
-console.log("A ver gabriel: ", process.env.NODE_ENV);
 const v1Router = express.Router();
 
 v1Router.use("/user", userRouter);

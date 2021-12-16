@@ -5,6 +5,7 @@ import { CustomerId } from "../../domain/customer/CustomerId";
 import { RecipeId } from "../../domain/recipe/RecipeId";
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
 import { CreateRateDto } from "./createRateDto";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 
 export class CreateRate {
     private _rateRepository: IRateRepository;
@@ -18,10 +19,10 @@ export class CreateRate {
     public async execute(dto: CreateRateDto): Promise<void> {
         const customerId: CustomerId = new CustomerId(dto.customer);
         const recipeId: RecipeId = new RecipeId(dto.recipe);
-        
-        const rate: Rate = Rate.create(customerId, recipeId, undefined, undefined);
-        
-        await this.rateRepository.save(rate);
+
+        // const rate: RecipeRating = new RecipeRating(recipe, customerId, );
+
+        // await this.rateRepository.save(rate);
     }
 
     /**

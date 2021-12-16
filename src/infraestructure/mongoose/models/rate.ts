@@ -7,20 +7,40 @@ const RateSchema = new mongoose.Schema(
             type: String,
             default: uuid.v4,
         },
-        rateValue: {
-            type: Number
+        rating: {
+            type: Number,
+            default: 0,
         },
         comment: {
-            type: String
-        },
-        customerId: {
             type: String,
-            required: true
         },
-        recipeId: {
+        customer: {
             type: String,
-            required: true
+            ref: "Customer",
+            required: true,
         },
+        recipe: {
+            type: String,
+            ref: "Recipe",
+            required: true,
+        },
+        qtyDelivered: {
+            type: Number,
+            required: true,
+        },
+        lastShippingDate: {
+            type: Date,
+            required: true,
+        },
+        beforeLastShippingDate: {
+            type: Date,
+            required: true,
+        },
+        shippingDates: [
+            {
+                type: Date,
+            },
+        ],
         deletionFlag: {
             type: Boolean,
             isRequired: true,

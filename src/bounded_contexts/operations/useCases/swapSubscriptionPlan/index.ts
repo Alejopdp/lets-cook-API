@@ -3,6 +3,7 @@ import { mongooseLogRepository } from "../../infra/repositories/log";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongoosePlanRepository } from "../../infra/repositories/plan";
+import { mongooseRateRepository } from "../../infra/repositories/rate";
 import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
 import { SwapSubscriptionPlan } from "./swapSubscriptionPlan";
@@ -15,6 +16,7 @@ export const swapSubscriptionPlan: SwapSubscriptionPlan = new SwapSubscriptionPl
     mongoosePaymentOrderReposiotry,
     mongooseCouponRepository,
     mongooseShippingZoneRepository,
-    mongooseLogRepository
+    mongooseLogRepository,
+    mongooseRateRepository
 );
 export const swapSubscriptionPlanController: SwapSubscriptionPlanController = new SwapSubscriptionPlanController(swapSubscriptionPlan);

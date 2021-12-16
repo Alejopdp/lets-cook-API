@@ -1,20 +1,36 @@
 import { Mapper } from "../../../core/infra/Mapper";
-import { Rate } from "../domain/rate/Rate";
-import { RateId } from "../domain/rate/RateId";
 import { CustomerId } from "../domain/customer/CustomerId";
-import { RecipeId } from "../domain/recipe/RecipeId";
+import { RecipeRating } from "../domain/recipeRating/RecipeRating";
+import { RecipeRatingId } from "../domain/recipeRating/RecipeRatingId";
+import { recipeMapper } from "./recipeMapper";
+import { Locale } from "../domain/locale/Locale";
 
-export class RateMapper implements Mapper<Rate> {
-    public toDomain(raw: any): Rate {
-        const customerId = new CustomerId(raw.customerId);
-        const recipeId = new RecipeId(raw.recipeId);
-        return Rate.create(customerId, recipeId, raw.rateValue, raw.comment, new RateId(raw._id));
+export class RateMapper implements Mapper<RecipeRating> {
+    public toDomain(raw: any, locale: Locale): RecipeRating {
+        const customerId = new CustomerId(raw.customer);
+        const recipe = recipeMapper.toDomain(raw.recipe, locale);
+        console.log(raw.shippingDates);
+        return new RecipeRating(
+            recipe,
+            customerId,
+            raw.qtyDelivered,
+            raw.lastShippingDate,
+            raw.beforeLastShippingDate,
+            raw.shippingDates,
+            raw.rating,
+            raw.comment,
+            new RecipeRatingId(raw._id)
+        );
     }
-    public toPersistence(t: Rate): any {
+    public toPersistence(t: RecipeRating): any {
         return {
-            customerId: t.customerId,
-            recipeId: t.recipeId,
-            rateValue: t.rateValue,
+            customer: t.customerId.toString(),
+            recipe: t.recipe.id.toString(),
+            qtyDelivered: t.qtyDelivered,
+            lastShippingDate: t.lastShippingDate,
+            beforeLastShippingDate: t.beforeLastShippingDate,
+            shippingDates: t.shippingDates,
+            rating: t.rating,
             comment: t.comment,
             _id: t.id.value,
         };
