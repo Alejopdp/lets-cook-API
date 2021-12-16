@@ -50,6 +50,7 @@ export class GetCustomerSubscriptionsPresenter {
                 planVariantLabel: subscription.getPlanVariantLabel(Locale.es) || "",
                 nextShippment: subscription.getNextShipmentLabel(orderSubscriptionMap[subscription.id.value], locale),
                 frequency: subscription.frequency.value(),
+                isOneTime: subscription.frequency.isOneTime(),
                 stateTitle:
                     !!!orderSubscriptionMap[subscription.id.value] && subscription.frequency.isOneTime()
                         ? "SUBSCRIPTION_DELIVERED"
