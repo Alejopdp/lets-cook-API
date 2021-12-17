@@ -188,6 +188,7 @@ export class Order extends Entity<Order> {
     }
 
     public toPaymentRejected(): void {
+        if (this.isCancelled()) return;
         this.state.toPaymentRejected(this);
     }
 
