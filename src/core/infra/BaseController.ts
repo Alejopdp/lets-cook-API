@@ -82,7 +82,7 @@ export abstract class BaseController {
         const endpoint: string = `${this.req.method} ${this.req.protocol}://${this.req.get("host")}${this.req.originalUrl}`;
         //@ts-ignore
         const userEmail: string | undefined = this.req.currentUser?.email;
-        awsSesService.sendErrorEmail(error.toString(), endpoint, userEmail);
+        awsSesService.sendErrorEmail(`[${process.env.NODE_ENV}] ${error.toString()}`, endpoint, userEmail);
 
         return this.res.status(500).json({
             message: error.toString(),
