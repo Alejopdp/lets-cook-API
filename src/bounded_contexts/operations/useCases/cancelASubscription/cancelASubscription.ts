@@ -49,7 +49,7 @@ export class CancelASubscription {
         const subscription: Subscription | undefined = await this.subscriptionRepository.findByIdOrThrow(subscriptionId);
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(subscription.customer.id);
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
-        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
+        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(subscription.customer.id);
         const customerRatings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(subscription?.customer.id!, Locale.es);
         const recipeRatingsMap: { [recipeId: string]: RecipeRating } = {};
 
@@ -66,12 +66,36 @@ export class CancelASubscription {
         }
 
         subscription.cancel(cancellationReason, orders, paymentOrders);
-        if (customerSubscriptions.every((sub) => sub.state.isCancelled() || sub.id.equals(subscriptionId))) {
-            this.mailingListService.updateSubscriber(subscription.customer.email, { shopify_tags: "Inactive subscriber" });
+        const principalSubscriptions = subscription.plan.isPrincipal()
+            ? [...customerSubscriptions.filter((sub) => sub.plan.isPrincipal() && !subscription.id.equals(sub.id)), subscription]
+            : customerSubscriptions.filter((sub) => sub.plan.isPrincipal());
+
+        var moreOrdersToCancel: Order[] = [];
+        var additionalActiveSubscriptions = customerSubscriptions.filter((sub) => sub.isActive() && !sub.plan.isPrincipal());
+
+        if (principalSubscriptions.every((sub) => sub.state.isCancelled())) {
+            moreOrdersToCancel = await this.orderRepository.findNextTwelveBySubscriptionList(
+                additionalActiveSubscriptions.map((sub) => sub.id),
+                Locale.es
+            );
+
+            for (let sub of additionalActiveSubscriptions) {
+                const subOrders = moreOrdersToCancel.filter((o) => o.subscriptionId.equals(sub.id));
+                const paymentOrdersIds = subOrders.map((o) => o.paymentOrderId!);
+                const subPaymentOrders = paymentOrders.filter((po) => paymentOrdersIds.some((id) => id.equals(po.id)));
+
+                if (sub.isActive()) sub.cancel(cancellationReason, subOrders, subPaymentOrders);
+            }
         }
 
-        await this.orderRepository.saveCancelledOrders(orders.filter((order) => order.isCancelled())); // TO DO: Transaction / Queue
+        if (customerSubscriptions.every((sub) => sub.state.isCancelled() || sub.id.equals(subscriptionId)))
+            if (customerSubscriptions.every((sub) => sub.state.isCancelled() || sub.id.equals(subscriptionId))) {
+                this.mailingListService.updateSubscriber(subscription.customer.email, { shopify_tags: "Inactive subscriber" });
+            }
+
+        await this.orderRepository.saveCancelledOrders([...orders, ...moreOrdersToCancel].filter((order) => order.isCancelled())); // TO DO: Transaction / Queue
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
+        for (let sub of additionalActiveSubscriptions) await this.subscriptionRepository.save(sub);
         await this.paymentOrderRepository.updateMany(paymentOrders); // TO DO: Transaction / Queue
         this.notificationService.notifyAdminAboutACancellation(subscription, dto.nameOrEmailOfAdminExecutingRequest);
         this.recipeRatingRepository.updateMany(customerRatings);
