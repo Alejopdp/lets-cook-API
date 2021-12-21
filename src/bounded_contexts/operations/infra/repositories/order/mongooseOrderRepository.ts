@@ -308,6 +308,11 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async findFutureOrders(locale: Locale = Locale.es): Promise<Order[]> {
         return await this.findBy({ shippingDate: { $gt: new Date() } }, locale);
     }
+
+    public async findAllBySubscriptionId(subscriptionId: SubscriptionId): Promise<Order[]> {
+        return await this.findBy({ subscription: subscriptionId.toString() });
+    }
+
     public async findFutureOrdersByShippingDayOfWeek(shippingDay: Day, locale: Locale = Locale.es): Promise<Order[]> {
         const ordersDb = await MongooseOrder.aggregate([
             {
