@@ -1,27 +1,24 @@
-import { IStorageService } from "../../application/storageService/IStorageService";
 import { Customer } from "../../domain/customer/Customer";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
-import { UpdatePasswordDto } from "./updatePasswordDto";
+import { UpdatePasswordWithoutCodeDto } from "./updatePasswordWithoutCodeDto";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
 
-export class UpdatePassword {
+export class UpdatePasswordWithoutCode {
     private _updatePasswordRepository: ICustomerRepository;
-    private _storageService: IStorageService;
     private _logRepository: ILogRepository;
 
-    constructor(updatePasswordRepository: ICustomerRepository, storageService: IStorageService, logRepository: ILogRepository) {
+    constructor(updatePasswordRepository: ICustomerRepository, logRepository: ILogRepository) {
         this._updatePasswordRepository = updatePasswordRepository;
-        this._storageService = storageService;
         this._logRepository = logRepository;
     }
 
-    public async execute(dto: UpdatePasswordDto): Promise<void> {
+    public async execute(dto: UpdatePasswordWithoutCodeDto): Promise<void> {
         const customer: Customer | undefined = await this.updatePasswordRepository.findByEmail(dto.email);
         if (!!!customer) throw new Error("User not found.");
-        if (dto.code !== customer.codeToRecoverPassword) throw new Error("El código para recuperar la contraseña no es correcto");
+        if (customer.email !== dto.emailOfRequester) throw new Error("No puedes cambiar la contraseña de otro usuario");
 
         const newPassword: UserPassword = UserPassword.create(dto.newPassword, false).hashPassword();
 
@@ -47,14 +44,6 @@ export class UpdatePassword {
      */
     public get updatePasswordRepository(): ICustomerRepository {
         return this._updatePasswordRepository;
-    }
-
-    /**
-     * Getter storageService
-     * @return {IStorageService}
-     */
-    public get storageService(): IStorageService {
-        return this._storageService;
     }
 
     /**

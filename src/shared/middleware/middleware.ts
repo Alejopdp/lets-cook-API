@@ -100,7 +100,7 @@ export class Middleware {
                 req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
                 next();
             } else {
-                return this.endRequest(403, "No se brindó ningún token", res);
+                return this.endRequest(403, "No estás autorizado para realizar la petición", res);
             }
         };
     }
@@ -123,7 +123,7 @@ export class Middleware {
                 req["decode"] = decoded;
                 next();
             } else {
-                return this.endRequest(403, "No se brindó ningún token", res);
+                return this.endRequest(403, "No estás autorizado para realizar la petición", res);
             }
         };
     };
@@ -149,7 +149,7 @@ export class Middleware {
                 req["decode"] = decoded;
                 next();
             } else {
-                return this.endRequest(403, "No se brindó ningún token", res);
+                return this.endRequest(403, "No estás autorizado para realizar la petición", res);
             }
         };
     };

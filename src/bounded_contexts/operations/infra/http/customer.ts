@@ -24,6 +24,7 @@ import { addPaymentMethodController } from "../../useCases/addPaymentMethod";
 import { checkIfEmailExistsController } from "../../useCases/checkIfEmailExists";
 import { futurePaymentSetupController } from "../../application/futurePaymentSetup";
 import { middleware } from "../../../../shared/middleware";
+import { updatePasswordWithoutCodeController } from "../../useCases/updatePasswordWithoutCode";
 
 const customerRouter = express.Router();
 
@@ -42,6 +43,9 @@ customerRouter.get("/information-as-admin/:id", (req, res) => getCustomerInforma
 // // PUT
 customerRouter.put("/forgot-password/:email", (req, res) => forgotPasswordController.execute(req, res));
 customerRouter.put("/reset-password/:email", (req, res) => updatePasswordController.execute(req, res));
+customerRouter.put("/change-password/:email", middleware.ensureAuthenticated(), (req, res) =>
+    updatePasswordWithoutCodeController.execute(req, res)
+);
 customerRouter.put("/update/:id", (req, res) => updateCustomerController.execute(req, res));
 // customerRouter.put("/update-customer/:id", (req, res) => updateCustomerController.execute(req, res));
 customerRouter.put("/update-email/:id", (req, res) => updateCustomerEmailController.execute(req, res));
