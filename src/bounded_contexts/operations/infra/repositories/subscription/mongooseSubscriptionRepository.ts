@@ -40,15 +40,15 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
             .populate("restriction")
             .populate("coupon");
 
-        return subscriptionDb ? subscriptionMapper.toDomain(subscriptionDb) : undefined;
+        return subscriptionDb ? subscriptionMapper.toDomain(subscriptionDb, locale) : undefined;
     }
 
     public async findByIdList(subscriptionsIds: SubscriptionId[]): Promise<Subscription[]> {
         return await this.findBy({ _id: subscriptionsIds.map((id) => id.value) });
     }
 
-    public async findByIdOrThrow(subscriptionId: SubscriptionId): Promise<Subscription> {
-        const subscription = await this.findById(subscriptionId);
+    public async findByIdOrThrow(subscriptionId: SubscriptionId, locale: Locale): Promise<Subscription> {
+        const subscription = await this.findById(subscriptionId, locale);
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");
 
         return subscription;
@@ -84,13 +84,13 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return await this.findBy({ planVariant: planVariantsIds.map((id) => id.value), state: "SUBSCRIPTION_ACTIVE" });
     }
 
-    public async findByCustomerId(customerId: CustomerId): Promise<Subscription[]> {
+    public async findByCustomerId(customerId: CustomerId, locale: Locale): Promise<Subscription[]> {
         const options: QueryOptions = {
             sort: {
                 state: 1,
             },
         };
-        return await this.findBy({ customer: customerId.value }, Locale.es, options);
+        return await this.findBy({ customer: customerId.value }, locale, options);
     }
 
     public async findByCouponId(couponId: CouponId): Promise<Subscription[]> {

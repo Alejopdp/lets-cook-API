@@ -34,7 +34,7 @@ export class MoveOrderShippingDate {
         if (!order.isFirstOrderOfSubscription) throw new Error("No adelantar un pedido que no es el 1ro de una suscripción");
 
         const [subscription, ordersOfSubscription]: [Subscription, Order[]] = await Promise.all([
-            await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId),
+            await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId, Locale.es),
             await this.orderRepository.findNextTwelveBySubscription(order.subscriptionId, Locale.es),
         ]);
         const newShippingDateOfFirstOrder = new Date(order.shippingDate);

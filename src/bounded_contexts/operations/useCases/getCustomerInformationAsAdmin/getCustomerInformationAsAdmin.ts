@@ -38,7 +38,7 @@ export class GetCustomerInformationAsAdmin {
     ): Promise<{ customer: Customer; subscriptions: Subscription[]; paymentOrders: PaymentOrder[]; orders: Order[] }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer = await this.customerRepository.findByIdOrThrow(customerId);
-        const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
+        const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId, dto.locale);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(customerId);
         const orders: Order[] = await this.orderRepository.findByPaymentOrderIdList(
             paymentOrders.map((po) => po.id),

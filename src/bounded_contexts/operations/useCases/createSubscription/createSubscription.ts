@@ -7,14 +7,11 @@ import {
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { CouponId } from "../../domain/cupons/CouponId";
 import { Coupon } from "../../domain/cupons/Cupon";
-import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
-import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
-import { Plan } from "../../domain/plan/Plan";
 import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
 import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../../domain/plan/PlanId";
@@ -95,7 +92,7 @@ export class CreateSubscription {
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount, shippingZones] = await Promise.all([
-            this.subscriptionRepository.findByCustomerId(customerId),
+            this.subscriptionRepository.findByCustomerId(customerId, Locale.es),
             this.customerRepository.findByIdOrThrow(customerId),
             this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
             this.paymentOrderRepository.countPaymentOrdersWithHumanId(),

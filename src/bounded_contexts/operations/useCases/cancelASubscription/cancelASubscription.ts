@@ -46,8 +46,11 @@ export class CancelASubscription {
     public async execute(dto: CancelASubscriptionDto): Promise<void> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const cancellationReason: CancellationReason = new CancellationReason(dto.cancellationReason, dto.cancellationComment, new Date());
-        const subscription: Subscription | undefined = await this.subscriptionRepository.findByIdOrThrow(subscriptionId);
-        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(subscription.customer.id);
+        const subscription: Subscription | undefined = await this.subscriptionRepository.findByIdOrThrow(subscriptionId, Locale.es);
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(
+            subscription.customer.id,
+            Locale.es
+        );
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(subscription.customer.id);
         const customerRatings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(subscription?.customer.id!, Locale.es);

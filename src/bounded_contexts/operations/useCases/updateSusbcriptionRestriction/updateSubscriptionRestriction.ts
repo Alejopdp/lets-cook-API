@@ -32,7 +32,7 @@ export class UpdateSubscriptionRestriction {
     public async execute(dto: UpdateSubscriptionRestrictionDto): Promise<void> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const restrictionId: RecipeRestrictionId = new RecipeRestrictionId(dto.restrictionId);
-        const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(subscriptionId);
+        const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale);
         const restriction: RecipeVariantRestriction = await this.restrictionRepository.findByIdOrThrow(restrictionId, dto.locale);
 
         // TO DO: QUe pasa si tiene recetas elegidas con otra restricción

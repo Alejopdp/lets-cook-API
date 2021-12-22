@@ -40,6 +40,12 @@ export class GetCustomerSubscriptionsPresenter {
         // const subscriptionsWithoutCancelledDuplicates = _.uniqBy(subscriptions, (subscription) =>
         //     [subscription.state.title, subscription.plan.id.value].join()
         // );
+
+        const oneTimeDeliveredStateMap = {
+            es: "Entregado",
+            en: "Delivered",
+            ca: "lliurat",
+        };
         for (let subscription of [...nonCancelledSubscriptions, ...cancelledSubscriptions]) {
             const presentedSubscription = {
                 id: subscription.id.value,
@@ -47,7 +53,7 @@ export class GetCustomerSubscriptionsPresenter {
                 planVariantPrice: subscription.price,
                 planVariantId: subscription.planVariantId.value,
                 planName: subscription.plan.name,
-                planVariantLabel: subscription.getPlanVariantLabel(Locale.es) || "",
+                planVariantLabel: subscription.getPlanVariantLabel(locale) || "",
                 nextShippment: subscription.getNextShipmentLabel(orderSubscriptionMap[subscription.id.value], locale),
                 frequency: subscription.frequency.value(),
                 isOneTime: subscription.frequency.isOneTime(),
@@ -57,8 +63,8 @@ export class GetCustomerSubscriptionsPresenter {
                         : subscription.state.title,
                 stateHumanTitle:
                     !!!orderSubscriptionMap[subscription.id.value] && subscription.frequency.isOneTime()
-                        ? "Entregado"
-                        : subscription.state.humanTitle,
+                        ? oneTimeDeliveredStateMap[locale]
+                        : subscription.getStateHumanTitle(locale),
                 stateColor: subscription.state.color,
                 iconUrl: await this.storageService.getPresignedUrlForFile(subscription.plan.iconLinealColorUrl),
             };
