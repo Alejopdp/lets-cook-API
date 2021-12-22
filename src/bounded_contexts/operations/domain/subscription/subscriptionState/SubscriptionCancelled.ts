@@ -1,3 +1,4 @@
+import { Locale } from "../../locale/Locale";
 import { PlanFrequency } from "../../plan/PlanFrequency";
 import { Subscription } from "../Subscription";
 import { ISubscriptionState } from "./ISubscriptionState";
@@ -14,8 +15,14 @@ export class SubscriptionCancelled implements ISubscriptionState {
         this.color = "red";
     }
 
-    public getHumanTitle(frequency: PlanFrequency): string {
-        return this.humanTitle;
+    public getHumanTitle(locale: Locale): string {
+        const map: { [localeKey: string]: string } = {
+            es: "Cancelado",
+            en: "Cancelled",
+            ca: "Cancel·lat",
+        };
+
+        return map[locale];
     }
 
     public toCancelled(subscription: Subscription): void {

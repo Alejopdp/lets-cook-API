@@ -64,7 +64,7 @@ export class ReorderPlan {
         dto: ReorderPlanDto
     ): Promise<{ subscription: Subscription; paymentIntent: Stripe.PaymentIntent; firstOrder: Order }> {
         const oldSubscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const oldSubscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(oldSubscriptionId);
+        const oldSubscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(oldSubscriptionId, dto.locale);
         const subscription: Subscription = new Subscription(
             oldSubscription.planVariantId,
             oldSubscription.plan,

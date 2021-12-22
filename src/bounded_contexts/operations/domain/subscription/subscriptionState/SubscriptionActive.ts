@@ -1,3 +1,4 @@
+import { Locale } from "../../locale/Locale";
 import { PlanFrequency } from "../../plan/PlanFrequency";
 import { Subscription } from "../Subscription";
 import { ISubscriptionState } from "./ISubscriptionState";
@@ -12,6 +13,15 @@ export class SubscriptionActive implements ISubscriptionState {
         this.title = "SUBSCRIPTION_ACTIVE";
         this.humanTitle = "Activo";
         this.color = "green";
+    }
+    public getHumanTitle(locale: Locale): string {
+        const map: { [localeKey: string]: string } = {
+            es: "Activo",
+            en: "Active",
+            ca: "Actiu",
+        };
+
+        return map[locale];
     }
 
     // public getHumanTitle(frequency: PlanFrequency, subscriptionCreationDate: Date, ): string {

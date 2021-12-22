@@ -35,7 +35,7 @@ export class Handle3dSecureFailure {
 
     public async execute(dto: Handle3dSecureFailureDto): Promise<void> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(dto.currentCustomer.id);
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(dto.currentCustomer.id, Locale.es);
         const subscription: Subscription | undefined = customerSubscriptions.find((sub) => sub.id.equals(subscriptionId));
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");
 

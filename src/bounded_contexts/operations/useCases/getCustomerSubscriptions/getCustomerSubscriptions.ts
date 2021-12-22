@@ -1,6 +1,5 @@
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { Order } from "../../domain/order/Order";
-import { Plan } from "../../domain/plan/Plan";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
@@ -28,7 +27,7 @@ export class GetCustomerSubscriptions {
         dto: GetCustomerSubscriptionsDto
     ): Promise<{ subscriptions: Subscription[]; nextOrders: Order[]; ratings: RecipeRating[] }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
+        const subscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId, dto.locale);
         const subscriptionsIds: SubscriptionId[] = subscriptions.map((subscription) => subscription.id);
         const nextOrders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(subscriptionsIds, dto.locale);
         const ratings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(customerId, dto.locale);

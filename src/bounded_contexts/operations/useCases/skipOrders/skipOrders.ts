@@ -32,8 +32,14 @@ export class SkipOrders {
 
     public async execute(dto: SkipOrdersDto): Promise<any> {
         const ordersIds: OrderId[] = [...dto.ordersToReactivate, ...dto.ordersToSkip].map((id: any) => new OrderId(id));
-        const orders: Order[] = await this.orderRepository.findByIdList(ordersIds, Locale.es);
-        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
+        const incomingOrders: Order[] = await this.orderRepository.findByIdList(ordersIds, Locale.es);
+        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(
+            incomingOrders.map((order) => order.paymentOrderId!)
+        );
+        const orders: Order[] = await this.orderRepository.findByPaymentOrderIdList(
+            paymentOrders.map((po) => po.id),
+            Locale.es
+        );
         const customerRatings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(orders[0].customer.id, Locale.es);
         const ordersMap: { [orderId: string]: Order } = {};
         const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
@@ -83,6 +89,22 @@ export class SkipOrders {
 
             order.reactivate(paymentOrdersMap[order.paymentOrderId?.value!]);
             activeOrdersToSave.push(order);
+        }
+
+        for (let paymentOrder of paymentOrders) {
+            const principalPlanOrders = orders.filter((o) => o.paymentOrderId?.equals(paymentOrder.id) && o.plan.isPrincipal());
+
+            if (principalPlanOrders.every((o) => o.isSkipped() || o.isCancelled())) {
+                console.log("TOdas skipped");
+
+                for (let order of orders) {
+                    console.log(`${order.isActive()} ${order.paymentOrderId?.equals(paymentOrder.id)} ${!order.plan.isPrincipal()}`);
+                    if (order.isActive() && order.paymentOrderId?.equals(paymentOrder.id) && !order.plan.isPrincipal()) {
+                        order.skip(paymentOrder);
+                        skippedOrdersToSave.push(order);
+                    }
+                }
+            }
         }
 
         await this.orderRepository.updateMany([...skippedOrdersToSave, ...activeOrdersToSave]);

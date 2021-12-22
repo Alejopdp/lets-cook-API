@@ -11,11 +11,11 @@ export interface ISubscriptionRepository {
     bulkSave(subscriptions: Subscription[]): Promise<void>;
     saveCancelledSubscriptions(subscriptions: Subscription[]): Promise<void>;
     findAll(locale: Locale): Promise<Subscription[]>;
-    findById(subscriptionId: SubscriptionId, locale?: Locale): Promise<Subscription | undefined>;
-    findByIdOrThrow(subscriptionId: SubscriptionId, locale?: Locale): Promise<Subscription>;
+    findById(subscriptionId: SubscriptionId, locale: Locale): Promise<Subscription | undefined>;
+    findByIdOrThrow(subscriptionId: SubscriptionId, locale: Locale): Promise<Subscription>;
     findBy(conditions: any, locale: Locale, options?: QueryOptions): Promise<Subscription[]>;
     findByIdList(subscriptionsIds: SubscriptionId[]): Promise<Subscription[]>;
-    findByCustomerId(customerId: CustomerId): Promise<Subscription[]>;
+    findByCustomerId(customerId: CustomerId, locale: Locale): Promise<Subscription[]>;
     findActiveSubscriptionByPlanVariantsIds(planVariantsIds: PlanVariantId[]): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerId(customerId: CustomerId): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerIdList(customersIds: CustomerId[]): Promise<Subscription[]>;

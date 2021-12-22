@@ -1,4 +1,5 @@
 import express from "express";
+import { cancelAPaymentOrderController } from "../../useCases/cancelAPaymentOrder";
 import { chargeOnePaymentOrderController } from "../../useCases/chargeOnePaymentOrder";
 import { createSubscriptionController } from "../../useCases/createSubscription";
 import { getCustomerPaymentOrdersController } from "../../useCases/getCustomerPaymentOrders";
@@ -24,6 +25,7 @@ paymentOrderRouter.put("/charge/:id", (req, res) => chargeOnePaymentOrderControl
 paymentOrderRouter.put("/update-state/:id", (req, res) => updatePaymentOrderAndOrdersStateController.execute(req, res));
 paymentOrderRouter.put("/refund/:id", (req, res) => refundPaymentOrderController.execute(req, res));
 paymentOrderRouter.put("/retry-payment/:id", (req, res) => retryPaymentOrderOfRejectedPaymentOrderController.execute(req, res));
+paymentOrderRouter.put("/cancel/:id", (req, res) => cancelAPaymentOrderController.execute(req, res));
 
 // DELETEs
 

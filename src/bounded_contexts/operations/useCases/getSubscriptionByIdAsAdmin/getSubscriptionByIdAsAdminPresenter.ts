@@ -115,7 +115,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
             planName: subscription.plan.name,
             planVariantDescription: subscription.getPlanVariantLabel(Locale.es),
             state: {
-                state: subscription.state.humanTitle,
+                state: subscription.getStateHumanTitle(locale),
                 stateTitle: subscription.state.title,
             },
             servingsLabel: subscription.getServingsLabel(),

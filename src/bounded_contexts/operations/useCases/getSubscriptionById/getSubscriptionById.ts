@@ -35,7 +35,7 @@ export class GetSubscriptionById {
     ): Promise<{ subscription: Subscription; orders: Order[]; customer: Customer; paymentOrders: PaymentOrder[] }> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const [subscription, orders]: [Subscription, Order[]] = await Promise.all([
-            this.subscriptionRepository.findByIdOrThrow(subscriptionId),
+            this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale),
             this.orderRepository.findNextTwelveBySubscription(subscriptionId, dto.locale),
         ]);
         const currentAndNextWeeksIds: WeekId[] = [orders[0]?.week, orders[1]?.week].reduce(

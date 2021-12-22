@@ -195,16 +195,17 @@ export class CreateManySubscriptions {
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
-        new Log(
-            LogType.NEW_SUBSCRIPTION,
-            customer.getFullNameOrEmail(),
-            "Usuario",
-            `El usuario ha agregado ${subscriptions.length} planes adicionales`,
-            `El usuario ha agregado ${subscriptions.length} planes adicionales`,
-            new Date(),
-            customer.id
+        this.logRepository.save(
+            new Log(
+                LogType.NEW_SUBSCRIPTION,
+                customer.getFullNameOrEmail(),
+                "Usuario",
+                `El usuario ha agregado ${subscriptions.length} planes adicionales`,
+                `El usuario ha agregado ${subscriptions.length} planes adicionales`,
+                new Date(),
+                customer.id
+            )
         );
-
         // const ticketDto: PaymentOrderBilledNotificationDto = {
         //             customerEmail: customer.email,
         //             foodVAT: Math.round((totalPrice + Number.EPSILON) * 100) / 100,

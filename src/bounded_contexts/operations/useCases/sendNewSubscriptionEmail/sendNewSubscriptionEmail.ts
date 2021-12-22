@@ -41,7 +41,7 @@ export class SendNewSubscriptionEmail {
     public async execute(dto: SendNewSubscriptionEmailDto): Promise<any> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const [subscription, firstOrder, shippingZones]: [Subscription, Order | undefined, ShippingZone[]] = await Promise.all([
-            this.subscriptionRepository.findByIdOrThrow(subscriptionId),
+            this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale),
             this.orderRepository.getFirstOrderOfSubscription(subscriptionId, dto.locale),
             this.shippingZoneRepository.findAll(),
         ]);
