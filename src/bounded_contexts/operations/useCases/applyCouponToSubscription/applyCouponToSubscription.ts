@@ -41,7 +41,7 @@ export class ApplyCouponToSubscription {
 
     public async execute(dto: ApplyCouponToSubscriptionDto): Promise<void> {
         const customerId = new CustomerId(dto.customerId);
-        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId, Locale.es);
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const subscription: Subscription | undefined = customerSubscriptions.find((sub) => sub.id.equals(subscriptionId));
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");

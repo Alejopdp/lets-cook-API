@@ -54,7 +54,7 @@ export class SwapSubscriptionPlan {
         const newPlanId: PlanId = new PlanId(dto.newPlanId);
         const newPlanVariantId: PlanVariantId = new PlanVariantId(dto.newPlanVariantId);
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId);
+        const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId, Locale.es);
         const customerRatings: RecipeRating[] = await this.recipesRatingRepository.findAllByCustomer(subscription?.customer.id!, Locale.es);
         const recipeRatingsMap: { [recipeId: string]: RecipeRating } = {};
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");

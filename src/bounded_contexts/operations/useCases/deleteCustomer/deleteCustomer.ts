@@ -1,4 +1,5 @@
 import { CustomerId } from "../../domain/customer/CustomerId";
+import { Locale } from "../../domain/locale/Locale";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
@@ -15,11 +16,13 @@ export class DeleteCustomer {
 
     public async execute(dto: DeleteCustomerDto): Promise<void> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
-        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
-        let activeSubscriptions = customerSubscriptions.filter((subscription: Subscription) => subscription.state.title === 'SUBSCRIPTION_ACTIVE');
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId, Locale.es);
+        let activeSubscriptions = customerSubscriptions.filter(
+            (subscription: Subscription) => subscription.state.title === "SUBSCRIPTION_ACTIVE"
+        );
 
-        if(activeSubscriptions.length !== 0) throw new Error("Hay suscripciones activas para el cliente seleccionado");
-        
+        if (activeSubscriptions.length !== 0) throw new Error("Hay suscripciones activas para el cliente seleccionado");
+
         await this.customerRepository.delete(customerId);
     }
 
@@ -35,7 +38,7 @@ export class DeleteCustomer {
      * Getter subscriptionRepository
      * @return {ISubscriptionRepository}
      */
-     public get subscriptionRepository(): ISubscriptionRepository {
+    public get subscriptionRepository(): ISubscriptionRepository {
         return this._subscriptionRepository;
     }
 }

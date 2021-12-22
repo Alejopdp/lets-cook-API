@@ -138,7 +138,7 @@ export class GetSubscriptionByIdPresenter {
                 .filter((variant) => !variant.isDeleted)
                 .map((variant) => this.presentPlanVariant(variant, locale)),
             state: {
-                state: subscription.state.humanTitle,
+                state: subscription.getStateHumanTitle(locale),
                 stateTitle: subscription.state.title,
             },
             servingsLabel: subscription.getServingsLabel(),

@@ -44,7 +44,7 @@ export class ExportSubscriptions {
                 customerEmail: subscription.customer.email,
                 subscriptionId: subscription.id.value,
                 subscriptionFrequency: subscription.frequency.getLabel(),
-                subscriptionState: subscription.state.humanTitle,
+                subscriptionState: subscription.getStateHumanTitle(Locale.es),
                 planId: subscription.plan.id.value,
                 planSku: subscription.plan.planSku.code,
                 planName: subscription.plan.name,

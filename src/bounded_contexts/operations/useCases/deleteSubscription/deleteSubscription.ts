@@ -31,7 +31,7 @@ export class DeleteSubscription {
 
     public async execute(dto: DeleteSubscriptionDto): Promise<any> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(subscriptionId);
+        const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(subscriptionId, Locale.es);
         const subscriptionOrders: Order[] = await this.orderRepository.findAllBySubscriptionId(subscriptionId);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(
             subscriptionOrders.map((order) => order.paymentOrderId!)

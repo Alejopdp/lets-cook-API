@@ -363,9 +363,9 @@ export class Subscription extends Entity<Subscription> {
         if (comment) this.restrictionComment = comment;
     }
 
-    // public getStateHumanTitle(): string {
-    //     return this.state.getHumanTitle(this.frequency, this.creationDate, this.getFirstOrderShippingDate())
-    // }
+    public getStateHumanTitle(locale: Locale): string {
+        return this.state.getHumanTitle(locale);
+    }
 
     public changePlanVariant(variantId: PlanVariantId, orders: Order[], paymentOrders: PaymentOrder[]): void {
         // const planVariant: PlanVariant | undefined = this.plan.getPlanVariantById(variantId);

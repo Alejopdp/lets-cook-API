@@ -42,7 +42,7 @@ export class GetCouponValidation {
         if (!coupon.hasStarted()) throw new Error("El cupón ingresado no es válido");
         if (coupon.isExpiredByEndDate()) throw new Error("El cupón de descuento ingresado ha expirado");
 
-        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId);
+        const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId, Locale.es);
 
         if (!coupon.isValid(customerSubscriptions, plan, planVariantId, dto.shippingCost))
             throw new Error("No puedes aplicar a este cupón");

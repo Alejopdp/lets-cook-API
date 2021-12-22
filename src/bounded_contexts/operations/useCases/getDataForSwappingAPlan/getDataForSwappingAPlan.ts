@@ -14,7 +14,10 @@ export class GetDataForSwappingAPlan {
         this._planRepository = planRepository;
     }
     public async execute(dto: GetDataForSwappingAPlanDto): Promise<{ subscription: Subscription; plans: Plan[] }> {
-        const subscription: Subscription | undefined = await this.subscriptionRepository.findById(new SubscriptionId(dto.subscriptionId));
+        const subscription: Subscription | undefined = await this.subscriptionRepository.findById(
+            new SubscriptionId(dto.subscriptionId),
+            dto.locale
+        );
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");
 
         const plans: Plan[] = await this.planRepository.findAll(dto.locale);

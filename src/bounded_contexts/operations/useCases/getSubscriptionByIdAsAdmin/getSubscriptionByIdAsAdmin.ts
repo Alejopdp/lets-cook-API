@@ -29,7 +29,7 @@ export class GetSubscriptionByIdAsAdmin {
         dto: GetSubscriptionByIdAsAdminDto
     ): Promise<{ subscription: Subscription; orders: Order[]; customer: Customer; nextPaymentOrder?: PaymentOrder }> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId);
+        const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId, dto.locale);
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");
 
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);

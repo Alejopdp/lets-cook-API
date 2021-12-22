@@ -20,8 +20,8 @@ export class GetRecipesForOrder {
     public async execute(dto: GetRecipesForOrderDto): Promise<{ recipes: Recipe[]; order: Order; subscription: Subscription }> {
         const orderId: OrderId = new OrderId(dto.orderId);
         const order: Order = await this.orderRepository.findByIdOrThrow(orderId, dto.locale);
-        const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId);
-        const recipes: Recipe[] = await this.recipeRepository.findForOrder(order, subscription.restriction?.id);
+        const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId, dto.locale);
+        const recipes: Recipe[] = await this.recipeRepository.findForOrder(order, subscription.restriction?.id, dto.locale);
         recipes.forEach(
             (recipe) =>
                 (recipe.recipeVariants = recipe.recipeVariants.filter((variant) =>

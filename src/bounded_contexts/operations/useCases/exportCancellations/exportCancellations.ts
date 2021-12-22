@@ -24,7 +24,7 @@ export class ExportCancellations {
                 customerFirstName: subscription.customer.getPersonalInfo().name!,
                 customerLastName: subscription.customer.getPersonalInfo().lastName!,
                 subscriptionId: subscription.id.value,
-                status: subscription.state.humanTitle,
+                status: subscription.getStateHumanTitle(Locale.es),
                 subscriptionCreatedAt: MomentTimeService.getDddDdMmmm(subscription.createdAt),
                 planTitle: subscription.plan.name,
                 planVariantTitle: subscription.getPlanVariantLabel(Locale.es),

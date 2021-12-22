@@ -7,7 +7,6 @@ import Stripe from "stripe";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
-import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
@@ -69,7 +68,7 @@ export class CreateSubscriptionAsAdmin {
     public async execute(dto: CreateSubscriptionAsAdminDto): Promise<any> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount, shippingZones] = await Promise.all([
-            this.subscriptionRepository.findByCustomerId(customerId),
+            this.subscriptionRepository.findByCustomerId(customerId, dto.locale),
             this.customerRepository.findByIdOrThrow(customerId),
             this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
             this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
