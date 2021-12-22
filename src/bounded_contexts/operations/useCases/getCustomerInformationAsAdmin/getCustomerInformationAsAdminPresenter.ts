@@ -78,7 +78,8 @@ export class GetCustomerInformationAsAdminPresenter {
             orderNumber: order.counter,
             isSkipped: order.isSkipped(),
             state: order.state.title,
-            isSkippable: paymentOrderMap[order.paymentOrderId?.value || ""].state.isActive(),
+            isSkippable: order.isActive(),
+            isReanudable: order.isReanudable(),
         }));
     }
 
