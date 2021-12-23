@@ -159,9 +159,8 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public addCoupon(orders: Order[], paymentOrders: PaymentOrder[], coupon: Coupon, shippingCost: number): void {
-        if (!!this.coupon) throw new Error("La suscripción ya ha usado un cupón");
         this.coupon = coupon;
-
+        this.couponChargesQtyApplied = 0;
         for (let order of orders) {
             this.applyCoupon(order, paymentOrders.find((po) => po.id.equals(order.paymentOrderId!))!, shippingCost);
         }
@@ -173,11 +172,17 @@ export class Subscription extends Entity<Subscription> {
         const hasFreeShipping = this._coupon?.type.type === "free" && this.getCouponDiscount(shippingCost) > 0;
 
         if (order.isActive() || order.isSkipped()) {
-            order.discountAmount = hasFreeShipping ? 0 : this.getCouponDiscount(shippingCost);
-            order.hasFreeShipping = hasFreeShipping;
+            const oldDiscountAmount = order.discountAmount;
+            const newDiscountAmount = hasFreeShipping ? 0 : this.getCouponDiscount(shippingCost);
             if (hasFreeShipping) paymentOrder.hasFreeShipping = hasFreeShipping;
+
             paymentOrder.discountAmount =
-                Math.round(paymentOrder.discountAmount * 100) / 100 + Math.round(order.discountAmount * 100) / 100;
+                Math.round(paymentOrder.discountAmount * 100) / 100 +
+                Math.round(newDiscountAmount * 100) / 100 -
+                Math.round(oldDiscountAmount * 100) / 100;
+
+            order.hasFreeShipping = hasFreeShipping;
+            order.discountAmount = newDiscountAmount;
 
             if (order.discountAmount > 0 || hasFreeShipping) this.couponChargesQtyApplied = this.couponChargesQtyApplied + 1;
         }
