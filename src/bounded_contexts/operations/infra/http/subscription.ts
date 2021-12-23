@@ -18,6 +18,7 @@ import { updateSubscriptionRestrictionController } from "../../useCases/updateSu
 import { middleware } from "../../../../shared/middleware";
 import { createSubscriptionAsAdminController } from "../../useCases/createSubscriptionAsAdmin";
 import { deleteSubscriptionController } from "../../useCases/deleteSubscription";
+import { updateSubscriptionCouponController } from "../../useCases/updateSubscriptionCoupon";
 
 const subscriptionRouter = express.Router();
 
@@ -59,6 +60,9 @@ subscriptionRouter.put("/handle-3dsecure-failure-for-many-subscriptions", middle
     handle3dSecureFailureForManySubscriptionsController.execute(req, res)
 );
 subscriptionRouter.put("/apply-coupon/:id", (req, res) => applyCouponToSubscriptionController.execute(req, res));
+subscriptionRouter.put("/update-coupon/:id", middleware.ensureAdminAuthenticated(), (req, res) =>
+    updateSubscriptionCouponController.execute(req, res)
+);
 
 // DELETEs
 subscriptionRouter.delete("/:id", middleware.ensureAdminAuthenticated(), (req, res) => deleteSubscriptionController.execute(req, res));
