@@ -5,6 +5,8 @@ import {
 } from "@src/shared/notificationService/INotificationService";
 import Stripe from "stripe";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
+import { CouponId } from "../../domain/cupons/CouponId";
+import { Coupon } from "../../domain/cupons/Cupon";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { Locale } from "../../domain/locale/Locale";
@@ -18,6 +20,7 @@ import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionActive } from "../../domain/subscription/subscriptionState/SubscriptionActive";
 import { Week } from "../../domain/week/Week";
+import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
@@ -41,6 +44,7 @@ export class CreateSubscriptionAsAdmin {
     private _notificationService: INotificationService;
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
+    private _couponRepository: ICouponRepository;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -52,7 +56,8 @@ export class CreateSubscriptionAsAdmin {
         paymentService: IPaymentService,
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
-        paymentOrderRepository: IPaymentOrderRepository
+        paymentOrderRepository: IPaymentOrderRepository,
+        couponRepository: ICouponRepository
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -64,6 +69,7 @@ export class CreateSubscriptionAsAdmin {
         this._paymentService = paymentService;
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
+        this._couponRepository = couponRepository;
     }
     public async execute(dto: CreateSubscriptionAsAdminDto): Promise<any> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
@@ -76,6 +82,7 @@ export class CreateSubscriptionAsAdmin {
         ]);
         const customerDefaultPaymentMethod: PaymentMethod | undefined = customer.getDefaultPaymentMethod();
         if (!!!customerDefaultPaymentMethod) throw new Error("El cliente no tiene ningún método de pago ingresado");
+        const coupon: Coupon | undefined = !!dto.couponCode ? await this.couponRepository.findActiveByCode(dto.couponCode) : undefined;
 
         const customerSubscriptions: Subscription[] = customerSubscriptionHistory.filter((sub) => sub.isActive());
         const planFrequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(dto.planFrequency);
@@ -93,7 +100,7 @@ export class CreateSubscriptionAsAdmin {
             customer,
             plan.getPlanVariantPrice(planVariantId),
             undefined,
-            undefined,
+            coupon,
             undefined,
             undefined,
             new Date() // TO DO: Calculate
@@ -123,6 +130,7 @@ export class CreateSubscriptionAsAdmin {
         const hasFreeShipping =
             // TO DO: Validar que la semana proxima tiene al menos 1 envio
             // paymentOrdersToUpdate.some(po => po.)
+            coupon?.type.type === "free" ||
             customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
             customerSubscriptions.length > 0;
 
@@ -211,6 +219,7 @@ export class CreateSubscriptionAsAdmin {
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+        if (coupon) await this.couponRepository.save(coupon);
 
         this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
 
@@ -323,5 +332,13 @@ export class CreateSubscriptionAsAdmin {
      */
     public get paymentOrderRepository(): IPaymentOrderRepository {
         return this._paymentOrderRepository;
+    }
+
+    /**
+     * Getter couponRepository
+     * @return {ICouponRepository}
+     */
+    public get couponRepository(): ICouponRepository {
+        return this._couponRepository;
     }
 }

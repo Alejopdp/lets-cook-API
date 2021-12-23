@@ -24,22 +24,13 @@ export class CreateSubscriptionAsAdminController extends BaseController {
                 planFrequency: this.req.body.planFrequency,
                 planId: this.req.body.planId,
                 planVariantId: this.req.body.planVariantId,
+                couponCode: this.req.body.couponCode,
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             const result = await this.createSubscriptionAsAdmin.execute(dto);
-            // const presented = this.createSubscriptionAsAdminPresenter.present(
-            //     result.subscription,
-            //     result.paymentIntent,
-            //     result.firstOrder,
-            //     result.customerPaymentMethods,
-            //     result.amountBilled,
-            //     result.tax,
-            //     result.shippingCost,
-            //     result.billedPaymentOrderHumanId
-            // );
 
-            return this.ok(this.res);
+            return this.ok(this.res, { subscriptionId: result.subscription.id.value });
             // return this.ok(this.res, presented);
         } catch (error) {
             return this.fail(error);

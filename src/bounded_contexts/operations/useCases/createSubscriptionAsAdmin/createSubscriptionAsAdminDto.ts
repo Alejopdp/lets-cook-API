@@ -6,4 +6,5 @@ export interface CreateSubscriptionAsAdminDto {
     planId: string;
     planVariantId: string;
     locale: Locale;
+    couponCode: string;
 }

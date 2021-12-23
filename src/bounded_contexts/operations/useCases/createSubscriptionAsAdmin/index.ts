@@ -11,6 +11,7 @@ import { mongooseShippingZoneRepository } from "../../infra/repositories/shippin
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
 import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { assignOrdersToPaymentOrder } from "../../services/assignOrdersToPaymentOrders";
+import { mongooseCouponRepository } from "../../infra/repositories/coupon";
 
 export const createSubscriptionAsAdmin: CreateSubscriptionAsAdmin = new CreateSubscriptionAsAdmin(
     mongooseCustomerRepository,
@@ -22,7 +23,8 @@ export const createSubscriptionAsAdmin: CreateSubscriptionAsAdmin = new CreateSu
     stripeService,
     awsSesService,
     assignOrdersToPaymentOrder,
-    mongoosePaymentOrderReposiotry
+    mongoosePaymentOrderReposiotry,
+    mongooseCouponRepository
 );
 export const createSubscriptionAsAdminPresenter: CreateSubscriptionAsAdminPresenter = new CreateSubscriptionAsAdminPresenter();
 export const createSubscriptionAsAdminController: CreateSubscriptionAsAdminController = new CreateSubscriptionAsAdminController(
