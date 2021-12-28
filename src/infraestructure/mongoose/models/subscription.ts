@@ -81,6 +81,10 @@ const SubscriptionSchema = new mongoose.Schema(
             },
         },
 
+        couponChargesQtyApplied: {
+            type: Number,
+            default: 0,
+        },
         deletionFlag: {
             type: Boolean,
             isRequired: true,
