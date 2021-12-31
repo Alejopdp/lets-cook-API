@@ -17,7 +17,7 @@ export class GetShippingRate {
 
     public async execute(dto: GetShippingRateDto): Promise<{ shippingZone: ShippingZone; hasNextShipping: boolean }> {
         if (!dto.latitude || !dto.longitude) throw new Error("Es necesario ingresar tanto una latitud como una longitud");
-        const shippings: ShippingZone[] = await this.shippingRepository.findAll();
+        const shippings: ShippingZone[] = await this.shippingRepository.findAllActive();
         const coordinates: Coordinates = new Coordinates(dto.latitude, dto.longitude);
         const shippingZone: ShippingZone | undefined = shippings.find((zone) =>
             zone.hasAddressInside(coordinates.latitude, coordinates.longitude)

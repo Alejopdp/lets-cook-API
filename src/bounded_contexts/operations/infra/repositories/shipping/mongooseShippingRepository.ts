@@ -50,6 +50,10 @@ export class MongooseShippingRepository implements IShippingZoneRepository {
         return await this.findBy({});
     }
 
+    public async findAllActive(): Promise<ShippingZone[]> {
+        return await this.findBy({ state: "active", deletionFlag: false });
+    }
+
     public async findBy(conditions: any): Promise<ShippingZone[]> {
         const couponsDb = await MongooseShippingZone.find({ ...conditions, deletionFlag: false });
         return couponsDb.map((raw: any) => shippingMapper.toDomain(raw));
