@@ -32,6 +32,8 @@ export class DeleteSubscription {
     public async execute(dto: DeleteSubscriptionDto): Promise<any> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(subscriptionId, Locale.es);
+        if (!subscription.state.isCancelled()) throw new Error("No puedes eliminar una suscripción si no está cancelada");
+
         const subscriptionOrders: Order[] = await this.orderRepository.findAllBySubscriptionId(subscriptionId);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(
             subscriptionOrders.map((order) => order.paymentOrderId!)
@@ -42,13 +44,8 @@ export class DeleteSubscription {
             orderMap[order.paymentOrderId?.toString()!] = order;
         }
 
-        for (let paymentOrder of paymentOrders) {
-            if (!!!paymentOrder.isBilled()) paymentOrder.discountOrderAmount(orderMap[paymentOrder.id.value]);
-        }
-
-        await this.orderRepository.destroyManyBySubscriptionId(subscriptionId);
-        await this.paymentOrderRepository.updateMany(paymentOrders);
-        await this.subscriptionRepository.destroy(subscriptionId);
+        await this.orderRepository.markAsDeletedBySubscriptionId(subscriptionId);
+        await this.subscriptionRepository.delete(subscriptionId);
         this.logRepository.save(
             new Log(
                 LogType.PLAN_DELETED,

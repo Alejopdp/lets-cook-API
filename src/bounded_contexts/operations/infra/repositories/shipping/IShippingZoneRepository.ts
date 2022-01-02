@@ -6,6 +6,7 @@ export interface IShippingZoneRepository {
     save(shipping: ShippingZone): Promise<void>;
     saveBulk(shippingZones: ShippingZone[]): Promise<void>;
     findAll(): Promise<ShippingZone[]>;
+    findAllActive(): Promise<ShippingZone[]>;
     updateState(state: ShippingZone): Promise<void>;
     findById(planId: ShippingZoneId): Promise<ShippingZone | undefined>;
     delete(planId: ShippingZoneId): Promise<void>;
