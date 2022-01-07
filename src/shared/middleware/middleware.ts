@@ -82,24 +82,29 @@ export class Middleware {
 
     public ensureAuthenticated() {
         return async (req: Request, res: Response, next: Function) => {
-            const token = req.headers["authorization"];
+            try {
+                const token = req.headers["authorization"];
 
-            if (token) {
-                const decoded = await this.tokenService.isTokenVerified(token);
-                const signatureFailed = !!decoded === false;
+                if (token) {
+                    const decoded = await this.tokenService.isTokenVerified(token);
+                    const signatureFailed = !!decoded === false;
 
-                if (signatureFailed) {
-                    return this.endRequest(403, "La sesión ha expirado.", res);
+                    if (signatureFailed) {
+                        return this.endRequest(403, "La sesión ha expirado.", res);
+                    }
+
+                    //@ts-ignore
+                    req["decode"] = decoded;
+                    //@ts-ignore
+                    console.log("A VER EL DECODED: ", req["decode"]);
+                    //@ts-ignore
+                    req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
+                    next();
+                } else {
+                    return this.endRequest(403, "No estás autorizado para realizar la petición", res);
                 }
-
-                //@ts-ignore
-                req["decode"] = decoded;
-                //@ts-ignore
-                console.log("A VER EL DECODED: ", req["decode"]);
-                //@ts-ignore
-                req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
-                next();
-            } else {
+            } catch (error) {
+                console.log(error);
                 return this.endRequest(403, "No estás autorizado para realizar la petición", res);
             }
         };
