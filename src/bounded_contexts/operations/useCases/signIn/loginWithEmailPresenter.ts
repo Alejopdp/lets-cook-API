@@ -22,6 +22,7 @@ export class LoginWithEmailPresenter {
                     label: method.getCardLabel(locale),
                     isDefault: method.isDefault,
                 })),
+                preferredLanguage: customer.getPersonalInfo().preferredLanguage || Locale.es,
             },
             token,
         };
