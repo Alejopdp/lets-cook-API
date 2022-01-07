@@ -136,6 +136,8 @@ export class CreateSubscription {
             );
         }
 
+        !!customer.personalInfo ? (customer.personalInfo.preferredLanguage = dto.locale) : "";
+
         const subscription: Subscription = new Subscription(
             planVariantId,
             plan,
@@ -152,7 +154,6 @@ export class CreateSubscription {
             new Date() // TO DO: Calculate
         );
 
-        // const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)
         );
