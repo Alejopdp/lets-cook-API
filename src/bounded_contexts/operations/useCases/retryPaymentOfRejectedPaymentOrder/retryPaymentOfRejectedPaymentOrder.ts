@@ -60,6 +60,7 @@ export class RetryPaymentOfRejectedPaymentOrder {
             throw new Error("Error al procesar el pago, el cliente necesita agregar un método de pago");
 
         paymentOrder.toBilled(orders, customer);
+        paymentOrder.paymentIntentId = paymentIntent.id;
         paymentOrder.addHumanId(paymentOrderWithHumanIdCount);
 
         await this.paymentOrderRepository.save(paymentOrder);
