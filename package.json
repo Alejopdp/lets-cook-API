@@ -9,6 +9,7 @@
         "webpack": "webpack --config webpack.config.ts",
         "build:staging": "tsc",
         "webpack": "cross-env NODE_ENV=development webpack --config webpack.config.ts",
+        "build:staging": "cross-env NODE_ENV=staging tsc",
         "webpack:staging": "cross-env NODE_ENV=staging webpack --config webpack.config.ts",
         "webpack:master": "cross-env NODE_ENV=production webpack --config webpack.config.ts",
         "build:staging": "cross-env NODE_ENV=staging tsc",
