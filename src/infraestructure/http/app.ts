@@ -60,7 +60,7 @@ const server = app.listen(process.env.PORT || 3001, () => {
 
 setInterval(function () {
     http.get("http://lets-cook-blog.herokuapp.com");
-}, 3600000); // every 1 hr
+}, 1800000); // every 30 min
 
 // Hot reload
 
