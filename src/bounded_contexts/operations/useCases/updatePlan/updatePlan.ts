@@ -1,5 +1,6 @@
-import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
+import { Order } from "../../domain/order/Order";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../../domain/plan/PlanId";
@@ -7,26 +8,42 @@ import { PlanSku } from "../../domain/plan/PlanSku";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../../domain/plan/PlanVariant/PlanVariantAttribute";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
-// import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
+import { Subscription } from "../../domain/subscription/Subscription";
+import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
+import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IPlanRepository } from "../../infra/repositories/plan/IPlanRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { UpdatePlanDto } from "./updatePlanDto";
 
+type planVariantPricesMap = {
+    [planVariantId: string]: { oldPrice: number; newPrice: number; oldPriceWithOffer?: number; newPriceWithOffer?: number };
+};
 export class UpdatePlan {
     private _planRepository: IPlanRepository;
     private _subscriptionRepository: ISubscriptionRepository;
     private _storageService: IStorageService;
+    private _orderRepository: IOrderRepository;
+    private _paymentOrderRepository: IPaymentOrderRepository;
 
-    constructor(planRepository: IPlanRepository, subscriptionRepository: ISubscriptionRepository, storageService: IStorageService) {
+    constructor(
+        planRepository: IPlanRepository,
+        subscriptionRepository: ISubscriptionRepository,
+        storageService: IStorageService,
+        orderRepository: IOrderRepository,
+        paymentOrderRepositoy: IPaymentOrderRepository
+    ) {
         this._planRepository = planRepository;
         this._subscriptionRepository = subscriptionRepository;
         this._storageService = storageService;
+        this._orderRepository = orderRepository;
+        this._paymentOrderRepository = paymentOrderRepositoy;
     }
 
     public async execute(dto: UpdatePlanDto): Promise<void> {
         const plan: Plan | undefined = await this.planRepository.findById(new PlanId(dto.id), dto.locale);
         if (!plan) throw new Error("El plan ingresado no existe");
-
+        const planVariantsMap: { [planVariantId: string]: PlanVariant } = {};
+        const planVariantsWithUpdatedPriceMap: planVariantPricesMap = {};
         const additionalPlans: Plan[] =
             dto.additionalPlansIds.length > 0
                 ? await this.planRepository.findAdditionalPlanListById(
@@ -38,6 +55,9 @@ export class UpdatePlan {
 
         const planSku: PlanSku = new PlanSku(dto.planSku);
         const planVariants: PlanVariant[] = [];
+        var isThereAPriceUpdate: boolean = false;
+
+        this.populatePlanVariantsMap(plan.planVariants, planVariantsMap);
 
         for (let variant of dto.planVariants) {
             var attributes: PlanVariantAttribute[] = [];
@@ -77,6 +97,22 @@ export class UpdatePlan {
                 variant.Personas,
                 variant.Recetas
             );
+
+            const planVariantBeingUpdated = planVariantsMap[planVariant.id.toString()];
+            const hasAPriceUpdate =
+                !!planVariantBeingUpdated &&
+                (planVariantBeingUpdated.price !== planVariant.price ||
+                    planVariantBeingUpdated.priceWithOffer !== planVariant.priceWithOffer);
+
+            if (hasAPriceUpdate) {
+                isThereAPriceUpdate = true;
+                planVariantsWithUpdatedPriceMap[planVariantBeingUpdated.id.toString()] = {
+                    newPrice: planVariant.price,
+                    newPriceWithOffer: planVariant.priceWithOffer,
+                    oldPrice: planVariantBeingUpdated.price,
+                    oldPriceWithOffer: planVariantBeingUpdated.priceWithOffer,
+                };
+            }
             planVariants.push(planVariant);
         }
 
@@ -132,6 +168,45 @@ export class UpdatePlan {
         }
 
         await this.planRepository.save(plan);
+
+        if (isThereAPriceUpdate) {
+            const planVariantsWithNewPriceIds = Object.entries(planVariantsWithUpdatedPriceMap).map((entry) => new PlanVariantId(entry[0]));
+            await this.updateOrdersAndPaymentOrdersPrice(planVariantsWithNewPriceIds, planVariantsWithUpdatedPriceMap);
+        }
+    }
+
+    private populatePlanVariantsMap(variants: PlanVariant[], map: { [planVariantId: string]: PlanVariant }): void {
+        for (let variant of variants) {
+            map[variant.id.toString()] = variant;
+        }
+    }
+
+    private async updateOrdersAndPaymentOrdersPrice(
+        planVariantsWithNewPriceIds: PlanVariantId[],
+        planVariantsPriceMap: planVariantPricesMap
+    ): Promise<void> {
+        const subscriptions = await this.subscriptionRepository.findActiveSubscriptionByPlanVariantsIds(planVariantsWithNewPriceIds);
+        const orders = await this.orderRepository.findActiveBySubscriptionIdList(subscriptions.map((sub) => sub.id));
+        const paymentOrders = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
+        const paymentOrderMap: { [paymentOrderId: string]: PaymentOrder } = {};
+
+        for (let paymentOrder of paymentOrders) {
+            paymentOrderMap[paymentOrder.id.toString()] = paymentOrder;
+        }
+
+        for (let order of orders) {
+            const newPrice =
+                planVariantsPriceMap[order.planVariantId.toString()].newPriceWithOffer ||
+                planVariantsPriceMap[order.planVariantId.toString()].newPrice;
+            const paymentOrder = paymentOrderMap[order.paymentOrderId!.toString()];
+
+            paymentOrder.discountOrderAmount(order);
+            order.price = newPrice;
+            paymentOrder.addOrder(order);
+        }
+
+        await this.orderRepository.updateMany(orders);
+        await this.paymentOrderRepository.updateMany(paymentOrders);
     }
 
     /**
@@ -156,5 +231,21 @@ export class UpdatePlan {
      */
     public get subscriptionRepository(): ISubscriptionRepository {
         return this._subscriptionRepository;
+    }
+
+    /**
+     * Getter orderRepository
+     * @return {IOrderRepository}
+     */
+    public get orderRepository(): IOrderRepository {
+        return this._orderRepository;
+    }
+
+    /**
+     * Getter paymentOrderRepository
+     * @return {IPaymentOrderRepository}
+     */
+    public get paymentOrderRepository(): IPaymentOrderRepository {
+        return this._paymentOrderRepository;
     }
 }
