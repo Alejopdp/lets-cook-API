@@ -1,5 +1,6 @@
 import { Order } from "../../domain/order/Order";
 import {
+    ActionExport,
     CancellationExport,
     CouponExport,
     CustomerExport,
@@ -10,6 +11,13 @@ import {
 import { utils, WorkBook, WorkSheet, writeFile, readFile } from "xlsx";
 
 export class XlsxService implements IExportService {
+    public exportCustomerActions(actionsExport: ActionExport[]): void {
+        const workbook: WorkBook = utils.book_new();
+        const sheet: WorkSheet = utils.json_to_sheet(actionsExport);
+
+        utils.book_append_sheet(workbook, sheet, "Acciones");
+        writeFile(workbook, "Acciones de cliente.xlsx");
+    }
     public parseCsvToJson(csvFilePath: string): string[][] {
         var workbook: WorkBook = readFile(csvFilePath);
         var third_worksheet = workbook.Sheets[workbook.SheetNames[0]];

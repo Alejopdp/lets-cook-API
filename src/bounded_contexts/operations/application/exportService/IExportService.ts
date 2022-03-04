@@ -160,10 +160,18 @@ export interface CouponExport {
     state: string;
 }
 
+export interface ActionExport {
+    date: string;
+    action: string;
+    user: string;
+    role: string;
+}
+
 export interface IExportService {
     parseCsvToJson(csvFilePath: string): string[][];
     exportSubscriptions(subscriptionsExport: SubscriptionExport[]): void;
     exportCustomers(customersExport: CustomerExport[]): void;
+    exportCustomerActions(actionsExport: ActionExport[]): void;
     exportCancellations(cancellationExports: CancellationExport[]): void;
     exportCoupons(couponsExport: CouponExport[]): void;
     exportNextOrdersWithRecipesSelection(ordersWithRecipeSelectionExport: OrdersWithRecipeSelectionExport[]): void;
