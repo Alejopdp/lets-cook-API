@@ -25,7 +25,7 @@ export class CustomerMapper implements Mapper<Customer> {
             raw.receivedOrdersQuantity || 0,
             shippingAddress,
             billingAddress,
-            UserPassword.create(raw.password, true),
+            raw.password ? UserPassword.create(raw.password, true) : undefined,
             raw.state,
             raw.codeToRecoverPassword,
             personalInfo,

@@ -26,12 +26,12 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
 
     public async execute(dto: LoginWithEmailDto): Promise<Response> {
         const customer: Customer | undefined = await this.customerRepository.findByEmail(dto.email);
-        // console.log("Customer: ",customer)
         if (!customer) return isFailure(invalidLoginArguments());
 
         if (!customer.state) return isFailure(inactiveUser());
 
         if (!!!customer.password) return isFailure(accountCreatedWithSocialMedia());
+        console.log("Customer password: ", customer.password);
 
         const incomingPassword: UserPassword = UserPassword.create(dto.password, false);
 
@@ -42,6 +42,7 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
             email: customer.email,
         };
 
+        console.log(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer, Locale.es));
         return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), customer, Locale.es));
     }
 
