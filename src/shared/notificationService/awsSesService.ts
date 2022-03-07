@@ -13,6 +13,7 @@ import {
     sendRecoverPasswordCodeTemplate,
     ticketTemplate,
     newSubscriptionsTemplate,
+    updateEmailTemplate,
 } from "../../emailTemplates/emailTemplates";
 import { planAhorroMailTemplate } from "../../emailTemplates/planAhorro";
 import { vegPlans } from "../../emailTemplates/vegPlans";
@@ -203,6 +204,10 @@ export class AwsSesService implements INotificationService {
 
     public async notifyCustomerAboutPaymentOrderBilled(dto: PaymentOrderBilledNotificationDto): Promise<void> {
         await this.sendMail([dto.customerEmail], `Tu ticket de Let's Cook ${dto.paymentOrderHumanNumber}`, "", ticketTemplate(dto));
+    }
+
+    public async sendUpdateEmailEmail(userEmail: string, changeEmailUrl: string, locale: Locale): Promise<void> {
+        await this.sendMail([userEmail], "Cambio de email", "", updateEmailTemplate(changeEmailUrl, locale));
     }
 
     /**
