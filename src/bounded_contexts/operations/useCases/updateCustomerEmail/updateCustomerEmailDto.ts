@@ -1,4 +1,3 @@
 export interface UpdateCustomerEmailDto {
-    customerId: string;
-    email: string;
+    token: string;
 }

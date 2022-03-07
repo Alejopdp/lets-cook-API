@@ -1,4 +1,5 @@
 import { Customer } from "@src/bounded_contexts/operations/domain/customer/Customer";
+import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
 import { Order } from "@src/bounded_contexts/operations/domain/order/Order";
 import { Subscription } from "@src/bounded_contexts/operations/domain/subscription/Subscription";
 import { RecipeSelection } from "../../bounded_contexts/operations/domain/order/RecipeSelection";
@@ -46,4 +47,5 @@ export interface INotificationService {
     notifyAdminAboutAPlanReactivation(subscription: Subscription): Promise<void>;
     sendErrorEmail(errorMessage: string, endpoint: string, userEmail: string | undefined): Promise<void>;
     notifyCustomerAboutPaymentOrderBilled(dto: PaymentOrderBilledNotificationDto): Promise<void>;
+    sendUpdateEmailEmail(userEmail: string, changeEmailUrl: string, locale: Locale): Promise<void>;
 }

@@ -31,7 +31,6 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
         if (!customer.state) return isFailure(inactiveUser());
 
         if (!!!customer.password) return isFailure(accountCreatedWithSocialMedia());
-        console.log("Customer password: ", customer.password);
 
         const incomingPassword: UserPassword = UserPassword.create(dto.password, false);
 

@@ -26,6 +26,7 @@ import { middleware } from "../../../../shared/middleware";
 import { updatePasswordWithoutCodeController } from "../../useCases/updatePasswordWithoutCode";
 // import { sendUpdateEmailEmailController } from "../../useCases/sendUpdateEmailEmail";
 import { exportCustomerActionsController } from "../../services/exportCustomerActions";
+import { sendUpdateEmailEmailController } from "../../useCases/sendUpdateEmailEmail";
 
 const customerRouter = express.Router();
 
@@ -70,6 +71,6 @@ customerRouter.post("/validation/:code", (req, res) => codeValidationController.
 customerRouter.post("/social-auth/:token", (req, res) => socialNetworkAuthController.execute(req, res));
 customerRouter.post("/setup-future-payment-method/:id", (req, res) => futurePaymentSetupController.execute(req, res));
 customerRouter.post("/check-if-email-exists", (req, res) => checkIfEmailExistsController.execute(req, res));
-// customerRouter.post("/request-email-change/:customerId", (req, res) => sendUpdateEmailEmailController.execute(req, res));
+customerRouter.post("/request-email-change/:customerId", (req, res) => sendUpdateEmailEmailController.execute(req, res));
 
 export { customerRouter as customerRouter };
