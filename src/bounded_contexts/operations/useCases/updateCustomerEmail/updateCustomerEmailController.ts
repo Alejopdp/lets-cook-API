@@ -15,7 +15,6 @@ export class UpdateCustomerEmailController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
-        console.log("DTO: ", this.req.body);
         try {
             const dto: UpdateCustomerEmailDto = {
                 token: this.req.body.token,
