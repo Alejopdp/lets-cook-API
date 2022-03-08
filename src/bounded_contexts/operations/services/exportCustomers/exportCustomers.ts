@@ -41,7 +41,7 @@ export class ExportCustomers {
         const customerPastOrdersMap: { [customerId: string]: Order[] } = {};
 
         for (let subscription of subscriptions) {
-            const actualKey = subscription.customer.id.value as string;
+            const actualKey = subscription.customer.id.toString();
 
             customerSubscriptionsMap[actualKey] = Array.isArray(customerSubscriptionsMap[actualKey])
                 ? [...customerSubscriptionsMap[actualKey], subscription]
@@ -52,7 +52,7 @@ export class ExportCustomers {
                     ? [...customerActiveSubscriptionsMap[actualKey], subscription]
                     : subscription.state.isActive()
                     ? [subscription]
-                    : [];
+                    : [...customerActiveSubscriptionsMap[actualKey]];
 
             subscriptionCustomerMap[subscription.id.value] = subscription.customer;
         }
