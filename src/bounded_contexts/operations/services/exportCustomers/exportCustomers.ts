@@ -52,7 +52,7 @@ export class ExportCustomers {
                     ? [...customerActiveSubscriptionsMap[actualKey], subscription]
                     : subscription.state.isActive()
                     ? [subscription]
-                    : [...customerActiveSubscriptionsMap[actualKey]];
+                    : customerActiveSubscriptionsMap[actualKey] || [];
 
             subscriptionCustomerMap[subscription.id.value] = subscription.customer;
         }
