@@ -18,8 +18,10 @@ export class UpdateCustomerEmail {
         this._tokenService = tokenService;
     }
 
-    public async execute(dto: UpdateCustomerEmailDto): Promise<{email: string}> {
+    public async execute(dto: UpdateCustomerEmailDto): Promise<{ email: string; id: string }> {
         const payload = await this.tokenService.isUpdateEmailVerified(dto.token);
+        if (payload.expiredToken) throw new Error("El link ha vencido.");
+
         const customerId: CustomerId = new CustomerId(payload.customerId);
         const customer: Customer | undefined = await this.customerRepository.findById(customerId);
         if (!customer) throw new Error("Error al buscar el cliente");
@@ -28,7 +30,7 @@ export class UpdateCustomerEmail {
 
         await this.customerRepository.save(customer);
 
-        return {email: customer.email}
+        return { email: customer.email, id: customer.id.toString() };
     }
 
     /**

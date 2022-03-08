@@ -1,4 +1,5 @@
 import { CustomerExport, IExportService } from "../../application/exportService/IExportService";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Customer } from "../../domain/customer/Customer";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { Locale } from "../../domain/locale/Locale";
@@ -28,16 +29,14 @@ export class ExportCustomers {
 
     public async execute(): Promise<void> {
         const customers: Customer[] = await this.customerRepository.findAll();
-        const customersIds: CustomerId[] = customers.map((customer) => customer.id);
         const subscriptions: Subscription[] = await this.subscriptionRepository.findAll(Locale.es);
-        const pastOrders: Order[] = await this.orderRepository.findPastOrdersByCustomerIdList(
+        const pastOrders: Order[] = await this.orderRepository.findPastOrdersBySubscriptionIdList(
             subscriptions.map((sub) => sub.id),
             Locale.es
         );
         const customersExport: CustomerExport[] = [];
         const customerSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
         const customerActiveSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
-        const subscriptionOrderMap: { [subscriptionId: string]: Order } = {};
         const subscriptionCustomerMap: { [subscriptionId: string]: Customer } = {};
         const customerPastOrdersMap: { [customerId: string]: Order[] } = {};
 
@@ -60,8 +59,8 @@ export class ExportCustomers {
 
         for (let order of pastOrders) {
             const customer: Customer = subscriptionCustomerMap[order.subscriptionId.value as string];
-            customerPastOrdersMap[customer.id.value] = Array.isArray(customerPastOrdersMap[customer.id.value])
-                ? [...customerPastOrdersMap[customer.id.value], order]
+            customerPastOrdersMap[customer.id.toString()] = Array.isArray(customerPastOrdersMap[customer.id.value])
+                ? [...customerPastOrdersMap[customer.id.toString()], order]
                 : [order];
         }
 
@@ -69,29 +68,36 @@ export class ExportCustomers {
             customersExport.push({
                 customerId: customer.id.value,
                 customerFirstName: customer.getPersonalInfo().name || "",
-                customerLastName: customer.getPersonalInfo().name || "",
+                customerLastName: customer.getPersonalInfo().lastName || "",
                 customerEmail: customer.email,
-                createdAt: "",
-                status: customer.state || "",
-                billingFirstName: customer.getBillingData().customerName || "",
-                billingLastName: customer.billingAddress?.customerName || "",
+                createdAt: MomentTimeService.getDateHumanLabel(customer.createdAt),
+                status: customer.getCustomerStatus(
+                    customerSubscriptionsMap[customer.id.toString()],
+                    customerPastOrdersMap[customer.id.toString()] || []
+                ),
+                billingName: customer.getBillingData().customerName || "",
+                billingLastName: customer.billingAddress?.identification || "",
                 billingAddressName: customer.getBillingData().addressName || "",
                 billingAddressDetails: customer.getBillingData().details || "",
-                billingCity: "N/A",
-                billingProvince: "N/A",
-                billingZipCode: "N/A",
-                billingCountry: "España",
-                billingPhoneNumber: "N/A",
+                billingCity: "",
+                billingProvince: "",
+                billingZipCode: "",
+                billingCountry: "",
+                billingPhoneNumber: customer.getPersonalInfo().phone1 ?? "",
+                billingPhoneNumber2: customer.getPersonalInfo().phone2 ?? "",
                 shippingAddressName: customer.getShippingAddress().name || "",
                 shippingAddressDetails: customer.getShippingAddress().details || "",
-                shippingAddressCity: "N/A",
-                shippingAddressProvince: "N/A",
-                shippingAddressZipCode: "N/A",
+                shippingAddressCity: "",
+                shippingAddressProvince: "",
+                shippingAddressZipCode: "",
                 shippingCountry: "España",
                 shopifyCustomerId: "",
                 pastOrdersCount: customerPastOrdersMap[customer.id.value]?.length || 0,
                 numberOfActiveSubscriptions: customerActiveSubscriptionsMap[customer.id.value]?.length || 0,
                 numberOfSubscriptions: customerSubscriptionsMap[customer.id.value]?.length || 0,
+                "Fecha de nacimiento": customer.getPersonalInfo().birthDate ?? "",
+                "Idioma de preferencia": customer.getPersonalInfo().preferredLanguage ?? "",
+                MGM: customer.friendCode ?? "",
             });
         }
 

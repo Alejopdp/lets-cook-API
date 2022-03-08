@@ -7,6 +7,11 @@ export class GetCustomerByIdPresenter {
             id: customer.id.value.toString(),
             email: customer.email,
             personalData: customer.getPersonalInfo(),
+            firstName: customer.getPersonalInfo().name,
+            lastName: customer.getPersonalInfo().lastName,
+            phone1: customer.getPersonalInfo().phone1,
+            phone2: customer.getPersonalInfo().phone2,
+            preferredLanguage: customer.getPersonalInfo().preferredLanguage,
             shippingAddress: customer.getShippingAddress(),
             billingData: customer.getBillingData(),
             paymentMethods: customer.paymentMethods.map((method) => ({

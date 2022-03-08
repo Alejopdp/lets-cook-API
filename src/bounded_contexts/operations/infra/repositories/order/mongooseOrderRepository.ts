@@ -253,7 +253,7 @@ export class MongooseOrderRepository implements IOrderRepository {
         return await this.findBy({ week: weekId.value }, locale);
     }
 
-    public async findPastOrdersByCustomerIdList(subscriptionsIds: SubscriptionId[], locale: Locale = Locale.es): Promise<Order[]> {
+    public async findPastOrdersBySubscriptionIdList(subscriptionsIds: SubscriptionId[], locale: Locale = Locale.es): Promise<Order[]> {
         return await this.findBy(
             {
                 state: "ORDER_BILLED",

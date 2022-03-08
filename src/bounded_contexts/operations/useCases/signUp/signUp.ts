@@ -41,6 +41,7 @@ export class SignUp {
             "",
             [],
             0,
+            new Date(),
             undefined,
             undefined,
             password,

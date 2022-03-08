@@ -19,13 +19,24 @@ export class JwtTokenService implements ITokenService {
         }
     }
 
-    public async isUpdateEmailVerified(token: string): Promise<{ email: string; customerId: string }> {
-        const decoded: { email: string; customerId: string } = (await jwt.verify(token, process.env.JWT_SEED as string)) as {
-            email: string;
-            customerId: string;
-        };
+    public async isUpdateEmailVerified(token: string): Promise<{ email: string; customerId: string; expiredToken: boolean }> {
+        let email = "";
+        let customerId = "";
+        let expiredToken = false;
+        try {
+            const decoded: { email: string; customerId: string } = (await jwt.verify(token, process.env.JWT_SEED as string)) as {
+                email: string;
+                customerId: string;
+            };
 
-        return decoded;
+            email = decoded.email;
+            customerId = decoded.customerId;
+
+            return { email, customerId, expiredToken };
+        } catch (error) {
+            if (error.name === "TokenExpiredError") expiredToken = true;
+            return { email, customerId, expiredToken };
+        }
     }
 
     public passwordGenerationToken(payload: any): string {
