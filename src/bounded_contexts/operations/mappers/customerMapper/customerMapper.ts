@@ -23,6 +23,7 @@ export class CustomerMapper implements Mapper<Customer> {
             raw.stripeId,
             paymentMethods,
             raw.receivedOrdersQuantity || 0,
+            new Date(raw.createdAt),
             shippingAddress,
             billingAddress,
             raw.password ? UserPassword.create(raw.password, true) : undefined,

@@ -98,7 +98,7 @@ export interface CustomerExport {
     customerEmail: string;
     createdAt: string;
     status: string;
-    billingFirstName: string;
+    billingName: string;
     billingLastName: string;
     billingAddressName: string;
     billingAddressDetails: string;
@@ -107,6 +107,7 @@ export interface CustomerExport {
     billingZipCode: string;
     billingCountry: string;
     billingPhoneNumber: string;
+    billingPhoneNumber2: string;
     shippingAddressName: string;
     shippingAddressDetails: string;
     shippingAddressCity: string;
@@ -117,6 +118,9 @@ export interface CustomerExport {
     pastOrdersCount: number;
     numberOfActiveSubscriptions: number;
     numberOfSubscriptions: number;
+    "Fecha de nacimiento": string;
+    "Idioma de preferencia": string;
+    MGM: string;
 }
 
 export interface CancellationExport {

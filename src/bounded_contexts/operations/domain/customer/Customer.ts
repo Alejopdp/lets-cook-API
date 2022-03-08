@@ -13,6 +13,9 @@ import { filter, method } from "lodash";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Locale } from "../locale/Locale";
 import { IPreferredDeliveryTime } from "./preferredDeliveryTime/IPreferredDeliveryTime";
+import { Subscription } from "../subscription/Subscription";
+import { Order } from "../order/Order";
+import { OrderBilled } from "../order/orderState/OrderBilled";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -27,6 +30,7 @@ export class Customer extends Entity<Customer> {
     private _personalInfo?: PersonalInfo;
     private _receivedOrdersQuantity: number;
     private _friendCode?: string;
+    private _createdAt: Date;
 
     protected constructor(
         email: string,
@@ -34,6 +38,7 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         paymentMethods: PaymentMethod[],
         receivedOrdersQuantity: number,
+        createdAt: Date,
         shippingAddress?: Address,
         billingAddress?: Billing,
         password?: UserPassword,
@@ -56,6 +61,7 @@ export class Customer extends Entity<Customer> {
         this._codeToRecoverPassword = codeToRecoverPassword;
         this._personalInfo = personalInfo;
         this._friendCode = friendCode;
+        this._createdAt = createdAt;
     }
 
     public static create(
@@ -64,6 +70,7 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         paymentMethods: PaymentMethod[],
         receivedOrdersQuantity: number,
+        createdAt: Date,
         shippingAddress?: Address,
         billingAddress?: Billing,
         password?: UserPassword,
@@ -79,6 +86,7 @@ export class Customer extends Entity<Customer> {
             stripeId,
             paymentMethods,
             receivedOrdersQuantity,
+            createdAt,
             shippingAddress,
             billingAddress,
             password,
@@ -311,6 +319,34 @@ export class Customer extends Entity<Customer> {
         }
     }
 
+    // En este momento a todos los clientes le pone "active". La idea es que si tiene 1 o mas suscripciones vigentes es "Activa".
+    // Si tuvo una suscripcion pero ahora no tiene es "Plan Cancelado". Dentro de los planes cancelados, si solo recibió 1 vez es "Cazaofertas".
+    // Si no tiene ninguna suscripción activa y nunca recibió es "Prospecto" ==> NI CANCELADA
+
+    public getCustomerStatus(
+        allCustomerSubscriptions: Subscription[],
+        pastOrders: Order[]
+    ): "Activo" | "Plan cancelado" | "Cazaofertas" | "Prospecto" {
+        const subscriptionOrderMap: { [subscriptionId: string]: Order[] } = {};
+
+        for (let order of pastOrders) {
+            if (Array.isArray(subscriptionOrderMap[order.subscriptionId.toString()]))
+                subscriptionOrderMap[order.subscriptionId.toString()] = [...subscriptionOrderMap[order.subscriptionId.toString()], order];
+            else subscriptionOrderMap[order.subscriptionId.toString()] = [order];
+        }
+
+        if (allCustomerSubscriptions.length === 0) return "Prospecto";
+        if (allCustomerSubscriptions.some((sub) => sub.isActive())) return "Activo";
+
+        if (pastOrders.length === 0) return "Prospecto";
+
+        for (let sub of allCustomerSubscriptions) {
+            if (subscriptionOrderMap[sub.id.toString()]?.filter((order) => order.isBilled()).length > 1) return "Plan cancelado";
+        }
+
+        return "Cazaofertas";
+    }
+
     /**
      * Getter email
      * @return {string}
@@ -408,6 +444,14 @@ export class Customer extends Entity<Customer> {
     }
 
     /**
+     * Getter createdAt
+     * @return {Date}
+     */
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    /**
      * Setter email
      * @param {string} value
      */
@@ -501,5 +545,13 @@ export class Customer extends Entity<Customer> {
      */
     public set friendCode(value: string | undefined) {
         this._friendCode = value;
+    }
+
+    /**
+     * Setter createdAt
+     * @param {Date} value
+     */
+    public set createdAt(value: Date) {
+        this._createdAt = value;
     }
 }
