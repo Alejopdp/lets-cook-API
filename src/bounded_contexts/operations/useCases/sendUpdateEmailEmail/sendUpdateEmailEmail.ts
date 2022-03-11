@@ -21,7 +21,7 @@ export class SendUpdateEmailEmail {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const customer: Customer = await this.customerRepository.findByIdOrThrow(customerId);
         const token: string = this.tokenService.getUpdateEmailToken({ email: dto.newEmail, customerId: customerId.value.toString() });
-        const updateEmailUrl: string = `${process.env.CUSTOMER_ORIGIN_URL}/update-email?token=${token}`;
+        const updateEmailUrl: string = `${process.env.CUSTOMER_ORIGIN_URL}/${dto.locale}/update-email?token=${token}`;
 
         await this.notificationService.sendUpdateEmailEmail(dto.newEmail, updateEmailUrl, dto.locale);
     }
