@@ -25,7 +25,7 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
     }
 
     public async execute(dto: LoginWithEmailDto): Promise<Response> {
-        const customer: Customer | undefined = await this.customerRepository.findByEmail(dto.email);
+        const customer: Customer | undefined = await this.customerRepository.findByEmail(dto.email.toLowerCase());
         if (!customer) return isFailure(invalidLoginArguments());
 
         if (!customer.state) return isFailure(inactiveUser());
