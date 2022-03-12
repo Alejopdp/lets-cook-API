@@ -19,6 +19,7 @@ export class GetCustomerInformationAsAdminPresenter {
         locale: Locale;
     }): any {
         return {
+            friendCode: customer.friendCode,
             personalData: {
                 id: customer.id.value.toString(),
                 email: customer.email,
