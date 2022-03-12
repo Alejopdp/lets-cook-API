@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
     cors({
-        origin: [process.env.CUSTOMER_ORIGIN_URL as string, process.env.ADMIN_ORIGIN_URL as string],
+        origin: true,
         credentials: true,
     })
 );
