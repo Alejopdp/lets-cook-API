@@ -5,11 +5,13 @@ import { mongooseRateRepository } from "../../infra/repositories/rate";
 import { GetCustomerSubscriptions } from "./getCustomerSubscriptions";
 import { GetCustomersubscriptionsController } from "./getCustomerSubscriptionsController";
 import { GetCustomerSubscriptionsPresenter } from "./getCustomerSubscriptionsPresenter";
+import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 
 export const getCustomerSubscriptions: GetCustomerSubscriptions = new GetCustomerSubscriptions(
     mongooseSubscriptionRepository,
     mongooseOrderRepository,
-    mongooseRateRepository
+    mongooseRateRepository,
+    mongooseCustomerRepository
 );
 
 export const getCustomerSubscriptionsPresenter: GetCustomerSubscriptionsPresenter = new GetCustomerSubscriptionsPresenter(s3Service);

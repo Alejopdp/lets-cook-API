@@ -19,6 +19,7 @@ export class CreateFriendCode {
     }
     public async execute(dto: CreateFriendCodeDto): Promise<any> {
         const customer = dto.customer;
+        if (customer.friendCode) return;
         const customersWithFriendCodeNumber = await this.customerRepository.countCustomersWithFriendCode();
 
         customer.createFriendCode(customersWithFriendCodeNumber + 301); // TO DO: Change logic, count coupons with same criteria

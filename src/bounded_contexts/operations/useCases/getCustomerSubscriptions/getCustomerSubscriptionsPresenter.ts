@@ -1,12 +1,11 @@
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 import { v4 as uuid } from "uuid";
 import { Order } from "../../domain/order/Order";
-import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import _ from "lodash";
 import { Locale } from "../../domain/locale/Locale";
+import { Customer } from "../../domain/customer/Customer";
 
 export class GetCustomerSubscriptionsPresenter {
     private _storageService: IStorageService;
@@ -15,7 +14,13 @@ export class GetCustomerSubscriptionsPresenter {
         this._storageService = storageService;
     }
 
-    public async present(subscriptions: Subscription[], nextOrders: Order[], locale: Locale, ratings: RecipeRating[]): Promise<any> {
+    public async present(
+        subscriptions: Subscription[],
+        nextOrders: Order[],
+        locale: Locale,
+        ratings: RecipeRating[],
+        customer: Customer
+    ): Promise<any> {
         const presentedPrincipalSubscriptions = [];
         const presentedAdditionalSubscriptions = [];
         const orderSubscriptionMap: { [key: string]: Order[] } = {};
@@ -100,12 +105,12 @@ export class GetCustomerSubscriptionsPresenter {
         //@ts-ignore
         if (ratings.some((rating) => rating.isRateable() && !rating.isRated())) pendingActions.push({ type: "rate_recipes" });
 
-        if (!!subscriptions[0]?.customer.friendCode) {
+        if (customer.friendCode) {
             //@ts-ignore
             pendingActions.push({
                 type: "invite_code",
                 //@ts-ignore
-                couponCode: subscriptions[0]?.customer.friendCode || "",
+                couponCode: customer.friendCode,
                 discountValue: "10 €",
             });
         }
