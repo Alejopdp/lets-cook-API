@@ -69,12 +69,15 @@ export class CancelASubscription {
         }
 
         subscription.cancel(cancellationReason, orders, paymentOrders);
-        const principalSubscriptions = subscription.plan.isPrincipal()
-            ? [...customerSubscriptions.filter((sub) => sub.plan.isPrincipal() && !subscription.id.equals(sub.id)), subscription]
-            : customerSubscriptions.filter((sub) => sub.plan.isPrincipal());
+
+        const principalSubscriptions = customerSubscriptions.filter((sub) => sub.plan.isPrincipal() && !subscription.id.equals(sub.id)); // Because changes have been made to subscription
+        if (subscription.plan.isPrincipal()) principalSubscriptions.push(subscription);
 
         var moreOrdersToCancel: Order[] = [];
-        var additionalActiveSubscriptions = customerSubscriptions.filter((sub) => sub.isActive() && !sub.plan.isPrincipal());
+        var additionalActiveSubscriptions = customerSubscriptions.filter(
+            (sub) => sub.isActive() && !sub.plan.isPrincipal() && !sub.id.equals(subscription.id)
+        );
+        if (!subscription.plan.isPrincipal()) additionalActiveSubscriptions.push(subscription);
 
         if (principalSubscriptions.every((sub) => sub.state.isCancelled())) {
             moreOrdersToCancel = await this.orderRepository.findNextTwelveBySubscriptionList(
@@ -98,6 +101,7 @@ export class CancelASubscription {
 
         await this.orderRepository.saveCancelledOrders([...orders, ...moreOrdersToCancel].filter((order) => order.isCancelled())); // TO DO: Transaction / Queue
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
+        console.log("CANCELLED SUB: ", subscription);
         for (let sub of additionalActiveSubscriptions) await this.subscriptionRepository.save(sub);
         await this.paymentOrderRepository.updateMany(paymentOrders); // TO DO: Transaction / Queue
         this.notificationService.notifyAdminAboutACancellation(subscription, dto.nameOrEmailOfAdminExecutingRequest);
