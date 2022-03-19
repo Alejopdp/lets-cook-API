@@ -244,12 +244,7 @@ export class CreateSubscription {
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
 
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
-        // if (addressIsChanged && oneActivePaymentOrder && oneActivePaymentOrder.shippingCost !== customerShippingZone.cost) {
-        //     for (let paymentOrder of paymentOrdersToUpdate) {
-        //         // TO DO: Update Orders shipping cost too
-        //         paymentOrder.shippingCost = customerShippingZone.cost;
-        //     }
-        // }
+
         if (coupon) await this.couponRepository.save(coupon);
         this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
         if (paymentIntent.status === "succeeded") {
