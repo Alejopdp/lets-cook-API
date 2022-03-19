@@ -101,7 +101,6 @@ export class CancelASubscription {
 
         await this.orderRepository.saveCancelledOrders([...orders, ...moreOrdersToCancel].filter((order) => order.isCancelled())); // TO DO: Transaction / Queue
         await this.subscriptionRepository.save(subscription); // TO DO: Transaction / Queue
-        console.log("CANCELLED SUB: ", subscription);
         for (let sub of additionalActiveSubscriptions) await this.subscriptionRepository.save(sub);
         await this.paymentOrderRepository.updateMany(paymentOrders); // TO DO: Transaction / Queue
         this.notificationService.notifyAdminAboutACancellation(subscription, dto.nameOrEmailOfAdminExecutingRequest);
