@@ -26,6 +26,7 @@ export class GetCustomerSubscriptionsPresenter {
         const orderSubscriptionMap: { [key: string]: Order[] } = {};
         const cancelledSubscriptions: Subscription[] = [];
         const nonCancelledSubscriptions: Subscription[] = [];
+        const planSubscriptionMap: { [planId: string]: Subscription } = {};
         var pendingActions = [];
 
         for (let order of nextOrders) {
@@ -34,8 +35,13 @@ export class GetCustomerSubscriptionsPresenter {
                 : [order];
         }
 
-        for (let subscription of subscriptions) {
-            if (subscription.state.isCancelled() && !cancelledSubscriptions.some((s) => s.plan.id.equals(subscription.plan.id))) {
+        for (let subscription of subscriptions.sort((sub1, sub2) => (sub2.state.isActive() ? 1 : -1))) {
+            if (subscription.isActive()) planSubscriptionMap[subscription.plan.id.toString()] = subscription;
+            if (
+                subscription.state.isCancelled() &&
+                !cancelledSubscriptions.some((s) => s.plan.id.equals(subscription.plan.id)) &&
+                !planSubscriptionMap[subscription.plan.id.toString()]
+            ) {
                 cancelledSubscriptions.push(subscription);
             } else if (!subscription.state.isCancelled()) {
                 nonCancelledSubscriptions.push(subscription);
