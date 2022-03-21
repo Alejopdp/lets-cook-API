@@ -45,7 +45,12 @@ export class CancelASubscription {
 
     public async execute(dto: CancelASubscriptionDto): Promise<void> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
-        const cancellationReason: CancellationReason = new CancellationReason(dto.cancellationReason, dto.cancellationComment, new Date());
+        const cancellationReason: CancellationReason = new CancellationReason(
+            dto.cancellationReason,
+            !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "Usuario",
+            dto.cancellationComment,
+            new Date()
+        );
         const subscription: Subscription | undefined = await this.subscriptionRepository.findByIdOrThrow(subscriptionId, Locale.es);
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(
             subscription.customer.id,
@@ -69,12 +74,15 @@ export class CancelASubscription {
         }
 
         subscription.cancel(cancellationReason, orders, paymentOrders);
-        const principalSubscriptions = subscription.plan.isPrincipal()
-            ? [...customerSubscriptions.filter((sub) => sub.plan.isPrincipal() && !subscription.id.equals(sub.id)), subscription]
-            : customerSubscriptions.filter((sub) => sub.plan.isPrincipal());
+
+        const principalSubscriptions = customerSubscriptions.filter((sub) => sub.plan.isPrincipal() && !subscription.id.equals(sub.id)); // Because changes have been made to subscription
+        if (subscription.plan.isPrincipal()) principalSubscriptions.push(subscription);
 
         var moreOrdersToCancel: Order[] = [];
-        var additionalActiveSubscriptions = customerSubscriptions.filter((sub) => sub.isActive() && !sub.plan.isPrincipal());
+        var additionalActiveSubscriptions = customerSubscriptions.filter(
+            (sub) => sub.isActive() && !sub.plan.isPrincipal() && !sub.id.equals(subscription.id)
+        );
+        if (!subscription.plan.isPrincipal()) additionalActiveSubscriptions.push(subscription);
 
         if (principalSubscriptions.every((sub) => sub.state.isCancelled())) {
             moreOrdersToCancel = await this.orderRepository.findNextTwelveBySubscriptionList(

@@ -1,10 +1,8 @@
-import { logger } from "../../../../../config";
 import { UseCase } from "../../../../core/domain/UseCase";
 import { Either, Failure, isFailure, isSuccess } from "../../../../core/logic/Result";
 import { INotificationService } from "../../../../shared/notificationService/INotificationService";
 import { ITokenService } from "../../../IAM/application/tokenService/ITokenService";
 import { Customer } from "../../domain/customer/Customer";
-import { CustomerId } from "../../domain/customer/CustomerId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { ForgotPasswordDto } from "./forgotPasswordDto";
 const crypto = require("crypto");
@@ -25,7 +23,7 @@ export class ForgotPassword implements UseCase<ForgotPasswordDto, Promise<Respon
 
     public async execute(dto: ForgotPasswordDto): Promise<Response> {
         const customer: Customer | undefined = await this.customerRepository.findByEmail(dto.email);
-        if (!customer) return isFailure(invalidArguments());
+        if (!customer) throw new Error(`No existe ningún cliente con el email ${dto.email}`);
 
         const token = this.tokenService.passwordGenerationToken({ email: customer.email, id: customer.id.value });
         let random: string = parseInt(crypto.randomBytes(3).toString("hex"), 16).toString().substr(0, 6);

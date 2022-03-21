@@ -1,10 +1,12 @@
 export class CancellationReason {
     private _title: string;
+    private _cancelledBy: string;
     private _comment?: string;
     private _date?: Date;
 
-    constructor(title: string, comment?: string, date?: Date) {
+    constructor(title: string, cancelledBy: string, comment?: string, date?: Date) {
         this._title = title;
+        this._cancelledBy = cancelledBy;
         this._comment = comment;
         this._date = date;
     }
@@ -46,6 +48,21 @@ export class CancellationReason {
      */
     public get date(): Date | undefined {
         return this._date;
+    }
+    /**
+     * Getter cancelledBy
+     * @return {string}
+     */
+    public get cancelledBy(): string {
+        return this._cancelledBy;
+    }
+
+    /**
+     * Setter cancelledBy
+     * @param {string} value
+     */
+    public set cancelledBy(value: string) {
+        this._cancelledBy = value;
     }
 
     /**

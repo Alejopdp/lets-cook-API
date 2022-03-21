@@ -3537,8 +3537,16 @@ export const updateEmailTemplate = (url: string, locale: Locale) => {
                 .intro { font-size: 24px !important; line-height: 36px !important; }
             }
         </style>
+        <style type="text/css">
+    .mlBodyBackgroundImage {
+      background-image: url(https://bucket.mlcdn.com/a/1966/1966360/images/458a3e2a9cefdfc02c5bdbe2e5648187276656c2.jpeg);
+    }
+  </style>
+
       </head>
-      <body style="margin: 0 !important; padding: 0 !important;background: #00a55522;">
+      <body     class="mlBodyBackgroundImage"
+    style="padding: 0; margin: 0; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none"
+>
     
         <div style="display: none; max-height: 0; overflow: hidden;">
                 
@@ -3557,7 +3565,7 @@ export const updateEmailTemplate = (url: string, locale: Locale) => {
             <header>
                 <!-- Since this is a purely decorative image, we can leave the alternative text blank. -->
                 <!-- Linking images also helps with Gmail displaying download links next to them. -->
-                <a href="https://tubaulonline.com">
+                <a href="https://letscooknow.es">
                     <center><img src="https://estudiantes.tubaulonline.com/tu_baul_logo.png" alt="" height="intrinsic" width="80"></center>
                 </a>
             </header>
@@ -3591,7 +3599,6 @@ export const updateEmailTemplate = (url: string, locale: Locale) => {
         </td></tr></table>
         <![endif]-->
       </body>
-    </html>  
-      
+    </html>      
       `;
 };
