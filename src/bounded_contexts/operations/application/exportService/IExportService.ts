@@ -134,12 +134,17 @@ export interface CancellationExport {
     // numberOfActiveSubscriptions: number;
     // numberOfSubscriptions: number;
     subscriptionId: string | number;
-    subscriptionCreatedAt: string;
-    cancellationDate: string;
+    subscriptionCreatedAt: Date;
+    cancellationDate: Date | string;
     planTitle: string;
     planVariantTitle: string;
     cancellationReason: string;
     cancellationComment: string;
+    User_or_admin: string;
+    customerPhoneNumber1: string;
+    customerPhoneNumber2: string;
+    weeksQTY: number;
+    active_subscriptions: number;
 }
 
 export interface CouponExport {

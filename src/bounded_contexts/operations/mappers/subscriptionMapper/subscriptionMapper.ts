@@ -1,18 +1,14 @@
 import { Mapper } from "../../../../core/infra/Mapper";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { Locale } from "../../domain/locale/Locale";
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { SubscriptionStateFactory } from "../../domain/subscription/subscriptionState/SubscriptionStateFactory";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { RecipeVariantRestriction } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { planMapper, recipeRestrictionMapper } from "..";
-import { CustomerId } from "../../domain/customer/CustomerId";
-import { CouponId } from "../../domain/cupons/CouponId";
 import { customerMapper } from "../customerMapper";
 import { Customer } from "../../domain/customer/Customer";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
-import { logger } from "../../../../../config";
 import { CancellationReason } from "../../domain/cancellationReason/CancellationReason";
 import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
@@ -30,7 +26,12 @@ export class SubscriptionMapper implements Mapper<Subscription> {
         const plan: Plan = planMapper.toDomain(raw.plan, locale || Locale.es);
         const coupon: Coupon | undefined = !!raw.coupon ? couponMapper.toDomain(raw.coupon) : undefined;
         const cancellation: CancellationReason | undefined = raw.cancellation
-            ? new CancellationReason(raw.cancellation.reason, raw.cancellation.comment, new Date(raw.cancellation.date))
+            ? new CancellationReason(
+                  raw.cancellation.reason,
+                  raw.cancellation.cancelledBy ?? "",
+                  raw.cancellation.comment,
+                  new Date(raw.cancellation.date)
+              )
             : undefined;
 
         return new Subscription(
@@ -54,7 +55,12 @@ export class SubscriptionMapper implements Mapper<Subscription> {
 
     public toPersistence(t: Subscription, locale?: Locale) {
         const cancellation = !!t.cancellationReason
-            ? { reason: t.cancellationReason.title, comment: t.cancellationReason.comment, date: t.cancellationReason.date }
+            ? {
+                  reason: t.cancellationReason.title,
+                  cancelledBy: t.cancellationReason.cancelledBy ?? "",
+                  comment: t.cancellationReason.comment,
+                  date: t.cancellationReason.date,
+              }
             : null;
 
         return {
