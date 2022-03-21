@@ -29,6 +29,7 @@ export class MoveOrderShippingDate {
         this._weekRepository = weekRepository;
     }
     public async execute(dto: MoveOrderShippingDateDto): Promise<Order> {
+        const daysForMovingOrder = 7;
         const firstOrderId: OrderId = new OrderId(dto.orderId);
         const order: Order = await this.orderRepository.findByIdOrThrow(firstOrderId, Locale.es);
         if (!order.isFirstOrderOfSubscription) throw new Error("No adelantar un pedido que no es el 1ro de una suscripción");
@@ -38,14 +39,14 @@ export class MoveOrderShippingDate {
             await this.orderRepository.findNextTwelveBySubscription(order.subscriptionId, Locale.es),
         ]);
         const newShippingDateOfFirstOrder = new Date(order.shippingDate);
-        newShippingDateOfFirstOrder.setDate(order.shippingDate.getDate() - subscription.frequency.getNumberOfDays());
+        newShippingDateOfFirstOrder.setDate(order.shippingDate.getDate() - daysForMovingOrder);
 
         if (newShippingDateOfFirstOrder < new Date())
             throw new Error("No puedes adelantar el pedido si el mismo quedaría con una fecha del pasado");
         const currentWeek: Week | undefined = await this.weekRepository.findCurrentWeek(new Date());
         if (!!!currentWeek) throw new Error("No se puede mover la 1er oden");
 
-        const weeks: Week[] = [currentWeek, ...(await this.weekRepository.findNextTwelveByFrequency(subscription.frequency))];
+        const weeks: Week[] = [currentWeek, ...(await this.weekRepository.findAll())]; // TO DO: Only search for the needed ones
 
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(subscription.customer.id);
         const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
@@ -67,20 +68,20 @@ export class MoveOrderShippingDate {
             billingDatePaymentOrderMap[new Date(paymentOrder.billingDate).toString()] = paymentOrder;
         }
 
-        for (let o of ordersOfSubscription) {
-            if (o.shippingDate >= order.shippingDate) {
-                const actualPaymentOrder = paymentOrdersMap[o.paymentOrderId?.value!];
+        for (let order of ordersOfSubscription) {
+            if (order.shippingDate >= order.shippingDate) {
+                const actualPaymentOrder = paymentOrdersMap[order.paymentOrderId?.value!];
                 const newPaymentOrderBillingDate = new Date(actualPaymentOrder.billingDate);
 
-                newPaymentOrderBillingDate.setDate(actualPaymentOrder.billingDate.getDate() - subscription.frequency.getNumberOfDays());
+                newPaymentOrderBillingDate.setDate(actualPaymentOrder.billingDate.getDate() - daysForMovingOrder);
 
-                o.shippingDate.setDate(o.shippingDate.getDate() - subscription.frequency.getNumberOfDays());
-                const newOrderWeek: Week | undefined = weeks.find((week) => week.containsDate(o.shippingDate));
-                if (!!!newOrderWeek) throw new Error(`No existe una semana que contenga la fecha ${o.shippingDate}`);
+                order.shippingDate.setDate(order.shippingDate.getDate() - daysForMovingOrder);
+                const newOrderWeek: Week | undefined = weeks.find((week) => week.containsDate(order.shippingDate));
+                if (!!!newOrderWeek) throw new Error(`No existe una semana que contenga la fecha ${order.shippingDate}`);
 
-                o.week = newOrderWeek;
+                order.week = newOrderWeek;
 
-                if (o.isBilled()) continue;
+                if (order.isBilled()) continue;
 
                 var newPaymentOrder: PaymentOrder | undefined = billingDatePaymentOrderMap[newPaymentOrderBillingDate.toString()];
                 const newPaymentOrderWeek: Week | undefined = weeks.find((week) => week.containsDate(newPaymentOrderBillingDate));
@@ -89,29 +90,29 @@ export class MoveOrderShippingDate {
 
                 if (!!!newPaymentOrder) {
                     newPaymentOrder = new PaymentOrder(
-                        o.shippingDate,
+                        order.shippingDate,
                         PaymentOrderStateFactory.createState("PAYMENT_ORDER_ACTIVE"),
                         "",
                         newPaymentOrderBillingDate,
                         newPaymentOrderWeek,
-                        o.price,
-                        o.discountAmount,
+                        order.price,
+                        order.discountAmount,
                         actualPaymentOrder.shippingCost,
-                        o.customer.id,
-                        o.hasFreeShipping,
+                        order.customer.id,
+                        order.hasFreeShipping,
                         undefined,
                         undefined,
                         actualPaymentOrder.lastRecipeSelectionDate,
                         actualPaymentOrder.humanId
                     );
                     newPaymentOrders.push(newPaymentOrder);
-                    o.paymentOrderId = newPaymentOrder.id;
+                    order.paymentOrderId = newPaymentOrder.id;
                 } else {
-                    newPaymentOrder?.addOrder(o);
+                    newPaymentOrder?.addOrder(order);
                 }
 
-                o.billingDate = newPaymentOrderBillingDate;
-                actualPaymentOrder.discountOrderAmount(o);
+                order.billingDate = newPaymentOrderBillingDate;
+                actualPaymentOrder.discountOrderAmount(order);
             }
         }
 
