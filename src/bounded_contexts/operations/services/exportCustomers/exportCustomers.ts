@@ -72,7 +72,7 @@ export class ExportCustomers {
                 customerEmail: customer.email,
                 createdAt: MomentTimeService.getDateHumanLabel(customer.createdAt),
                 status: customer.getCustomerStatus(
-                    customerSubscriptionsMap[customer.id.toString()],
+                    customerSubscriptionsMap[customer.id.toString()] ?? [],
                     customerPastOrdersMap[customer.id.toString()] || []
                 ),
                 billingName: customer.getBillingData().customerName || "",
@@ -92,12 +92,13 @@ export class ExportCustomers {
                 shippingAddressZipCode: "",
                 shippingCountry: "España",
                 shopifyCustomerId: "",
-                pastOrdersCount: customerPastOrdersMap[customer.id.value]?.length || 0,
+                pastOrdersCount: (customerPastOrdersMap[customer.id.value]?.length || 0) + (customer.shopifyReceivedOrdersQuantity ?? 0),
                 numberOfActiveSubscriptions: customerActiveSubscriptionsMap[customer.id.value]?.length || 0,
                 numberOfSubscriptions: customerSubscriptionsMap[customer.id.value]?.length || 0,
                 "Fecha de nacimiento": customer.getPersonalInfo().birthDate ?? "",
                 "Idioma de preferencia": customer.getPersonalInfo().preferredLanguage ?? "",
                 MGM: customer.friendCode ?? "",
+                shopifyFirstDeliveryDate: customer.firstOrderDate ?? "",
             });
         }
 

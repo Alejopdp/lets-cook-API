@@ -121,6 +121,7 @@ export interface CustomerExport {
     "Fecha de nacimiento": string;
     "Idioma de preferencia": string;
     MGM: string;
+    shopifyFirstDeliveryDate: Date | string;
 }
 
 export interface CancellationExport {
