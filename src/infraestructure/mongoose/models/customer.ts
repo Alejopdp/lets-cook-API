@@ -196,6 +196,13 @@ const CustomerSchema = new mongoose.Schema(
         friendCode: {
             type: String,
         },
+        shopifyReceivedOrdersQuantity: {
+            type: Number,
+            default: 0,
+        },
+        firstOrderDate: {
+            type: Date,
+        },
         deletionFlag: {
             type: Boolean,
             default: false,

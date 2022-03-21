@@ -23,6 +23,8 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         personalInfo: customerDb.personalInfo,
                         receivedOrdersQuantity: customerDb.receivedOrdersQuantity,
                         friendCode: customerDb.friendCode,
+                        shopifyReceivedOrdersQuantity: customerDb.shopifyReceivedOrdersQuantity,
+                        firstOrderDate: customerDb.firstOrderDate,
                     },
                 }
             );

@@ -31,7 +31,9 @@ export class CustomerMapper implements Mapper<Customer> {
             raw.codeToRecoverPassword,
             personalInfo,
             new CustomerId(raw._id),
-            raw.friendCode || undefined
+            raw.friendCode || undefined,
+            raw.shopifyReceivedOrdersQuantity,
+            raw.firstOrderDate
         );
     }
     public toPersistence(t: Customer): any {
@@ -51,6 +53,8 @@ export class CustomerMapper implements Mapper<Customer> {
             personalInfo: t.personalInfo ? personalInfoMapper.toPersistence(t.personalInfo) : null,
             _id: t.id.value,
             friendCode: t.friendCode,
+            shopifyReceivedOrdersQuantity: t.shopifyReceivedOrdersQuantity,
+            firstOrderDate: t.firstOrderDate,
         };
     }
 }

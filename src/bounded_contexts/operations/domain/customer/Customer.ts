@@ -1,21 +1,16 @@
 // Principal
 import { Entity } from "../../../../core/domain/Entity";
-import { Guard } from "../../../../core/logic/Guard";
 import { CustomerId } from "./CustomerId";
-// import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { Address } from "../address/Address";
 import { Billing } from "../billing/Billing";
 import { PaymentMethod } from "./paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "./paymentMethod/PaymentMethodId";
 import { PersonalInfo } from "./personalInfo/PersonalInfo";
-import { filter, method } from "lodash";
-import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Locale } from "../locale/Locale";
 import { IPreferredDeliveryTime } from "./preferredDeliveryTime/IPreferredDeliveryTime";
 import { Subscription } from "../subscription/Subscription";
 import { Order } from "../order/Order";
-import { OrderBilled } from "../order/orderState/OrderBilled";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -31,6 +26,8 @@ export class Customer extends Entity<Customer> {
     private _receivedOrdersQuantity: number;
     private _friendCode?: string;
     private _createdAt: Date;
+    private _shopifyReceivedOrdersQuantity: number | undefined;
+    private _firstOrderDate: Date | undefined;
 
     protected constructor(
         email: string,
@@ -46,7 +43,9 @@ export class Customer extends Entity<Customer> {
         codeToRecoverPassword?: string,
         personalInfo?: PersonalInfo,
         id?: CustomerId,
-        friendCode?: string
+        friendCode?: string,
+        shopifyReceivedOrdersQuantity?: number,
+        firstOrderDate?: Date
     ) {
         super(id);
         this._email = email;
@@ -62,6 +61,8 @@ export class Customer extends Entity<Customer> {
         this._personalInfo = personalInfo;
         this._friendCode = friendCode;
         this._createdAt = createdAt;
+        this._shopifyReceivedOrdersQuantity = shopifyReceivedOrdersQuantity;
+        this._firstOrderDate = firstOrderDate;
     }
 
     public static create(
@@ -78,7 +79,9 @@ export class Customer extends Entity<Customer> {
         codeToRecoverPassword?: string,
         personalInfo?: PersonalInfo,
         id?: CustomerId,
-        friendCode?: string
+        friendCode?: string,
+        shopifyReceivedOrdersQuantity?: number,
+        firstOrderDate?: Date
     ): Customer {
         return new Customer(
             email,
@@ -94,7 +97,9 @@ export class Customer extends Entity<Customer> {
             codeToRecoverPassword,
             personalInfo,
             id,
-            friendCode
+            friendCode,
+            shopifyReceivedOrdersQuantity,
+            firstOrderDate
         );
     }
 
@@ -553,5 +558,37 @@ export class Customer extends Entity<Customer> {
      */
     public set createdAt(value: Date) {
         this._createdAt = value;
+    }
+
+    /**
+     * Getter shopifyReceivedOrdersQuantity
+     * @return {number | undefined}
+     */
+    public get shopifyReceivedOrdersQuantity(): number | undefined {
+        return this._shopifyReceivedOrdersQuantity;
+    }
+
+    /**
+     * Getter firstOrderDate
+     * @return {Date | undefined }
+     */
+    public get firstOrderDate(): Date | undefined {
+        return this._firstOrderDate;
+    }
+
+    /**
+     * Setter shopifyReceivedOrdersQuantity
+     * @param {number | undefined} value
+     */
+    public set shopifyReceivedOrdersQuantity(value: number | undefined) {
+        this._shopifyReceivedOrdersQuantity = value;
+    }
+
+    /**
+     * Setter firstOrderDate
+     * @param {Date | undefined} value
+     */
+    public set firstOrderDate(value: Date | undefined) {
+        this._firstOrderDate = value;
     }
 }
