@@ -60,6 +60,7 @@ export class MoveOrderShippingDate {
         // [X] Probar con suscripción existente con cupones
         // [X] Probar con suscripción existente con cupon de cosoto de envio gratis
         // [X] Probar con plan adicional de unica vez y distintas frecuencias
+        // [] Si hoy es miercoles y quiero adelantar un martes, debería dejarme, preguntar a santi
 
         // Solo permitir esta accion si se está ejecutando en la 1er orden y la misma fue salteada
 
