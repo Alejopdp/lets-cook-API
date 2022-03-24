@@ -175,6 +175,10 @@ export interface ActionExport {
     action: string;
     user: string;
     role: string;
+    "action type": string;
+    "customer first name": string;
+    "customer last name": string;
+    "customer email": string;
 }
 
 export interface IExportService {
@@ -185,4 +189,5 @@ export interface IExportService {
     exportCancellations(cancellationExports: CancellationExport[]): void;
     exportCoupons(couponsExport: CouponExport[]): void;
     exportNextOrdersWithRecipesSelection(ordersWithRecipeSelectionExport: OrdersWithRecipeSelectionExport[]): void;
+    exportAllCustomersActions(actionsExport: ActionExport[]): void;
 }
