@@ -1,18 +1,16 @@
 // Principal
 import { Entity } from "../../../../core/domain/Entity";
-import { Guard } from "../../../../core/logic/Guard";
 import { CustomerId } from "./CustomerId";
-// import { PlanVariant } from "./PlanVariant/PlanVariant";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { Address } from "../address/Address";
 import { Billing } from "../billing/Billing";
 import { PaymentMethod } from "./paymentMethod/PaymentMethod";
 import { PaymentMethodId } from "./paymentMethod/PaymentMethodId";
 import { PersonalInfo } from "./personalInfo/PersonalInfo";
-import { filter, method } from "lodash";
-import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Locale } from "../locale/Locale";
 import { IPreferredDeliveryTime } from "./preferredDeliveryTime/IPreferredDeliveryTime";
+import { Subscription } from "../subscription/Subscription";
+import { Order } from "../order/Order";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -27,6 +25,9 @@ export class Customer extends Entity<Customer> {
     private _personalInfo?: PersonalInfo;
     private _receivedOrdersQuantity: number;
     private _friendCode?: string;
+    private _createdAt: Date;
+    private _shopifyReceivedOrdersQuantity: number | undefined;
+    private _firstOrderDate: Date | undefined;
 
     protected constructor(
         email: string,
@@ -34,6 +35,7 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         paymentMethods: PaymentMethod[],
         receivedOrdersQuantity: number,
+        createdAt: Date,
         shippingAddress?: Address,
         billingAddress?: Billing,
         password?: UserPassword,
@@ -41,7 +43,9 @@ export class Customer extends Entity<Customer> {
         codeToRecoverPassword?: string,
         personalInfo?: PersonalInfo,
         id?: CustomerId,
-        friendCode?: string
+        friendCode?: string,
+        shopifyReceivedOrdersQuantity?: number,
+        firstOrderDate?: Date
     ) {
         super(id);
         this._email = email;
@@ -56,6 +60,9 @@ export class Customer extends Entity<Customer> {
         this._codeToRecoverPassword = codeToRecoverPassword;
         this._personalInfo = personalInfo;
         this._friendCode = friendCode;
+        this._createdAt = createdAt;
+        this._shopifyReceivedOrdersQuantity = shopifyReceivedOrdersQuantity;
+        this._firstOrderDate = firstOrderDate;
     }
 
     public static create(
@@ -64,6 +71,7 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         paymentMethods: PaymentMethod[],
         receivedOrdersQuantity: number,
+        createdAt: Date,
         shippingAddress?: Address,
         billingAddress?: Billing,
         password?: UserPassword,
@@ -71,7 +79,9 @@ export class Customer extends Entity<Customer> {
         codeToRecoverPassword?: string,
         personalInfo?: PersonalInfo,
         id?: CustomerId,
-        friendCode?: string
+        friendCode?: string,
+        shopifyReceivedOrdersQuantity?: number,
+        firstOrderDate?: Date
     ): Customer {
         return new Customer(
             email,
@@ -79,6 +89,7 @@ export class Customer extends Entity<Customer> {
             stripeId,
             paymentMethods,
             receivedOrdersQuantity,
+            createdAt,
             shippingAddress,
             billingAddress,
             password,
@@ -86,7 +97,9 @@ export class Customer extends Entity<Customer> {
             codeToRecoverPassword,
             personalInfo,
             id,
-            friendCode
+            friendCode,
+            shopifyReceivedOrdersQuantity,
+            firstOrderDate
         );
     }
 
@@ -225,15 +238,15 @@ export class Customer extends Entity<Customer> {
     }
 
     public getShippingAddress(locale: Locale = Locale.es): {
-        name?: string;
-        details?: string;
+        addressName?: string;
+        addressDetails?: string;
         preferredShippingHour: string;
         latitude?: number;
         longitude?: number;
     } {
         return {
-            details: this.shippingAddress?.details,
-            name: this.shippingAddress?.name,
+            addressDetails: this.shippingAddress?.details,
+            addressName: this.shippingAddress?.name,
             preferredShippingHour: this.shippingAddress?.deliveryTime?.value() || "",
             latitude: this.shippingAddress?.latitude,
             longitude: this.shippingAddress?.longitude,
@@ -309,6 +322,34 @@ export class Customer extends Entity<Customer> {
             const paymentMethod: PaymentMethod = new PaymentMethod(brand, last4Numbers, exp_month, exp_year, cvc, isDefault, stripeId);
             this.paymentMethods = [...this.paymentMethods, paymentMethod];
         }
+    }
+
+    // En este momento a todos los clientes le pone "active". La idea es que si tiene 1 o mas suscripciones vigentes es "Activa".
+    // Si tuvo una suscripcion pero ahora no tiene es "Plan Cancelado". Dentro de los planes cancelados, si solo recibió 1 vez es "Cazaofertas".
+    // Si no tiene ninguna suscripción activa y nunca recibió es "Prospecto" ==> NI CANCELADA
+
+    public getCustomerStatus(
+        allCustomerSubscriptions: Subscription[],
+        pastOrders: Order[]
+    ): "Activo" | "Plan cancelado" | "Cazaofertas" | "Prospecto" {
+        const subscriptionOrderMap: { [subscriptionId: string]: Order[] } = {};
+
+        for (let order of pastOrders) {
+            if (Array.isArray(subscriptionOrderMap[order.subscriptionId.toString()]))
+                subscriptionOrderMap[order.subscriptionId.toString()] = [...subscriptionOrderMap[order.subscriptionId.toString()], order];
+            else subscriptionOrderMap[order.subscriptionId.toString()] = [order];
+        }
+
+        if (allCustomerSubscriptions.length === 0) return "Prospecto";
+        if (allCustomerSubscriptions.some((sub) => sub.isActive())) return "Activo";
+
+        if (pastOrders.length === 0) return "Prospecto";
+
+        for (let sub of allCustomerSubscriptions) {
+            if (subscriptionOrderMap[sub.id.toString()]?.filter((order) => order.isBilled()).length > 1) return "Plan cancelado";
+        }
+
+        return "Cazaofertas";
     }
 
     /**
@@ -408,6 +449,14 @@ export class Customer extends Entity<Customer> {
     }
 
     /**
+     * Getter createdAt
+     * @return {Date}
+     */
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    /**
      * Setter email
      * @param {string} value
      */
@@ -501,5 +550,45 @@ export class Customer extends Entity<Customer> {
      */
     public set friendCode(value: string | undefined) {
         this._friendCode = value;
+    }
+
+    /**
+     * Setter createdAt
+     * @param {Date} value
+     */
+    public set createdAt(value: Date) {
+        this._createdAt = value;
+    }
+
+    /**
+     * Getter shopifyReceivedOrdersQuantity
+     * @return {number | undefined}
+     */
+    public get shopifyReceivedOrdersQuantity(): number | undefined {
+        return this._shopifyReceivedOrdersQuantity;
+    }
+
+    /**
+     * Getter firstOrderDate
+     * @return {Date | undefined }
+     */
+    public get firstOrderDate(): Date | undefined {
+        return this._firstOrderDate;
+    }
+
+    /**
+     * Setter shopifyReceivedOrdersQuantity
+     * @param {number | undefined} value
+     */
+    public set shopifyReceivedOrdersQuantity(value: number | undefined) {
+        this._shopifyReceivedOrdersQuantity = value;
+    }
+
+    /**
+     * Setter firstOrderDate
+     * @param {Date | undefined} value
+     */
+    public set firstOrderDate(value: Date | undefined) {
+        this._firstOrderDate = value;
     }
 }

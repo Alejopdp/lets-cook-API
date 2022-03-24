@@ -17,13 +17,12 @@ export class UpdateCustomerEmailController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: UpdateCustomerEmailDto = {
-                customerId: this.req.params.id,
-                email: this.req.body.email
+                token: this.req.body.token,
             };
 
-            await this.updateCustomer.execute(dto);
+            const result = await this.updateCustomer.execute(dto);
 
-            return this.ok(this.res);
+            return this.ok(this.res, result);
         } catch (error) {
             return this.fail(error);
         }

@@ -1,12 +1,11 @@
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 import { v4 as uuid } from "uuid";
 import { Order } from "../../domain/order/Order";
-import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import _ from "lodash";
 import { Locale } from "../../domain/locale/Locale";
+import { Customer } from "../../domain/customer/Customer";
 
 export class GetCustomerSubscriptionsPresenter {
     private _storageService: IStorageService;
@@ -15,12 +14,19 @@ export class GetCustomerSubscriptionsPresenter {
         this._storageService = storageService;
     }
 
-    public async present(subscriptions: Subscription[], nextOrders: Order[], locale: Locale, ratings: RecipeRating[]): Promise<any> {
+    public async present(
+        subscriptions: Subscription[],
+        nextOrders: Order[],
+        locale: Locale,
+        ratings: RecipeRating[],
+        customer: Customer
+    ): Promise<any> {
         const presentedPrincipalSubscriptions = [];
         const presentedAdditionalSubscriptions = [];
         const orderSubscriptionMap: { [key: string]: Order[] } = {};
         const cancelledSubscriptions: Subscription[] = [];
         const nonCancelledSubscriptions: Subscription[] = [];
+        const planSubscriptionMap: { [planId: string]: Subscription } = {};
         var pendingActions = [];
 
         for (let order of nextOrders) {
@@ -29,8 +35,13 @@ export class GetCustomerSubscriptionsPresenter {
                 : [order];
         }
 
-        for (let subscription of subscriptions) {
-            if (subscription.state.isCancelled() && !cancelledSubscriptions.some((s) => s.plan.id.equals(subscription.plan.id))) {
+        for (let subscription of subscriptions.sort((sub1, sub2) => (sub2.state.isActive() ? 1 : -1))) {
+            if (subscription.isActive()) planSubscriptionMap[subscription.plan.id.toString()] = subscription;
+            if (
+                subscription.state.isCancelled() &&
+                !cancelledSubscriptions.some((s) => s.plan.id.equals(subscription.plan.id)) &&
+                !planSubscriptionMap[subscription.plan.id.toString()]
+            ) {
                 cancelledSubscriptions.push(subscription);
             } else if (!subscription.state.isCancelled()) {
                 nonCancelledSubscriptions.push(subscription);
@@ -100,12 +111,12 @@ export class GetCustomerSubscriptionsPresenter {
         //@ts-ignore
         if (ratings.some((rating) => rating.isRateable() && !rating.isRated())) pendingActions.push({ type: "rate_recipes" });
 
-        if (!!subscriptions[0]?.customer.friendCode) {
+        if (customer.friendCode) {
             //@ts-ignore
             pendingActions.push({
                 type: "invite_code",
                 //@ts-ignore
-                couponCode: subscriptions[0]?.customer.friendCode || "",
+                couponCode: customer.friendCode,
                 discountValue: "10 €",
             });
         }

@@ -5,12 +5,16 @@ import { MailOptions } from "nodemailer/lib/json-transport";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import { Customer } from "@src/bounded_contexts/operations/domain/customer/Customer";
 import { Subscription } from "@src/bounded_contexts/operations/domain/subscription/Subscription";
+import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
 
 export class NodemailerService implements INotificationService {
     private _transporter: Mail;
 
     constructor(transporter: Mail) {
         this._transporter = transporter;
+    }
+    sendUpdateEmailEmail(userEmail: string, changeEmailUrl: string, locale: Locale): Promise<void> {
+        throw new Error("Method not implemented.");
     }
     notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(customerEmail: string, customerName: string, planNames: string[]): Promise<void> {
         throw new Error("Method not implemented.");

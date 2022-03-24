@@ -23,14 +23,17 @@ export class CustomerMapper implements Mapper<Customer> {
             raw.stripeId,
             paymentMethods,
             raw.receivedOrdersQuantity || 0,
+            new Date(raw.createdAt),
             shippingAddress,
             billingAddress,
-            UserPassword.create(raw.password, true),
+            raw.password ? UserPassword.create(raw.password, true) : undefined,
             raw.state,
             raw.codeToRecoverPassword,
             personalInfo,
             new CustomerId(raw._id),
-            raw.friendCode || undefined
+            raw.friendCode || undefined,
+            raw.shopifyReceivedOrdersQuantity,
+            raw.firstOrderDate
         );
     }
     public toPersistence(t: Customer): any {
@@ -50,6 +53,8 @@ export class CustomerMapper implements Mapper<Customer> {
             personalInfo: t.personalInfo ? personalInfoMapper.toPersistence(t.personalInfo) : null,
             _id: t.id.value,
             friendCode: t.friendCode,
+            shopifyReceivedOrdersQuantity: t.shopifyReceivedOrdersQuantity,
+            firstOrderDate: t.firstOrderDate,
         };
     }
 }

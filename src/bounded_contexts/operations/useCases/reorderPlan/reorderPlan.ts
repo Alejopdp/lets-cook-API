@@ -5,7 +5,6 @@ import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
-import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
@@ -21,7 +20,6 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
-import { UpdatePaymentOrdersShippingCostByCustomer } from "../../services/updatePaymentOrdersShippingCostByCustomer/updatePaymentOrdersShippingCostByCustomer";
 import { ReorderPlanDto } from "./reorderPlanDto";
 
 export class ReorderPlan {
@@ -83,6 +81,7 @@ export class ReorderPlan {
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(
             oldSubscription.customer.id
         );
+        const paymentOrdersWithHumanIdQty = await this.paymentOrderRepository.countPaymentOrdersWithHumanId();
 
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
@@ -129,6 +128,7 @@ export class ReorderPlan {
             throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
         } else {
             newPaymentOrders[0]?.toBilled(orders, subscription.customer);
+            newPaymentOrders[0]?.addHumanId(paymentOrdersWithHumanIdQty);
         }
 
         await this.notificationService.notifyAdminAboutAPlanReactivation(subscription);
@@ -147,7 +147,7 @@ export class ReorderPlan {
             paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
             phoneNumber: subscription.customer.personalInfo?.phone1 || "",
             shippingAddressCity: "",
-            shippingAddressName: subscription.customer.getShippingAddress().name || "",
+            shippingAddressName: subscription.customer.getShippingAddress().addressName || "",
             shippingCost: newPaymentOrders[0].shippingCost,
             shippingCustomerName: subscription.customer.getPersonalInfo().fullName || "",
             shippingDate: orders[0].getHumanShippmentDay(dto.locale),

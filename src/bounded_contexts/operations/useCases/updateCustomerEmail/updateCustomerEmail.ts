@@ -1,45 +1,36 @@
-import { IStorageService } from "../../application/storageService/IStorageService";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { Customer } from "../../domain/customer/Customer";
-import { Address } from "../../domain/address/Address";
-import { UserPassword } from "../../../IAM/domain/user/UserPassword";
-import { RecipeGeneralData } from "../../domain/recipe/RecipeGeneralData/RecipeGeneralData";
-import { RecipeSku } from "../../domain/recipe/RecipeGeneralData/RecipeSku";
-import { RecipeWeight } from "../../domain/recipe/RecipeGeneralData/RecipeWeight";
-import { WeightUnit } from "../../domain/recipe/RecipeGeneralData/WeightUnit";
-import { RecipeId } from "../../domain/recipe/RecipeId";
-import { RecipeNutritionalData } from "../../domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
-import { RecipeTag } from "../../domain/recipe/RecipeTag";
-import { RecipeVariant } from "../../domain/recipe/RecipeVariant/RecipeVariant";
-import { Week } from "../../domain/week/Week";
-import { WeekId } from "../../domain/week/WeekId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
-import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
-import { RecipeVariantCreator } from "../../services/recipeVariantCreator/recipeVariantCreator";
-import { RecipeVariantCreatorDto } from "../../services/recipeVariantCreator/recipeVariantCreatorDto";
 import { UpdateCustomerEmailDto } from "./updateCustomerEmailDto";
+import { ITokenService } from "../../../IAM/application/tokenService/ITokenService";
+
+// Se marca al usuario como correo no verificado?
+// Se envia un correo al email con un link para que el usuario cambie el email
+// El usuario entra al link y se hace la actualización
+// Se desloguea al usuario para que iingrese con el nuevo email
 
 export class UpdateCustomerEmail {
     private _customerRepository: ICustomerRepository;
-    private _storageService: IStorageService;
+    private _tokenService: ITokenService;
 
-    constructor(
-        customerRepository: ICustomerRepository,
-        storageService: IStorageService,
-    ) {
+    constructor(customerRepository: ICustomerRepository, tokenService: ITokenService) {
         this._customerRepository = customerRepository;
-        this._storageService = storageService;
+        this._tokenService = tokenService;
     }
 
-    public async execute(dto: UpdateCustomerEmailDto): Promise<void> {
-        const customerId: CustomerId = new CustomerId(dto.customerId);
+    public async execute(dto: UpdateCustomerEmailDto): Promise<{ email: string; id: string }> {
+        const payload = await this.tokenService.isUpdateEmailVerified(dto.token);
+        if (payload.expiredToken) throw new Error("El link ha vencido.");
+
+        const customerId: CustomerId = new CustomerId(payload.customerId);
         const customer: Customer | undefined = await this.customerRepository.findById(customerId);
-        console.log(customer)
         if (!customer) throw new Error("Error al buscar el cliente");
-        
-        customer.email = dto.email;
+
+        customer.email = payload.email;
 
         await this.customerRepository.save(customer);
+
+        return { email: customer.email, id: customer.id.toString() };
     }
 
     /**
@@ -51,10 +42,10 @@ export class UpdateCustomerEmail {
     }
 
     /**
-     * Getter storageService
-     * @return {IStorageService}
+     * Getter tokenService
+     * @return {ITokenService}
      */
-    public get storageService(): IStorageService {
-        return this._storageService;
+    public get tokenService(): ITokenService {
+        return this._tokenService;
     }
 }

@@ -98,7 +98,7 @@ export interface CustomerExport {
     customerEmail: string;
     createdAt: string;
     status: string;
-    billingFirstName: string;
+    billingName: string;
     billingLastName: string;
     billingAddressName: string;
     billingAddressDetails: string;
@@ -107,6 +107,7 @@ export interface CustomerExport {
     billingZipCode: string;
     billingCountry: string;
     billingPhoneNumber: string;
+    billingPhoneNumber2: string;
     shippingAddressName: string;
     shippingAddressDetails: string;
     shippingAddressCity: string;
@@ -117,6 +118,10 @@ export interface CustomerExport {
     pastOrdersCount: number;
     numberOfActiveSubscriptions: number;
     numberOfSubscriptions: number;
+    "Fecha de nacimiento": string;
+    "Idioma de preferencia": string;
+    MGM: string;
+    shopifyFirstDeliveryDate: Date | string;
 }
 
 export interface CancellationExport {
@@ -130,12 +135,17 @@ export interface CancellationExport {
     // numberOfActiveSubscriptions: number;
     // numberOfSubscriptions: number;
     subscriptionId: string | number;
-    subscriptionCreatedAt: string;
-    cancellationDate: string;
+    subscriptionCreatedAt: Date;
+    cancellationDate: Date | string;
     planTitle: string;
     planVariantTitle: string;
     cancellationReason: string;
     cancellationComment: string;
+    User_or_admin: string;
+    customerPhoneNumber1: string;
+    customerPhoneNumber2: string;
+    weeksQTY: number;
+    active_subscriptions: number;
 }
 
 export interface CouponExport {
@@ -160,11 +170,24 @@ export interface CouponExport {
     state: string;
 }
 
+export interface ActionExport {
+    date: string;
+    action: string;
+    user: string;
+    role: string;
+    "action type": string;
+    "customer first name": string;
+    "customer last name": string;
+    "customer email": string;
+}
+
 export interface IExportService {
     parseCsvToJson(csvFilePath: string): string[][];
     exportSubscriptions(subscriptionsExport: SubscriptionExport[]): void;
     exportCustomers(customersExport: CustomerExport[]): void;
+    exportCustomerActions(actionsExport: ActionExport[]): void;
     exportCancellations(cancellationExports: CancellationExport[]): void;
     exportCoupons(couponsExport: CouponExport[]): void;
     exportNextOrdersWithRecipesSelection(ordersWithRecipeSelectionExport: OrdersWithRecipeSelectionExport[]): void;
+    exportAllCustomersActions(actionsExport: ActionExport[]): void;
 }

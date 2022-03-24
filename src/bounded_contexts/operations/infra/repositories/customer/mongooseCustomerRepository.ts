@@ -1,11 +1,7 @@
 import { Customer } from "../../../domain/customer/Customer";
-import { Coupon } from "../../../domain/cupons/Cupon";
-import { ShippingZoneId } from "../../../domain/shipping/ShippingZoneId";
 import { ICustomerRepository } from "./ICustomerRepository";
 import { Customer as MongooseCustomer } from "../../../../../infraestructure/mongoose/models";
 import { customerMapper } from "../../../mappers/customerMapper";
-import { Locale } from "../../../domain/locale/Locale";
-import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 
 export class MongooseCustomerRepository implements ICustomerRepository {
@@ -27,6 +23,8 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         personalInfo: customerDb.personalInfo,
                         receivedOrdersQuantity: customerDb.receivedOrdersQuantity,
                         friendCode: customerDb.friendCode,
+                        shopifyReceivedOrdersQuantity: customerDb.shopifyReceivedOrdersQuantity,
+                        firstOrderDate: customerDb.firstOrderDate,
                     },
                 }
             );

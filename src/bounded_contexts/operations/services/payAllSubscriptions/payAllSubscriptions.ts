@@ -155,7 +155,7 @@ export class PayAllSubscriptions {
                             foodVAT: Math.round((totalAmount * 0.1 + Number.EPSILON) * 100) / 100,
                             phoneNumber: paymentOrderCustomer.personalInfo?.phone1 || "",
                             shippingAddressCity: "",
-                            shippingAddressName: paymentOrderCustomer.getShippingAddress().name || "",
+                            shippingAddressName: paymentOrderCustomer.getShippingAddress().addressName || "",
                             shippingCost: customerHasFreeShipping ? 0 : shippingCost,
                             shippingCustomerName: paymentOrderCustomer.getPersonalInfo().fullName || "",
                             shippingDate: paymentOrderOrderMap[paymentOrderId][0].getHumanShippmentDay(

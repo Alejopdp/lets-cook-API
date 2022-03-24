@@ -74,7 +74,7 @@ export class SendNewSubscriptionEmail {
             paymentOrderHumanNumber: (paymentOrder.getHumanIdOrIdValue() as string) || "",
             phoneNumber: subscription.customer.personalInfo?.phone1 || "",
             shippingAddressCity: "",
-            shippingAddressName: subscription.customer.getShippingAddress().name || "",
+            shippingAddressName: subscription.customer.getShippingAddress().addressName || "",
             shippingCost: paymentOrder.shippingCost,
             shippingCustomerName: subscription.customer.getPersonalInfo().fullName || "",
             shippingDate: firstOrder!.getHumanShippmentDay(dto.locale),

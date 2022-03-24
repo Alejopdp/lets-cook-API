@@ -1,5 +1,5 @@
 import { Customer } from "@src/bounded_contexts/operations/domain/customer/Customer";
-import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
+import { Locale } from "../bounded_contexts/operations/domain/locale/Locale";
 import { Subscription } from "@src/bounded_contexts/operations/domain/subscription/Subscription";
 import { PaymentOrderBilledNotificationDto } from "@src/shared/notificationService/INotificationService";
 import { RecipeSelection } from "../bounded_contexts/operations/domain/order/RecipeSelection";
@@ -746,8 +746,8 @@ export const addressChangeTemplate = (customer: Customer, adminNameOrEmail?: str
                         : `<p>El cliente ${customer.email} ha cambiado su direcció a:</p>`
                 }
                 <ul>
-                    <li>${customer.getShippingAddress().name}</li>
-                    ${!!customer.getShippingAddress().details ? `<li>${customer.getShippingAddress().details}</li>` : ""}
+                    <li>${customer.getShippingAddress().addressName}</li>
+                    ${!!customer.getShippingAddress().addressDetails ? `<li>${customer.getShippingAddress().addressDetails}</li>` : ""}
                     <li>Con horario de preferencia de entrega ${customer.getShippingAddress().preferredShippingHour}</li>
                 </ul>
                 <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
@@ -3453,4 +3453,152 @@ export const ticketTemplate = (dto: PaymentOrderBilledNotificationDto) => {
         </body>
     </html>
     `;
+};
+
+export const updateEmailTemplate = (url: string, locale: Locale) => {
+    const texts: { [locale: string]: { hello: string; text_1: string; text_2: string; here: string } } = {
+        [Locale.es]: {
+            hello: "Hola!",
+            text_1: "Has solicitado un cambio de correo electrónico, puedes entrar ",
+            text_2: " para confirmar el cambio. El enlace estará disponible durante 1 hora. Si no logras hacer el cambio, deberías solicitarlo de nuevo.",
+            here: "aquí",
+        },
+        [Locale.en]: {
+            hello: "Hello!",
+            text_1: "You have requested to change your e-mail address. Please, enter ",
+            text_2: " to confirm. The link will be available for 1 hour. If you are unable to make the change, please make the request again.",
+            here: "here",
+        },
+        [Locale.ca]: {
+            hello: "Hola!",
+            text_1: "Has sol·licitat un canvi d'adreça electrònica, pots entrar ",
+            text_2: " per confirmar-lo. L'enllaç estarà disponible durant 1 hora. Si no aconsegueixes realitzar els canvis, hauries de demanar un de nou.",
+            here: "aquí",
+        },
+    };
+
+    return `
+    <!DOCTYPE html>
+    <html lang="es">
+      <head>
+        <title>Gracias por tu compra</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <style type="text/css">
+            body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+            table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+            img { -ms-interpolation-mode: bicubic; }
+    
+            /* RESET STYLES */
+            img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+            table { border-collapse: collapse !important; }
+            body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    
+            /* iOS BLUE LINKS */
+            a[x-apple-data-detectors] {
+                color: inherit !important;
+                text-decoration: none !important;
+                font-size: inherit !important;
+                font-family: inherit !important;
+                font-weight: inherit !important;
+                line-height: inherit !important;
+            }
+    
+            /* GMAIL BLUE LINKS */
+            u + #body a {
+                color: inherit;
+                text-decoration: none;
+                font-size: inherit;
+                font-family: inherit;
+                font-weight: inherit;
+                line-height: inherit;
+            }
+    
+            /* SAMSUNG MAIL BLUE LINKS */
+            #MessageViewBody a {
+                color: inherit;
+                text-decoration: none;
+                font-size: inherit;
+                font-family: inherit;
+                font-weight: inherit;
+                line-height: inherit;
+            }
+    
+            /* These rules set the link and hover states, making it clear that links are, in fact, links. */
+            /* Embrace established conventions like underlines on links to keep emails accessible. */
+            a { color: #B200FD; font-weight: 600; text-decoration: underline; }
+            a:hover { color: #000000 !important; text-decoration: none !important; }
+    
+            /* These rules adjust styles for desktop devices, keeping the email responsive for users. */
+            /* Some email clients don't properly apply media query-based styles, which is why we go mobile-first. */
+            @media screen and (min-width:600px) {
+                h1 { font-size: 48px !important; line-height: 48px !important; }
+                .intro { font-size: 24px !important; line-height: 36px !important; }
+            }
+        </style>
+        <style type="text/css">
+    .mlBodyBackgroundImage {
+      background-image: url(https://bucket.mlcdn.com/a/1966/1966360/images/458a3e2a9cefdfc02c5bdbe2e5648187276656c2.jpeg);
+    }
+  </style>
+
+      </head>
+      <body     class="mlBodyBackgroundImage"
+    style="padding: 0; margin: 0; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: none"
+>
+    
+        <div style="display: none; max-height: 0; overflow: hidden;">
+                
+        </div>
+        <div style="display: none; max-height: 0px; overflow: hidden;">
+        &nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;
+        </div>
+    
+        <!--[if (gte mso 9)|(IE)]>
+        <table cellspacing="0" cellpadding="0" border="0" width="600" align="center" role="presentation"><tr><td>
+        <![endif]-->
+        <!-- The role and aria-label attributes are added to wrap the email content as an article for screen readers. Some of them will read out the aria-label as the title of the document, so use something like "An email from Your Brand Name" to make it recognizable. -->
+        <!-- Default styling of text is applied to the wrapper div. Be sure to use text that is large enough and has a high contrast with the background color for people with visual impairments. -->
+        <div role="article" aria-label="Tu Baul- compra confirmada" lang="en" style="background-color: transparent ; color: #2b2b2b; font-family: 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 18px; font-weight: 400; line-height: 28px; margin: 0 auto; max-width: 1000px; padding: 40px 16px 40px 16px;">
+            
+            <header>
+                <!-- Since this is a purely decorative image, we can leave the alternative text blank. -->
+                <!-- Linking images also helps with Gmail displaying download links next to them. -->
+                <a href="https://letscooknow.es">
+                    <center><img src="https://estudiantes.tubaulonline.com/tu_baul_logo.png" alt="" height="intrinsic" width="80"></center>
+                </a>
+            </header>
+    
+            <main>
+                <!-- This div is purely presentational, providing a container for the message. -->
+                <div style="background-color: white; border-radius: 64px; padding: 32px 40px;">
+                    <!-- This ghost table is used solely for padding in Word-based Outlook clients. -->
+                    <!--[if (gte mso 9)|(IE)]>
+                    <table cellspacing="0" cellpadding="0" border="0" width="600" align="center" role="presentation"><tr><td style="background-color: ghostwhite;font-family: 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; padding: 24px 48px 24px 48px;">
+                    <![endif]-->
+                    <h1 style="color: #00a555; font-size: 24px; font-weight: 800; line-height: 24px; margin: 16px 0;">
+                    ${texts[locale].hello}
+                    </h1>
+                        
+                    <div style="background-color: white; border-radius: 64px; padding: 8px 40px;">  
+                    <p>${texts[locale].text_1}<a href="${url}">${texts[locale].here}</a>${texts[locale].text_2}</p>
+            
+                    </div>
+            
+    
+                    <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
+    
+                      </div>
+            </main>
+    
+            <h2 style="color: #00a555; font-size: 28px; font-weight: 700; line-height: 32px; margin: 48px 0;text-align: center;">letscooknow.es</h2>
+        </div>
+    
+        <!--[if (gte mso 9)|(IE)]>
+        </td></tr></table>
+        <![endif]-->
+      </body>
+    </html>      
+      `;
 };

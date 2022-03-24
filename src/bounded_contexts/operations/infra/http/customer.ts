@@ -1,7 +1,6 @@
 import express from "express";
 import multer from "multer";
 import { codeValidationController } from "../../useCases/validateCodeToRecoverPassword";
-import { emailValidatedController } from "../../useCases/customerEmailValidation";
 import { signUpController } from "../../useCases/signUp";
 import { signInController } from "../../useCases/signIn";
 import { forgotPasswordController } from "../../useCases/forgotPassword";
@@ -25,6 +24,9 @@ import { checkIfEmailExistsController } from "../../useCases/checkIfEmailExists"
 import { futurePaymentSetupController } from "../../application/futurePaymentSetup";
 import { middleware } from "../../../../shared/middleware";
 import { updatePasswordWithoutCodeController } from "../../useCases/updatePasswordWithoutCode";
+import { exportCustomerActionsController } from "../../services/exportCustomerActions";
+import { sendUpdateEmailEmailController } from "../../useCases/sendUpdateEmailEmail";
+import { exportAllCustomersActionsController } from "../../services/exportAllCustomersActions";
 
 const customerRouter = express.Router();
 
@@ -37,6 +39,8 @@ const options: multer.Options = {
 customerRouter.get("/", (req, res) => getCustomerListController.execute(req, res));
 customerRouter.get("/by-name/:name", (req, res) => getCustomerByNameController.execute(req, res));
 customerRouter.get("/export", (req, res) => exportCustomersController.execute(req, res));
+customerRouter.get("/export-actions/:customerId", (req, res) => exportCustomerActionsController.execute(req, res));
+customerRouter.get("/export-actions", (req, res) => exportAllCustomersActionsController.execute(req, res));
 customerRouter.get("/:id", (req, res) => getCustomerByIdController.execute(req, res));
 customerRouter.get("/information-as-admin/:id", (req, res) => getCustomerInformationAsAdminController.execute(req, res));
 
@@ -48,7 +52,7 @@ customerRouter.put("/change-password/:email", middleware.ensureAuthenticated(), 
 );
 customerRouter.put("/update/:id", (req, res) => updateCustomerController.execute(req, res));
 // customerRouter.put("/update-customer/:id", (req, res) => updateCustomerController.execute(req, res));
-customerRouter.put("/update-email/:id", (req, res) => updateCustomerEmailController.execute(req, res));
+customerRouter.put("/update-email", (req, res) => updateCustomerEmailController.execute(req, res));
 customerRouter.put("/update-shipping/:id", middleware.ensureAuthenticated(), (req, res) =>
     updateShippingCustomerController.execute(req, res)
 );
@@ -68,5 +72,6 @@ customerRouter.post("/validation/:code", (req, res) => codeValidationController.
 customerRouter.post("/social-auth/:token", (req, res) => socialNetworkAuthController.execute(req, res));
 customerRouter.post("/setup-future-payment-method/:id", (req, res) => futurePaymentSetupController.execute(req, res));
 customerRouter.post("/check-if-email-exists", (req, res) => checkIfEmailExistsController.execute(req, res));
+customerRouter.post("/request-email-change/:customerId", (req, res) => sendUpdateEmailEmailController.execute(req, res));
 
 export { customerRouter as customerRouter };
