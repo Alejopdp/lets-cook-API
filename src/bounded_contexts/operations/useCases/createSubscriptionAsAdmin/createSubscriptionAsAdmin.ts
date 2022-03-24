@@ -230,7 +230,7 @@ export class CreateSubscriptionAsAdmin {
             paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
             phoneNumber: customer.personalInfo?.phone1 || "",
             shippingAddressCity: "",
-            shippingAddressName: customer.getShippingAddress().name || "",
+            shippingAddressName: customer.getShippingAddress().addressName || "",
             shippingCost: newPaymentOrders[0].shippingCost,
             shippingCustomerName: customer.getPersonalInfo().fullName || "",
             shippingDate: orders[0].getHumanShippmentDay(dto.locale),

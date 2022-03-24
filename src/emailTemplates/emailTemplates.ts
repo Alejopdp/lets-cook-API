@@ -746,8 +746,8 @@ export const addressChangeTemplate = (customer: Customer, adminNameOrEmail?: str
                         : `<p>El cliente ${customer.email} ha cambiado su direcció a:</p>`
                 }
                 <ul>
-                    <li>${customer.getShippingAddress().name}</li>
-                    ${!!customer.getShippingAddress().details ? `<li>${customer.getShippingAddress().details}</li>` : ""}
+                    <li>${customer.getShippingAddress().addressName}</li>
+                    ${!!customer.getShippingAddress().addressDetails ? `<li>${customer.getShippingAddress().addressDetails}</li>` : ""}
                     <li>Con horario de preferencia de entrega ${customer.getShippingAddress().preferredShippingHour}</li>
                 </ul>
                 <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">

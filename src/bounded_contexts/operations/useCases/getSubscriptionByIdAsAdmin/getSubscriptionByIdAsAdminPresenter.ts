@@ -93,7 +93,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
             },
             frequency: subscription.frequency.value(),
             plan: presentedPlan,
-            shippingAddress: customer.getShippingAddress().name,
+            shippingAddress: customer.getShippingAddress().addressName,
             // billingData,
             paymentMethod: presentedPaymentMethod?.cardLabel,
             schedule,

@@ -238,15 +238,15 @@ export class Customer extends Entity<Customer> {
     }
 
     public getShippingAddress(locale: Locale = Locale.es): {
-        name?: string;
-        details?: string;
+        addressName?: string;
+        addressDetails?: string;
         preferredShippingHour: string;
         latitude?: number;
         longitude?: number;
     } {
         return {
-            details: this.shippingAddress?.details,
-            name: this.shippingAddress?.name,
+            addressDetails: this.shippingAddress?.details,
+            addressName: this.shippingAddress?.name,
             preferredShippingHour: this.shippingAddress?.deliveryTime?.value() || "",
             latitude: this.shippingAddress?.latitude,
             longitude: this.shippingAddress?.longitude,

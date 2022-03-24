@@ -147,7 +147,7 @@ export class ReorderPlan {
             paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
             phoneNumber: subscription.customer.personalInfo?.phone1 || "",
             shippingAddressCity: "",
-            shippingAddressName: subscription.customer.getShippingAddress().name || "",
+            shippingAddressName: subscription.customer.getShippingAddress().addressName || "",
             shippingCost: newPaymentOrders[0].shippingCost,
             shippingCustomerName: subscription.customer.getPersonalInfo().fullName || "",
             shippingDate: orders[0].getHumanShippmentDay(dto.locale),
