@@ -1,6 +1,5 @@
 import { ActionExport, IExportService } from "../../application/exportService/IExportService";
 import { Customer } from "../../domain/customer/Customer";
-import { CustomerId } from "../../domain/customer/CustomerId";
 import { Log } from "../../domain/customer/log/Log";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
