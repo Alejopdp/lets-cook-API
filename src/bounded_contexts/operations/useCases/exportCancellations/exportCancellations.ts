@@ -45,8 +45,10 @@ export class ExportCancellations {
                 subscriptionOrdersMap[order.subscriptionId.toString()] = [];
             if (!order.isBilled()) continue;
 
-            [...subscriptionOrdersMap[order.subscriptionId.toString()], order];
+            subscriptionOrdersMap[order.subscriptionId.toString()] = [...subscriptionOrdersMap[order.subscriptionId.toString()], order];
         }
+
+        console.log("A VER EL MAPA: ", subscriptionOrdersMap);
 
         for (let subscription of cancelledSubscriptions) {
             exportRows.push({
