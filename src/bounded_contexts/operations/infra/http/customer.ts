@@ -24,9 +24,9 @@ import { checkIfEmailExistsController } from "../../useCases/checkIfEmailExists"
 import { futurePaymentSetupController } from "../../application/futurePaymentSetup";
 import { middleware } from "../../../../shared/middleware";
 import { updatePasswordWithoutCodeController } from "../../useCases/updatePasswordWithoutCode";
-// import { sendUpdateEmailEmailController } from "../../useCases/sendUpdateEmailEmail";
 import { exportCustomerActionsController } from "../../services/exportCustomerActions";
 import { sendUpdateEmailEmailController } from "../../useCases/sendUpdateEmailEmail";
+import { exportAllCustomersActionsController } from "../../services/exportAllCustomersActions";
 
 const customerRouter = express.Router();
 
@@ -40,6 +40,7 @@ customerRouter.get("/", (req, res) => getCustomerListController.execute(req, res
 customerRouter.get("/by-name/:name", (req, res) => getCustomerByNameController.execute(req, res));
 customerRouter.get("/export", (req, res) => exportCustomersController.execute(req, res));
 customerRouter.get("/export-actions/:customerId", (req, res) => exportCustomerActionsController.execute(req, res));
+customerRouter.get("/export-actions", (req, res) => exportAllCustomersActionsController.execute(req, res));
 customerRouter.get("/:id", (req, res) => getCustomerByIdController.execute(req, res));
 customerRouter.get("/information-as-admin/:id", (req, res) => getCustomerInformationAsAdminController.execute(req, res));
 

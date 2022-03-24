@@ -4,9 +4,9 @@ import { CustomerId } from "../../domain/customer/CustomerId";
 import { Log } from "../../domain/customer/log/Log";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
-import { ExportCustomerActionsDto } from "./exportCustomerActionsDto";
+import { ExportAllCustomersActionsDto } from "./exportAllCustomersActionsDto";
 
-export class ExportCustomerActions {
+export class ExportAllCustomersActions {
     private _customerRepository: ICustomerRepository;
     private _logRepository: ILogRepository;
     private _exportService: IExportService;
@@ -17,11 +17,15 @@ export class ExportCustomerActions {
         this._exportService = exportService;
     }
 
-    public async execute(dto: ExportCustomerActionsDto): Promise<void> {
-        const customerId: CustomerId = new CustomerId(dto.customerId);
-        const logs: Log[] = await this.logRepository.findAllByCustomer(customerId);
-        const customer: Customer = await this.customerRepository.findByIdOrThrow(customerId);
+    public async execute(dto: ExportAllCustomersActionsDto): Promise<void> {
+        const logs: Log[] = await this.logRepository.findAll();
+        const customers: Customer[] = await this.customerRepository.findByIdList(logs.map((log) => log.customerId));
+        const customersMap: { [customerId: string]: Customer } = {};
         const actionsForExport: ActionExport[] = [];
+
+        for (const customer of customers) {
+            customersMap[customer.id.toString()] = customer;
+        }
 
         for (let log of logs) {
             const logDate = new Date(log.timestamp);
@@ -42,14 +46,14 @@ export class ExportCustomerActions {
                 user: log.user,
                 role: log.role,
                 "action type": log.type,
-                "customer first name": customer.getPersonalInfo().name ?? "",
-                "customer last name": customer.getPersonalInfo().lastName ?? "",
-                "customer email": customer.email,
+                "customer first name": customersMap[log.customerId.toString()]?.getPersonalInfo().name ?? "",
+                "customer last name": customersMap[log.customerId.toString()]?.getPersonalInfo().lastName ?? "",
+                "customer email": customersMap[log.customerId.toString()]?.email ?? "",
                 action: log.action,
             });
         }
 
-        this.exportService.exportCustomerActions(actionsForExport);
+        this.exportService.exportAllCustomersActions(actionsForExport);
     }
 
     /**

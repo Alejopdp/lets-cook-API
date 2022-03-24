@@ -11,7 +11,9 @@ export class MongooseLogRepository implements ILogRepository {
         await MongooseLog.create(logToSave);
     }
     public async findAll(): Promise<Log[]> {
-        throw new Error("Method not implemented.");
+        const dbLogs = await MongooseLog.find({}).sort({ createdAt: -1 });
+
+        return dbLogs.map((log: any) => logMapper.toDomain(log));
     }
 
     public async findAllByCustomer(customerId: CustomerId): Promise<Log[]> {

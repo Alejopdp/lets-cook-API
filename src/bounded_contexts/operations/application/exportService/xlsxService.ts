@@ -18,6 +18,15 @@ export class XlsxService implements IExportService {
         utils.book_append_sheet(workbook, sheet, "Acciones");
         writeFile(workbook, "Acciones de cliente.xlsx");
     }
+
+    public exportAllCustomersActions(actionsExport: ActionExport[]): void {
+        const workbook: WorkBook = utils.book_new();
+        const sheet: WorkSheet = utils.json_to_sheet(actionsExport);
+
+        utils.book_append_sheet(workbook, sheet, "Acciones");
+        writeFile(workbook, "Acciones de clientes.xlsx");
+    }
+
     public parseCsvToJson(csvFilePath: string): string[][] {
         var workbook: WorkBook = readFile(csvFilePath);
         var third_worksheet = workbook.Sheets[workbook.SheetNames[0]];
