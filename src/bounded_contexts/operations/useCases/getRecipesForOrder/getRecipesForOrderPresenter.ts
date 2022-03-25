@@ -30,6 +30,7 @@ export class GetRecipesForOrderPresenter {
                 quantity: recipeSelection.quantity,
                 recipeVariantId: recipeSelection.recipeVariantId.value,
             })),
+            planId: subscription.plan.id.toString(),
         };
     }
 
