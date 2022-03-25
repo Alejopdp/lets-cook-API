@@ -23,10 +23,13 @@ export class GetCustomerSubscriptionsPresenter {
     ): Promise<any> {
         const presentedPrincipalSubscriptions = [];
         const presentedAdditionalSubscriptions = [];
+        const presentedAdditionalSubscriptionsWithoutDeliveredDuplicates = [];
         const orderSubscriptionMap: { [key: string]: Order[] } = {};
         const cancelledSubscriptions: Subscription[] = [];
         const nonCancelledSubscriptions: Subscription[] = [];
         const planSubscriptionMap: { [planId: string]: Subscription } = {};
+        const additionalSubscriptionPlanMap: { [planId: string]: any } = {};
+        const oneTimeDeliveredSubscriptions: any = [];
         var pendingActions = [];
 
         for (let order of nextOrders) {
@@ -59,8 +62,8 @@ export class GetCustomerSubscriptionsPresenter {
         };
         for (let subscription of [...nonCancelledSubscriptions, ...cancelledSubscriptions]) {
             const presentedSubscription = {
-                id: subscription.id.value,
-                planId: subscription.plan.id.value,
+                id: subscription.id.toString(),
+                planId: subscription.plan.id.toString(),
                 planVariantPrice: subscription.price,
                 planVariantId: subscription.planVariantId.value,
                 planName: subscription.plan.name,
@@ -85,6 +88,8 @@ export class GetCustomerSubscriptionsPresenter {
                 presentedAdditionalSubscriptions.push(presentedSubscription);
             }
 
+            // Removing duplicated plans for one_time additional plans
+
             const nextOrder = subscription.getNextChoosableRecipesOrder(orderSubscriptionMap[subscription.id.value]);
 
             if (
@@ -100,6 +105,19 @@ export class GetCustomerSubscriptionsPresenter {
                     shippment: nextOrder.getPendingRecipeChooseLabel(locale),
                     orderId: nextOrder.id.value,
                 });
+            }
+        }
+
+        for (let sub of presentedAdditionalSubscriptions.sort((sub1, sub2) => (sub1.stateTitle > sub2.stateTitle ? 1 : -1))) {
+            if (sub.stateTitle === "SUBSCRIPTION_ACTIVE") additionalSubscriptionPlanMap[sub.planId] = sub;
+            if (
+                sub.stateTitle === "SUBSCRIPTION_DELIVERED" &&
+                !oneTimeDeliveredSubscriptions.some((s: any) => s.planId === sub.planId) &&
+                !additionalSubscriptionPlanMap[sub.planId]
+            ) {
+                oneTimeDeliveredSubscriptions.push(sub);
+            } else if (sub.stateTitle !== "SUBSCRIPTION_DELIVERED") {
+                presentedAdditionalSubscriptionsWithoutDeliveredDuplicates.push(sub);
             }
         }
 
@@ -123,7 +141,7 @@ export class GetCustomerSubscriptionsPresenter {
 
         return {
             principalPlanSubscriptions: presentedPrincipalSubscriptions,
-            additionalPlanSubscriptions: presentedAdditionalSubscriptions,
+            additionalPlanSubscriptions: [...oneTimeDeliveredSubscriptions, ...presentedAdditionalSubscriptionsWithoutDeliveredDuplicates],
             pendingActions,
             friendCode: subscriptions[0]?.customer.friendCode,
         };
