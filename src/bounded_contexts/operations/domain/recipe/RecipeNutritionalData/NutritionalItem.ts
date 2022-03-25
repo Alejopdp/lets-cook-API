@@ -3,10 +3,12 @@ import { IValueObject } from "../../../../../core/domain/ValueObject";
 export class NutritionalItem implements IValueObject<NutritionalItem> {
     private _key: string;
     private _value: string;
+    private _id: string;
 
-    constructor(key: string, value: string) {
+    constructor(key: string, value: string, id?: string) {
         this._key = key;
         this._value = value;
+        this._id = id ?? "";
     }
 
     public equals(aNutritionalItem: NutritionalItem): boolean {
@@ -27,6 +29,22 @@ export class NutritionalItem implements IValueObject<NutritionalItem> {
      */
     public get value(): string {
         return this._value;
+    }
+
+    /**
+     * Getter id
+     * @return {string}
+     */
+    public get id(): string {
+        return this._id;
+    }
+
+    /**
+     * Setter id
+     * @param {string} value
+     */
+    public set id(value: string) {
+        this._id = value;
     }
 
     /**

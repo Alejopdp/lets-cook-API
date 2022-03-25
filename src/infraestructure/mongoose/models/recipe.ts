@@ -112,13 +112,35 @@ const RecipeSchema = new mongoose.Schema(
         ],
         nutritionalInfo: [
             {
-                key: {
-                    type: String,
-                    required: true,
+                es: {
+                    key: {
+                        type: String,
+                        required: true,
+                    },
+                    value: {
+                        type: String,
+                        required: true,
+                    },
                 },
-                value: {
-                    type: String,
-                    required: true,
+                en: {
+                    key: {
+                        type: String,
+                        required: true,
+                    },
+                    value: {
+                        type: String,
+                        required: true,
+                    },
+                },
+                ca: {
+                    key: {
+                        type: String,
+                        required: true,
+                    },
+                    value: {
+                        type: String,
+                        required: true,
+                    },
                 },
             },
         ],

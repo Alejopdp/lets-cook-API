@@ -5,18 +5,19 @@ import { WeekId } from "../../../domain/week/WeekId";
 import { RecipeTag } from "../../../domain/recipe/RecipeTag";
 import { IRecipeRepository } from "./IRecipeRepository";
 import _ from "lodash";
-import { logger } from "../../../../../../config";
 import { recipeMapper } from "../../../mappers/recipeMapper";
 import { Order } from "../../../domain/order/Order";
 import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariantSku";
 import { Locale } from "../../../domain/locale/Locale";
+import { RecipeNutritionalData } from "@src/bounded_contexts/operations/domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
     public async save(recipe: Recipe, locale: Locale = Locale.es): Promise<void> {
         const recipeDb = recipeMapper.toPersistence(recipe, locale);
+        const alreadySavedRecipe = await RecipeModel.findById(recipe.id.toString());
 
-        if (await RecipeModel.exists({ _id: recipe.id.value })) {
+        if (alreadySavedRecipe) {
             const auxRecipeGeneralData = { ...recipeDb.recipeGeneralData };
             delete recipeDb.recipeGeneralData;
             const nameWithLocaleKey = `recipeGeneralData.name.${locale}`;
@@ -27,6 +28,11 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                 { _id: recipe.id.value },
                 {
                     ...recipeDb,
+                    nutritionalInfo: this.getUpdatedNutritionalInfoForMongo(
+                        recipe.recipeNutritionalData,
+                        alreadySavedRecipe.nutritionalInfo,
+                        locale
+                    ),
                     $set: {
                         ...auxRecipeGeneralData,
                         [nameWithLocaleKey]: auxRecipeGeneralData.name[locale],
@@ -155,5 +161,35 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     }
     public async delete(recipeId: RecipeId): Promise<void> {
         await RecipeModel.findOneAndUpdate({ _id: recipeId.value }, { deletionFlag: true });
+    }
+
+    private getUpdatedNutritionalInfoForMongo(
+        newNutritionalData: RecipeNutritionalData,
+        oldValues: { _id: string; [locale: string]: { key: string; value: string } }[],
+        locale: Locale
+    ): any {
+        const finalArray: any[] = [];
+
+        for (let nutritionalItem of newNutritionalData.nutritionalItems) {
+            const oldValue = oldValues.find((old) => {
+                return old._id.toString() === nutritionalItem.id;
+            });
+
+            if (oldValue) {
+                oldValue[locale]["key"] = nutritionalItem.key;
+                oldValue[locale]["value"] = nutritionalItem.value;
+                finalArray.push(oldValue);
+            }
+
+            if (!oldValue) {
+                finalArray.push({
+                    [Locale.es]: { key: nutritionalItem.key, value: nutritionalItem.value },
+                    [Locale.en]: { key: nutritionalItem.key, value: nutritionalItem.value },
+                    [Locale.ca]: { key: nutritionalItem.key, value: nutritionalItem.value },
+                });
+            }
+        }
+
+        return finalArray;
     }
 }
