@@ -57,7 +57,12 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                 }
             );
         } else {
-            await RecipeModel.create(recipeDb);
+            const newRecipe = {
+                ...recipeDb,
+                nutritionalInfo: this.getNutritionalInfoForCreatingItInMongo(recipeDb.nutritionalInfo),
+                imageTags: this.getImageTagsForCreatingThemInMongo(recipeDb.imageTags),
+            };
+            await RecipeModel.create(newRecipe);
         }
     }
 
@@ -167,8 +172,31 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         await RecipeModel.findOneAndUpdate({ _id: recipeId.value }, { deletionFlag: true });
     }
 
+    private getImageTagsForCreatingThemInMongo(tags: string[]): { es: string[]; en: string[]; ca: string[] } {
+        return {
+            es: tags,
+            en: tags,
+            ca: tags,
+        };
+    }
+
+    private getNutritionalInfoForCreatingItInMongo(
+        nutritionalInfo: {
+            _id: string;
+            key: string;
+            value: string;
+        }[]
+    ): { es: { key: string; value: string }; en: { key: string; value: string }; ca: { key: string; value: string } }[] {
+        return nutritionalInfo.map((infoItem) => ({
+            es: { key: infoItem.key, value: infoItem.value },
+            en: { key: infoItem.key, value: infoItem.value },
+            ca: { key: infoItem.key, value: infoItem.value },
+        }));
+    }
+
     private getUpdatedNutritionalInfoForMongo(
         newNutritionalData: RecipeNutritionalData,
+        //@ts-ignore
         oldValues: { _id: string; [locale: string]: { key: string; value: string } }[],
         locale: Locale
     ): any {
