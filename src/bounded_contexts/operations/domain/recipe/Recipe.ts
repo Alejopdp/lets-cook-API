@@ -84,7 +84,7 @@ export class Recipe extends Entity<Recipe> {
     }
 
     public getPresentedNutritionalInfo(): { key: string; value: string }[] {
-        return this.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
+        return this.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value, id: item.id }));
     }
 
     public getDefaultVariantSku(): string {

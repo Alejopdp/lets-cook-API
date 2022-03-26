@@ -28,6 +28,10 @@ export class GetCouponValidation {
         const plan: Plan = await this.planRepository.findByIdOrThrow(planId, Locale.es);
         const planPrice = plan.getPlanVariantPrice(planVariantId);
         if (!coupon) throw new Error("El cupón de descuento ingresado es incorrecto");
+        console.log(
+            "Final amount: ",
+            Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)
+        );
         if (
             !coupon.isFreeShippingCoupon() &&
             (Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)) / 100 < 0

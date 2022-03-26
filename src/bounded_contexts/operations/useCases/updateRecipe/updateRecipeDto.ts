@@ -16,7 +16,7 @@ export interface UpdateRecipeDto {
     recipeImage?: ReadStream;
     // recipeImageExtension: string;
     imageTags: string[];
-    nutritionalInfo: { key: string; value: string }[];
+    nutritionalInfo: { key: string; value: string; id?: string }[];
     relatedPlans: number[] | string[];
     availableMonths: Month[];
     availableWeeksIds: string[] | number[];

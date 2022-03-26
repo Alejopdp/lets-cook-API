@@ -6,12 +6,14 @@
     "scripts": {
         "start": "node dist/src/index",
         "dev": "node dist/index",
+        "webpack": "webpack --config webpack.config.ts",
+        "build:staging": "tsc",
         "webpack": "cross-env NODE_ENV=development webpack --config webpack.config.ts",
         "build:staging": "cross-env NODE_ENV=staging tsc",
         "webpack:staging": "cross-env NODE_ENV=staging webpack --config webpack.config.ts",
-        "webpack:production": "cross-env NODE_ENV=production webpack --config webpack.config.ts",
+        "webpack:master": "cross-env NODE_ENV=production webpack --config webpack.config.ts",
         "build:staging": "cross-env NODE_ENV=staging tsc",
-        "build:production": "cross-env NODE_ENV=production tsc",
+        "build:master": "cross-env NODE_ENV=production tsc",
         "lint": "eslint . --ext .ts",
         "test": "mocha -r ts-node/register src/bounded_contexts/**/*.test.ts"
     },

@@ -71,7 +71,7 @@ export class UpdateRecipe {
         );
         const recipeImageTags: RecipeTag[] = dto.imageTags.map((tag: string) => new RecipeTag(tag));
         const recipeBackOfficeTags: RecipeTag[] = dto.backOfficeTags.map((tag: string) => new RecipeTag(tag));
-        const nutritionalItems: NutritionalItem[] = dto.nutritionalInfo.map((item) => new NutritionalItem(item.key, item.value));
+        const nutritionalItems: NutritionalItem[] = dto.nutritionalInfo.map((item) => new NutritionalItem(item.key, item.value, item.id));
         const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData(nutritionalItems);
 
         if (!recipe.recipeGeneralData.equals(recipeGeneralData)) recipe.recipeGeneralData = recipeGeneralData;

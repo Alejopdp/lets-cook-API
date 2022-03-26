@@ -12,7 +12,6 @@ export class GetRecipeByIdPresenter {
 
             imagesUrls.push(presignedUrl);
         }
-
         return {
             id: recipe.id.value,
             name: recipe.recipeGeneralData.name,

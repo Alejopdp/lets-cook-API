@@ -105,20 +105,54 @@ const RecipeSchema = new mongoose.Schema(
 
         recipeGeneralData: RecipeGeneralData,
         recipeVariants: [RecipeVariant],
-        imageTags: [
-            {
-                type: String,
+        imageTags: {
+            es: {
+                type: [String],
+                required: true,
+                default: [],
             },
-        ],
+            en: {
+                type: [String],
+                required: true,
+                default: [],
+            },
+            ca: {
+                type: [String],
+                required: true,
+                default: [],
+            },
+        },
         nutritionalInfo: [
             {
-                key: {
-                    type: String,
-                    required: true,
+                es: {
+                    key: {
+                        type: String,
+                        required: true,
+                    },
+                    value: {
+                        type: String,
+                        required: true,
+                    },
                 },
-                value: {
-                    type: String,
-                    required: true,
+                en: {
+                    key: {
+                        type: String,
+                        required: true,
+                    },
+                    value: {
+                        type: String,
+                        required: true,
+                    },
+                },
+                ca: {
+                    key: {
+                        type: String,
+                        required: true,
+                    },
+                    value: {
+                        type: String,
+                        required: true,
+                    },
                 },
             },
         ],
