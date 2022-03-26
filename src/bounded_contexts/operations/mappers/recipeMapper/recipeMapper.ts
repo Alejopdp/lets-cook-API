@@ -17,8 +17,8 @@ export class RecipeMapper implements Mapper<Recipe> {
     public toDomain(raw: any, locale?: Locale): Recipe {
         const recipeGeneralData: RecipeGeneralData = recipeGeneralDataMapper.toDomain(raw.recipeGeneralData, locale);
         const recipeVariants: RecipeVariant[] = raw.recipeVariants.map((variant: any) => recipeVariantMapper.toDomain(variant, locale));
-        const imageTags: RecipeTag[] = raw.imageTags.map((tag: any) => new RecipeTag(tag));
-        const backOfficeImageTags: RecipeTag[] = raw.imageTags.map((tag: any) => new RecipeTag(tag));
+        const imageTags: RecipeTag[] = raw.imageTags[locale ?? Locale.es].map((tag: string) => new RecipeTag(tag));
+        const backOfficeImageTags: RecipeTag[] = raw.backOfficeTags.map((tag: any) => new RecipeTag(tag));
         const availableWeeks: Week[] = raw.availableWeeks.map((rawWeek: any) => weekMapper.toDomain(rawWeek));
         const availableMonths: Month[] = raw.availableMonths.map((month: any) => (<any>Month)[month]);
         const relatedPlansIds: PlanId[] = raw.relatedPlans.map((id: string) => new PlanId(id));
@@ -29,7 +29,6 @@ export class RecipeMapper implements Mapper<Recipe> {
             }
         );
         const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData(nutritionalItems);
-
         return new Recipe(
             recipeGeneralData,
             recipeVariants,

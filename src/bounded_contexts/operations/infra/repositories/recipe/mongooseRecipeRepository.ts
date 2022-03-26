@@ -19,10 +19,13 @@ export class MongooseRecipeRepository implements IRecipeRepository {
 
         if (alreadySavedRecipe) {
             const auxRecipeGeneralData = { ...recipeDb.recipeGeneralData };
+            const newImageTagsForLocale = [...recipeDb.imageTags];
             delete recipeDb.recipeGeneralData;
+            delete recipeDb.imageTags;
             const nameWithLocaleKey = `recipeGeneralData.name.${locale}`;
             const shortDescriptionWithLocaleKey = `recipeGeneralData.recipeDescription.shortDescription.${locale}`;
             const longDescriptionWithLocaleKey = `recipeGeneralData.recipeDescription.longDescription.${locale}`;
+            const imageTagsWithLocaleKey = `imageTags.${locale}`;
 
             await RecipeModel.updateOne(
                 { _id: recipe.id.value },
@@ -33,6 +36,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                         alreadySavedRecipe.nutritionalInfo,
                         locale
                     ),
+                    [imageTagsWithLocaleKey]: newImageTagsForLocale,
                     $set: {
                         ...auxRecipeGeneralData,
                         [nameWithLocaleKey]: auxRecipeGeneralData.name[locale],
