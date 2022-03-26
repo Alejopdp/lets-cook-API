@@ -34,6 +34,7 @@ export class ExportCustomers {
             subscriptions.map((sub) => sub.id),
             Locale.es
         );
+        const subscriptionsMap: { [subscriptionId: string]: Subscription } = {};
         const customersExport: CustomerExport[] = [];
         const customerSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
         const customerActiveSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
@@ -42,15 +43,18 @@ export class ExportCustomers {
 
         for (let subscription of subscriptions) {
             const actualKey = subscription.customer.id.toString();
+            subscriptionsMap[subscription.id.toString()] = subscription;
 
             customerSubscriptionsMap[actualKey] = Array.isArray(customerSubscriptionsMap[actualKey])
                 ? [...customerSubscriptionsMap[actualKey], subscription]
                 : [subscription];
 
             customerActiveSubscriptionsMap[actualKey] =
-                Array.isArray(customerActiveSubscriptionsMap[actualKey]) && subscription.state.isActive()
+                Array.isArray(customerActiveSubscriptionsMap[actualKey]) &&
+                subscription.state.isActive() &&
+                !subscription.frequency.isOneTime()
                     ? [...customerActiveSubscriptionsMap[actualKey], subscription]
-                    : subscription.state.isActive()
+                    : subscription.state.isActive() && !subscription.frequency.isOneTime()
                     ? [subscription]
                     : customerActiveSubscriptionsMap[actualKey] || [];
 
@@ -58,10 +62,18 @@ export class ExportCustomers {
         }
 
         for (let order of pastOrders) {
+            const orderSubscription = subscriptionsMap[order.subscriptionId.toString()];
             const customer: Customer = subscriptionCustomerMap[order.subscriptionId.value as string];
             customerPastOrdersMap[customer.id.toString()] = Array.isArray(customerPastOrdersMap[customer.id.value])
                 ? [...customerPastOrdersMap[customer.id.toString()], order]
                 : [order];
+
+            if (orderSubscription.isAOneTimeSubAndWasDelivered(order)) {
+                customerActiveSubscriptionsMap[order.customer.id.toString()] = [
+                    ...customerActiveSubscriptionsMap[order.customer.id.toString()],
+                    orderSubscription,
+                ];
+            }
         }
 
         for (let customer of customers) {

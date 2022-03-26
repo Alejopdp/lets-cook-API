@@ -387,6 +387,11 @@ export class Subscription extends Entity<Subscription> {
         //     paymentOrder.amount;
         // });
     }
+
+    // IMPORTANT: It assumes that the shipping order was never skipped
+    public isAOneTimeSubAndWasDelivered(order: Order): boolean {
+        return this.frequency.isOneTime() && order.shippingDate >= new Date();
+    }
     /**
      * Getter planVariantId
      * @return {PlanVariantId}
