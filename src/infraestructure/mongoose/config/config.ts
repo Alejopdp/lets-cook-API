@@ -3,7 +3,7 @@ import { logger, restoreDb } from "../../../../config";
 import { loadMockData } from "../../../../scripts/db";
 
 export const connectToDatabase = async () => {
-    const mongoUri: string = "mongodb+srv://lets_cook_admin:Rwn7Bu2VJqju6Yia@ecommerce.6octe.mongodb.net/staging";
+    const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
 
     try {
         await mongoose.connect(mongoUri, {
