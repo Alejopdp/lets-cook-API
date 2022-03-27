@@ -82,7 +82,7 @@ export class ExportNextOrdersWithRecipesSelection {
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(subscriptionsIds);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findAll(Locale.es);
         // const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(paymentOrdersIds);
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        // const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
         const customerOrdersMap: { [customerId: string]: Order[] } = {};
         const paymentOrderMap: { [paymentOrderId: string]: PaymentOrder } = {};
@@ -152,6 +152,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         orderId: order.id.value,
                         orderState: order.state.title,
                         weekLabel: order.week.getShorterLabel(),
+                        billingDate: order.getDdMmYyyyBillingDate(),
                         deliveryDate: order.getDdMmYyyyShipmentDate(),
                         customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
                         customerId: subscription.customer.id.value,
@@ -216,6 +217,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         paymentOrderNumber: paymentOrderMap[order.paymentOrderId!.value].humanId || "",
                         orderState: order.state.title,
                         weekLabel: order.week.getShorterLabel(),
+                        billingDate: order.getDdMmYyyyBillingDate(),
                         deliveryDate: order.getDdMmYyyyShipmentDate(),
                         customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
                         customerId: subscription.customer.id.value,
@@ -289,7 +291,8 @@ export class ExportNextOrdersWithRecipesSelection {
                 paymentOrderNumber: paymentOrder.humanId?.toString() ?? "",
                 orderState: "N/A",
                 weekLabel: paymentOrder.week.getShorterLabel(),
-                deliveryDate: !!auxOrder ? auxOrder.getDdMmYyyyShipmentDate() : "",
+                billingDate: auxOrder?.getDdMmYyyyBillingDate() ?? "",
+                deliveryDate: auxOrder?.getDdMmYyyyShipmentDate() ?? "",
                 customerPreferredShippingHour: auxOrder?.customer.getShippingAddress().preferredShippingHour || "",
                 customerId: paymentOrder.customerId.value,
                 customerFirstName: auxOrder?.customer.getPersonalInfo().name! || "",

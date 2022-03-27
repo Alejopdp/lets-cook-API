@@ -14,6 +14,7 @@ export interface OrdersWithRecipeSelectionExport {
     paymentOrderNumber: string | number;
     orderState: string;
     weekLabel: string;
+    billingDate: string;
     deliveryDate: string;
     customerPreferredShippingHour: string;
     customerId: string | number;
