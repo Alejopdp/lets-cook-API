@@ -45,6 +45,7 @@ export interface IOrderRepository {
     saveOrdersWithNewState(orders: Order[]): Promise<void>;
     addCustomerToOrderOfSubscription(subscriptionId: SubscriptionId, customerId: CustomerId): Promise<void>;
     findByChosenRecipeAndFutureShippingDate(recipeId: string): Promise<Order[]>;
+    findOneTimeSubscriptionAndFutureOrders(locale: Locale): Promise<Order[]>;
     delete(orderId: OrderId): Promise<void>;
     markAsDeletedBySubscriptionId(subscriptionId: SubscriptionId): Promise<void>;
     destroyManyBySubscriptionId(subscriptionId: SubscriptionId): Promise<void>;
