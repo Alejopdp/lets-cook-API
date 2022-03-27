@@ -286,7 +286,7 @@ export class ExportNextOrdersWithRecipesSelection {
                 paymentOrderId: paymentOrder.id.value,
                 paymentOrderState: paymentOrder.state.title,
                 orderId: "N/A",
-                paymentOrderNumber: "N/A",
+                paymentOrderNumber: paymentOrder.humanId?.toString() ?? "",
                 orderState: "N/A",
                 weekLabel: paymentOrder.week.getShorterLabel(),
                 deliveryDate: !!auxOrder ? auxOrder.getDdMmYyyyShipmentDate() : "",
@@ -387,8 +387,8 @@ export class ExportNextOrdersWithRecipesSelection {
         //     }
         // }
 
-        // const sortedExport = _.orderBy(ordersExport, [""]);
-        this.exportService.exportNextOrdersWithRecipesSelection(ordersExport);
+        const sortedExport = _.orderBy(ordersExport, ["customerEmail"], "asc");
+        this.exportService.exportNextOrdersWithRecipesSelection(sortedExport);
 
         return;
     }
