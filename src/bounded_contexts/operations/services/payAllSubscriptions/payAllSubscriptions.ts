@@ -172,10 +172,10 @@ export class PayAllSubscriptions {
                     }
 
                     paymentOrderToBill.paymentIntentId = paymentIntent.id;
-                } catch (error) {
-                    //@ts-ignore
+                } catch (error: any) {
                     logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
                     paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
+                    paymentOrderToBill.paymentIntentId = error?.payment_intent?.id ?? "";
                 }
             } else {
                 logger.info(`Skipping payment order ${paymentOrderToBill.id.value} due to state ${paymentOrderToBill.state.title}`);
