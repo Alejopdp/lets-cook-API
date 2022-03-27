@@ -42,6 +42,7 @@ export interface OrdersWithRecipeSelectionExport {
     chooseState: RecipeSelectionState | string;
     pricePlan: number;
     kitPrice: number;
+    coupon: string;
     planDiscount: number;
     kitDiscount: number;
     finalPrice: number;
