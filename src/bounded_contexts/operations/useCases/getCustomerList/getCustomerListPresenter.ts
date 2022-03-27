@@ -1,20 +1,26 @@
 import { Customer } from "../../domain/customer/Customer";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
+import { Order } from "../../domain/order/Order";
 import { Subscription } from "../../domain/subscription/Subscription";
 
 export class GetCouponListPresenter {
-    public static present(customers: Customer[], activeSubscriptions: Subscription[]): any {
+    public static present(customers: Customer[], activeSubscriptions: Subscription[], oneTimeSubscriptionFutureOrders: Order[]): any {
         const customerActiveSubscriptionMap: { [customerId: string]: number } = {};
         const presentedCustomers = [];
+        const subscriptionOrderMap = new Map<string, Order>();
+
+        for (const order of oneTimeSubscriptionFutureOrders) {
+            subscriptionOrderMap.set(order.subscriptionId.toString(), order);
+        }
 
         for (let subscription of activeSubscriptions) {
             const actualKey = customerActiveSubscriptionMap[subscription.customer.id.value];
+            const oneTimeOrder: Order | undefined = subscriptionOrderMap.get(subscription.id.toString());
 
-            if (!!actualKey) {
-                customerActiveSubscriptionMap[subscription.customer.id.value] = actualKey + 1;
-            } else {
-                customerActiveSubscriptionMap[subscription.customer.id.value] = 1;
-            }
+            if (subscription.frequency.isOneTime() && !oneTimeOrder) continue;
+            if (oneTimeOrder && subscription.isAOneTimeSubAndWasDelivered(oneTimeOrder)) continue;
+
+            customerActiveSubscriptionMap[subscription.customer.id.value] = 1 + (actualKey ?? 0);
         }
 
         for (let customer of customers) {
