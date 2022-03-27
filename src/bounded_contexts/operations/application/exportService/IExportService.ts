@@ -14,6 +14,7 @@ export interface OrdersWithRecipeSelectionExport {
     paymentOrderNumber: string | number;
     orderState: string;
     weekLabel: string;
+    billingDate: string;
     deliveryDate: string;
     customerPreferredShippingHour: string;
     customerId: string | number;
@@ -41,6 +42,7 @@ export interface OrdersWithRecipeSelectionExport {
     chooseState: RecipeSelectionState | string;
     pricePlan: number;
     kitPrice: number;
+    coupon: string;
     planDiscount: number;
     kitDiscount: number;
     finalPrice: number;
