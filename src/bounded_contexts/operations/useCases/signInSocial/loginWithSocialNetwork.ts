@@ -13,6 +13,8 @@ const firebaseAdminConfig = require("../../../../firebase-admin.json");
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { logger } from "../../../../../config";
 import { IMailingListService } from "../../application/mailingListService/IMailingListService";
+import { Locale } from "../../domain/locale/Locale";
+import { PersonalInfo } from "../../domain/customer/personalInfo/PersonalInfo";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
@@ -48,7 +50,12 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
         var customer: Customer | undefined = await this.customerRepository.findByEmail(userEmail);
 
         if (!!!customer) {
+            const newCustomerDisplayName: string = user.displayName;
             customer = Customer.create(userEmail, true, "", [], 0, undefined, undefined, undefined, "active", undefined);
+            const firstName: string = newCustomerDisplayName?.split(" ")?.[0] ?? "";
+            const lastName = newCustomerDisplayName?.split(" ")?.slice(1)?.join() ?? "";
+            const newCustomerPersonalInfo = new PersonalInfo(firstName, lastName, user.phoneNumber ?? "");
+            customer["personalInfo"] = newCustomerPersonalInfo;
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
 
             customer.stripeId = stripeCustomerId;
