@@ -27,6 +27,7 @@ import { updatePasswordWithoutCodeController } from "../../useCases/updatePasswo
 import { exportCustomerActionsController } from "../../services/exportCustomerActions";
 import { sendUpdateEmailEmailController } from "../../useCases/sendUpdateEmailEmail";
 import { exportAllCustomersActionsController } from "../../services/exportAllCustomersActions";
+import { Permission } from "../../../../bounded_contexts/IAM/domain/permission/Permission";
 
 const customerRouter = express.Router();
 
@@ -38,11 +39,19 @@ const options: multer.Options = {
 // customerRouter.get("/:email", (req, res) => emailValidatedController.execute(req, res));
 customerRouter.get("/", (req, res) => getCustomerListController.execute(req, res));
 customerRouter.get("/by-name/:name", (req, res) => getCustomerByNameController.execute(req, res));
-customerRouter.get("/export", (req, res) => exportCustomersController.execute(req, res));
-customerRouter.get("/export-actions/:customerId", (req, res) => exportCustomerActionsController.execute(req, res));
-customerRouter.get("/export-actions", (req, res) => exportAllCustomersActionsController.execute(req, res));
+customerRouter.get("/export", middleware.ensureAdminAuthenticated([Permission.EXPORT_CUSTOMERS]), (req, res) =>
+    exportCustomersController.execute(req, res)
+);
+customerRouter.get("/export-actions/:customerId", middleware.ensureAdminAuthenticated([Permission.EXPORT_CUSTOMERS]), (req, res) =>
+    exportCustomerActionsController.execute(req, res)
+);
+customerRouter.get("/export-actions", middleware.ensureAdminAuthenticated([Permission.EXPORT_CUSTOMERS]), (req, res) =>
+    exportAllCustomersActionsController.execute(req, res)
+);
 customerRouter.get("/:id", (req, res) => getCustomerByIdController.execute(req, res));
-customerRouter.get("/information-as-admin/:id", (req, res) => getCustomerInformationAsAdminController.execute(req, res));
+customerRouter.get("/information-as-admin/:id", middleware.ensureAdminAuthenticated([Permission.VIEW_CUSTOMER]), (req, res) =>
+    getCustomerInformationAsAdminController.execute(req, res)
+);
 
 // // PUT
 customerRouter.put("/forgot-password/:email", (req, res) => forgotPasswordController.execute(req, res));
@@ -62,7 +71,9 @@ customerRouter.put("/update-billing/:id", middleware.ensureAuthenticated(), (req
 customerRouter.put("/update-info/:id", (req, res) => updateCustomerInfoController.execute(req, res));
 customerRouter.put("/update-payment/:id", middleware.ensureAuthenticated(), (req, res) => updatePaymentMethodController.execute(req, res));
 customerRouter.put("/add-payment-method/:id", middleware.ensureAuthenticated(), (req, res) => addPaymentMethodController.execute(req, res));
-customerRouter.put("/delete/:id", (req, res) => deleteCustomerController.execute(req, res));
+customerRouter.put("/delete/:id", middleware.ensureAdminAuthenticated([Permission.DELETE_CUSTOMER]), (req, res) =>
+    deleteCustomerController.execute(req, res)
+);
 
 // // POSTs
 customerRouter.post("/sign-up", (req, res) => signUpController.execute(req, res));
