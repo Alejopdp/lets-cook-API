@@ -51,7 +51,7 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
 
         if (!!!customer) {
             const newCustomerDisplayName: string = user.displayName;
-            customer = Customer.create(userEmail, true, "", [], 0, undefined, undefined, undefined, "active", undefined);
+            customer = Customer.create(userEmail, true, "", [], 0, new Date(), undefined, undefined, undefined, "active", undefined);
             const firstName: string = newCustomerDisplayName?.split(" ")?.[0] ?? "";
             const lastName = newCustomerDisplayName?.split(" ")?.slice(1)?.join() ?? "";
             const newCustomerPersonalInfo = new PersonalInfo(firstName, lastName, user.phoneNumber ?? "");
