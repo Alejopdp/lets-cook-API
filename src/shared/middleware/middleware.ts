@@ -125,7 +125,6 @@ export class Middleware {
 
                 //@ts-ignore
                 const adminUser: User = (await this.getCurrentUser(true, decoded.id))! as User;
-
                 if (!adminUser?.hasPermissions(permissions)) {
                     return this.endRequest(401, "No estás autorizado", res);
                 }

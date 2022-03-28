@@ -39,6 +39,8 @@ export const adminRole: Role = new Role(
         Permission.EXPORT_CUSTOMERS,
         Permission.EXPORT_CUSTOMER_ACTIONS,
         Permission.EXPORT_COUPONS,
+        Permission.VIEW_COUPONS,
+        Permission.IMPORT_RECIPE_SELECTION,
     ],
     uuid.v4()
 );
@@ -54,6 +56,7 @@ export const recetasRole = new Role("Recetas", [
     Permission.CREATE_RECIPE,
     Permission.UPDATE_RECIPE,
     Permission.DELETE_RECIPE,
+    Permission.VIEW_COUPONS,
 ]);
 
 export const blogRole = new Role("Blog", [
@@ -64,6 +67,7 @@ export const blogRole = new Role("Blog", [
     Permission.VIEW_RECIPES,
     Permission.VIEW_SHIPPING_ZONE,
     Permission.VIEW_SUBSCRIPTION,
+    Permission.VIEW_COUPONS,
 ]);
 
 export const customerSupportRole = new Role("Atencion al cliente", [
@@ -74,4 +78,5 @@ export const customerSupportRole = new Role("Atencion al cliente", [
     Permission.VIEW_RECIPES,
     Permission.VIEW_SHIPPING_ZONE,
     Permission.VIEW_SUBSCRIPTION,
+    Permission.VIEW_COUPONS,
 ]);
