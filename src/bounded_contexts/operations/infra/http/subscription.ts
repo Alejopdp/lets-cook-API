@@ -30,7 +30,7 @@ subscriptionRouter.get("/", middleware.ensureAdminAuthenticated([Permission.VIEW
 subscriptionRouter.get("/information-as-admin/:id", middleware.ensureAdminAuthenticated([Permission.VIEW_SUBSCRIPTION]), (req, res) =>
     getSubscriptionByIdAsAdminController.execute(req, res)
 );
-subscriptionRouter.get("/by-customer/:customerId", middleware.ensureAdminAuthenticated([Permission.VIEW_SUBSCRIPTION]), (req, res) =>
+subscriptionRouter.get("/by-customer/:customerId", middleware.ensureAuthenticated(), (req, res) =>
     getCustomerSusbcriptionsController.execute(req, res)
 );
 subscriptionRouter.get("/export", middleware.ensureAdminAuthenticated([Permission.EXPORT_SUBSCRIPTIONS]), (req, res) =>

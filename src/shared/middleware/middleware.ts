@@ -88,6 +88,7 @@ export class Middleware {
 
                 if (token) {
                     const decoded = await this.tokenService.isTokenVerified(token);
+                    console.log("A ver el decoded: ", decoded);
                     const signatureFailed = !!decoded === false;
 
                     if (signatureFailed) {
