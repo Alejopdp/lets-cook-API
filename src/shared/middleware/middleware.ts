@@ -7,7 +7,8 @@ import { ICustomerRepository } from "@src/bounded_contexts/operations/infra/repo
 import { Request, Response } from "express";
 import { logger } from "../../../config";
 import { jwtTokenService } from "../../bounded_contexts/IAM/application/tokenService";
-import { ITokenService } from "../../bounded_contexts/IAM/application/tokenService/ITokenService";
+import { AdminLoginTokenPayload, ITokenService } from "../../bounded_contexts/IAM/application/tokenService/ITokenService";
+import { Permission } from "../../bounded_contexts/IAM/domain/permission/Permission";
 const rateLimit = require("express-rate-limit");
 
 export class Middleware {
@@ -110,43 +111,21 @@ export class Middleware {
         };
     }
 
-    public ensureProcesserAuthenticated = () => {
+    public ensureAdminAuthenticated = (permissions: Permission[]) => {
         return async (req: Request, res: Response, next: Function) => {
             const token = req.headers["authorization"];
 
             if (token) {
-                const decoded = await this.tokenService.isTokenVerified(token);
-                const signatureFailed = !!decoded === false;
-
-                if (signatureFailed) return this.endRequest(403, "La sesión ha expirado", res);
-
-                //@ts-ignore
-                if (decoded.roleTitle !== "Processer" && decoded.roleTitle !== "Admin")
-                    return this.endRequest(401, "No estás autorizado", res);
-
-                //@ts-ignore
-                req["decode"] = decoded;
-                next();
-            } else {
-                return this.endRequest(403, "No estás autorizado para realizar la petición", res);
-            }
-        };
-    };
-
-    public ensureAdminAuthenticated = () => {
-        return async (req: Request, res: Response, next: Function) => {
-            const token = req.headers["authorization"];
-
-            if (token) {
-                const decoded = await this.tokenService.isTokenVerified(token);
-                const signatureFailed = !!decoded === false;
+                const decoded: AdminLoginTokenPayload | undefined = await this.tokenService.verifyAndGetAdminTokenPayloadOrUndefined(token);
+                const signatureFailed = !!decoded === false || !decoded;
 
                 if (signatureFailed) {
                     return this.endRequest(403, "La sesión ha expirado.", res);
                 }
 
-                //@ts-ignore
-                if (decoded.roleTitle! !== "Administrador") {
+                const adminUser: User = (await this.getCurrentUser(true, decoded.id))! as User;
+
+                if (!adminUser?.hasPermissions(permissions)) {
                     return this.endRequest(401, "No estás autorizado", res);
                 }
 

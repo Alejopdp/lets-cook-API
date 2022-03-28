@@ -19,19 +19,24 @@ import { middleware } from "../../../../shared/middleware";
 import { createSubscriptionAsAdminController } from "../../useCases/createSubscriptionAsAdmin";
 import { deleteSubscriptionController } from "../../useCases/deleteSubscription";
 import { updateSubscriptionCouponController } from "../../useCases/updateSubscriptionCoupon";
+import { Permission } from "../../../../bounded_contexts/IAM/domain/permission/Permission";
 
 const subscriptionRouter = express.Router();
 
 // GETs
-subscriptionRouter.get("/", middleware.ensureAuthenticated(), (req, res) => getSubscriptionListController.execute(req, res));
-subscriptionRouter.get("/information-as-admin/:id", middleware.ensureAdminAuthenticated(), (req, res) =>
+subscriptionRouter.get("/", middleware.ensureAdminAuthenticated([Permission.VIEW_SUBSCRIPTION]), (req, res) =>
+    getSubscriptionListController.execute(req, res)
+);
+subscriptionRouter.get("/information-as-admin/:id", middleware.ensureAdminAuthenticated([Permission.VIEW_SUBSCRIPTION]), (req, res) =>
     getSubscriptionByIdAsAdminController.execute(req, res)
 );
-subscriptionRouter.get("/by-customer/:customerId", middleware.ensureAuthenticated(), (req, res) =>
+subscriptionRouter.get("/by-customer/:customerId", middleware.ensureAdminAuthenticated([Permission.VIEW_SUBSCRIPTION]), (req, res) =>
     getCustomerSusbcriptionsController.execute(req, res)
 );
-subscriptionRouter.get("/export", middleware.ensureAuthenticated(), (req, res) => exportSubscriptionsController.execute(req, res));
-subscriptionRouter.get("/export-cancellations", middleware.ensureAuthenticated(), (req, res) =>
+subscriptionRouter.get("/export", middleware.ensureAdminAuthenticated([Permission.EXPORT_SUBSCRIPTIONS]), (req, res) =>
+    exportSubscriptionsController.execute(req, res)
+);
+subscriptionRouter.get("/export-cancellations", middleware.ensureAdminAuthenticated([Permission.EXPORT_CANCELLATIONS]), (req, res) =>
     exportCancellationsController.execute(req, res)
 );
 subscriptionRouter.get("/:id", middleware.ensureAuthenticated(), (req, res) => getSubscriptionByIdController.execute(req, res));
@@ -39,7 +44,7 @@ subscriptionRouter.get("/:id", middleware.ensureAuthenticated(), (req, res) => g
 // POSTs
 subscriptionRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
 subscriptionRouter.post("/many", (req, res) => createManySubscriptionsController.execute(req, res));
-subscriptionRouter.post("/as-admin", middleware.ensureAdminAuthenticated(), (req, res) =>
+subscriptionRouter.post("/as-admin", middleware.ensureAdminAuthenticated([Permission.CREATE_SUBSCRIPTION]), (req, res) =>
     createSubscriptionAsAdminController.execute(req, res)
 );
 subscriptionRouter.post("/reorder/:subscriptionId", middleware.ensureAuthenticated(), (req, res) =>
@@ -60,11 +65,13 @@ subscriptionRouter.put("/handle-3dsecure-failure-for-many-subscriptions", middle
     handle3dSecureFailureForManySubscriptionsController.execute(req, res)
 );
 subscriptionRouter.put("/apply-coupon/:id", (req, res) => applyCouponToSubscriptionController.execute(req, res));
-subscriptionRouter.put("/update-coupon/:id", middleware.ensureAdminAuthenticated(), (req, res) =>
+subscriptionRouter.put("/update-coupon/:id", middleware.ensureAdminAuthenticated([Permission.UPDATE_SUBSCRIPTION]), (req, res) =>
     updateSubscriptionCouponController.execute(req, res)
 );
 
 // DELETEs
-subscriptionRouter.delete("/:id", middleware.ensureAdminAuthenticated(), (req, res) => deleteSubscriptionController.execute(req, res));
+subscriptionRouter.delete("/:id", middleware.ensureAdminAuthenticated([Permission.DELETE_SUBSCRIPTION]), (req, res) =>
+    deleteSubscriptionController.execute(req, res)
+);
 
 export { subscriptionRouter };

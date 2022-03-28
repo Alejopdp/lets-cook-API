@@ -1,3 +1,5 @@
+import { Permission } from "../../../../bounded_contexts/IAM/domain/permission/Permission";
+import { middleware } from "../../../../shared/middleware";
 import express from "express";
 import { cancelAPaymentOrderController } from "../../useCases/cancelAPaymentOrder";
 import { chargeOnePaymentOrderController } from "../../useCases/chargeOnePaymentOrder";
@@ -21,11 +23,19 @@ paymentOrderRouter.get("/:id", (req, res) => getPaymentOrderByIdController.execu
 paymentOrderRouter.post("/", (req, res) => createSubscriptionController.execute(req, res));
 
 // PUTs
-paymentOrderRouter.put("/charge/:id", (req, res) => chargeOnePaymentOrderController.execute(req, res));
+paymentOrderRouter.put("/charge/:id", middleware.ensureAdminAuthenticated([Permission.UPDATE_PAYMENT_ORDER]), (req, res) =>
+    chargeOnePaymentOrderController.execute(req, res)
+);
 paymentOrderRouter.put("/update-state/:id", (req, res) => updatePaymentOrderAndOrdersStateController.execute(req, res));
-paymentOrderRouter.put("/refund/:id", (req, res) => refundPaymentOrderController.execute(req, res));
-paymentOrderRouter.put("/retry-payment/:id", (req, res) => retryPaymentOrderOfRejectedPaymentOrderController.execute(req, res));
-paymentOrderRouter.put("/cancel/:id", (req, res) => cancelAPaymentOrderController.execute(req, res));
+paymentOrderRouter.put("/refund/:id", middleware.ensureAdminAuthenticated([Permission.UPDATE_PAYMENT_ORDER]), (req, res) =>
+    refundPaymentOrderController.execute(req, res)
+);
+paymentOrderRouter.put("/retry-payment/:id", middleware.ensureAdminAuthenticated([Permission.UPDATE_PAYMENT_ORDER]), (req, res) =>
+    retryPaymentOrderOfRejectedPaymentOrderController.execute(req, res)
+);
+paymentOrderRouter.put("/cancel/:id", middleware.ensureAdminAuthenticated([Permission.UPDATE_PAYMENT_ORDER]), (req, res) =>
+    cancelAPaymentOrderController.execute(req, res)
+);
 
 // DELETEs
 
