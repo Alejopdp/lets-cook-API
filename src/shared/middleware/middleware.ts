@@ -123,6 +123,7 @@ export class Middleware {
                     return this.endRequest(403, "La sesión ha expirado.", res);
                 }
 
+                //@ts-ignore
                 const adminUser: User = (await this.getCurrentUser(true, decoded.id))! as User;
 
                 if (!adminUser?.hasPermissions(permissions)) {
