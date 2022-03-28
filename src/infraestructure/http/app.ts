@@ -26,7 +26,7 @@ Sentry.init({
             // router: someRouter,
         }),
         new Sentry.Integrations.Console(),
-        new Sentry.Integrations.ContextLines(),
+        // new Sentry.Integrations.ContextLines(),
         new Sentry.Integrations.FunctionToString(),
         new Sentry.Integrations.Modules(),
         new Sentry.Integrations.InboundFilters(),
