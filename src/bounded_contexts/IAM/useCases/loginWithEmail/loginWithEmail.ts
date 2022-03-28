@@ -1,7 +1,7 @@
 import { logger } from "../../../../../config";
 import { UseCase } from "../../../../core/domain/UseCase";
 import { Either, Failure, isFailure, isSuccess } from "../../../../core/logic/Result";
-import { ITokenService } from "../../application/tokenService/ITokenService";
+import { AdminLoginTokenPayload, ITokenService } from "../../application/tokenService/ITokenService";
 import { User } from "../../domain/user/User";
 import { UserPassword } from "../../domain/user/UserPassword";
 import { IUserRepository } from "../../infra/repositories/user/IUserRepository";
@@ -31,8 +31,8 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
 
         if (!user.password?.equals(incomingPassword)) return isFailure(invalidLoginArguments());
 
-        const tokenPayload = {
-            id: user.id.value,
+        const tokenPayload: AdminLoginTokenPayload = {
+            id: user.id.toString(),
             fullName: `${user.name.firstName} ${user.name.lastName}`,
             firstName: user.name.firstName,
             lastName: user.name.lastName,
@@ -41,7 +41,7 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
             email: user.email,
         };
 
-        return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), tokenPayload));
+        return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signAdminLoginToken(tokenPayload), tokenPayload));
     }
 
     /**

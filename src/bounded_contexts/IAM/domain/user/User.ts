@@ -1,5 +1,6 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { Guard } from "../../../../core/logic/Guard";
+import { Permission } from "../permission/Permission";
 import { Role } from "../role/Role";
 import { UserId } from "./UserId";
 import { UserName } from "./UserName";
@@ -95,6 +96,10 @@ export class User extends Entity<User> {
 
     public getFullName(): string {
         return `${this.name.firstName} ${this.name.lastName}`;
+    }
+
+    public hasPermissions(permissions: Permission[]): boolean {
+        return this.role.hasPermissions(permissions);
     }
 
     /**

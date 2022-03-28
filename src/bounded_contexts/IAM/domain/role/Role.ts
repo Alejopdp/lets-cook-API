@@ -31,6 +31,10 @@ export class Role implements IValueObject<Role> {
         this.permissions = this.permissions.filter((permission) => permission !== permissionToRemove);
     }
 
+    public hasPermissions(permissions: Permission[]): boolean {
+        return permissions.every((permission) => this.permissions.includes(permission));
+    }
+
     /**
      * Getter title
      * @return {string}
