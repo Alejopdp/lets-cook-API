@@ -12,8 +12,8 @@ const app = express();
 
 /** Sentry **/
 Sentry.init({
-    dsn: "https://9b2a5dd18dc3451fb38e9050b13df102@o968175.ingest.sentry.io/5919601",
-    environment: "production",
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV,
     release: "letscook1.0", // TODO: Configure automatic releases info with Github
     integrations: [
         // enable HTTP calls tracing
