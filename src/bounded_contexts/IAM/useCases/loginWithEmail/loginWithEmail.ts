@@ -41,6 +41,8 @@ export class LoginWithEmail implements UseCase<LoginWithEmailDto, Promise<Respon
             email: user.email,
         };
 
+        console.log("TOKEN PAYLOAD: ", tokenPayload);
+
         return isSuccess(LoginWithEmailPresenter.present(this.tokenService.signLoginToken(tokenPayload), tokenPayload));
     }
 

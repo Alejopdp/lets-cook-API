@@ -10,7 +10,7 @@ export class MonthlyFrequency implements IPlanFrequency {
 
     public getNDatesWithFrequencyOffset(qtyOfDates: number, baseDate: Date): Date[] {
         const dates: Date[] = [baseDate];
-        const auxDateForCalculatingRestOfDates: Date = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), 10);
+        const auxDateForCalculatingRestOfDates: Date = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
 
         for (let i = 1; i < qtyOfDates; i++) {
             auxDateForCalculatingRestOfDates.setDate(auxDateForCalculatingRestOfDates.getDate() + this.offset);

@@ -37,29 +37,28 @@ export class MoveNextBillingDate {
     // [X] Cambiar shipping date a la semana del primer cobro
     // [X] Cambiar shipping date del resto de ordenes en base a la frecuencia
     // [X] Cambiar billing date de todas las payment orders
-    // [] QUE PASA CON LA ORDER QUE ESTÄ BILLED
-    // [] Qué pasa con ordenes skipeadas?
-    // [] Payment order canceladas, nuevas, etc
+    // [X] QUE PASA CON LA ORDER QUE ESTÄ BILLED ==> No me traigo ninguna billed
+    // [X] Qué pasa con ordenes skipeadas? => Modifico normalemnte billing y shipping date
+    // [X] Payment order canceladas, nuevas, etc
     // [] Obtener semana para nueva payment order
     // [] Que pasa con las nuevas payment orders que se crean y los cupones con X cargos de descuento
     // [] Como se comporta con el cobrar ahora?
-    // Si quedan ordenes para una semana solo con adicional, saltar las semanas
+    // [] Si quedan ordenes para una semana solo con adicional, saltar las semanas
 
     public async execute(dto: MoveNextBillingDateDto): Promise<any> {
         if (dto.nextBillingDate.getDay() !== 6) throw new Error("No puedes elegir una fecha que no sea un sábado");
+        if (dto.nextBillingDate.getTime() <= new Date().getTime()) throw new Error("No puedes elegir una fecha pasada");
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const [subscription, orders, weeks]: [Subscription, Order[], Week[]] = await Promise.all([
             this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale),
             this.orderRepository.findFutureActiveAndSkippedBySubscriptionOrderdByShippingDate(subscriptionId, dto.locale),
             this.weekRepository.findAll(),
         ]);
-        const [ordersPaymentOrders, allCustomerPaymentOrders]: [PaymentOrder[], PaymentOrder[]] = await Promise.all([
-            this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!)),
-            this.paymentOrderRepository.findNextTwelveByCustomer(subscription.customer.id),
-        ]);
+        const allCustomerPaymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(subscription.customer.id);
         const allPaymentOrdersBillingDateMap = new Map<string, PaymentOrder>();
         const paymentOrdersMap = new Map<string, PaymentOrder>();
         const newPaymentOrders: PaymentOrder[] = [];
+        const paymentOrdersToUpdate: PaymentOrder[] = [];
 
         for (const paymentOrder of allCustomerPaymentOrders) {
             const billingDate = paymentOrder.billingDate;
@@ -67,9 +66,6 @@ export class MoveNextBillingDate {
                 `${billingDate.getFullYear()}${billingDate.getMonth()}${billingDate.getDate()}`,
                 paymentOrder
             );
-        }
-
-        for (const paymentOrder of ordersPaymentOrders) {
             paymentOrdersMap.set(paymentOrder.id.toString(), paymentOrder);
         }
 
@@ -88,7 +84,10 @@ export class MoveNextBillingDate {
                 `${billingDate.getFullYear()}${billingDate.getMonth()}${billingDate.getDate()}`
             );
             let order = orders[i];
-            const oldPaymentOrder: PaymentOrder = paymentOrdersMap.get(order.paymentOrderId!.toString())!;
+            const oldPaymentOrder: PaymentOrder | undefined = paymentOrdersMap.get(order.paymentOrderId!.toString());
+            if (!oldPaymentOrder) throw new Error(`No se encontró una payment order para la order: ${order.id.toString()}`);
+            const oldPaymentOrderBillingDateKey = `${oldPaymentOrder.billingDate.getFullYear()}${oldPaymentOrder.billingDate.getMonth()}${oldPaymentOrder.billingDate.getDate()}`;
+            const oldPaymentOrderToUpdate: PaymentOrder = allPaymentOrdersBillingDateMap.get(oldPaymentOrderBillingDateKey)!;
             const newPaymentOrder: PaymentOrder =
                 allPaymentOrdersBillingDateMap.get(`${billingDate.getFullYear()}${billingDate.getMonth()}${billingDate.getDate()}`) ??
                 new PaymentOrder(
@@ -104,7 +103,7 @@ export class MoveNextBillingDate {
                     oldPaymentOrder.hasFreeShipping
                 );
 
-            oldPaymentOrder.discountOrderAmount(order);
+            oldPaymentOrderToUpdate.discountOrderAmount(order);
             order.shippingDate = newShippingDates[i];
             order.billingDate = newBillingDates[i];
             order.paymentOrderId = newPaymentOrder.id;
@@ -116,13 +115,11 @@ export class MoveNextBillingDate {
             }
         }
 
-        console.log("NEW BILLING DATES: ", JSON.stringify(newBillingDates));
-        console.log("NEW SHIPPING DATES: ", JSON.stringify(newShippingDates));
-        console.log("NEW ORDERS SHIPPING DATES: ", JSON.stringify(orders.map((o) => o.shippingDate)));
-
-        // await this.paymentOrderRepository.bulkSave(newPaymentOrders);
-        // await this.paymentOrderRepository.updateMany(ordersPaymentOrders);
-        // await this.orderRepository.updateMany(orders);
+        await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+        await this.paymentOrderRepository.updateMany(
+            allCustomerPaymentOrders.filter((paymentOrder) => paymentOrder.billingDate.getTime() > new Date().getTime())
+        );
+        await this.orderRepository.updateMany(orders);
     }
 
     /**

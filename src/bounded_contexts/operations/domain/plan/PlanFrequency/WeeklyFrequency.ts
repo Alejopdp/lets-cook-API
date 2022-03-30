@@ -9,7 +9,6 @@ export class WeeklyFrequency implements IPlanFrequency {
     }
 
     public getNDatesWithFrequencyOffset(qtyOfDates: number, baseDate: Date): Date[] {
-        console.log("ENTRA ACA NO");
         const dates: Date[] = [baseDate];
         const auxDateForCalculatingRestOfDates: Date = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
 
