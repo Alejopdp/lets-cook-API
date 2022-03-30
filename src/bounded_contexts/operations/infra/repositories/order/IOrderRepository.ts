@@ -49,4 +49,5 @@ export interface IOrderRepository {
     delete(orderId: OrderId): Promise<void>;
     markAsDeletedBySubscriptionId(subscriptionId: SubscriptionId): Promise<void>;
     destroyManyBySubscriptionId(subscriptionId: SubscriptionId): Promise<void>;
+    findFutureActiveAndSkippedBySubscriptionOrderdByShippingDate(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]>;
 }
