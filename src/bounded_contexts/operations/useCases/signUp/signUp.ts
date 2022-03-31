@@ -36,7 +36,7 @@ export class SignUp {
 
         const password: UserPassword = UserPassword.create(dto.password, false).hashPassword();
         const customer: Customer = Customer.create(
-            dto.email,
+            dto.email.toLowerCase(),
             dto.isEmailVerified,
             "",
             [],
