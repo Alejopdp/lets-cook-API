@@ -30,7 +30,9 @@ export class MongooseUserRepository implements IUserRepository {
     }
 
     public async findByEmail(email: string): Promise<User | undefined> {
-        const userDb = await MongooseUser.findOne({ email, deletionFlag: false }).populate("roleId");
+        const userDb = await MongooseUser.findOne({ email: { $regex: `^${email}$`, $options: "i" }, deletionFlag: false }).populate(
+            "roleId"
+        );
 
         return !!userDb ? userMapper.toDomain(userDb) : undefined;
     }
