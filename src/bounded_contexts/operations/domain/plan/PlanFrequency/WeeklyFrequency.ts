@@ -2,8 +2,27 @@ import { Locale } from "../../locale/Locale";
 import { IPlanFrequency } from "./IPlanFrequency";
 
 export class WeeklyFrequency implements IPlanFrequency {
+    private _offset: number;
+
+    constructor() {
+        this._offset = 7;
+    }
+
     public equals(aPlanFrequency: IPlanFrequency): boolean {
         return aPlanFrequency.value() === this.value();
+    }
+
+    public getNDatesWithFrequencyOffset(qtyOfDates: number, baseDate: Date): Date[] {
+        const dates: Date[] = [baseDate];
+        const auxDateForCalculatingRestOfDates: Date = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
+
+        for (let i = 1; i < qtyOfDates; i++) {
+            auxDateForCalculatingRestOfDates.setDate(auxDateForCalculatingRestOfDates.getDate() + this.offset);
+
+            dates.push(new Date(auxDateForCalculatingRestOfDates.getTime()));
+        }
+
+        return dates;
     }
 
     public getLabel(locale: Locale = Locale.es): string {
@@ -38,5 +57,21 @@ export class WeeklyFrequency implements IPlanFrequency {
     }
     public isMonthly(): boolean {
         return false;
+    }
+
+    /**
+     * Getter offset
+     * @return {number}
+     */
+    public get offset(): number {
+        return this._offset;
+    }
+
+    /**
+     * Setter offset
+     * @param {number} value
+     */
+    public set offset(value: number) {
+        this._offset = value;
     }
 }

@@ -9,4 +9,5 @@ export interface IPlanFrequency extends IValueObject<IPlanFrequency> {
     isWeekly(): boolean;
     isBiweekly(): boolean;
     isMonthly(): boolean;
+    getNDatesWithFrequencyOffset(qtyOfDates: number, baseDate: Date): Date[];
 }

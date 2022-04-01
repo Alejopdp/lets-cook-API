@@ -19,6 +19,7 @@ import { middleware } from "../../../../shared/middleware";
 import { createSubscriptionAsAdminController } from "../../useCases/createSubscriptionAsAdmin";
 import { deleteSubscriptionController } from "../../useCases/deleteSubscription";
 import { updateSubscriptionCouponController } from "../../useCases/updateSubscriptionCoupon";
+import { changeSubscriptionFrequencyController } from "../../useCases/changeSubscriptionFrequency";
 
 const subscriptionRouter = express.Router();
 
@@ -63,7 +64,9 @@ subscriptionRouter.put("/apply-coupon/:id", (req, res) => applyCouponToSubscript
 subscriptionRouter.put("/update-coupon/:id", middleware.ensureAdminAuthenticated(), (req, res) =>
     updateSubscriptionCouponController.execute(req, res)
 );
-
+subscriptionRouter.put("/change-frequency/:id", middleware.ensureAdminAuthenticated(), (req, res) =>
+    changeSubscriptionFrequencyController.execute(req, res)
+);
 // DELETEs
 subscriptionRouter.delete("/:id", middleware.ensureAdminAuthenticated(), (req, res) => deleteSubscriptionController.execute(req, res));
 

@@ -313,6 +313,31 @@ export class MongooseOrderRepository implements IOrderRepository {
         return await this.findBy({ subscription: subscriptionId.toString() });
     }
 
+    public async findFutureActiveAndSkippedBySubscriptionOrderdByShippingDate(
+        subscriptionId: SubscriptionId,
+        locale: Locale
+    ): Promise<Order[]> {
+        const ordersDb = await MongooseOrder.find({
+            subscription: subscriptionId.value,
+            deletionFlag: false,
+            shippingDate: { $gte: new Date() },
+            state: ["ORDER_ACTIVE", "ORDER_SKIPPED"],
+        })
+            .sort({ shippingDate: 1 })
+            .populate("customer")
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week")
+            .populate({
+                path: "recipeSelection",
+                populate: {
+                    path: "recipe",
+                    populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }] },
+                },
+            });
+
+        return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
+    }
+
     public async findFutureOrdersByShippingDayOfWeek(shippingDay: Day, locale: Locale = Locale.es): Promise<Order[]> {
         const ordersDb = await MongooseOrder.aggregate([
             {
