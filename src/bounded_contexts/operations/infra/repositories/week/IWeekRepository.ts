@@ -19,4 +19,5 @@ export interface IWeekRepository {
     findWeekTwelveWeeksLater(): Promise<Week | undefined>;
     findWeekTwelveBiweeksLater(): Promise<Week | undefined>;
     findWeekTwelveMonthsLater(): Promise<Week | undefined>;
+    // findWeeksForTwoYearsFromNow(): Promise<Week[]>
 }

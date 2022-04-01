@@ -8,6 +8,10 @@ export class WeeklyFrequency implements IPlanFrequency {
         this._offset = 7;
     }
 
+    public equals(aPlanFrequency: IPlanFrequency): boolean {
+        return aPlanFrequency.value() === this.value();
+    }
+
     public getNDatesWithFrequencyOffset(qtyOfDates: number, baseDate: Date): Date[] {
         const dates: Date[] = [baseDate];
         const auxDateForCalculatingRestOfDates: Date = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
@@ -19,10 +23,6 @@ export class WeeklyFrequency implements IPlanFrequency {
         }
 
         return dates;
-    }
-
-    public equals(aPlanFrequency: IPlanFrequency): boolean {
-        return aPlanFrequency.value() === this.value();
     }
 
     public getLabel(locale: Locale = Locale.es): string {

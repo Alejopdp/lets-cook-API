@@ -21,6 +21,7 @@ import { deleteSubscriptionController } from "../../useCases/deleteSubscription"
 import { updateSubscriptionCouponController } from "../../useCases/updateSubscriptionCoupon";
 import { Permission } from "../../../../bounded_contexts/IAM/domain/permission/Permission";
 import { moveNextBillingDateController } from "../../useCases/moveNextBillingDate";
+import { changeSubscriptionFrequencyController } from "../../useCases/changeSubscriptionFrequency";
 
 const subscriptionRouter = express.Router();
 
@@ -73,6 +74,9 @@ subscriptionRouter.put("/move-next-billing-date/:id", middleware.ensureAdminAuth
     moveNextBillingDateController.execute(req, res)
 );
 
+subscriptionRouter.put("/change-frequency/:id", middleware.ensureAdminAuthenticated([Permission.UPDATE_SUBSCRIPTION]), (req, res) =>
+    changeSubscriptionFrequencyController.execute(req, res)
+);
 // DELETEs
 subscriptionRouter.delete("/:id", middleware.ensureAdminAuthenticated([Permission.DELETE_SUBSCRIPTION]), (req, res) =>
     deleteSubscriptionController.execute(req, res)
