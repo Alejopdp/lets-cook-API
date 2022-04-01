@@ -9,10 +9,6 @@ export class OneTimeFrequency implements IPlanFrequency {
         return aPlanFrequency.value() === this.value();
     }
 
-    public getNDatesWithFrequencyOffset(qtyOfDates: number, baseDate: Date): Date[] {
-        throw new Error("No puedes mover la fecha de cobro de un plan de única vez");
-    }
-
     public getLabel(locale: Locale = Locale.es): string {
         switch (locale) {
             case Locale.es:
