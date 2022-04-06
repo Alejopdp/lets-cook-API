@@ -47,31 +47,13 @@ export const adminRole: Role = new Role(
 );
 
 export const recetasRole = new Role("Recetas", [
-    Permission.VIEW_BLOG,
-    Permission.VIEW_CUSTOMER,
-    Permission.VIEW_ORDERS,
-    Permission.VIEW_PLANS,
     Permission.VIEW_RECIPES,
-    Permission.VIEW_SHIPPING_ZONE,
-    Permission.VIEW_SUBSCRIPTION,
     Permission.CREATE_RECIPE,
     Permission.UPDATE_RECIPE,
     Permission.DELETE_RECIPE,
-    Permission.VIEW_COUPONS,
-    Permission.VIEW_PAYMENT_ORDERS,
 ]);
 
-export const blogRole = new Role("Blog", [
-    Permission.VIEW_BLOG,
-    Permission.VIEW_CUSTOMER,
-    Permission.VIEW_ORDERS,
-    Permission.VIEW_PLANS,
-    Permission.VIEW_RECIPES,
-    Permission.VIEW_SHIPPING_ZONE,
-    Permission.VIEW_SUBSCRIPTION,
-    Permission.VIEW_COUPONS,
-    Permission.VIEW_PAYMENT_ORDERS,
-]);
+export const blogRole = new Role("Blog", [Permission.VIEW_BLOG]);
 
 export const customerSupportRole = new Role("Atencion al cliente", [
     Permission.VIEW_BLOG,
