@@ -1,3 +1,5 @@
+import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
+
 export interface IGuardResult {
     succeeded: boolean;
     message?: string;
@@ -17,6 +19,18 @@ export class Guard {
         }
 
         return { succeeded: true };
+    }
+
+    public static againstAccents(text: string, locale: Locale): void {
+        var accentArray = ["á", "à", "ã", "â", "é", "è", "ê", "í", "ì", "î", "õ", "ó", "ò", "ô", "ú", "ù", "û"];
+
+        for (var i = 0; i < text.length; i++) {
+            for (var j = 0; j < accentArray.length; j++) {
+                if (text[i] === accentArray[j]) {
+                    throw new Error(`The email must not have any special character`);
+                }
+            }
+        }
     }
 
     public static againstNullOrUndefined(argument: any, argumentName: string): IGuardResult {
@@ -66,19 +80,12 @@ export class Guard {
         } else {
             return {
                 succeeded: false,
-                message: `${argumentName} isn't oneOf the correct types in ${JSON.stringify(
-                    validValues
-                )}. Got "${value}".`,
+                message: `${argumentName} isn't oneOf the correct types in ${JSON.stringify(validValues)}. Got "${value}".`,
             };
         }
     }
 
-    public static inRange(
-        num: number,
-        min: number,
-        max: number,
-        argumentName: string
-    ): IGuardResult {
+    public static inRange(num: number, min: number, max: number, argumentName: string): IGuardResult {
         const isInRange = num >= min && num <= max;
         if (!isInRange) {
             return {
@@ -90,12 +97,7 @@ export class Guard {
         }
     }
 
-    public static allInRange(
-        numbers: number[],
-        min: number,
-        max: number,
-        argumentName: string
-    ): IGuardResult {
+    public static allInRange(numbers: number[], min: number, max: number, argumentName: string): IGuardResult {
         let failingResult: IGuardResult | null = null;
         for (let num of numbers) {
             const numIsInRangeResult = this.inRange(num, min, max, argumentName);

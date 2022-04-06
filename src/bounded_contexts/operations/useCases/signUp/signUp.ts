@@ -1,4 +1,3 @@
-import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Locale } from "../../domain/locale/Locale";
 import { Customer } from "../../domain/customer/Customer";
@@ -8,6 +7,7 @@ import { UserPassword } from "../../../IAM/domain/user/UserPassword";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
 import { ITokenService } from "../../../IAM/application/tokenService/ITokenService";
 import { IMailingListService } from "../../application/mailingListService/IMailingListService";
+import { Guard } from "../../../../core/logic/Guard";
 
 export class SignUp {
     private _signUpRepository: ICustomerRepository;
@@ -31,6 +31,7 @@ export class SignUp {
     }
 
     public async execute(dto: SignUpDto): Promise<any> {
+        Guard.againstAccents(dto.email, Locale.es);
         const customerInfo: Customer | undefined = await this.signUpRepository.findByEmail(dto.email);
         if (customerInfo) throw new Error("El usuario ya existe, por favor utiliza otro correo");
 

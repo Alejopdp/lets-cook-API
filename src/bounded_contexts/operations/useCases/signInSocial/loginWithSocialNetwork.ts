@@ -1,10 +1,10 @@
 import { UseCase } from "../../../../core/domain/UseCase";
-import { Either, Failure, isFailure, isSuccess } from "../../../../core/logic/Result";
+import { Either, Failure, isSuccess } from "../../../../core/logic/Result";
 import { ITokenService } from "../../../IAM/application/tokenService/ITokenService";
 import { Customer } from "../../domain/customer/Customer";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { LoginWithSocialMediaDto } from "./loginWithSocialMediaDto";
-import { LoginWithEmailErrors, invalidLoginArguments, inactiveUser } from "./loginWithEmailErrors";
+import { LoginWithEmailErrors } from "./loginWithEmailErrors";
 import { LoginWithEmailPresenter } from "./loginWithEmailPresenter";
 import { initializeApp, credential } from "firebase-admin";
 // var admin = require("firebase-admin");
