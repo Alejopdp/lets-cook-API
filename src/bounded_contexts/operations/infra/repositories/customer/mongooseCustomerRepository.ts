@@ -35,7 +35,10 @@ export class MongooseCustomerRepository implements ICustomerRepository {
     }
 
     public async findByEmail(email: string): Promise<Customer | undefined> {
-        const customerDb = await MongooseCustomer.findOne({ email: { $regex: `^${email}$`, $options: "i" }, deletionFlag: false });
+        const customerDb = await MongooseCustomer.findOne({
+            email: { $regex: `^${email.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}$`, $options: "i" },
+            deletionFlag: false,
+        });
 
         return !!customerDb ? customerMapper.toDomain(customerDb) : undefined;
     }
