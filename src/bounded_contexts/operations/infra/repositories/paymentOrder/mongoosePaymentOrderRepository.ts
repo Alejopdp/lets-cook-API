@@ -8,6 +8,7 @@ import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Subscription } from "../../../domain/subscription/Subscription";
 import { WeekId } from "@src/bounded_contexts/operations/domain/week/WeekId";
+import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 
 export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async save(paymentOrder: PaymentOrder): Promise<void> {
@@ -27,6 +28,22 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         const paymentOrdersToSave = paymentOrders.map((paymentOrder) => paymentOrderMapper.toPersistence(paymentOrder));
 
         await MongoosePaymentOrder.insertMany(paymentOrdersToSave);
+    }
+
+    // TO DO: Chequear week por billing date
+    public async countHalfWeekOrdersByWeek(week: Week): Promise<number> {
+        const group = await MongoosePaymentOrder.aggregate()
+            .project({ state: 1, customer: 1, billingDate: 1, week: 1 })
+            .lookup({ from: "Customer", localField: "customer", foreignField: "_id", as: "customer" })
+            .unwind("$customer")
+            .match({
+                // billingDate: { $gte: week.minDay, $lte: week.maxDay },
+                week: week.id.toString(),
+                state: { $in: ["PAYMENT_ORDER_ACTIVE", "PAYMENT_ORDER_BILLED"] },
+            })
+            .group({ _id: null, count: { $sum: "$customer.receivedOrdersQuantity" } });
+
+        return group[0]?.count ?? 0;
     }
 
     public async updateMany(paymentOrders: PaymentOrder[]): Promise<void> {

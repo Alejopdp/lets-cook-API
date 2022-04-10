@@ -13,6 +13,7 @@ import { Week } from "../../../domain/week/Week";
 import { PaymentOrderId } from "../../../domain/paymentOrder/PaymentOrderId";
 import { WeekId } from "../../../domain/week/WeekId";
 import { Day } from "../../../domain/day/Day";
+import { PlanType } from "@src/bounded_contexts/operations/domain/plan/PlanType/PlanType";
 
 export class MongooseOrderRepository implements IOrderRepository {
     public async save(order: Order): Promise<void> {
@@ -77,12 +78,106 @@ export class MongooseOrderRepository implements IOrderRepository {
         );
     }
 
+    public async countPlanActiveOrdersByWeek(week: Week, planType: PlanType): Promise<number> {
+        const aggregateCount = await MongooseOrder.aggregate()
+            .project({ plan: 1, shippingDate: 1, state: 1, week: 1 })
+            .match({ week: week.id.toString(), state: { $in: ["ORDER_ACTIVE", "ORDER_BILLED"] } })
+            .lookup({ from: "Plan", localField: "plan", foreignField: "_id", as: "plan" })
+            .unwind("plan")
+            .addFields({ planType: "$plan.type" })
+            .match({ planType: planType })
+            .count("count");
+
+        return aggregateCount[0]?.count ?? 0;
+    }
+
+    public async countKitsForCookingByWeek(week: Week): Promise<number> {
+        const result = await MongooseOrder.aggregate()
+            .project({ state: 1, shippingDate: 1, planVariant: 1, plan: 1, week: 1 })
+            .lookup({
+                from: "Plan",
+                localField: "plan",
+                foreignField: "_id",
+                as: "plan",
+            })
+            .unwind("plan")
+            .match({ week: week.id.toString(), state: { $in: ["ORDER_BILLED"] } })
+            .addFields({
+                numberOfPersons: {
+                    $reduce: {
+                        input: "$plan.variants",
+                        in: {
+                            $cond: {
+                                if: { $eq: ["$$this._id", "$planVariant"] },
+                                then: { $ifNull: ["$$this.numberOfPersons", "$$value"] },
+                                else: "$$value",
+                            },
+                        },
+                        initialValue: 0,
+                    },
+                },
+            })
+            .group({
+                _id: null,
+                numberOfPersonsSum: { $sum: "$numberOfPersons" },
+            });
+
+        return result[0]?.numberOfPersonsSum ?? 0;
+    }
+
+    public async getBilledAmountSumByWeek(week: Week): Promise<number> {
+        const aggregateCount = await MongooseOrder.aggregate()
+            .project({ price: 1, shippingDate: 1, state: 1, discountAmount: 1, plan: 1, week: 1 })
+            .lookup({ from: "Plan", localField: "plan", foreignField: "_id", as: "plan" })
+            .unwind("plan")
+            .addFields({ planType: "$plan.type" })
+            .match({ planType: "Principal", week: week.id.toString(), state: "ORDER_BILLED" })
+            .group({ _id: null, billedAmount: { $sum: "$price" } });
+
+        return aggregateCount[0]?.billedAmount ?? 0;
+    }
+
+    public async getBilledAmountAvgByWeek(week: Week): Promise<number> {
+        const aggregateCount = await MongooseOrder.aggregate()
+            .project({ price: 1, shippingDate: 1, state: 1, discountAmount: 1, plan: 1, week: 1 })
+            .match({ week: week.id.toString(), state: "ORDER_BILLED" })
+            .lookup({ from: "Plan", localField: "plan", foreignField: "_id", as: "plan" })
+            .unwind("plan")
+            .addFields({ planType: "$plan.type" })
+            .match({ planType: "Principal" })
+            .group({ _id: null, billedAmount: { $avg: "$price" } });
+
+        return aggregateCount[0].billedAmount;
+    }
+
+    public async getNumberOfPersonsByWeek(week: Week): Promise<number> {
+        const aggregateSum = await MongooseOrder.aggregate()
+            .project({ price: 1, shippingDate: 1, state: 1, discountAmount: 1, plan: 1, planVariant: 1, week: 1 })
+            .match({ week: week.id.toString(), state: "ORDER_BILLED" })
+            .lookup({ from: "Plan", localField: "plan", foreignField: "_id", as: "plan" })
+            .unwind("$plan")
+            .addFields({
+                planType: "$plan.type",
+                variant: {
+                    $reduce: {
+                        input: "$plan.variants",
+                        in: { $cond: { if: { $eq: ["$$this._id", "$planVariant"] }, then: "$$this", else: "$$value" } },
+                        initialValue: { numberOfPersons: 0 },
+                    },
+                },
+            })
+            .match({ planType: "Principal" })
+            .group({ _id: null, numberOfPersons: { $sum: "$variant.numberOfPersons" } });
+
+        return aggregateSum[0].numberOfPersons;
+    }
+
     public async getCountByPaymentOrderIdMap(
         paymentOrdersIds: PaymentOrderId[],
         locale: Locale = Locale.es
     ): Promise<{ [key: string]: number }> {
-        const ordersDb = await MongooseOrder.find({ paymentOrder: paymentOrdersIds.map((id) => id.value), deletionFlag: false });
         const map: { [key: string]: number } = {};
+        const ordersDb = await MongooseOrder.find({ paymentOrder: paymentOrdersIds.map((id) => id.value), deletionFlag: false });
 
         for (let orderDb of ordersDb) {
             map[orderDb.paymentOrder!] = map[orderDb.paymentOrder!] ? map[orderDb.paymentOrder!] + 1 : 1;
@@ -440,3 +535,11 @@ export class MongooseOrderRepository implements IOrderRepository {
         await MongooseOrder.deleteMany({ subscription: subscriptionId.value });
     }
 }
+
+// /**
+//  * newField: The new field name.
+//  * expression: The new field expression.
+//  */
+//  {
+//     numberOfPersons: {$filter: {input: "$plan.variants", as: "variant", cond: {$eq: ["$planVariant", {$getField: {field: "_id", input: "variant"}}]}}}
+// }

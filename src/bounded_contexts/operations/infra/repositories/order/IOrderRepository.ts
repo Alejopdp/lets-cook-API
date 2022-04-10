@@ -9,11 +9,17 @@ import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { SubscriptionId } from "../../../domain/subscription/SubscriptionId";
 import { Week } from "../../../domain/week/Week";
 import { WeekId } from "../../../domain/week/WeekId";
+import { PlanType } from "@src/bounded_contexts/operations/domain/plan/PlanType/PlanType";
 
 export interface IOrderRepository {
     save(order: Order): Promise<void>;
     bulkSave(orders: Order[]): Promise<void>;
     updateMany(orders: Order[]): Promise<void>;
+    countPlanActiveOrdersByWeek(week: Week, planType: PlanType): Promise<number>;
+    getBilledAmountSumByWeek(week: Week): Promise<number>;
+    getBilledAmountAvgByWeek(week: Week): Promise<number>;
+    getNumberOfPersonsByWeek(week: Week): Promise<number>;
+    countKitsForCookingByWeek(week: Week): Promise<number>;
     findAll(locale: Locale): Promise<Order[]>;
     findById(orderId: OrderId, locale: Locale): Promise<Order | undefined>;
     findBy(conditions: any, locale: Locale): Promise<Order[]>;

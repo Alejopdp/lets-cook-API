@@ -13,6 +13,7 @@ import { paymentOrderRouter } from "../../../bounded_contexts/operations/infra/h
 import { restrictionRouter } from "../../../bounded_contexts/operations/infra/http/restriction";
 import { mailingListRouter } from "../../../bounded_contexts/operations/infra/http/mailingList";
 import { logRouter } from "../../../bounded_contexts/operations/infra/http/log";
+import { analyticsRouter } from "../../../bounded_contexts/operations/infra/http/analytics";
 
 const v1Router = express.Router();
 
@@ -30,6 +31,7 @@ v1Router.use("/payment-order", paymentOrderRouter);
 v1Router.use("/restriction", restrictionRouter);
 v1Router.use("/mailing-list", mailingListRouter);
 v1Router.use("/log", logRouter);
+v1Router.use("/analytics", analyticsRouter )
 
 // All routes go here
 

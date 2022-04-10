@@ -1,4 +1,5 @@
-import { WeekId } from "@src/bounded_contexts/operations/domain/week/WeekId";
+import { Week } from "../../../domain/week/Week";
+import { WeekId } from "../../../domain/week/WeekId";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
 import { PaymentOrder } from "../../../domain/paymentOrder/PaymentOrder";
@@ -9,6 +10,7 @@ export interface IPaymentOrderRepository {
     save(paymentOrder: PaymentOrder): Promise<void>;
     bulkSave(paymentOrders: PaymentOrder[]): Promise<void>;
     updateMany(paymentOrders: PaymentOrder[]): Promise<void>;
+    countHalfWeekOrdersByWeek(week: Week): Promise<number>;
     findAll(locale: Locale): Promise<PaymentOrder[]>;
     findAllSortedByBillingDateAsc(locale: Locale): Promise<PaymentOrder[]>;
     findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined>;
