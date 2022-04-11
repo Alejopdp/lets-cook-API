@@ -16,6 +16,17 @@ export class MongooseLogRepository implements ILogRepository {
         return dbLogs.map((log: any) => logMapper.toDomain(log));
     }
 
+    public async findAllBetweenDate(startDate: Date, endDate: Date): Promise<Log[]> {
+        const dbLogs = await MongooseLog.find({
+            createdAt: {
+                $gte: startDate,
+                $lte: endDate,
+            },
+        }).sort({ createdAt: -1 });
+
+        return dbLogs.map((log: any) => logMapper.toDomain(log));
+    }
+
     public async findAllByCustomer(customerId: CustomerId): Promise<Log[]> {
         const dbLogs = await MongooseLog.find({ customerId: customerId.toString() }).sort({ createdAt: -1 });
 

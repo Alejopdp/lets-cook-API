@@ -1,1 +1,4 @@
-export interface ExportAllCustomersActionsDto {}
+export interface ExportAllCustomersActionsDto {
+    startDate: Date;
+    endDate: Date;
+}

@@ -15,6 +15,8 @@ export class ExportCustomerActionsController extends BaseController {
         try {
             const dto: ExportCustomerActionsDto = {
                 customerId: this.req.params.customerId,
+                startDate: new Date(this.req.query.startDate as string),
+                endDate: new Date(this.req.query.endDate as string),
             };
 
             await this.exportCustomers.execute(dto);
