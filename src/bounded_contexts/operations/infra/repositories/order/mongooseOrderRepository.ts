@@ -228,7 +228,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .match({ planType: "Principal" })
             .group({ _id: null, billedAmount: { $avg: "$price" } });
 
-        return aggregateCount[0].billedAmount;
+        return aggregateCount[0]?.billedAmount ?? 0;
     }
 
     public async getNumberOfPersonsByWeek(week: Week): Promise<number> {
