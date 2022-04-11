@@ -13,7 +13,10 @@ export class ExportAllCustomersActionsController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const dto: ExportAllCustomersActionsDto = {};
+            const dto: ExportAllCustomersActionsDto = {
+                startDate: new Date(this.req.query.startDate as string),
+                endDate: new Date(this.req.query.endDate as string),
+            };
 
             await this.exportCustomers.execute(dto);
 

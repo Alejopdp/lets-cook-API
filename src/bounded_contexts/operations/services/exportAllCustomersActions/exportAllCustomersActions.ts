@@ -1,4 +1,5 @@
 import { ActionExport, IExportService } from "../../application/exportService/IExportService";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Customer } from "../../domain/customer/Customer";
 import { Log } from "../../domain/customer/log/Log";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
@@ -17,7 +18,7 @@ export class ExportAllCustomersActions {
     }
 
     public async execute(dto: ExportAllCustomersActionsDto): Promise<void> {
-        const logs: Log[] = await this.logRepository.findAll();
+        const logs: Log[] = await this.logRepository.findAllBetweenDate(dto.startDate ?? new Date(), dto.endDate ?? new Date());
         const customers: Customer[] = await this.customerRepository.findByIdList(logs.map((log) => log.customerId));
         const customersMap: { [customerId: string]: Customer } = {};
         const actionsForExport: ActionExport[] = [];
@@ -29,19 +30,9 @@ export class ExportAllCustomersActions {
         for (let log of logs) {
             const logDate = new Date(log.timestamp);
             actionsForExport.push({
-                date:
-                    logDate.getDate() +
-                    "/" +
-                    logDate.getMonth() +
-                    1 +
-                    "/" +
-                    logDate.getFullYear() +
-                    " " +
-                    logDate.getHours() +
-                    ":" +
-                    logDate.getMinutes() +
-                    ":" +
-                    logDate.getSeconds(),
+                date: `${MomentTimeService.getDdMmYyyy(logDate)} ${logDate.getHours()}:${
+                    (logDate.getMinutes() < 10 ? "0" : "") + logDate.getMinutes()
+                }:${logDate.getSeconds()}`,
                 user: log.user,
                 role: log.role,
                 "action type": log.type,

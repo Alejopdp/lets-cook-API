@@ -38,7 +38,7 @@ export class UpdatePaymentMethod {
             new Log(
                 LogType.CREDIT_CARD_UPDATED,
                 dto.nameOrEmailOfAdminExecutingRequest || customer.getFullNameOrEmail(),
-                !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "User",
+                !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "Usuario",
                 `Se marcó la tarjeta terminada en ${customer.getDefaultPaymentMethod()?.last4Numbers} como default`,
                 `Se marcó el método ${customer.getDefaultPaymentMethod()?.id.toString()} como default`,
                 new Date(),
