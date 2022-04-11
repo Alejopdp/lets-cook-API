@@ -9,6 +9,7 @@ import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Query, QueryOptions } from "mongoose";
 import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { CouponId } from "../../../domain/cupons/CouponId";
+import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 
 export class MongooseSubscriptionRepository implements ISubscriptionRepository {
     public async save(subscription: Subscription): Promise<void> {
@@ -31,6 +32,14 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         const subscriptionsToSave = subscriptions.map((subscription) => subscriptionMapper.toPersistence(subscription));
 
         await MongooseSubscription.updateMany({ _id: subscriptions.map((sub) => sub.id.value) }, { state: "SUBSCRIPTION_CANCELLED" }); // TO DO: Save cancellation reason
+    }
+
+    public async countCancelledSubscriptionsByWeek(week: Week): Promise<number> {
+        const count = await MongooseSubscription.countDocuments({
+            state: "SUBSCRIPTION_CANCELLED",
+            "cancellation.date": { $gte: week.minDay, $lte: week.maxDay },
+        });
+        return count;
     }
 
     public async findById(subscriptionId: SubscriptionId, locale: Locale = Locale.es): Promise<Subscription | undefined> {

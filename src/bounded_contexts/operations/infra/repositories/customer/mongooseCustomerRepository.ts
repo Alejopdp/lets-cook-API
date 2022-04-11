@@ -3,6 +3,7 @@ import { ICustomerRepository } from "./ICustomerRepository";
 import { Customer as MongooseCustomer } from "../../../../../infraestructure/mongoose/models";
 import { customerMapper } from "../../../mappers/customerMapper";
 import { CustomerId } from "../../../domain/customer/CustomerId";
+import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 
 export class MongooseCustomerRepository implements ICustomerRepository {
     public async save(customer: Customer): Promise<void> {
@@ -78,6 +79,84 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         if (!!!customer) throw new Error("El cliente ingresado no existe");
 
         return customer;
+    }
+
+    public async countActiveCustomersByWeek(week: Week): Promise<number> {
+        const count = await MongooseCustomer.aggregate()
+            .project({
+                _id: 1,
+            })
+            .lookup({ from: "Order", localField: "_id", foreignField: "customer", as: "orders" })
+            .match({
+                $expr: {
+                    $gt: [
+                        {
+                            $size: {
+                                $ifNull: [
+                                    {
+                                        $filter: {
+                                            input: "$orders",
+                                            as: "order",
+                                            cond: { $eq: [{ $getField: { field: "state", input: "order" } }, "ORDER_BILLED"] },
+                                        },
+                                    },
+                                    [],
+                                ],
+                            },
+                        },
+                        0,
+                    ],
+                },
+                week: week.id.toString(),
+            })
+            .group({ _id: "$_id", activeSubscriptions: { $sum: {} } })
+            .count("activeCustomers");
+
+        return count[0]?.activeCustomers ?? 0;
+    }
+
+    public async countNewLeadsByWeek(week: Week): Promise<number> {
+        const count = await MongooseCustomer.aggregate()
+            .project({
+                _id: 1,
+            })
+            .lookup({ from: "Subscription", localField: "_id", foreignField: "customer", as: "subscriptions" })
+            .lookup({ from: "Order", localField: "_id", foreignField: "customer", as: "orders" })
+            .match({
+                $expr: {
+                    $and: [
+                        {
+                            $gt: [
+                                {
+                                    $size: {
+                                        $ifNull: [
+                                            {
+                                                $filter: {
+                                                    input: "$subs",
+                                                    as: "sub",
+                                                    cond: { $ne: [{ $getField: { field: "state", input: "sub" } }, "SUBSCRIPTION_ACTIVE"] },
+                                                },
+                                            },
+                                            [],
+                                        ],
+                                    },
+                                },
+                                0,
+                            ],
+                        },
+                        { $gt: [{ $size: { $ifNull: ["$orders", []] } }, 0] },
+                    ],
+                },
+                week: week.id.toString(),
+            })
+            .group({ _id: "$_id", newLeadsQty: { $sum: 1 } })
+            .count("newLeadsQty");
+
+        return count[0]?.newLeadsQty ?? 0;
+    }
+
+    public async countNewCustomersByWeek(week: Week): Promise<number> {
+        return await MongooseCustomer.count({ receivedOrdersQuantity: 0, createdAt: { $gte: week.minDay, $lte: week.maxDay } });
     }
 
     public async countCustomersWithFriendCode(): Promise<number> {

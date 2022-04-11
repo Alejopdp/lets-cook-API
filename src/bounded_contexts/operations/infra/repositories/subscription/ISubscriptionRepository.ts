@@ -1,4 +1,5 @@
 import { CouponId } from "@src/bounded_contexts/operations/domain/cupons/CouponId";
+import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 import { QueryOptions } from "mongoose";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Locale } from "../../../domain/locale/Locale";
@@ -10,6 +11,7 @@ export interface ISubscriptionRepository {
     save(subscription: Subscription): Promise<void>;
     bulkSave(subscriptions: Subscription[]): Promise<void>;
     saveCancelledSubscriptions(subscriptions: Subscription[]): Promise<void>;
+    countCancelledSubscriptionsByWeek(week: Week): Promise<number>;
     findAll(locale: Locale): Promise<Subscription[]>;
     findById(subscriptionId: SubscriptionId, locale: Locale): Promise<Subscription | undefined>;
     findByIdOrThrow(subscriptionId: SubscriptionId, locale: Locale): Promise<Subscription>;
