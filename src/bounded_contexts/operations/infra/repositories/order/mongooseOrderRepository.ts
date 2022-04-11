@@ -101,8 +101,73 @@ export class MongooseOrderRepository implements IOrderRepository {
                 as: "plan",
             })
             .unwind("plan")
-            .match({ week: week.id.toString(), state: { $in: ["ORDER_BILLED"] } })
+            .match({ week: week.id.toString(), state: { $in: ["ORDER_ACTIVE", "ORDER_BILLED"] } })
             .addFields({
+                numberOfRecipes: {
+                    $reduce: {
+                        input: "$plan.variants",
+                        in: {
+                            $cond: {
+                                if: { $eq: ["$$this._id", "$planVariant"] },
+                                then: { $ifNull: ["$$this.numberOfRecipes", "$$value"] },
+                                else: "$$value",
+                            },
+                        },
+                        initialValue: 0,
+                    },
+                },
+            })
+            .group({
+                _id: null,
+                numberOfRecipesSum: { $sum: "$numberOfRecipes" },
+            });
+
+        return result[0]?.numberOfRecipesSum ?? 0;
+    }
+
+    public async countCustomersWhoChoseRecipesByWeekGroupedByPlan(
+        week: Week
+    ): Promise<{ _id: string; chosenRecipes: number; notChosenRecipes: number }[]> {
+        const group = await MongooseOrder.aggregate()
+            .project({ _id: 1, state: 1, week: 1, plan: 1, recipeSelection: 1 })
+            .lookup({
+                from: "Plan",
+                localField: "plan",
+                foreignField: "_id",
+                as: "plan",
+            })
+            .unwind("$plan")
+            .match({
+                week: week.id.toString(),
+            })
+            .sort({ "plan.name.es": -1 })
+            .group({
+                _id: "$plan.name.es",
+                chosenRecipes: { $sum: { $cond: { if: { $gt: [{ $size: "$recipeSelection" }, 0] }, then: 1, else: 0 } } },
+                notChosenRecipes: { $sum: { $cond: { if: { $gt: [{ $size: "$recipeSelection" }, 0] }, then: 0, else: 1 } } },
+            });
+
+        return group;
+    }
+
+    public async countCustomersWhoChoseRecipesByWeekGroupedByNumberOfPersons(
+        week: Week
+    ): Promise<{ _id: string; chosenRecipes: number; notChosenRecipes: number }[]> {
+        const group = await MongooseOrder.aggregate()
+            .project({ _id: 1, state: 1, week: 1, plan: 1, recipeSelection: 1, planVariant: 1 })
+            .lookup({
+                from: "Plan",
+                localField: "plan",
+                foreignField: "_id",
+                as: "plan",
+            })
+            .unwind("$plan")
+            .match({
+                week: week.id.toString(),
+            })
+            .sort({ "plan.name.es": -1 })
+            .addFields({
+                // match planVariant field with looked up plan variants array field and get number of persons
                 numberOfPersons: {
                     $reduce: {
                         input: "$plan.variants",
@@ -118,11 +183,27 @@ export class MongooseOrderRepository implements IOrderRepository {
                 },
             })
             .group({
-                _id: null,
-                numberOfPersonsSum: { $sum: "$numberOfPersons" },
+                _id: "$numberOfPersons",
+                chosenRecipes: { $sum: { $cond: { if: { $gt: [{ $size: "$recipeSelection" }, 0] }, then: 1, else: 0 } } },
+                notChosenRecipes: { $sum: { $cond: { if: { $gt: [{ $size: "$recipeSelection" }, 0] }, then: 0, else: 1 } } },
             });
 
-        return result[0]?.numberOfPersonsSum ?? 0;
+        return group;
+    }
+
+    public async countActiveCustomersByWeek(week: Week): Promise<number> {
+        const count = await MongooseOrder.aggregate()
+            .project({
+                _id: 1,
+                customer: 1,
+                week: 1,
+                state: 1,
+            })
+            .match({ week: week.id.toString(), state: { $in: ["ORDER_ACTIVE", "ORDER_BILLED"] } })
+            .group({ _id: "$customer", activeCustomers: { $sum: 1 } })
+            .count("activeCustomers");
+
+        return count[0]?.activeCustomers ?? 0;
     }
 
     public async getBilledAmountSumByWeek(week: Week): Promise<number> {
@@ -131,7 +212,7 @@ export class MongooseOrderRepository implements IOrderRepository {
             .lookup({ from: "Plan", localField: "plan", foreignField: "_id", as: "plan" })
             .unwind("plan")
             .addFields({ planType: "$plan.type" })
-            .match({ planType: "Principal", week: week.id.toString(), state: "ORDER_BILLED" })
+            .match({ week: week.id.toString(), state: { $in: ["ORDER_ACTIVE", "ORDER_BILLED"] } })
             .group({ _id: null, billedAmount: { $sum: "$price" } });
 
         return aggregateCount[0]?.billedAmount ?? 0;
@@ -153,7 +234,7 @@ export class MongooseOrderRepository implements IOrderRepository {
     public async getNumberOfPersonsByWeek(week: Week): Promise<number> {
         const aggregateSum = await MongooseOrder.aggregate()
             .project({ price: 1, shippingDate: 1, state: 1, discountAmount: 1, plan: 1, planVariant: 1, week: 1 })
-            .match({ week: week.id.toString(), state: "ORDER_BILLED" })
+            .match({ week: week.id.toString(), state: { $in: ["ORDER_ACTIVE", "ORDER_BILLED"] } })
             .lookup({ from: "Plan", localField: "plan", foreignField: "_id", as: "plan" })
             .unwind("$plan")
             .addFields({
@@ -166,8 +247,12 @@ export class MongooseOrderRepository implements IOrderRepository {
                     },
                 },
             })
-            .match({ planType: "Principal" })
-            .group({ _id: null, numberOfPersons: { $sum: "$variant.numberOfPersons" } });
+            .group({
+                _id: null,
+                numberOfPersons: {
+                    $sum: { $multiply: [{ $ifNull: ["$variant.numberOfPersons", 0] }, { $ifNull: ["$variant.numberOfRecipes", 0] }] },
+                },
+            });
 
         return aggregateSum[0].numberOfPersons;
     }

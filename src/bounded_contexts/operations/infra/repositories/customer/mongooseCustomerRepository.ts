@@ -3,7 +3,6 @@ import { ICustomerRepository } from "./ICustomerRepository";
 import { Customer as MongooseCustomer } from "../../../../../infraestructure/mongoose/models";
 import { customerMapper } from "../../../mappers/customerMapper";
 import { CustomerId } from "../../../domain/customer/CustomerId";
-import { Subscription as MongooseSubscription } from "../../../../../infraestructure/mongoose/models";
 import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 
 export class MongooseCustomerRepository implements ICustomerRepository {
@@ -87,9 +86,29 @@ export class MongooseCustomerRepository implements ICustomerRepository {
             .project({
                 _id: 1,
             })
-            .lookup({ from: "Subscription", localField: "_id", foreignField: "customer", as: "sub" })
-            .unwind("$sub")
-            .match({ "sub.state": "SUBSCRIPTION_ACTIVE", shippingDate: { $gte: week.minDay, $lte: week.maxDay } })
+            .lookup({ from: "Order", localField: "_id", foreignField: "customer", as: "orders" })
+            .match({
+                $expr: {
+                    $gt: [
+                        {
+                            $size: {
+                                $ifNull: [
+                                    {
+                                        $filter: {
+                                            input: "$orders",
+                                            as: "order",
+                                            cond: { $eq: [{ $getField: { field: "state", input: "order" } }, "ORDER_BILLED"] },
+                                        },
+                                    },
+                                    [],
+                                ],
+                            },
+                        },
+                        0,
+                    ],
+                },
+                week: week.id.toString(),
+            })
             .group({ _id: "$_id", activeSubscriptions: { $sum: {} } })
             .count("activeCustomers");
 
