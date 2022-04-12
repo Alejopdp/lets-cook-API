@@ -14,8 +14,8 @@ export const connectToDatabase = async () => {
         });
         mongoose.set("debug", true);
 
-        await resetDatabase();
-        logger.info("Database connected: ", process.env.NODE_ENV);
+        // await resetDatabase();
+        logger.info("Database connected");
     } catch (error) {
         console.log(error);
         logger.error(error);
