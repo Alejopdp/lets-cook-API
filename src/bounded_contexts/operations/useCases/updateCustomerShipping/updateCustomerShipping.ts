@@ -61,9 +61,7 @@ export class UpdateCustomerShipping {
         const preferredDeliveryTime = dto.deliveryTime ? PreferredDeliveryTimeFactory.createDeliveryTime(dto.deliveryTime) : undefined;
 
         customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, preferredDeliveryTime);
-        paymentOrders.forEach((order) =>
-            order.state.isActive() && !order.hasFreeShipping ? (order.shippingCost = customerNewShippingZone.cost) : ""
-        );
+        paymentOrders.forEach((order) => (!order.hasFreeShipping ? (order.shippingCost = customerNewShippingZone.cost) : ""));
         orders.forEach((order) => order.moveShippingDateToDIfferentDayNumberOfSameWeek(customerNewShippingZone.getDayNumberOfWeek()));
 
         await this.paymentOrderRepository.updateMany(paymentOrders);
