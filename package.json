@@ -1,7 +1,7 @@
 {
     "name": "lets_cook_now_api",
     "version": "1.0.0",
-    "description": "Let's cook API",
+    "description": "Let's Cook Now API",
     "main": "server.ts",
     "engines": {
         "npm": ">=7.0.0",
