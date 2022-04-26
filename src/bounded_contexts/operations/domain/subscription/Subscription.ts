@@ -346,7 +346,7 @@ export class Subscription extends Entity<Subscription> {
     public getPriceByFrequencyLabel(locale: Locale): string {
         const text = { es: { totalValue: "Valor total:" }, en: { totalValue: "Total value:" }, ca: { totalValue: "Valor total:" } };
 
-        return `${text[locale].totalValue} ${this.price} €/ ${this.frequency.getLabel(locale)}`;
+        return `${text[locale].totalValue} ${this.getPrice()} €/ ${this.frequency.getLabel(locale)}`;
     }
 
     public getPrice(): number {

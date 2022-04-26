@@ -119,7 +119,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
                 stateTitle: subscription.state.title,
             },
             servingsLabel: subscription.getServingsLabel(),
-            price: subscription.price,
+            price: subscription.getPrice(),
             priceLabel: subscription.getPriceByFrequencyLabel(locale),
             icon: await this.storageService.getPresignedUrlForFile(subscription.plan.iconLinealColorUrl),
         };

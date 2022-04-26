@@ -64,7 +64,7 @@ export class GetCustomerSubscriptionsPresenter {
             const presentedSubscription = {
                 id: subscription.id.toString(),
                 planId: subscription.plan.id.toString(),
-                planVariantPrice: subscription.price,
+                planVariantPrice: subscription.getPrice(),
                 planVariantId: subscription.planVariantId.value,
                 planName: subscription.plan.name,
                 planVariantLabel: subscription.getPlanVariantLabel(locale) || "",
