@@ -84,7 +84,6 @@
         "@types/point-in-polygon": "^1.1.1",
         "@types/shallowequal": "^1.1.1",
         "@types/uuid": "^8.3.4",
-        "@types/winston": "^2.4.4",
         "source-map-support": "^0.5.21",
         "ts-loader": "^8.0.2",
         "webpack": "^4.44.1",
