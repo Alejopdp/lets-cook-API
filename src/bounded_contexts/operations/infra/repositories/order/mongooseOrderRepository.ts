@@ -493,6 +493,13 @@ export class MongooseOrderRepository implements IOrderRepository {
         return await this.findBy({ subscription: subscriptionId.toString() });
     }
 
+    public async findOneTimeSubscriptionAndFutureOrders(locale: Locale): Promise<Order[]> {
+        return await this.findBy(
+            { shippingDate: { $gte: new Date() }, state: "ORDER_BILLED", "subscription.frequency": "one_time" },
+            locale
+        );
+    }
+
     public async findFutureOrdersByShippingDayOfWeek(shippingDay: Day, locale: Locale = Locale.es): Promise<Order[]> {
         const ordersDb = await MongooseOrder.aggregate([
             {

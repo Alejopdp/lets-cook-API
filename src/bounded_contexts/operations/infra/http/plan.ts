@@ -11,6 +11,8 @@ import { getAdditionalPlansByPlanIdController } from "../../useCases/getAddition
 import { getPlanVariantsRecipesByWeekListController } from "../../useCases/getPlanVariantsRecipesByWeek";
 import { getDataForSwappingAPlanController } from "../../useCases/getDataForSwappingAPlan";
 import { getPlanAhorroController } from "../../useCases/getPlanAhorro";
+import { Permission } from "../../../../bounded_contexts/IAM/domain/permission/Permission";
+import { middleware } from "../../../../shared/middleware";
 
 const planRouter = express.Router();
 
@@ -28,21 +30,32 @@ planRouter.get("/ahorro", (req, res) => getPlanAhorroController.execute(req, res
 planRouter.get("/:id", (req, res) => getPlanByIdController.execute(req, res));
 
 // PUT
-planRouter.put("/toggle-state/:id", (req, res) => togglePlanStateController.execute(req, res));
-planRouter.put("/:id", multer(options).single("planImage"), (req, res) => updatePlanController.execute(req, res));
+planRouter.put("/toggle-state/:id", middleware.ensureAdminAuthenticated([Permission.UPDATE_PLAN]), (req, res) =>
+    togglePlanStateController.execute(req, res)
+);
+planRouter.put(
+    "/:id",
+    [multer(options).single("planImage"), middleware.ensureAdminAuthenticated([Permission.UPDATE_PLAN])],
+    (req: any, res: any) => updatePlanController.execute(req, res)
+);
 
 // POSTs
 planRouter.post(
     "/",
-    multer(options).fields([
-        { name: "planImage", maxCount: 1 },
-        { name: "icon", maxCount: 1 },
-        { name: "iconWithColor", maxCount: 1 },
-    ]),
-    (req, res) => createPlanController.execute(req, res)
+    [
+        multer(options).fields([
+            { name: "planImage", maxCount: 1 },
+            { name: "icon", maxCount: 1 },
+            { name: "iconWithColor", maxCount: 1 },
+        ]),
+        middleware.ensureAdminAuthenticated([Permission.CREATE_PLAN]),
+    ],
+    (req: any, res: any) => createPlanController.execute(req, res)
 );
 
 // DELETEs
-planRouter.delete("/:id", (req, res) => deletePlanController.execute(req, res));
+planRouter.delete("/:id", middleware.ensureAdminAuthenticated([Permission.DELETE_PLAN]), (req, res) =>
+    deletePlanController.execute(req, res)
+);
 
 export { planRouter };

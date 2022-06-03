@@ -17,17 +17,18 @@ export class RecipeMapper implements Mapper<Recipe> {
     public toDomain(raw: any, locale?: Locale): Recipe {
         const recipeGeneralData: RecipeGeneralData = recipeGeneralDataMapper.toDomain(raw.recipeGeneralData, locale);
         const recipeVariants: RecipeVariant[] = raw.recipeVariants.map((variant: any) => recipeVariantMapper.toDomain(variant, locale));
-        const imageTags: RecipeTag[] = raw.imageTags.map((tag: any) => new RecipeTag(tag));
-        const backOfficeImageTags: RecipeTag[] = raw.imageTags.map((tag: any) => new RecipeTag(tag));
+        const imageTags: RecipeTag[] = raw.imageTags[locale ?? Locale.es].map((tag: string) => new RecipeTag(tag));
+        const backOfficeImageTags: RecipeTag[] = raw.backOfficeTags.map((tag: any) => new RecipeTag(tag));
         const availableWeeks: Week[] = raw.availableWeeks.map((rawWeek: any) => weekMapper.toDomain(rawWeek));
         const availableMonths: Month[] = raw.availableMonths.map((month: any) => (<any>Month)[month]);
         const relatedPlansIds: PlanId[] = raw.relatedPlans.map((id: string) => new PlanId(id));
         const recipeTools: string[] = raw.tools;
         const nutritionalItems: NutritionalItem[] = raw.nutritionalInfo.map(
-            (item: { key: string; value: string }) => new NutritionalItem(item.key, item.value)
+            (item: { [locale: string]: { key: string; value: string } }) => {
+                return new NutritionalItem(item[locale ?? "es"].key, item[locale ?? "es"].value, item["_id"].toString());
+            }
         );
         const recipeNutritionalData: RecipeNutritionalData = new RecipeNutritionalData(nutritionalItems);
-
         return new Recipe(
             recipeGeneralData,
             recipeVariants,
@@ -49,7 +50,11 @@ export class RecipeMapper implements Mapper<Recipe> {
         const availableWeeks = t.availableWeeks.map((week) => week.id.value);
         const backOfficeTags = t.recipeBackOfficeTags.map((tag) => tag.name);
         const relatedPlans = t.relatedPlans.map((planId) => planId.value);
-        const nutritionalInfo = t.recipeNutritionalData.nutritionalItems.map((item) => ({ key: item.key, value: item.value }));
+        const nutritionalInfo = t.recipeNutritionalData.nutritionalItems.map((item) => ({
+            key: item.key,
+            value: item.value,
+            _id: item.id,
+        }));
         const imageTags = t.recipeImageTags.map((tag) => tag.name);
 
         return {
