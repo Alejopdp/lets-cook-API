@@ -6,12 +6,7 @@ export const connectToDatabase = async () => {
     const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
 
     try {
-        await mongoose.connect(mongoUri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-            useCreateIndex: true,
-        });
+        await mongoose.connect(mongoUri);
         mongoose.set("debug", true);
 
         // await resetDatabase();
