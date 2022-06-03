@@ -22,7 +22,7 @@ export class CheckIfEmailExistsController extends BaseController {
 
             if (!exists) return this.fail(`No existe ningún cliente con el correo ${dto.email}`);
             return this.ok(this.res, exists);
-        } catch (err) {
+        } catch (err: any) {
             return this.fail(err);
         }
     }

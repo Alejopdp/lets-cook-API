@@ -2,7 +2,7 @@ import { Mapper } from "../../../core/infra/Mapper";
 import { Permission } from "../domain/permission/Permission";
 import { Role } from "../domain/role/Role";
 
-export class RoleMapper implements Mapper<Role> {
+export class RoleMapper implements Mapper<Role, any> {
     public toDomain(raw: any): Role {
         const permissions: Permission[] = raw.permissions.map((permission: string) => (<any>Permission)[permission]);
 

@@ -22,7 +22,7 @@ export class CreateRateController extends BaseController {
             await this.createRate.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

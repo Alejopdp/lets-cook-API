@@ -36,8 +36,8 @@ export class ExportCancellations {
                 Array.isArray(customerActiveSubscriptionsMap[actualKey]) && subscription.state.isActive()
                     ? [...customerActiveSubscriptionsMap[actualKey], subscription]
                     : subscription.state.isActive()
-                    ? [subscription]
-                    : customerActiveSubscriptionsMap[actualKey] || [];
+                        ? [subscription]
+                        : customerActiveSubscriptionsMap[actualKey] || [];
         }
 
         for (let order of ordersOfCancelledSubcriptions) {
@@ -47,8 +47,6 @@ export class ExportCancellations {
 
             subscriptionOrdersMap[order.subscriptionId.toString()] = [...subscriptionOrdersMap[order.subscriptionId.toString()], order];
         }
-
-        console.log("A VER EL MAPA: ", subscriptionOrdersMap);
 
         for (let subscription of cancelledSubscriptions) {
             exportRows.push({

@@ -25,7 +25,7 @@ export class GetPlanAhorroController extends BaseController {
             const presentedResult = await this.getPlanAhorroPresenter.present(result, dto.locale);
 
             return this.ok(this.res, presentedResult);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

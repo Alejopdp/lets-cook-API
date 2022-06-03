@@ -24,7 +24,7 @@ export class UpdatePasswordWithoutCodeController extends BaseController {
             // fs.unlinkSync(planImagePath);
 
             return this.ok(this.res, { result: "Successfully modified" });
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -1,5 +1,4 @@
 import { planVariantMapper } from "..";
-import { logger } from "../../../../../config";
 import { Mapper } from "../../../../core/infra/Mapper";
 import { Locale } from "../../domain/locale/Locale";
 import { Plan } from "../../domain/plan/Plan";
@@ -11,7 +10,7 @@ import { PlanSlug } from "../../domain/plan/PlanSlug";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 
-export class PlanMapper implements Mapper<Plan> {
+export class PlanMapper implements Mapper<Plan, any> {
     public toDomain(raw: any, locale: Locale): Plan {
         const sku: PlanSku = new PlanSku(raw.sku);
         const type: PlanType = (<any>PlanType)[raw.type];

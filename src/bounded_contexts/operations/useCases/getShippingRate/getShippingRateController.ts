@@ -28,7 +28,7 @@ export class GetShippingRateController extends BaseController {
             const presented = this.getShippingRatePresenter.present(result.shippingZone, result.hasNextShipping);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             return this.fail(error);
         }

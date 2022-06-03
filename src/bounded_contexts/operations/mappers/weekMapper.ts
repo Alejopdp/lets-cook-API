@@ -3,7 +3,7 @@ import { Locale } from "../domain/locale/Locale";
 import { Week } from "../domain/week/Week";
 import { WeekId } from "../domain/week/WeekId";
 
-export class WeekMapper implements Mapper<Week> {
+export class WeekMapper implements Mapper<Week, any> {
     public toDomain(raw: any, locale?: Locale): Week {
         return new Week(raw.minDay, raw.maxDay, new WeekId(raw._id));
     }

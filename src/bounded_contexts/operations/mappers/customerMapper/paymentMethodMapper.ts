@@ -3,7 +3,7 @@ import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod
 import { PaymentMethodId } from "../../domain/customer/paymentMethod/PaymentMethodId";
 import { Locale } from "../../domain/locale/Locale";
 
-export class PaymentMethodMapper extends Mapper<PaymentMethod> {
+export class PaymentMethodMapper extends Mapper<PaymentMethod, any> {
     public toDomain(raw: any, locale?: Locale): PaymentMethod {
         return new PaymentMethod(
             raw.brand,

@@ -11,15 +11,16 @@ import { RecipeRestrictionId } from "../../../domain/recipe/RecipeVariant/recipe
 import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariantSku";
 import { Locale } from "../../../domain/locale/Locale";
 import { RecipeNutritionalData } from "@src/bounded_contexts/operations/domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
+import { PersistenceRecipe } from "@src/bounded_contexts/operations/mappers/recipeMapper/recipeMapper";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
     public async save(recipe: Recipe, locale: Locale = Locale.es): Promise<void> {
-        const recipeDb = recipeMapper.toPersistence(recipe, locale);
+        const recipeDb = recipeMapper.toPersistence(recipe, locale) as Partial<PersistenceRecipe>;
         const alreadySavedRecipe = await RecipeModel.findById(recipe.id.toString());
 
         if (alreadySavedRecipe) {
             const auxRecipeGeneralData = { ...recipeDb.recipeGeneralData };
-            const newImageTagsForLocale = [...recipeDb.imageTags];
+            const newImageTagsForLocale = [...(recipeDb?.imageTags ?? [])];
             delete recipeDb.recipeGeneralData;
             delete recipeDb.imageTags;
             const nameWithLocaleKey = `recipeGeneralData.name.${locale}`;
@@ -39,16 +40,16 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                     [imageTagsWithLocaleKey]: newImageTagsForLocale,
                     $set: {
                         ...auxRecipeGeneralData,
-                        [nameWithLocaleKey]: auxRecipeGeneralData.name[locale],
-                        [shortDescriptionWithLocaleKey]: auxRecipeGeneralData.recipeDescription.shortDescription[locale],
-                        [longDescriptionWithLocaleKey]: auxRecipeGeneralData.recipeDescription.longDescription[locale],
+                        [nameWithLocaleKey]: auxRecipeGeneralData?.name?.[locale] ?? "",
+                        [shortDescriptionWithLocaleKey]: auxRecipeGeneralData?.recipeDescription?.shortDescription[locale],
+                        [longDescriptionWithLocaleKey]: auxRecipeGeneralData?.recipeDescription?.longDescription[locale],
                         "recipeGeneralData.recipeCookDuration": {
-                            timeValue: auxRecipeGeneralData.recipeCookDuration.timeValue,
-                            timeUnit: auxRecipeGeneralData.recipeCookDuration.timeUnit,
+                            timeValue: auxRecipeGeneralData?.recipeCookDuration?.timeValue,
+                            timeUnit: auxRecipeGeneralData?.recipeCookDuration?.timeUnit,
                         },
                         "recipeGeneralData.recipeWeight": {
-                            weightValue: auxRecipeGeneralData.recipeWeight.weightValue,
-                            weightUnit: auxRecipeGeneralData.recipeWeight.weightUnit,
+                            weightValue: auxRecipeGeneralData?.recipeWeight?.weightValue,
+                            weightUnit: auxRecipeGeneralData?.recipeWeight?.weightUnit,
                         },
                         "recipeGeneralData.sku": auxRecipeGeneralData.sku,
                         "recipeGeneralData.imagesUrls": auxRecipeGeneralData.imagesUrls,
@@ -59,8 +60,8 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         } else {
             const newRecipe = {
                 ...recipeDb,
-                nutritionalInfo: this.getNutritionalInfoForCreatingItInMongo(recipeDb.nutritionalInfo),
-                imageTags: this.getImageTagsForCreatingThemInMongo(recipeDb.imageTags),
+                nutritionalInfo: this.getNutritionalInfoForCreatingItInMongo(recipeDb?.nutritionalInfo ?? []),
+                imageTags: this.getImageTagsForCreatingThemInMongo(recipeDb?.imageTags ?? []),
             };
             await RecipeModel.create(newRecipe);
         }
@@ -197,7 +198,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     private getUpdatedNutritionalInfoForMongo(
         newNutritionalData: RecipeNutritionalData,
         //@ts-ignore
-        oldValues: { _id: string; [locale: string]: { key: string; value: string } }[],
+        oldValues: { _id: string;[locale: string]: { key: string; value: string } }[],
         locale: Locale
     ): any {
         const finalArray: any[] = [];

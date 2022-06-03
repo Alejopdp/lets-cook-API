@@ -24,8 +24,8 @@ export class CustomerEmailValidationController extends BaseController {
 
             const result = await this.customerEmailValidation.execute(dto);
 
-            return this.ok(this.res, {emailExist: result});
-        } catch (error) {
+            return this.ok(this.res, { emailExist: result });
+        } catch (error: any) {
             return this.fail(error);
         }
     }

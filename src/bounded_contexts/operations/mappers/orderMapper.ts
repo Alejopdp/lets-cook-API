@@ -15,7 +15,7 @@ import { SubscriptionId } from "../domain/subscription/SubscriptionId";
 import { Week } from "../domain/week/Week";
 import { customerMapper } from "./customerMapper";
 
-export class OrderMapper implements Mapper<Order> {
+export class OrderMapper implements Mapper<Order, any> {
     public toDomain(raw: any, locale: Locale = Locale.es): Order {
         const state: IOrderState = OrderStateFactory.createState(raw.state);
         const week: Week = weekMapper.toDomain(raw.week);

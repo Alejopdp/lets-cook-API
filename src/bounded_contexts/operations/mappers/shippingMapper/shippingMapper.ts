@@ -1,11 +1,10 @@
 import { ShippingZoneId } from "../../domain/shipping/ShippingZoneId";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
-
 import { Mapper } from "../../../../core/infra/Mapper";
 import { ShippingZoneRadio } from "../../domain/shipping/ShippingZoneRadio/ShippingZoneRadio";
 import { Coordinates } from "../../domain/shipping/ShippingZoneRadio/Coordinates";
 import { Day } from "../../domain/day/Day";
-export class ShippingMapper implements Mapper<ShippingZone> {
+export class ShippingMapper implements Mapper<ShippingZone, any> {
     public toDomain(raw: any): ShippingZone {
         const radio: ShippingZoneRadio = new ShippingZoneRadio(
             raw.radio.map((radio: any) => new Coordinates(radio.latitude, radio.longitude))

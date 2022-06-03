@@ -18,7 +18,7 @@ export abstract class BaseController {
         // const sentryTransaction = sentryService.createTransaction(this.req.method, this.req.originalUrl);
         try {
             await this.executeImpl();
-        } catch (error) {
+        } catch (error: any) {
             // sentryService.catchException(error);
         } finally {
             // sentryService.endTransaction(sentryTransaction);

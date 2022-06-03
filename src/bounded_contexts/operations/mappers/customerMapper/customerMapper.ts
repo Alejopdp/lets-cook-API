@@ -10,7 +10,7 @@ import { paymentMethodMapper } from ".";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PersonalInfo } from "../../domain/customer/personalInfo/PersonalInfo";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
-export class CustomerMapper implements Mapper<Customer> {
+export class CustomerMapper implements Mapper<Customer, any> {
     public toDomain(raw: any): Customer {
         const shippingAddress: Address | undefined = raw.shippingAddress ? addressMapper.toDomain(raw.shippingAddress) : undefined;
         const billingAddress: Billing | undefined = raw.billingAddress ? billingMapper.toDomain(raw.billingAddress) : undefined;

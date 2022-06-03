@@ -15,7 +15,7 @@ export class ExportSubscriptionsController extends BaseController {
             await this.exportSubscriptions.execute();
 
             return this.res.download("Suscripciones.xlsx", (err) => fs.unlinkSync("Suscripciones.xlsx"));
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

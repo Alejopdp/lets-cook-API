@@ -6,7 +6,25 @@ import { RecipeGeneralData } from "../../domain/recipe/RecipeGeneralData/RecipeG
 import { RecipeSku } from "../../domain/recipe/RecipeGeneralData/RecipeSku";
 import { RecipeWeight } from "../../domain/recipe/RecipeGeneralData/RecipeWeight";
 
-export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
+export interface DatabaseRecipeGeneralData {
+    name: { [locale: string]: string },
+    recipeDescription: {
+        shortDescription: { [locale: string]: string },
+        longDescription: { [locale: string]: string },
+    },
+    recipeCookDuration: {
+        timeValue: number
+        timeUnit: string
+    },
+    recipeWeight: {
+        weightValue: number
+        weightUnit: string
+    },
+    sku: string
+    imagesUrls: string[],
+    difficultyLevel: string
+}
+export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData, DatabaseRecipeGeneralData> {
     public toDomain(raw: any, locale: Locale = Locale.es): RecipeGeneralData {
         const recipeDescription: RecipeDescription = new RecipeDescription(
             raw.recipeDescription.shortDescription[locale] || raw.recipeDescription.shortDescription[Locale.es] || "",
@@ -25,7 +43,7 @@ export class RecipeGeneralDataMapper implements Mapper<RecipeGeneralData> {
             raw.imagesUrls
         );
     }
-    public toPersistence(t: RecipeGeneralData, locale: Locale = Locale.es) {
+    public toPersistence(t: RecipeGeneralData, locale: Locale = Locale.es): DatabaseRecipeGeneralData {
         return {
             name: { [locale]: t.name },
             recipeDescription: {

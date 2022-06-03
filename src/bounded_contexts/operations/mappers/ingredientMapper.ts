@@ -2,7 +2,7 @@ import { Mapper } from "../../../core/infra/Mapper";
 import { Ingredient } from "../domain/ingredient/ingredient";
 import { Locale } from "../domain/locale/Locale";
 
-export class IngredientMapper implements Mapper<Ingredient> {
+export class IngredientMapper implements Mapper<Ingredient, any> {
     public toDomain(raw: any, locale: Locale = Locale.es): Ingredient {
         return new Ingredient(raw.name[locale], raw._id);
     }

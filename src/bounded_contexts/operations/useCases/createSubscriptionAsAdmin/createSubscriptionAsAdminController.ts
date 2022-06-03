@@ -32,7 +32,7 @@ export class CreateSubscriptionAsAdminController extends BaseController {
 
             return this.ok(this.res, { subscriptionId: result.subscription.id.value });
             // return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -19,7 +19,7 @@ export class DeleteRecipeRatingController extends BaseController {
             // await this.deleteRecipeRating.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -25,7 +25,7 @@ export class GetDataForSwappingAPlanController extends BaseController {
             const presented = this.getDataForSwappingAPlanPresenter.present(result.subscription, result.plans);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

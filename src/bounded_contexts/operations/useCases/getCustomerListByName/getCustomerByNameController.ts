@@ -20,7 +20,7 @@ export class GetCustomerByNameController extends BaseController {
             const result = await this.getCustomerByName.execute(dto);
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             return this.fail(error);
         }

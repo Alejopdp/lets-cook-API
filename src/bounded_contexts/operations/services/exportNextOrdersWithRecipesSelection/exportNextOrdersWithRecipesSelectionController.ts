@@ -27,7 +27,7 @@ export class ExportNextOrdersWithRecipesSelectionController extends BaseControll
             await this.exportNextOrdersWithRecipesSelection.execute(dto);
 
             return this.res.download("Selección de recetas.xlsx", (err) => fs.unlinkSync("Selección de recetas.xlsx"));
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

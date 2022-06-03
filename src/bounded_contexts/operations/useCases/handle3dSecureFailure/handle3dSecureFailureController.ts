@@ -25,7 +25,7 @@ export class Handle3dSecureFailureController extends BaseController {
             await this.handle3dSecureFailure.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

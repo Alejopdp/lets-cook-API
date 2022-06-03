@@ -25,7 +25,7 @@ export class GetCustomerByIdController extends BaseController {
             const presented = this.getCustomerByIdPresenter.present(result, dto.locale);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             return this.fail(error);
         }

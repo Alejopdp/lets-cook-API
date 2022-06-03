@@ -32,7 +32,7 @@ export class UpdateCustomerBillingController extends BaseController {
             await this.updateCustomer.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

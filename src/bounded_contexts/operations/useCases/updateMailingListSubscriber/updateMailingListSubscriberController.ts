@@ -20,7 +20,7 @@ export class UpdateMailingListSubscriberController extends BaseController {
             await this.UpdateMailingListSubscriber.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
             return this.fail(error);
         }

@@ -25,7 +25,7 @@ export class GetRecipesForOrderController extends BaseController {
             const presented = await this.getRecipesForOrderPresenter.present(recipes, order, subscription, dto.locale);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

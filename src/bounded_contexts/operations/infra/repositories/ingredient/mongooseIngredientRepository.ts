@@ -8,7 +8,7 @@ import { IngredientId } from "@src/bounded_contexts/operations/domain/ingredient
 export class MongooseIngredientRepository implements IIngredientRepository {
     public async save(ingredient: Ingredient, locale: Locale = Locale.es): Promise<void> {
         const ingredientToSave = ingredientMapper.toPersistence(ingredient, locale);
-        const exists: boolean = await IngredientModel.exists({ _id: ingredientToSave._id });
+        const exists: boolean = (await IngredientModel.exists({ _id: ingredientToSave._id })) !== null;
 
         if (exists) {
             const nameLocaleKey = `name.${locale}`;

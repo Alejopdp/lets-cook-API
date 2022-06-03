@@ -27,7 +27,7 @@ export class RetryPaymentOfRejectedPaymentOrderController extends BaseController
             const presented = this.retryPaymentOfRejectedPaymentOrderPresenter.present(paymentOrder);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error as Error);
         }
     }

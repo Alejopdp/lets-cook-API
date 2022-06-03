@@ -124,9 +124,9 @@ export class PayAllSubscriptions {
                     const totalAmount = customerHasFreeShipping
                         ? (Math.round(paymentOrderToBill.amount * 100) - Math.round(paymentOrderToBill.discountAmount * 100)) / 100
                         : (Math.round(paymentOrderToBill.amount * 100) -
-                              Math.round(paymentOrderToBill.discountAmount * 100) +
-                              Math.round(shippingCost * 100)) /
-                          100;
+                            Math.round(paymentOrderToBill.discountAmount * 100) +
+                            Math.round(shippingCost * 100)) /
+                        100;
 
                     var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
                         id: "",
@@ -172,7 +172,7 @@ export class PayAllSubscriptions {
                     }
 
                     paymentOrderToBill.paymentIntentId = paymentIntent.id;
-                } catch (error) {
+                } catch (error: any) {
                     // @ts-ignore
                     logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
                     paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);

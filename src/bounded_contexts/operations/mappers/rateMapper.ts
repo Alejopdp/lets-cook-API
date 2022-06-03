@@ -5,7 +5,7 @@ import { RecipeRatingId } from "../domain/recipeRating/RecipeRatingId";
 import { recipeMapper } from "./recipeMapper";
 import { Locale } from "../domain/locale/Locale";
 
-export class RateMapper implements Mapper<RecipeRating> {
+export class RateMapper implements Mapper<RecipeRating, any> {
     public toDomain(raw: any, locale: Locale): RecipeRating {
         const customerId = new CustomerId(raw.customer);
         const recipe = recipeMapper.toDomain(raw.recipe, locale);

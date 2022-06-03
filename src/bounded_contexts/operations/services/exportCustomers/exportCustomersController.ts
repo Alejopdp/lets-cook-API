@@ -15,7 +15,7 @@ export class ExportCustomersController extends BaseController {
             await this.exportCustomers.execute();
 
             return this.res.download("Clientes.xlsx", (err) => fs.unlinkSync("Clientes.xlsx"));
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

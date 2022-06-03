@@ -23,7 +23,7 @@ export class Handle3dSecureFailureForManySubscriptionsController extends BaseCon
             await this.handle3dSecureFailureForManySubscriptions.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

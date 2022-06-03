@@ -15,7 +15,7 @@ import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
 import { couponMapper } from "../couponMapper";
 import { Coupon } from "../../domain/cupons/Cupon";
 
-export class SubscriptionMapper implements Mapper<Subscription> {
+export class SubscriptionMapper implements Mapper<Subscription, any> {
     public toDomain(raw: any, locale?: Locale): Subscription {
         const frequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(raw.frequency);
         const restriction: RecipeVariantRestriction | undefined = !!raw.restriction
@@ -27,11 +27,11 @@ export class SubscriptionMapper implements Mapper<Subscription> {
         const coupon: Coupon | undefined = !!raw.coupon ? couponMapper.toDomain(raw.coupon) : undefined;
         const cancellation: CancellationReason | undefined = raw.cancellation
             ? new CancellationReason(
-                  raw.cancellation.reason,
-                  raw.cancellation.cancelledBy ?? "",
-                  raw.cancellation.comment,
-                  new Date(raw.cancellation.date)
-              )
+                raw.cancellation.reason,
+                raw.cancellation.cancelledBy ?? "",
+                raw.cancellation.comment,
+                new Date(raw.cancellation.date)
+            )
             : undefined;
 
         return new Subscription(
@@ -56,11 +56,11 @@ export class SubscriptionMapper implements Mapper<Subscription> {
     public toPersistence(t: Subscription, locale?: Locale) {
         const cancellation = !!t.cancellationReason
             ? {
-                  reason: t.cancellationReason.title,
-                  cancelledBy: t.cancellationReason.cancelledBy ?? "",
-                  comment: t.cancellationReason.comment,
-                  date: t.cancellationReason.date,
-              }
+                reason: t.cancellationReason.title,
+                cancelledBy: t.cancellationReason.cancelledBy ?? "",
+                comment: t.cancellationReason.comment,
+                date: t.cancellationReason.date,
+            }
             : null;
 
         return {

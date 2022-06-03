@@ -30,7 +30,7 @@ export class GetCustomersubscriptionsController extends BaseController {
             );
 
             return this.ok(this.res, presentedResult);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -105,7 +105,7 @@ export class Middleware {
                 } else {
                     return this.endRequest(403, "No estás autorizado para realizar la petición", res);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 console.log(error);
                 return this.endRequest(403, "No estás autorizado para realizar la petición", res);
             }
@@ -156,7 +156,7 @@ export class Middleware {
                 req["decode"] = token;
 
                 next();
-            } catch (error) {
+            } catch (error: any) {
                 return this.endRequest(403, "La sesión ha expirado", res);
             }
         };

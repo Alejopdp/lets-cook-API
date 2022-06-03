@@ -29,7 +29,7 @@ export class AddPaymentMethodController extends BaseController {
             const presented = this.addPaymentMethodPresenter.present(paymentMethod, dto.locale);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

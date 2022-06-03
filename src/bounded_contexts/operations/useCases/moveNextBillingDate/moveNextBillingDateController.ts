@@ -26,7 +26,7 @@ export class MoveNextBillingDateController extends BaseController {
             // const presented = this.moveNextBillingDatePresenter.present(result)
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -23,7 +23,7 @@ export class GetDataForGeneratingPasswordController extends BaseController {
             const result = await this.useCase.execute(dto);
 
             return this.ok(this.res, result);
-        } catch (err) {
+        } catch (err: any) {
             return this.fail(err);
         }
     }

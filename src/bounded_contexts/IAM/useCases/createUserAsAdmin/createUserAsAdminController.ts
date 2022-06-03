@@ -22,7 +22,7 @@ export class CreateUserAsAdminController extends BaseController {
             await this.useCase.execute(dto);
 
             return this.ok(this.res);
-        } catch (err) {
+        } catch (err: any) {
             return this.fail(err);
         }
     }

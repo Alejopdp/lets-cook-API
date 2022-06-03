@@ -70,7 +70,7 @@ export class CreatePlanController extends BaseController {
             fs.unlinkSync(iconWithColorPath);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

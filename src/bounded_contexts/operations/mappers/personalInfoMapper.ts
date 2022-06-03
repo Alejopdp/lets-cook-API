@@ -2,7 +2,7 @@ import { Mapper } from "../../../core/infra/Mapper";
 import { PersonalInfo } from "../domain/customer/personalInfo/PersonalInfo";
 import { PersonalInfoId } from "../domain/customer/personalInfo/PersonalInfoId";
 
-export class PersonalInfoMapper implements Mapper<PersonalInfo> {
+export class PersonalInfoMapper implements Mapper<PersonalInfo, any> {
     public toDomain(raw: any): PersonalInfo {
         return new PersonalInfo(
             raw.name,

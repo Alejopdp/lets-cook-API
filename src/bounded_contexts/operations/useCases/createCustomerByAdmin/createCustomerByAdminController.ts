@@ -45,7 +45,7 @@ export class CreateCustomerByAdminController extends BaseController {
             // const presented = this.signUpPresenter.present(result);
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

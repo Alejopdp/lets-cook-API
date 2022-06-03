@@ -18,7 +18,7 @@ export class ExportCancellationsController extends BaseController {
             await this.exportCancellations.execute(dto);
 
             return this.res.download("Cancelaciones.xlsx", (err) => fs.unlinkSync("Cancelaciones.xlsx"));
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -23,7 +23,7 @@ export class MoveOrderShippingDateController extends BaseController {
             const presented = this.moveOrderShippingDatePresenter.present(result)
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }
@@ -41,8 +41,8 @@ export class MoveOrderShippingDateController extends BaseController {
      * Getter moveOrderShippingDatePresenter
      * @return {MoveOrderShippingDatePresenter}
      */
-	public get moveOrderShippingDatePresenter(): MoveOrderShippingDatePresenter {
-		return this._moveOrderShippingDatePresenter;
-	}
+    public get moveOrderShippingDatePresenter(): MoveOrderShippingDatePresenter {
+        return this._moveOrderShippingDatePresenter;
+    }
 
 }

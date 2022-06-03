@@ -7,7 +7,7 @@ import { UserId } from "../domain/user/UserId";
 import { UserName } from "../domain/user/UserName";
 import { UserPassword } from "../domain/user/UserPassword";
 
-export class UserMapper extends Mapper<User> {
+export class UserMapper extends Mapper<User, any> {
     public toDomain(raw: any): User {
         const role: Role = roleMapper.toDomain(raw.roleId);
         const name: UserName = new UserName(raw.firstName, raw.lastName);

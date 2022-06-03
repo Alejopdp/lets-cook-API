@@ -22,7 +22,7 @@ export class SubscribeToMailingListGroupController extends BaseController {
             await this.SubscribeToMailingListGroup.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
             return this.fail(error);
         }

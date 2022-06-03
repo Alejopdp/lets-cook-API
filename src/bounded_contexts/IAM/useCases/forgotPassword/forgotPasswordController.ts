@@ -20,7 +20,7 @@ export class ForgotPasswordController extends BaseController {
             await this.forgotPassword.execute(dto);
 
             return this.ok(this.res);
-        } catch (err) {
+        } catch (err: any) {
             logger.error(err);
             return this.fail(err);
         }
