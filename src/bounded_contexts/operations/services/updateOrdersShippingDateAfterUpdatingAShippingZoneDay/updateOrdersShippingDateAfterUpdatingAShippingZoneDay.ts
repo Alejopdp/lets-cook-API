@@ -18,6 +18,8 @@ export class UpdateOrdersShippingDateAfterUpdatingAShippingZoneDay {
         for (let order of futureOrdersWithActualDayOfWeek) {
             if (order.isGoingToBeShippedThisWeek()) continue;
             if (order.shippingDate.getDay() === dto.newShippingDayOfWeek.dayNumberOfWeek) continue;
+            if (!dto.shippingZone.hasAddressInside(order.customer?.shippingAddress?.latitude!, order.customer?.shippingAddress?.longitude!))
+                continue;
 
             order.moveShippingDateToDIfferentDayNumberOfSameWeek(dto.newShippingDayOfWeek.dayNumberOfWeek);
         }
