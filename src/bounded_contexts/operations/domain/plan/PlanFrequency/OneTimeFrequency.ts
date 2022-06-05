@@ -2,6 +2,9 @@ import { Locale } from "../../locale/Locale";
 import { IPlanFrequency } from "./IPlanFrequency";
 
 export class OneTimeFrequency implements IPlanFrequency {
+    public getNDatesWithFrequencyOffset(qtyOfDates: number, baseDate: Date): Date[] {
+        throw new Error("No puedes mover la fecha de cobro de un plan de única vez");
+    }
     public equals(aPlanFrequency: IPlanFrequency): boolean {
         return aPlanFrequency.value() === this.value();
     }

@@ -87,9 +87,9 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
 
     public async findNextTwelveByCustomer(customerId: CustomerId): Promise<PaymentOrder[]> {
         const paymentOrdersDb = await MongoosePaymentOrder.find({
-            customerId: customerId.value,
+            customerId: customerId.toString(),
             deletionFlag: false,
-            shippingDate: { $gte: new Date() },
+            billingDate: { $gte: new Date() },
         })
             .sort({ billingDate: 1 })
             .populate("week");
