@@ -3,7 +3,7 @@ require("dotenv").config();
 import "./infraestructure/http/app";
 // import "./infraestructure/sequelize" hooks
 import "./infraestructure/mongoose";
-require("source-map-support").install();
+import 'source-map-support/register'
 
 // Subdomains
 // import "./bounded_contexts/IAM"
