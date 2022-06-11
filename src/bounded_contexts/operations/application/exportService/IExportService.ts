@@ -99,7 +99,7 @@ export interface CustomerExport {
     createdAt: string;
     status: string;
     billingName: string;
-    billingLastName: string;
+    "DNI / NIE / CIF": string;
     billingAddressName: string;
     billingAddressDetails: string;
     billingCity: string;

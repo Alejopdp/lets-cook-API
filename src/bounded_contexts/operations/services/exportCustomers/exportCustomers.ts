@@ -51,12 +51,12 @@ export class ExportCustomers {
 
             customerActiveSubscriptionsMap[actualKey] =
                 Array.isArray(customerActiveSubscriptionsMap[actualKey]) &&
-                subscription.state.isActive() &&
-                !subscription.frequency.isOneTime()
+                    subscription.state.isActive() &&
+                    !subscription.frequency.isOneTime()
                     ? [...customerActiveSubscriptionsMap[actualKey], subscription]
                     : subscription.state.isActive() && !subscription.frequency.isOneTime()
-                    ? [subscription]
-                    : customerActiveSubscriptionsMap[actualKey] || [];
+                        ? [subscription]
+                        : customerActiveSubscriptionsMap[actualKey] || [];
 
             subscriptionCustomerMap[subscription.id.value] = subscription.customer;
         }
@@ -82,13 +82,13 @@ export class ExportCustomers {
                 customerFirstName: customer.getPersonalInfo().name || "",
                 customerLastName: customer.getPersonalInfo().lastName || "",
                 customerEmail: customer.email,
-                createdAt: MomentTimeService.getDateHumanLabel(customer.createdAt),
+                createdAt: MomentTimeService.getDdMmYyyy(customer.createdAt),
                 status: customer.getCustomerStatus(
                     customerSubscriptionsMap[customer.id.toString()] ?? [],
                     customerPastOrdersMap[customer.id.toString()] || []
                 ),
                 billingName: customer.getBillingData().customerName || "",
-                billingLastName: customer.billingAddress?.identification || "",
+                "DNI / NIE / CIF": customer.billingAddress?.identification || "",
                 billingAddressName: customer.getBillingData().addressName || "",
                 billingAddressDetails: customer.getBillingData().details || "",
                 billingCity: "",
