@@ -29,7 +29,7 @@ jobs:
               with:
                   node-version: "14"
                   #   cache: "npm"
-            - run: npm install #This is so it doesn't try to run a migration
+            - run: npm install --production #This is so it doesn't try to run a migration
             - run: npm run build:staging
             - run: zip -r deploy.zip dist/ package.json .npmrc .ebextensions/ .platform/
             - name: Deploy to EB
