@@ -182,8 +182,7 @@ export class Customer extends Entity<Customer> {
         fullName?: string;
         phone1?: string;
         phone2?: string;
-        birthDate?: string;
-        birthDateValue?: Date;
+        birthDate?: Date;
         preferredLanguage?: string;
     } {
         return {
@@ -195,8 +194,7 @@ export class Customer extends Entity<Customer> {
                     : `${this.personalInfo?.name || ""} ${this.personalInfo?.lastName || ""}`,
             phone1: this.personalInfo?.phone1,
             phone2: this.personalInfo?.phone2,
-            birthDate: this.personalInfo?.birthDate?.toDateString(),
-            birthDateValue: this.personalInfo?.birthDate,
+            birthDate: this.personalInfo?.birthDate,
             preferredLanguage: this.personalInfo?.preferredLanguage,
         };
     }
@@ -209,6 +207,7 @@ export class Customer extends Entity<Customer> {
         birthDate: Date,
         preferredLanguage: string
     ): void {
+        console.log("customer method: ", birthDate)
         if (!this.personalInfo) {
             const personalInfo: PersonalInfo = new PersonalInfo(name, lastName, phone1, phone2, birthDate, preferredLanguage);
             this.personalInfo = personalInfo;
