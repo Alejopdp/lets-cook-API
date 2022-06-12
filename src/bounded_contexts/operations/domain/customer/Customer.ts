@@ -99,7 +99,7 @@ export class Customer extends Entity<Customer> {
             id,
             friendCode,
             shopifyReceivedOrdersQuantity,
-            firstOrderDate
+            firstOrderDate,
         );
     }
 
@@ -222,10 +222,14 @@ export class Customer extends Entity<Customer> {
         addressName: string,
         customerName: string,
         details: string,
-        identification: string
+        identification: string,
+        city: string,
+        province: string,
+        country: string,
+        postalCode: string
     ): void {
         if (!this.billingAddress) {
-            const billingAddress: Billing = new Billing(lat, long, addressName, customerName, details, identification);
+            const billingAddress: Billing = new Billing(lat, long, addressName, customerName, details, city, province, postalCode, country, identification);
             this.billingAddress = billingAddress;
         } else {
             this.billingAddress?.changeInfoBilling(lat, long, addressName, customerName, details, identification);
@@ -242,6 +246,10 @@ export class Customer extends Entity<Customer> {
         preferredShippingHour: string;
         latitude?: number;
         longitude?: number;
+        city: string;
+        country: string;
+        postalCode: string;
+        province: string;
     } {
         return {
             addressDetails: this.shippingAddress?.details,
@@ -249,6 +257,10 @@ export class Customer extends Entity<Customer> {
             preferredShippingHour: this.shippingAddress?.deliveryTime?.value() || "",
             latitude: this.shippingAddress?.latitude,
             longitude: this.shippingAddress?.longitude,
+            city: this.shippingAddress?.city ?? "",
+            province: this.shippingAddress?.province ?? "",
+            country: this.shippingAddress?.country ?? "",
+            postalCode: this.shippingAddress?.postalCode ?? "",
         };
     }
 
@@ -259,6 +271,11 @@ export class Customer extends Entity<Customer> {
         identification?: string;
         latitude?: number;
         longitude?: number;
+        city: string;
+        country: string;
+        postalCode: string;
+        province: string;
+
     } {
         return {
             addressName: this.billingAddress?.addressName,
@@ -267,6 +284,10 @@ export class Customer extends Entity<Customer> {
             identification: this.billingAddress?.identification,
             latitude: this.billingAddress?.latitude,
             longitude: this.billingAddress?.longitude,
+            city: this.billingAddress?.city ?? "",
+            province: this.billingAddress?.province ?? "",
+            country: this.billingAddress?.country ?? "",
+            postalCode: this.billingAddress?.postalCode ?? "",
         };
     }
 
@@ -276,13 +297,17 @@ export class Customer extends Entity<Customer> {
         name: string,
         fullName: string,
         details: string,
+        city: string,
+        province: string,
+        country: string,
+        postalCode: string,
         deliveryTime?: IPreferredDeliveryTime
     ): void {
         if (!this.shippingAddress) {
-            const shippingAddress: Address = new Address(lat, long, name, fullName, details, deliveryTime);
+            const shippingAddress: Address = new Address(lat, long, name, fullName, details, city, province, country, postalCode, deliveryTime);
             this.shippingAddress = shippingAddress;
         } else {
-            this.shippingAddress?.changeInfoShipping(lat, long, name, fullName, details, deliveryTime);
+            this.shippingAddress?.changeInfoShipping(lat, long, name, fullName, details, city, province, country, postalCode, deliveryTime);
         }
     }
 

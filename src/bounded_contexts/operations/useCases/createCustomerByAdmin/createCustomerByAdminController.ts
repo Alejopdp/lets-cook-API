@@ -38,7 +38,16 @@ export class CreateCustomerByAdminController extends BaseController {
                 billingDetails: this.req.body.billingClarifications,
                 customerName: this.req.body.billingName,
                 identification: this.req.body.billingPersonalIdNumber,
-                state: 'active'
+                state: 'active',
+                shippingCity: this.req.body.shippingCity ?? "",
+                shippingProvince: this.req.body.shippingProvince ?? "",
+                shippingPostalCode: this.req.body.shippingPostalCode ?? "",
+                shippingCountry: this.req.body.shippingCountry ?? "",
+                billingCity: this.req.body.billingCity ?? "",
+                billingProvince: this.req.body.billingProvince ?? "",
+                billingPostalCode: this.req.body.billingPostalCode ?? "",
+                billingCountry: this.req.body.billingCountr ?? ""
+
             };
 
             const result = await this.signUp.execute(dto);

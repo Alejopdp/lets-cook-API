@@ -33,6 +33,9 @@ export class CreateCustomerByAdmin {
             dto.address,
             dto.address,
             dto.addressDetails,
+            dto.shippingCity,
+            dto.shippingProvince, dto.shippingCountry,
+            dto.shippingPostalCode,
             preferedDeliveryTime
         );
         const billing: Billing = new Billing(
@@ -41,6 +44,10 @@ export class CreateCustomerByAdmin {
             dto.billingAddressName,
             dto.customerName,
             dto.billingDetails,
+            dto.billingCity,
+            dto.billingProvince,
+            dto.billingPostalCode,
+            dto.billingCountry,
             dto.identification
         );
         const personalInfo: PersonalInfo = new PersonalInfo(

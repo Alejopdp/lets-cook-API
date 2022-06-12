@@ -33,6 +33,29 @@ const AddressSchema = new mongoose.Schema({
     deliveryTime: {
         type: String,
     },
+
+    city: {
+        type: String,
+        default: ""
+    },
+
+    province: {
+        type: String,
+        default: ""
+    },
+
+    postalCode: {
+        type: String,
+        default: ""
+    },
+
+    country: {
+        type: String,
+        default: ""
+    }
+
+
+
 });
 
 const BillingSchema = new mongoose.Schema({
@@ -69,6 +92,27 @@ const BillingSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+
+    city: {
+        type: String,
+        default: ""
+    },
+
+    province: {
+        type: String,
+        default: ""
+    },
+
+    postalCode: {
+        type: String,
+        default: ""
+    },
+
+    country: {
+        type: String,
+        default: ""
+    }
+
 });
 
 const PersonalInfoSchema = new mongoose.Schema({

@@ -17,4 +17,8 @@ export interface CreateSubscriptionDto {
     customerLastName: string;
     phone1: string;
     locale: Locale;
+    shippingCity: string;
+    shippingProvince: string;
+    shippingPostalCode: string;
+    shippingCountry: string;
 }

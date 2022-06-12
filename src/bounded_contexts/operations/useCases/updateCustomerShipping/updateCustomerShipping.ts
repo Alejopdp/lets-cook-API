@@ -60,7 +60,7 @@ export class UpdateCustomerShipping {
         );
         const preferredDeliveryTime = dto.deliveryTime ? PreferredDeliveryTimeFactory.createDeliveryTime(dto.deliveryTime) : undefined;
 
-        customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, preferredDeliveryTime);
+        customer.changeShippingAddress(dto.lat, dto.long, dto.name, dto.fullName, dto.details, dto.city, dto.province, dto.country, dto.postalCode, preferredDeliveryTime);
         paymentOrders.forEach((order) =>
             order.state.isActive() && !order.hasFreeShipping ? (order.shippingCost = customerNewShippingZone.cost) : ""
         );

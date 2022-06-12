@@ -18,4 +18,12 @@ export interface createCustomerDto {
     customerName: string;
     identification: string;
     state: string;
+    shippingCity: string
+    shippingProvince: string
+    shippingPostalCode: string
+    shippingCountry: string
+    billingCity: string
+    billingProvince: string
+    billingPostalCode: string
+    billingCountry: string
 }
