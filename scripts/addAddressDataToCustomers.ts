@@ -3,14 +3,8 @@
 
 import axios from "axios"
 import { connectToDatabase } from "../src/infraestructure/mongoose/config/config"
-import Geocode from "react-geocode";
 import { Customer } from "../src/bounded_contexts/operations/domain/customer/Customer"
 import { mongooseCustomerRepository } from "../src/bounded_contexts/operations/infra/repositories/customer"
-
-Geocode.setApiKey("AIzaSyDfrf-ItSLCXubKnFjo6JqTN03-JUX5Zy8");
-Geocode.setLanguage("es");
-Geocode.setRegion("es");
-
 
 const addAddressDataToCustomers = async () => {
     console.log("Connectig to db...")
