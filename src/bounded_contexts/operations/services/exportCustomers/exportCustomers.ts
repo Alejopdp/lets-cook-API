@@ -107,7 +107,7 @@ export class ExportCustomers {
                 pastOrdersCount: (customerPastOrdersMap[customer.id.value]?.length || 0) + (customer.shopifyReceivedOrdersQuantity ?? 0),
                 numberOfActiveSubscriptions: customerActiveSubscriptionsMap[customer.id.value]?.length || 0,
                 numberOfSubscriptions: customerSubscriptionsMap[customer.id.value]?.length || 0,
-                "Fecha de nacimiento": customer.getPersonalInfo().birthDate ?? "",
+                "Fecha de nacimiento": customer.getPersonalInfo().birthDate ? MomentTimeService.getDdMmYyyy(customer.getPersonalInfo().birthDate!) : "",
                 "Idioma de preferencia": customer.getPersonalInfo().preferredLanguage ?? "",
                 MGM: customer.friendCode ?? "",
                 shopifyFirstDeliveryDate: customer.firstOrderDate ?? "",

@@ -4,7 +4,7 @@ import { loadMockData } from "../../../../scripts/db";
 
 export const connectToDatabase = async () => {
     // const mongoUri: string = ((process.env.URLDB as string) + process.env.NODE_ENV) as string;
-    const mongoUri: string = ((process.env.URLDB as string) + "staging") as string;
+    const mongoUri: string = ((process.env.URLDB as string) + "production") as string;
 
     try {
         await mongoose.connect(mongoUri);

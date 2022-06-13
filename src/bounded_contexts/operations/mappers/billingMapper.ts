@@ -4,7 +4,7 @@ import { BillingId } from "../domain/billing/BillingId";
 
 export class BillingMapper implements Mapper<Billing, any> {
     public toDomain(raw: any): Billing {
-        return new Billing(raw.latitude, raw.longitude, raw.addressName, raw.customerName, raw.addressDetails, raw.identification, new BillingId(raw._id));
+        return new Billing(raw.latitude, raw.longitude, raw.addressName, raw.customerName, raw.addressDetails, raw.city, raw.province, raw.postalCode, raw.country, raw.identification, new BillingId(raw._id));
     }
     public toPersistence(t: Billing): any {
         return {
@@ -15,6 +15,10 @@ export class BillingMapper implements Mapper<Billing, any> {
             addressDetails: t.details,
             identification: t.identification,
             _id: t.id.value,
+            city: t.city,
+            province: t.province,
+            postalCode: t.postalCode,
+            country: t.country
         };
     }
 }

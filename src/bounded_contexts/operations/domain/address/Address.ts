@@ -9,6 +9,10 @@ export class Address extends Entity<Address> {
     private _fullName: string;
     private _details: string;
     private _deliveryTime?: IPreferredDeliveryTime;
+    private _city: string;
+    private _province: string;
+    private _country: string;
+    private _postalCode: string;
 
     constructor(
         latitude: number,
@@ -16,6 +20,10 @@ export class Address extends Entity<Address> {
         name: string,
         fullName: string,
         details: string,
+        city: string,
+        province: string,
+        country: string,
+        postalCode: string,
         deliveryTime?: IPreferredDeliveryTime,
         addressId?: AddressId
     ) {
@@ -25,6 +33,10 @@ export class Address extends Entity<Address> {
         this._name = name;
         this._fullName = fullName;
         this._details = details;
+        this._city = city;
+        this._province = province;
+        this._country = country;
+        this._postalCode = postalCode;
         this._deliveryTime = deliveryTime;
     }
 
@@ -42,6 +54,10 @@ export class Address extends Entity<Address> {
         name: string,
         fullName: string,
         details: string,
+        city: string,
+        province: string,
+        country: string,
+        postalCode: string,
         deliveryTime?: IPreferredDeliveryTime
     ): void {
         this.latitude = lat;
@@ -49,7 +65,76 @@ export class Address extends Entity<Address> {
         this.name = name;
         this.fullName = fullName;
         this.details = details;
+        this.city = city;
+        this.province = province;
+        this.country = country;
+        this.postalCode = postalCode;
         this.deliveryTime = deliveryTime;
+    }
+
+
+    /**
+     * Getter city
+     * @return {string}
+     */
+    public get city(): string {
+        return this._city;
+    }
+
+    /**
+     * Getter province
+     * @return {string}
+     */
+    public get province(): string {
+        return this._province;
+    }
+
+    /**
+     * Getter country
+     * @return {string}
+     */
+    public get country(): string {
+        return this._country;
+    }
+
+    /**
+     * Getter postalCode
+     * @return {string}
+     */
+    public get postalCode(): string {
+        return this._postalCode;
+    }
+
+    /**
+     * Setter city
+     * @param {string} value
+     */
+    public set city(value: string) {
+        this._city = value;
+    }
+
+    /**
+     * Setter province
+     * @param {string} value
+     */
+    public set province(value: string) {
+        this._province = value;
+    }
+
+    /**
+     * Setter country
+     * @param {string} value
+     */
+    public set country(value: string) {
+        this._country = value;
+    }
+
+    /**
+     * Setter postalCode
+     * @param {string} value
+     */
+    public set postalCode(value: string) {
+        this._postalCode = value;
     }
 
     /**

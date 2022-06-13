@@ -16,6 +16,10 @@ export class AddressMapper implements Mapper<Address, any> {
             raw.addressName,
             raw.addressFullName,
             raw.addressDetails,
+            raw.city,
+            raw.province,
+            raw.country,
+            raw.postalCode,
             preferredDeliveryTime,
             new AddressId(raw._id)
         );
@@ -29,6 +33,10 @@ export class AddressMapper implements Mapper<Address, any> {
             addressDetails: t.details,
             deliveryTime: t.deliveryTime?.value(),
             _id: t.id.value,
+            city: t.city,
+            province: t.province,
+            country: t.country,
+            postalCode: t.postalCode
         };
     }
 }

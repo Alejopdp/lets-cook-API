@@ -33,6 +33,10 @@ export class CreateSubscriptionController extends BaseController {
                 longitude: this.req.body.longitude,
                 phone1: this.req.body.phone1,
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                shippingCity: this.req.body.shippingCity ?? "",
+                shippingCountry: this.req.body.shippingCountry ?? "",
+                shippingPostalCode: this.req.body.shippingPostalCode ?? "",
+                shippingProvince: this.req.body.shippingProvince ?? ""
             };
 
             const result = await this.createSubscription.execute(dto);

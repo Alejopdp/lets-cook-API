@@ -15,6 +15,7 @@ export class UpdateCustomerInfoController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
+        console.log("Birth date: ", this.req.body.birthDate);
         try {
             const dto: UpdateCustomerInfoDto = {
                 customerId: this.req.params.id,
