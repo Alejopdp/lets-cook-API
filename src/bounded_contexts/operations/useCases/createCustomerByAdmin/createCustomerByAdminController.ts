@@ -45,7 +45,7 @@ export class CreateCustomerByAdminController extends BaseController {
                 billingCity: this.req.body.billingCity ?? "",
                 billingProvince: this.req.body.billingProvince ?? "",
                 billingPostalCode: this.req.body.billingPostalCode ?? "",
-                billingCountry: this.req.body.billingCountr ?? ""
+                billingCountry: this.req.body.billingCountry ?? ""
 
             };
 
