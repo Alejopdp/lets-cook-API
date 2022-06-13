@@ -51,12 +51,12 @@ export class ExportCustomers {
 
             customerActiveSubscriptionsMap[actualKey] =
                 Array.isArray(customerActiveSubscriptionsMap[actualKey]) &&
-                subscription.state.isActive() &&
-                !subscription.frequency.isOneTime()
+                    subscription.state.isActive() &&
+                    !subscription.frequency.isOneTime()
                     ? [...customerActiveSubscriptionsMap[actualKey], subscription]
                     : subscription.state.isActive() && !subscription.frequency.isOneTime()
-                    ? [subscription]
-                    : customerActiveSubscriptionsMap[actualKey] || [];
+                        ? [subscription]
+                        : customerActiveSubscriptionsMap[actualKey] || [];
 
             subscriptionCustomerMap[subscription.id.value] = subscription.customer;
         }
@@ -82,32 +82,32 @@ export class ExportCustomers {
                 customerFirstName: customer.getPersonalInfo().name || "",
                 customerLastName: customer.getPersonalInfo().lastName || "",
                 customerEmail: customer.email,
-                createdAt: MomentTimeService.getDateHumanLabel(customer.createdAt),
+                createdAt: MomentTimeService.getDdMmYyyy(customer.createdAt),
                 status: customer.getCustomerStatus(
                     customerSubscriptionsMap[customer.id.toString()] ?? [],
                     customerPastOrdersMap[customer.id.toString()] || []
                 ),
                 billingName: customer.getBillingData().customerName || "",
-                billingLastName: customer.billingAddress?.identification || "",
+                "DNI / NIE / CIF": customer.billingAddress?.identification || "",
                 billingAddressName: customer.getBillingData().addressName || "",
                 billingAddressDetails: customer.getBillingData().details || "",
-                billingCity: "",
-                billingProvince: "",
-                billingZipCode: "",
-                billingCountry: "",
+                billingCity: customer.getBillingData().city || "",
+                billingProvince: customer.getBillingData().province || "",
+                billingZipCode: customer.getBillingData().postalCode || "",
+                billingCountry: customer.getBillingData().country || "",
                 billingPhoneNumber: customer.getPersonalInfo().phone1 ?? "",
                 billingPhoneNumber2: customer.getPersonalInfo().phone2 ?? "",
                 shippingAddressName: customer.getShippingAddress().addressName || "",
                 shippingAddressDetails: customer.getShippingAddress().addressDetails || "",
-                shippingAddressCity: "",
-                shippingAddressProvince: "",
-                shippingAddressZipCode: "",
-                shippingCountry: "España",
+                shippingAddressCity: customer.getShippingAddress().city || "",
+                shippingAddressProvince: customer.getShippingAddress().province || "",
+                shippingAddressZipCode: customer.getShippingAddress().postalCode || "",
+                shippingCountry: customer.getShippingAddress().country || "",
                 shopifyCustomerId: "",
                 pastOrdersCount: (customerPastOrdersMap[customer.id.value]?.length || 0) + (customer.shopifyReceivedOrdersQuantity ?? 0),
                 numberOfActiveSubscriptions: customerActiveSubscriptionsMap[customer.id.value]?.length || 0,
                 numberOfSubscriptions: customerSubscriptionsMap[customer.id.value]?.length || 0,
-                "Fecha de nacimiento": customer.getPersonalInfo().birthDate ?? "",
+                "Fecha de nacimiento": customer.getPersonalInfo().birthDate ? MomentTimeService.getDdMmYyyy(customer.getPersonalInfo().birthDate!) : "",
                 "Idioma de preferencia": customer.getPersonalInfo().preferredLanguage ?? "",
                 MGM: customer.friendCode ?? "",
                 shopifyFirstDeliveryDate: customer.firstOrderDate ?? "",

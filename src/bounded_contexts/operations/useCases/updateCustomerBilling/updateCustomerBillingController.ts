@@ -27,6 +27,10 @@ export class UpdateCustomerBillingController extends BaseController {
                 identification: this.req.body.identification,
                 //@ts-ignore
                 nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
+                city: this.req.body.city ?? "",
+                province: this.req.body.province ?? "",
+                postalCode: this.req.body.postalCode ?? "",
+                country: this.req.body.country ?? ""
             };
 
             await this.updateCustomer.execute(dto);

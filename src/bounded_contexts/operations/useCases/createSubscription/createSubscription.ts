@@ -124,6 +124,10 @@ export class CreateSubscription {
                 dto.addressName,
                 dto.addressName,
                 dto.addressDetails,
+                dto.shippingCity,
+                dto.shippingProvince,
+                dto.shippingCountry,
+                dto.shippingPostalCode,
                 customer.shippingAddress?.deliveryTime
             );
             customer.changeBillingAddress(
@@ -132,7 +136,11 @@ export class CreateSubscription {
                 dto.addressName,
                 customer.billingAddress?.customerName || `${dto.customerFirstName} ${dto.customerLastName}`,
                 dto.addressDetails,
-                customer.billingAddress?.identification || ""
+                customer.billingAddress?.identification || "",
+                dto.shippingCity,
+                dto.shippingProvince,
+                dto.shippingCountry,
+                dto.shippingPostalCode,
             );
         }
 
@@ -275,8 +283,7 @@ export class CreateSubscription {
             customer.getFullNameOrEmail(),
             "Usuario",
             `Nueva suscripción para el plan ${subscription.plan.name} y variante ${subscription.getPlanVariantLabel(Locale.es)}`,
-            `Subscription ${subscription.id.toString()} of ${
-                subscription.plan.name
+            `Subscription ${subscription.id.toString()} of ${subscription.plan.name
             } (${subscription.plan.id.toString()}) with variant ${subscription.planVariantId.toString()}`,
             new Date(),
             customer.id
