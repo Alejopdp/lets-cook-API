@@ -246,6 +246,7 @@ export class CreateSubscription {
             shippingDay: orders[0].getHumanShippmentDay(dto.locale),
             planSku: subscription.plan.planSku.code,
         };
+        if (orders[0].isBilled() && dto.couponId) orders[0].couponCode = coupon?.couponCode ?? ""
         await this.subscriptionRepository.save(subscription);
         await this.orderRepository.bulkSave(orders);
         await this.customerRepository.save(customer);

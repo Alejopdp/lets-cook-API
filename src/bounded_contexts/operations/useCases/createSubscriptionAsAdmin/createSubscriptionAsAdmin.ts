@@ -201,6 +201,7 @@ export class CreateSubscriptionAsAdmin {
             if (customerSubscriptionHistory.length === 0) createFriendCode.execute({ customer });
         }
 
+        if (orders[0].isBilled() && dto.couponCode) orders[0].couponCode = coupon?.couponCode ?? ""
         const notificationDto: NewSubscriptionNotificationDto = {
             customerEmail: customer.email,
             customerFirstName: customer.email,

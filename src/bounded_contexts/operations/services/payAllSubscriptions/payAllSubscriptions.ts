@@ -97,6 +97,7 @@ export class PayAllSubscriptions {
         // PAYMENT ORDER - ORDER MAP
         for (let order of ordersToBill) {
             const actualKey = order.paymentOrderId?.value;
+
             if (!actualKey) {
                 ordersWIthoutPaymentOrder.push(order);
             } else {
@@ -124,9 +125,9 @@ export class PayAllSubscriptions {
                     const totalAmount = customerHasFreeShipping
                         ? (Math.round(paymentOrderToBill.amount * 100) - Math.round(paymentOrderToBill.discountAmount * 100)) / 100
                         : (Math.round(paymentOrderToBill.amount * 100) -
-                              Math.round(paymentOrderToBill.discountAmount * 100) +
-                              Math.round(shippingCost * 100)) /
-                          100;
+                            Math.round(paymentOrderToBill.discountAmount * 100) +
+                            Math.round(shippingCost * 100)) /
+                        100;
 
                     var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
                         id: "",
@@ -274,6 +275,14 @@ export class PayAllSubscriptions {
                     billingDateAndOrders[1].forEach((order) => (order.paymentOrderId = newPaymentOrder.id));
                 }
             }
+        }
+
+        // ASSIGN COUPON CODE TO BILLED ORDERS
+        for (const sub of activeSusbcriptions) {
+            const order = subscriptionOrderMap[sub.id.toString()]
+            if (!order?.isBilled()) continue;
+
+            order.couponCode = sub.coupon?.couponCode ?? ""
         }
 
         logger.info(`${paymentOrdersToBill.filter((po) => po.state.isBilled()).length} processed succesfully`);
