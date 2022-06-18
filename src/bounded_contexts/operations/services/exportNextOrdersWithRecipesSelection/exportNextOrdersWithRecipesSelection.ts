@@ -54,15 +54,15 @@ export class ExportNextOrdersWithRecipesSelection {
             weeksIds.length > 0
                 ? await this.orderRepository.findByWeekList(weeksIds, Locale.es)
                 : dto.billingDates.length > 0
-                ? await this.orderRepository.findByBillingDates(dto.billingDates, Locale.es)
-                : dto.shippingDates.length > 0
-                ? await this.orderRepository.findByShippingDates(dto.shippingDates, Locale.es)
-                : dto.customers.length > 0
-                ? await this.orderRepository.findAllByCustomersIds(
-                      dto.customers.map((id) => new CustomerId(id)),
-                      Locale.es
-                  )
-                : await this.orderRepository.findCurrentWeekOrders(Locale.es);
+                    ? await this.orderRepository.findByBillingDates(dto.billingDates, Locale.es)
+                    : dto.shippingDates.length > 0
+                        ? await this.orderRepository.findByShippingDates(dto.shippingDates, Locale.es)
+                        : dto.customers.length > 0
+                            ? await this.orderRepository.findAllByCustomersIds(
+                                dto.customers.map((id) => new CustomerId(id)),
+                                Locale.es
+                            )
+                            : await this.orderRepository.findCurrentWeekOrders(Locale.es);
         const activeOrders: Order[] = orders.filter((order) => !order.isSkipped() && !order.isCancelled());
         const paymentOrderOrderMap: { [paymentOrderId: string]: Order[] } = {};
         const subscriptionsIds: SubscriptionId[] = [];
@@ -77,6 +77,11 @@ export class ExportNextOrdersWithRecipesSelection {
             paymentOrderOrderMap[actualPoId] = Array.isArray(paymentOrderOrderMap[actualPoId])
                 ? [...paymentOrderOrderMap[actualPoId], order]
                 : [order];
+
+            if (order.id.toString() === "ca788a20-471d-4b30-b985-1c9453544c8f") {
+                console.log("The order exists");
+                console.log("Paymnet order map: ", paymentOrderOrderMap[actualPoId]);
+            }
         }
 
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(subscriptionsIds);
@@ -129,7 +134,6 @@ export class ExportNextOrdersWithRecipesSelection {
                 customerDeliveriesByWeek[customerId] = customerBillingDateMap;
             }
 
-            // console.log(paymentOrderExportLinesQuantityMap[actualPoId]);
         }
 
         for (let order of activeOrders) {
@@ -165,9 +169,9 @@ export class ExportNextOrdersWithRecipesSelection {
                         planId: order.plan.id.value,
                         planSku: order.plan.planSku.code,
                         planName: order.plan.name,
-                        planVariantId: subscription.planVariantId.value,
-                        planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
-                        planVariantDescription: subscription.getPlanVariantLabel(Locale.es),
+                        planVariantId: order.planVariantId.value,
+                        planVariantSku: orderPlanVariant?.sku.code || "",
+                        planVariantDescription: orderPlanVariant?.getLabel() ?? "",
                         subscriptionRestrictionComment: subscription.restrictionComment,
                         subscriptionRestriction: RestrictionCodeFactory.createCode(subscription.restriction?.value),
                         recipeVariantSku: "",
@@ -175,9 +179,9 @@ export class ExportNextOrdersWithRecipesSelection {
                         recipeName: "",
                         recipeSku: "",
                         //@ts-ignore
-                        numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
+                        numberOfPersons: orderPlanVariant?.numberOfPersons || "",
                         //@ts-ignore
-                        numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
+                        numberOfRecipes: orderPlanVariant?.numberOfRecipes || "",
                         customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                         chooseState: order.plan.abilityToChooseRecipes ? RecipeSelectionState.AUN_NO_ELIGIO : RecipeSelectionState.NO_ELIGE,
                         pricePlan: order.getTotalPrice(),
@@ -231,9 +235,9 @@ export class ExportNextOrdersWithRecipesSelection {
                         planId: order.plan.id.value,
                         planSku: order.plan.planSku.code,
                         planName: order.plan.name,
-                        planVariantId: subscription.planVariantId.value,
-                        planVariantSku: subscription.plan.getPlanVariantById(subscription.planVariantId)?.sku.code || "",
-                        planVariantDescription: subscription.getPlanVariantLabel(Locale.es),
+                        planVariantId: order.planVariantId.toString(),
+                        planVariantSku: orderPlanVariant?.sku.code || "",
+                        planVariantDescription: orderPlanVariant?.getLabel() ?? "",
                         subscriptionRestrictionComment: subscription.restrictionComment,
                         subscriptionRestriction: RestrictionCodeFactory.createCode(subscription.restriction?.value),
                         recipeVariantSku:
@@ -243,9 +247,9 @@ export class ExportNextOrdersWithRecipesSelection {
                         recipeName: recipeSelection.recipe.getName(),
                         recipeSku: recipeSelection.recipe.recipeGeneralData.recipeSku.code,
                         //@ts-ignore
-                        numberOfPersons: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfPersons || "",
+                        numberOfPersons: orderPlanVariant?.numberOfPersons || "",
                         //@ts-ignore
-                        numberOfRecipes: subscription.plan.getPlanVariantById(subscription.planVariantId)?.numberOfRecipes || "",
+                        numberOfRecipes: orderPlanVariant?.numberOfRecipes || "",
                         customerPreferredLanguage: subscription.customer.getPersonalInfo().preferredLanguage!,
                         chooseState: order.choseByAdmin ? RecipeSelectionState.ELEGIDA_POR_LC : RecipeSelectionState.ELIGIO, // TO DO: Elegido por LC
                         pricePlan: order.getTotalPrice(),
@@ -253,8 +257,8 @@ export class ExportNextOrdersWithRecipesSelection {
                         coupon: subscription.coupon?.couponCode ?? "",
                         planDiscount: order.discountAmount,
                         kitDiscount: order.getKitDiscount(),
-                        finalPrice: order.getTotalPrice() - order.discountAmount,
                         finalKitPrice: order.getFinalKitPrice(),
+                        finalPrice: order.getTotalPrice() - order.discountAmount,
                         finalPortionPrice: order.getFinalPortionPrice(),
                         recipeDivision: 1 / paymentOrderExportLinesQuantityMap[order.paymentOrderId?.value!],
                         recivedOrdersQuantity: order.customer.receivedOrdersQuantity,
@@ -333,65 +337,10 @@ export class ExportNextOrdersWithRecipesSelection {
                 onlyFirstWeek:
                     !!auxOrder && !!auxOrder?.customer && customerDeliveriesByWeek[auxOrder.customer.id.toString()]
                         ? Object.entries(customerDeliveriesByWeek[auxOrder.customer.id.toString()]).length === 1 &&
-                          customerSubscriptionsMap[auxOrder.customer.id.toString()].every((sub) => !sub.isActive())
+                        customerSubscriptionsMap[auxOrder.customer.id.toString()].every((sub) => !sub.isActive())
                         : false,
             });
         }
-
-        // for (let customerId in customerOrdersMap) {
-        //     const customerOrders = customerOrdersMap[customerId];
-        //     const customer: Customer = subscriptionMap[customerOrders[0].subscriptionId.value].customer;
-
-        //     if (customerOrders.every((order) => !order.hasFreeShipping)) {
-        //         const customerShippingZone: ShippingZone = shippingZones.find((zone) =>
-        //             zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)
-        //         )!;
-
-        //         ordersExport.push({
-        //             stripePaymentId: "N/A",
-        //             paymentOrderId: "N/A",
-        //             paymentOrderState: "N/A",
-        //             orderId: "N/A",
-        //             orderNumber: "N/A",
-        //             orderState: "N/A",
-        //             weekLabel: customerOrders[0].week.getShorterLabel(),
-        //             deliveryDate: MomentTimeService.getDddDdMmmm(customerOrders[0].shippingDate),
-        //             customerPreferredShippingHour: customer.getShippingAddress().preferredShippingHour,
-        //             customerId: customerId,
-        //             customerFirstName: customer.getPersonalInfo().name!,
-        //             customerLastName: customer.getPersonalInfo().lastName!,
-        //             customerEmail: customer.email,
-        //             subscriptionDate: "N/A",
-        //             recipeFormSubmissionDate: "N/A",
-        //             recipeFormUpdateDate: "N/A",
-        //             planId: "N/A",
-        //             planSku: "N/A",
-        //             planName: "Envío",
-        //             planVariantId: "N/A",
-        //             planVariantSku: "N/A",
-        //             planVariantDescription: "N/A",
-        //             subscriptionRestrictionComment: "N/A",
-        //             subscriptionRestriction: "N/A",
-        //             recipeVariantSku: "N/A",
-        //             recipeVariantId: "N/A",
-        //             recipeName: "N/A",
-        //             recipeSku: "",
-        //             numberOfPersons: 0,
-        //             numberOfRecipes: 0,
-        //             customerPreferredLanguage: customer.getPersonalInfo().preferredLanguage!,
-        //             chooseState: "N/A", // TO DO: Elegido por LC
-        //             pricePlan: customerShippingZone.cost,
-        //             kitPrice: 0,
-        //             planDiscount: 0,
-        //             kitDiscount: 0,
-        //             finalPrice: 0,
-        //             finalKitPrice: 0,
-        //             finalPortionPrice: 0,
-        //             recipeDivision: 0,
-        //             recivedOrdersQuantity: customer.receivedOrdersQuantity,
-        //         });
-        //     }
-        // }
 
         const sortedExport = _.orderBy(ordersExport, ["customerEmail"], "asc");
         this.exportService.exportNextOrdersWithRecipesSelection(sortedExport);

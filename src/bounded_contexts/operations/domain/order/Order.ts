@@ -94,8 +94,7 @@ export class Order extends Entity<Order> {
 
         if (totalIncomingRecipes > planVariant.getNumberOfRecipes())
             throw new Error(
-                `No puedes elegir mas de ${planVariant.getNumberOfRecipes()} recetas para el plan ${
-                    this.plan.name
+                `No puedes elegir mas de ${planVariant.getNumberOfRecipes()} recetas para el plan ${this.plan.name
                 } y variante de ${planVariant.getLabel()}`
             );
 
@@ -113,8 +112,7 @@ export class Order extends Entity<Order> {
             );
             if (!!restriction && !restriction.equals(recipeVariantRestriction) && !restriction.acceptsEveryRecipe())
                 throw new Error(
-                    `El cliente ${this.customer.getFullNameOrEmail()} no puede consumir una receta que no cumpla con ${
-                        restriction.label
+                    `El cliente ${this.customer.getFullNameOrEmail()} no puede consumir una receta que no cumpla con ${restriction.label
                     } en la suscripción ${this.subscriptionId.value}`
                 );
             if (selection.recipe.availableWeeks.every((week) => !week.id.equals(this.week.id))) {
@@ -285,8 +283,7 @@ export class Order extends Entity<Order> {
             throw new Error(`La orden a la cual se le quiere remover el descuento (${this.id.toString()}), no tiene ningún pago asociado`);
         if (!this.paymentOrderId.equals(paymentOrder.id))
             throw new Error(
-                `La orden a la cual se le quiere remover el descuento (${this.id.toString()}), tiene el pago ${this.paymentOrderId.toString()} en vez de ${
-                    paymentOrder.id.toString
+                `La orden a la cual se le quiere remover el descuento (${this.id.toString()}), tiene el pago ${this.paymentOrderId.toString()} en vez de ${paymentOrder.id.toString
                 }`
             );
 
@@ -298,6 +295,7 @@ export class Order extends Entity<Order> {
         return this.plan.name;
     }
 
+    // TODO Remove the param as the order already has the plan variant id assigned
     public getPlanVariantLabel(planVariantId: PlanVariantId): string {
         return this.plan.getPlanVariantLabel(planVariantId);
     }
@@ -315,7 +313,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  this.getTotalPrice() / planVariant.numberOfRecipes
+                this.getTotalPrice() / planVariant.numberOfRecipes
                 : this.getTotalPrice()
         );
     }
@@ -328,7 +326,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  Math.round(this.discountAmount * 100) / planVariant.numberOfRecipes / 100
+                Math.round(this.discountAmount * 100) / planVariant.numberOfRecipes / 100
                 : this.discountAmount
         );
     }
@@ -341,7 +339,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfRecipes / 100
+                (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfRecipes / 100
                 : (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / 100
         );
     }
