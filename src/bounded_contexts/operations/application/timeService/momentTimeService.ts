@@ -7,7 +7,7 @@ const moment = require("moment");
 moment.locale("es");
 
 export class MomentTimeService {
-    constructor() {}
+    constructor() { }
 
     private static isMonday(day: Date): boolean {
         return moment(day).isoWeekday() === 1;
@@ -27,6 +27,7 @@ export class MomentTimeService {
     }
 
     public static getDateHumanLabel(date: Date, locale: Locale = Locale.es): string {
+        console.log("Locale: ", locale)
         return moment(date).locale(locale).format("dddd Do MMMM");
     }
 

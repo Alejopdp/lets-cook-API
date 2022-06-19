@@ -1,10 +1,9 @@
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
-import { PlanId } from "../../domain/plan/PlanId";
-import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
+import { Locale } from "../../domain/locale/Locale";
 // import { PlanVariantWithRecipe } from "../../domain/plan/PlanVariant/PlanVariantWithRecipes";
 
 export class GetShippingRatePresenter {
-    public present(shippingZone: ShippingZone, hasNextShipping: boolean): any {
+    public present(shippingZone: ShippingZone, hasNextShipping: boolean, locale: Locale): any {
         return {
             id: shippingZone.id.value,
             name: shippingZone.name,
@@ -12,9 +11,9 @@ export class GetShippingRatePresenter {
             cost: shippingZone.cost,
             state: shippingZone.state,
             radio: shippingZone.radio,
-            dayLabel: shippingZone.getDayLabel(),
+            dayLabel: shippingZone.getDayLabel(locale),
             dayNumberOfWeek: shippingZone.getDayNumberOfWeek(),
-            nextShippingDate: shippingZone.getHumanNextShippingDate(),
+            nextShippingDate: shippingZone.getHumanNextShippingDate(locale),
             hasNextShipping,
         };
     }

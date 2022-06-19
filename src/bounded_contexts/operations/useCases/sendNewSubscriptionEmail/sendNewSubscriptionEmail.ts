@@ -60,7 +60,7 @@ export class SendNewSubscriptionEmail {
             firstOrderId: firstOrder ? (firstOrder.id.value as string) : "",
             hasIndicatedRestrictions: subscription.restrictionComment,
             shippingCost: customerShippingZone?.cost!,
-            shippingDay: customerShippingZone?.getDayLabel()!,
+            shippingDay: customerShippingZone?.getDayLabel(dto.locale)!,
             isPlanAhorro: subscription.plan.planSlug.slug === "plan-ahorro",
             planSku: subscription.plan.planSku.code,
         };
