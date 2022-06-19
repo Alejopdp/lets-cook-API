@@ -205,7 +205,8 @@ export class CreateSubscription {
             ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
             : newPaymentOrders[0].getTotalAmount();
 
-        if (Math.round(newPaymentOrders[0].getFinalAmount()) >= 0.5) {
+
+        if (amountToBill >= 0.5) {
             paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
                 amountToBill,
                 dto.stripePaymentMethodId
