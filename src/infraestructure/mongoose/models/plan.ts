@@ -73,6 +73,9 @@ const PlanSchema = new mongoose.Schema(
                 type: String,
                 // required: true,
             },
+            ca: {
+                type: String,
+            }
         },
         description: {
             es: {
@@ -83,6 +86,10 @@ const PlanSchema = new mongoose.Schema(
                 type: String,
                 // required: true,
             },
+            ca: {
+                type: String,
+            }
+
         },
 
         sku: {
