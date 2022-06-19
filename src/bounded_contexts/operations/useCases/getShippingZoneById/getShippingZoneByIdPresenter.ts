@@ -1,8 +1,8 @@
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
-import { PlanId } from "../../domain/plan/PlanId";
+import { Locale } from "../../domain/locale/Locale";
 
 export class GetShippingZoneByIdPresenter {
-    public static present(shipping: ShippingZone): any {
+    public static present(shipping: ShippingZone, locale: Locale): any {
         return {
             id: shipping.id.value,
             name: shipping.name,
@@ -11,7 +11,7 @@ export class GetShippingZoneByIdPresenter {
             state: shipping.state,
             radio: shipping.radio,
             shippingDayOfWeek: shipping.getDayNumberOfWeek(),
-            shippingDayOfWeekLabel: shipping.getDayLabel(),
+            shippingDayOfWeekLabel: shipping.getDayLabel(locale),
         };
     }
 }

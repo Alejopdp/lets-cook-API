@@ -1,4 +1,5 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { GetShippingZoneById } from "./getShippingZoneById";
 import { GetShippingZoneByIdDto } from "./getShippingZoneByIdDto";
 
@@ -14,6 +15,8 @@ export class GetShippingZoneByIdController extends BaseController {
         try {
             const dto: GetShippingZoneByIdDto = {
                 id: this.req.params.id,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+
             };
             const result = await this.getShippingZoneById.execute(dto);
 

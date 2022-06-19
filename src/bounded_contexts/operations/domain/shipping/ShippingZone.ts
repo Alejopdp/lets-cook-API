@@ -5,6 +5,7 @@ import { ShippingZoneRadio } from "./ShippingZoneRadio/ShippingZoneRadio";
 import { ShippingZoneId } from "../shipping/ShippingZoneId";
 import { Day } from "../day/Day";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Locale } from "../locale/Locale";
 
 export class ShippingZone extends Entity<ShippingZone> {
     private _name: string;
@@ -66,8 +67,8 @@ export class ShippingZone extends Entity<ShippingZone> {
         return this.radio.hasPointInside(lat, lng);
     }
 
-    public getDayLabel(): string {
-        return this.shippingDayOfWeek.getDayName();
+    public getDayLabel(locale: Locale): string {
+        return this.shippingDayOfWeek.getDayName(locale);
     }
 
     public getDayNumberOfWeek(): number {
@@ -108,8 +109,8 @@ export class ShippingZone extends Entity<ShippingZone> {
         );
     }
 
-    public getHumanNextShippingDate(): string {
-        return MomentTimeService.getDateHumanLabel(this.nextShippingDate());
+    public getHumanNextShippingDate(locale: Locale): string {
+        return MomentTimeService.getDateHumanLabel(this.nextShippingDate(), locale);
     }
 
     /**

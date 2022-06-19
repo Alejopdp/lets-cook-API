@@ -70,7 +70,7 @@ export class ExportSubscriptions {
                 shippingUpdateDate: "???",
                 discountCode: subscription.coupon?.couponCode || "",
                 shippingZone: shippingZone?.name || "",
-                shippingDay: shippingZone?.getDayLabel() || "",
+                shippingDay: shippingZone?.getDayLabel(Locale.es) || "",
                 customerPreferredShippingHour: subscription.customer.getShippingAddress().preferredShippingHour,
                 subscriptionRestriction: subscription.restriction?.label || "",
                 subscriptionRestrictionComment: subscription.restrictionComment,

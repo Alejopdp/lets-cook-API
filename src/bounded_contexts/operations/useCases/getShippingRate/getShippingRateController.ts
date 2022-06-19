@@ -25,7 +25,7 @@ export class GetShippingRateController extends BaseController {
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
             const result = await this.getShippingRate.execute(dto);
-            const presented = this.getShippingRatePresenter.present(result.shippingZone, result.hasNextShipping);
+            const presented = this.getShippingRatePresenter.present(result.shippingZone, result.hasNextShipping, dto.locale);
 
             return this.ok(this.res, presented);
         } catch (error: any) {

@@ -17,7 +17,7 @@ export class GetShippingZoneById {
 
         if (!shipping) throw new Error("Error al buscar el cupón");
 
-        return GetShippingZoneByIdPresenter.present(shipping);
+        return GetShippingZoneByIdPresenter.present(shipping, dto.locale);
     }
 
     /**
