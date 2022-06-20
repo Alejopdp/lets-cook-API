@@ -13,6 +13,7 @@ export class UpdatePaymentOrdersShippingCost {
     }
 
     public async execute(shippingZone: ShippingZone, newShippingCost: number): Promise<void> {
+        const today = new Date()
         const customers: Customer[] = await this.customerRepository.findAll();
         const customersInsideTheShippingZone = customers.filter(
             (customer) =>
@@ -20,11 +21,14 @@ export class UpdatePaymentOrdersShippingCost {
                 customer.shippingAddress?.longitude &&
                 shippingZone.hasAddressInside(customer.shippingAddress?.latitude, customer.shippingAddress?.longitude)
         );
-        const paymentOrdersToUpdate = await this.paymentOrderRepository.findActiveByCustomerIdsList(
+        const paymentOrdersToUpdate = await this.paymentOrderRepository.findByCustomerIdsList(
             customersInsideTheShippingZone.map((customer) => customer.id)
         );
 
+
         for (let paymentOrder of paymentOrdersToUpdate) {
+            if (paymentOrder.state.isBilled() || paymentOrder.billingDate < today) continue
+
             paymentOrder.shippingCost = newShippingCost;
         }
 

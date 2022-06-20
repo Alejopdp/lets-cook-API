@@ -169,6 +169,10 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         });
     }
 
+    public async findByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]> {
+        return await this.findBy({ customer: customerIds.map((id) => id.value) });
+    }
+
     public async countPaymentOrdersWithHumanId(): Promise<number> {
         return await MongoosePaymentOrder.count({ $and: [{ humanId: { $exists: true } }, { humanId: { $ne: null } }] });
     }

@@ -39,6 +39,7 @@ export class Order extends Entity<Order> {
     private _customer: Customer;
     private _counter: number;
     private _isFirstOrderOfSubscription: boolean;
+    private _hasBeenMovedOneWeekForward: boolean;
 
     constructor(
         shippingDate: Date,
@@ -61,7 +62,8 @@ export class Order extends Entity<Order> {
         orderId?: OrderId,
         createdAt: Date = new Date(),
         counter: number = 0,
-        isFirstOrderOfSubscription: boolean = false
+        isFirstOrderOfSubscription: boolean = false,
+        hasBeenMovedOneWeekForward: boolean = false
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -84,6 +86,7 @@ export class Order extends Entity<Order> {
         this._customer = customer;
         this._counter = counter;
         this._isFirstOrderOfSubscription = isFirstOrderOfSubscription;
+        this._hasBeenMovedOneWeekForward = hasBeenMovedOneWeekForward
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, restriction?: RecipeVariantRestriction): void {
@@ -555,6 +558,24 @@ export class Order extends Entity<Order> {
     public get isFirstOrderOfSubscription(): boolean {
         return this._isFirstOrderOfSubscription;
     }
+
+
+    /**
+     * Getter hasBeenMovedOneWeekForward
+     * @return {boolean}
+     */
+    public get hasBeenMovedOneWeekForward(): boolean {
+        return this._hasBeenMovedOneWeekForward;
+    }
+
+    /**
+     * Setter hasBeenMovedOneWeekForward
+     * @param {boolean} value
+     */
+    public set hasBeenMovedOneWeekForward(value: boolean) {
+        this._hasBeenMovedOneWeekForward = value;
+    }
+
 
     /**
      * Setter shippingDate
