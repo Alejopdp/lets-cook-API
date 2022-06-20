@@ -52,7 +52,8 @@ export class OrderMapper implements Mapper<Order> {
             new OrderId(raw._id),
             raw.createdAt,
             raw.counter,
-            raw.isFirstOrderOfSubscription
+            raw.isFirstOrderOfSubscription,
+            raw.hasBeenMovedOneWeekForward
         );
     }
 
@@ -79,6 +80,7 @@ export class OrderMapper implements Mapper<Order> {
             _id: t.id.value,
             customer: t.customer.id.value,
             isFirstOrderOfSubscription: t.isFirstOrderOfSubscription,
+            hasBeenMovedOneWeekForward: t.hasBeenMovedOneWeekForward
         };
     }
 }

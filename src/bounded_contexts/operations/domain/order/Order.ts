@@ -39,6 +39,7 @@ export class Order extends Entity<Order> {
     private _customer: Customer;
     private _counter: number;
     private _isFirstOrderOfSubscription: boolean;
+    private _hasBeenMovedOneWeekForward: boolean;
 
     constructor(
         shippingDate: Date,
@@ -61,7 +62,8 @@ export class Order extends Entity<Order> {
         orderId?: OrderId,
         createdAt: Date = new Date(),
         counter: number = 0,
-        isFirstOrderOfSubscription: boolean = false
+        isFirstOrderOfSubscription: boolean = false,
+        hasBeenMovedOneWeekForward: boolean = false
     ) {
         super(orderId);
         this._shippingDate = shippingDate;
@@ -84,6 +86,7 @@ export class Order extends Entity<Order> {
         this._customer = customer;
         this._counter = counter;
         this._isFirstOrderOfSubscription = isFirstOrderOfSubscription;
+        this._hasBeenMovedOneWeekForward = hasBeenMovedOneWeekForward
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, restriction?: RecipeVariantRestriction): void {
@@ -94,8 +97,7 @@ export class Order extends Entity<Order> {
 
         if (totalIncomingRecipes > planVariant.getNumberOfRecipes())
             throw new Error(
-                `No puedes elegir mas de ${planVariant.getNumberOfRecipes()} recetas para el plan ${
-                    this.plan.name
+                `No puedes elegir mas de ${planVariant.getNumberOfRecipes()} recetas para el plan ${this.plan.name
                 } y variante de ${planVariant.getLabel()}`
             );
 
@@ -113,8 +115,7 @@ export class Order extends Entity<Order> {
             );
             if (!!restriction && !restriction.equals(recipeVariantRestriction) && !restriction.acceptsEveryRecipe())
                 throw new Error(
-                    `El cliente ${this.customer.getFullNameOrEmail()} no puede consumir una receta que no cumpla con ${
-                        restriction.label
+                    `El cliente ${this.customer.getFullNameOrEmail()} no puede consumir una receta que no cumpla con ${restriction.label
                     } en la suscripción ${this.subscriptionId.value}`
                 );
             if (selection.recipe.availableWeeks.every((week) => !week.id.equals(this.week.id))) {
@@ -285,8 +286,7 @@ export class Order extends Entity<Order> {
             throw new Error(`La orden a la cual se le quiere remover el descuento (${this.id.toString()}), no tiene ningún pago asociado`);
         if (!this.paymentOrderId.equals(paymentOrder.id))
             throw new Error(
-                `La orden a la cual se le quiere remover el descuento (${this.id.toString()}), tiene el pago ${this.paymentOrderId.toString()} en vez de ${
-                    paymentOrder.id.toString
+                `La orden a la cual se le quiere remover el descuento (${this.id.toString()}), tiene el pago ${this.paymentOrderId.toString()} en vez de ${paymentOrder.id.toString
                 }`
             );
 
@@ -315,7 +315,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  this.getTotalPrice() / planVariant.numberOfRecipes
+                this.getTotalPrice() / planVariant.numberOfRecipes
                 : this.getTotalPrice()
         );
     }
@@ -328,7 +328,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  Math.round(this.discountAmount * 100) / planVariant.numberOfRecipes / 100
+                Math.round(this.discountAmount * 100) / planVariant.numberOfRecipes / 100
                 : this.discountAmount
         );
     }
@@ -341,7 +341,7 @@ export class Order extends Entity<Order> {
             //@ts-ignore
             planVariant.numberOfRecipes
                 ? //@ts-ignore
-                  (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfRecipes / 100
+                (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / planVariant.numberOfRecipes / 100
                 : (Math.round(this.getTotalPrice() * 100) - Math.round(this.discountAmount * 100)) / 100
         );
     }
@@ -557,6 +557,24 @@ export class Order extends Entity<Order> {
     public get isFirstOrderOfSubscription(): boolean {
         return this._isFirstOrderOfSubscription;
     }
+
+
+    /**
+     * Getter hasBeenMovedOneWeekForward
+     * @return {boolean}
+     */
+    public get hasBeenMovedOneWeekForward(): boolean {
+        return this._hasBeenMovedOneWeekForward;
+    }
+
+    /**
+     * Setter hasBeenMovedOneWeekForward
+     * @param {boolean} value
+     */
+    public set hasBeenMovedOneWeekForward(value: boolean) {
+        this._hasBeenMovedOneWeekForward = value;
+    }
+
 
     /**
      * Setter shippingDate

@@ -32,7 +32,7 @@ export class MoveOrderShippingDate {
         const daysForMovingOrder = 7;
         const firstOrderId: OrderId = new OrderId(dto.orderId);
         const order: Order = await this.orderRepository.findByIdOrThrow(firstOrderId, Locale.es);
-        if (!order.isFirstOrderOfSubscription) throw new Error("No adelantar un pedido que no es el 1ro de una suscripción");
+        if (!order.isFirstOrderOfSubscription) throw new Error("No puedes adelantar un pedido que no es el 1ro de una suscripción");
 
         const [subscription, ordersOfSubscription]: [Subscription, Order[]] = await Promise.all([
             await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId, Locale.es),
@@ -41,8 +41,7 @@ export class MoveOrderShippingDate {
         const newShippingDateOfFirstOrder = new Date(order.shippingDate);
         newShippingDateOfFirstOrder.setDate(order.shippingDate.getDate() - daysForMovingOrder);
 
-        if (newShippingDateOfFirstOrder < new Date())
-            throw new Error("No puedes adelantar el pedido si el mismo quedaría con una fecha del pasado");
+        if (order.hasBeenMovedOneWeekForward) throw new Error("El pedido ya ha sido movido una semana");
         const currentWeek: Week | undefined = await this.weekRepository.findCurrentWeek(new Date());
         if (!!!currentWeek) throw new Error("No se puede mover la 1er oden");
 
@@ -55,14 +54,12 @@ export class MoveOrderShippingDate {
 
         // [X] Probar con 1ra suscripicion
         // [X] Probar con 2da suscriptcion
-        // [] Probar con suscripciones canceladas
+        // [X] Probar con suscripciones canceladas
         // [X] Probar con suscripciones slatadas
         // [X] Probar con suscripción existente con cupones
         // [X] Probar con suscripción existente con cupon de cosoto de envio gratis
         // [X] Probar con plan adicional de unica vez y distintas frecuencias
         // [] Si hoy es miercoles y quiero adelantar un martes, debería dejarme, preguntar a santi
-
-        // Solo permitir esta accion si se está ejecutando en la 1er orden y la misma fue salteada
 
         for (let paymentOrder of paymentOrders) {
             paymentOrdersMap[paymentOrder.id.value] = paymentOrder;
@@ -73,6 +70,7 @@ export class MoveOrderShippingDate {
             if (order.shippingDate >= order.shippingDate) {
                 const actualPaymentOrder = paymentOrdersMap[order.paymentOrderId?.value!];
                 const newPaymentOrderBillingDate = new Date(actualPaymentOrder.billingDate);
+                var newPaymentOrder: PaymentOrder | undefined = billingDatePaymentOrderMap[newPaymentOrderBillingDate.toString()];
 
                 newPaymentOrderBillingDate.setDate(actualPaymentOrder.billingDate.getDate() - daysForMovingOrder);
 
@@ -82,9 +80,9 @@ export class MoveOrderShippingDate {
 
                 order.week = newOrderWeek;
 
+                if (order.isFirstOrderOfSubscription) order.hasBeenMovedOneWeekForward = true;
                 if (order.isBilled()) continue;
 
-                var newPaymentOrder: PaymentOrder | undefined = billingDatePaymentOrderMap[newPaymentOrderBillingDate.toString()];
                 const newPaymentOrderWeek: Week | undefined = weeks.find((week) => week.containsDate(newPaymentOrderBillingDate));
                 if (!!!newPaymentOrderWeek)
                     throw new Error(`No existe una semana que contenga la nueva billing date ${newPaymentOrderBillingDate}`);
@@ -92,7 +90,7 @@ export class MoveOrderShippingDate {
                 if (!!!newPaymentOrder) {
                     newPaymentOrder = new PaymentOrder(
                         order.shippingDate,
-                        PaymentOrderStateFactory.createState("PAYMENT_ORDER_ACTIVE"),
+                        PaymentOrderStateFactory.createState(actualPaymentOrder.state.title),
                         "",
                         newPaymentOrderBillingDate,
                         newPaymentOrderWeek,
@@ -110,6 +108,7 @@ export class MoveOrderShippingDate {
                     order.paymentOrderId = newPaymentOrder.id;
                 } else {
                     newPaymentOrder?.addOrder(order);
+                    newPaymentOrder.state = PaymentOrderStateFactory.createState(actualPaymentOrder.state.title) // TO DO: This state change overrides an unwanted state chanege in the method above (Cancelled POs to Active). Encapsulate this logic within it.
                 }
 
                 order.billingDate = newPaymentOrderBillingDate;

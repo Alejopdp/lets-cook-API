@@ -119,6 +119,11 @@ const OrderSchema = new mongoose.Schema(
             type: Boolean,
         },
 
+        hasBeenMovedOneWeekForward: {
+            type: Boolean,
+            default: false,
+        },
+
         deletionFlag: {
             type: Boolean,
             required: true,
