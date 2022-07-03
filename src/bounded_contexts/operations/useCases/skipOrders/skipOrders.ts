@@ -1,4 +1,3 @@
-import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { Order } from "../../domain/order/Order";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { SkipOrdersDto } from "./skipOrdersDto";
@@ -11,45 +10,56 @@ import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
+import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
+import { Subscription } from "../../domain/subscription/Subscription";
+import { UpdateDiscountAfterSkippingOrders } from "../../services/updateDiscountsAfterSkippingOrders/updateDiscountsAfterSkippingOrders";
 
 export class SkipOrders {
     private _orderRepository: IOrderRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _logRepository: ILogRepository;
     private _recipeRatingRepository: IRateRepository;
+    private _subscriptionRepository: ISubscriptionRepository;
+    private _updateDiscountsAfterSkippingOrders: UpdateDiscountAfterSkippingOrders;
 
     constructor(
         orderRepository: IOrderRepository,
         paymentOrderRepository: IPaymentOrderRepository,
         logRepository: ILogRepository,
-        recipeRatingRepository: IRateRepository
+        recipeRatingRepository: IRateRepository,
+        subscriptionRepository: ISubscriptionRepository,
+        updateDiscountsAfterSKippingOrders: UpdateDiscountAfterSkippingOrders
     ) {
         this._orderRepository = orderRepository;
         this._paymentOrderRepository = paymentOrderRepository;
         this._logRepository = logRepository;
         this._recipeRatingRepository = recipeRatingRepository;
+        this._subscriptionRepository = subscriptionRepository
+        this._updateDiscountsAfterSkippingOrders = updateDiscountsAfterSKippingOrders
     }
 
     public async execute(dto: SkipOrdersDto): Promise<any> {
+        var ordersSkippedLogString: string = "";
+        var ordersSkippedDebugLogString: string = "";
+        var ordersUnskippedLogString: string = "";
+        var ordersUnskippedDebugLogString: string = "";
         const ordersIds: OrderId[] = [...dto.ordersToReactivate, ...dto.ordersToSkip].map((id: any) => new OrderId(id));
         const incomingOrders: Order[] = await this.orderRepository.findByIdList(ordersIds, Locale.es);
-        const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(
+        const [subscription, paymentOrders]: [Subscription, PaymentOrder[]] = await Promise.all([this.subscriptionRepository.findByIdOrThrow(incomingOrders[0].subscriptionId, Locale.es), this.paymentOrderRepository.findByIdList(
             incomingOrders.map((order) => order.paymentOrderId!)
-        );
+        )])
         const orders: Order[] = await this.orderRepository.findByPaymentOrderIdList(
             paymentOrders.map((po) => po.id),
             Locale.es
         );
-        const customerRatings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(orders[0].customer.id, Locale.es);
+
+        const customerRatings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(orders[0].customer.id, Locale.es)
         const ordersMap: { [orderId: string]: Order } = {};
         const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
         const skippedOrdersToSave: Order[] = [];
         const activeOrdersToSave: Order[] = [];
         const ratingMap: { [ratingId: string]: RecipeRating } = {};
-        var ordersSkippedLogString: string = "";
-        var ordersSkippedDebugLogString: string = "";
-        var ordersUnskippedLogString: string = "";
-        var ordersUnskippedDebugLogString: string = "";
+
 
         for (let rating of customerRatings) {
             ratingMap[rating.recipe.id.value] = rating;
@@ -65,12 +75,15 @@ export class SkipOrders {
 
         for (let orderId of dto.ordersToSkip) {
             const order = ordersMap[orderId];
+            const relatedPaymentOrder = paymentOrdersMap[order.paymentOrderId?.value!]
+
             if (!order.isSkipped() && !order.isBilled()) {
                 ordersSkippedLogString = `${ordersSkippedLogString}, ${order.getWeekLabel()}`;
                 ordersSkippedDebugLogString = `${ordersSkippedLogString} | ${order.id.toString()}`;
             }
 
-            order.skip(paymentOrdersMap[order.paymentOrderId?.value!]);
+            subscription?.skipOrder(order, relatedPaymentOrder)
+            // order.skip(relatedPaymentOrder)
             skippedOrdersToSave.push(order);
 
             for (let selection of order.recipeSelection) {
@@ -78,6 +91,7 @@ export class SkipOrders {
 
                 recipeRating.removeOneDelivery(order.shippingDate);
             }
+
         }
 
         for (let orderId of dto.ordersToReactivate) {
@@ -109,6 +123,7 @@ export class SkipOrders {
 
         await this.orderRepository.updateMany([...skippedOrdersToSave, ...activeOrdersToSave]);
         await this.paymentOrderRepository.updateMany(paymentOrders);
+        await this.subscriptionRepository.save(subscription)
 
         if (!!ordersSkippedLogString) {
             this.logRepository.save(
@@ -138,6 +153,8 @@ export class SkipOrders {
                 )
             );
         }
+
+        await this.updateDiscountsAfterSkippingOrders.execute({ subscriptionId: incomingOrders[0].subscriptionId.toString() })
     }
 
     /**
@@ -170,5 +187,25 @@ export class SkipOrders {
      */
     public get recipeRatingRepository(): IRateRepository {
         return this._recipeRatingRepository;
+
     }
+
+
+    /**
+     * Getter subscriptionRepository
+     * @return {ISubscriptionRepository}
+     */
+    public get subscriptionRepository(): ISubscriptionRepository {
+        return this._subscriptionRepository;
+    }
+
+
+    /**
+     * Getter updateDiscountsAfterSkippingOrders
+     * @return {UpdateDiscountAfterSkippingOrders}
+     */
+    public get updateDiscountsAfterSkippingOrders(): UpdateDiscountAfterSkippingOrders {
+        return this._updateDiscountsAfterSkippingOrders;
+    }
+
 }

@@ -25,4 +25,5 @@ export interface ISubscriptionRepository {
     findByCouponId(couponId: CouponId): Promise<Subscription[]>;
     delete(subscriptionId: SubscriptionId): Promise<void>;
     destroy(subscriptionId: SubscriptionId): Promise<void>;
+    destroyManyByCustomer(customerId: CustomerId): Promise<void>;
 }

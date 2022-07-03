@@ -11,11 +11,11 @@ export interface CreateCouponDto {
     minRequireType: string;
     minRequireValue: number;
     productsForApplyingType: string;
-    productsForApplyingValue: string[];
+    productsForApplyingValue?: string[];
     limites: ILimitAplication[];
     maxChargeQtyType: string;
     maxChargeQtyValue: number;
     startDate: Date,
-    endDate: Date;
+    endDate?: Date;
     state: string;
 }

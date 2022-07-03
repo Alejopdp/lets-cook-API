@@ -30,7 +30,7 @@ export interface IOrderRepository {
     countKitsForCookingByWeek(week: Week): Promise<number>;
     findAll(locale: Locale): Promise<Order[]>;
     findById(orderId: OrderId, locale: Locale): Promise<Order | undefined>;
-    findBy(conditions: any, locale: Locale): Promise<Order[]>;
+    findBy(conditions: any, locale: Locale, sort?: { [field: string]: 'asc' | 'desc', }): Promise<Order[]>;
     findNextTwelveBySubscription(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]>;
     getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[], locale: Locale): Promise<{ [key: string]: number }>;
     findByIdList(ordersIds: OrderId[], locale: Locale): Promise<Order[]>;
@@ -63,5 +63,6 @@ export interface IOrderRepository {
     delete(orderId: OrderId): Promise<void>;
     markAsDeletedBySubscriptionId(subscriptionId: SubscriptionId): Promise<void>;
     destroyManyBySubscriptionId(subscriptionId: SubscriptionId): Promise<void>;
+    destroyByCustomerId(customerId: CustomerId): Promise<void>
     findFutureActiveAndSkippedBySubscriptionOrderdByShippingDate(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]>;
 }
