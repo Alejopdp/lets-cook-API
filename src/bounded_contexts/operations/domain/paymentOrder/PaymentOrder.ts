@@ -62,7 +62,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         if (this.state.isPendingConfirmation()) return;
 
         this.amount = (Math.round(this.amount * 100) + Math.round(order.getTotalPrice() * 100)) / 100; // TO DO: Add price with discount
-        this.discountAmount = (Math.round(this.discountAmount * 100) + Math.round(order.discountAmount * 100)) / 100; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+        this.addDiscountAmount(order.discountAmount) // TODO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
 
         if (order.hasFreeShipping) this.hasFreeShipping = true;
         if (this.state.isCancelled()) this.state.toActive(this);
@@ -70,9 +70,18 @@ export class PaymentOrder extends Entity<PaymentOrder> {
 
     public discountOrderAmount(order: Order): void {
         this.amount = (Math.round(this.amount * 100) - Math.round(order.getTotalPrice() * 100)) / 100;
-        this.discountAmount = (Math.round(this.discountAmount * 100) - Math.round(order.discountAmount * 100)) / 100;
+        this.discountDiscountAmount(order.discountAmount)
 
         if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
+    }
+
+    public addDiscountAmount(discountAmount: number): void {
+        this.discountAmount = (Math.round(this.discountAmount * 100) + Math.round(discountAmount * 100)) / 100
+    }
+
+    public discountDiscountAmount(discountAmount: number): void {
+        this.discountAmount = (Math.round(this.discountAmount * 100) - Math.round(discountAmount * 100)) / 100
+
     }
 
     public updateAmountsAfterSwappingPlan(

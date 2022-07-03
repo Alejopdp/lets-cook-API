@@ -79,7 +79,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
             amountDetails: {
                 subtotal: nextActiveOrder?.price,
                 shippingCost: nextPaymentOrder?.shippingCost,
-                discount: subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
+                discount: subscription.getCouponDiscountOr0IfIsNotApplyable(nextPaymentOrder?.shippingCost || 0),
                 taxes:
                     (Math.round(
                         (Math.round((nextActiveOrder?.price || 0) * 100) - Math.round((nextActiveOrder?.discountAmount || 0) * 100)) * 0.1
@@ -89,7 +89,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
                 total:
                     (nextActiveOrder?.getTotalPrice() || subscription.getPrice()) +
                     (nextPaymentOrder?.shippingCost || 0) -
-                    subscription.getCouponDiscount(nextPaymentOrder?.shippingCost || 0),
+                    subscription.getCouponDiscountOr0IfIsNotApplyable(nextPaymentOrder?.shippingCost || 0),
             },
             frequency: subscription.frequency.value(),
             plan: presentedPlan,

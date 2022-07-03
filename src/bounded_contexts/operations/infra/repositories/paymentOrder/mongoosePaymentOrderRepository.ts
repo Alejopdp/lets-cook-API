@@ -186,4 +186,8 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async delete(paymentOrderId: PaymentOrderId): Promise<void> {
         await MongoosePaymentOrder.updateOne({ _id: paymentOrderId.value }, { deletionFlag: true });
     }
+
+    public async destroyByCustomerId(customerId: CustomerId): Promise<void> {
+        await MongoosePaymentOrder.deleteMany({ customer: customerId.toString() })
+    }
 }

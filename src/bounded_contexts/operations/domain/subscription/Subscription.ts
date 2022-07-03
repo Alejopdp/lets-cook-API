@@ -87,7 +87,7 @@ export class Subscription extends Entity<Subscription> {
                     this.planVariantId,
                     this.plan,
                     this.plan.getPlanVariantPrice(this.planVariantId),
-                    hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+                    hasFreeShipping ? 0 : this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost),
                     hasFreeShipping,
                     this._id,
                     [],
@@ -104,7 +104,7 @@ export class Subscription extends Entity<Subscription> {
                 )
             );
 
-            if (this.getCouponDiscount(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
+            if (this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
 
             return orders;
         } else {
@@ -120,7 +120,7 @@ export class Subscription extends Entity<Subscription> {
                         this.planVariantId,
                         this.plan,
                         this.plan.getPlanVariantPrice(this.planVariantId),
-                        hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+                        hasFreeShipping ? 0 : this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost),
                         hasFreeShipping && this.isCouponApplyable(),
                         this._id,
                         [],
@@ -136,7 +136,7 @@ export class Subscription extends Entity<Subscription> {
                         i === 0
                     )
                 );
-                if (this.getCouponDiscount(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
+                if (this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
                 deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
             }
             return orders;
@@ -144,11 +144,16 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getCouponDiscount(shippingCost: number): number {
+        return this.coupon?.getDiscount(this.plan, this.planVariantId, shippingCost) ?? 0
+
+    }
+    public getCouponDiscountOr0IfIsNotApplyable(shippingCost: number): number {
         if (!!!this.coupon) return 0;
         if (!this.isCouponApplyable()) return 0;
 
         return this.coupon.getDiscount(this.plan, this.planVariantId, shippingCost);
     }
+
 
     private isCouponApplyable(): boolean {
         return (
@@ -168,12 +173,19 @@ export class Subscription extends Entity<Subscription> {
         coupon.addApplication(this.customer);
     }
 
+    public skipOrder(orderToSkip: Order, relatedPaymentOrder: PaymentOrder): void {
+        // TODO: Mover descuento para free shipping tmb
+        if (orderToSkip.discountAmount > 0) this.couponChargesQtyApplied--
+        orderToSkip.skip(relatedPaymentOrder)
+
+    }
+
     private applyCoupon(order: Order, paymentOrder: PaymentOrder, shippingCost: number): void {
-        const hasFreeShipping = this._coupon?.type.type === "free" && this.getCouponDiscount(shippingCost) > 0;
+        const hasFreeShipping = this._coupon?.type.type === "free" && this.getCouponDiscountOr0IfIsNotApplyable(shippingCost) > 0;
 
         if (order.isActive() || order.isSkipped()) {
             const oldDiscountAmount = order.discountAmount;
-            const newDiscountAmount = hasFreeShipping ? 0 : this.getCouponDiscount(shippingCost);
+            const newDiscountAmount = hasFreeShipping ? 0 : this.getCouponDiscountOr0IfIsNotApplyable(shippingCost);
             if (hasFreeShipping) paymentOrder.hasFreeShipping = hasFreeShipping;
 
             paymentOrder.discountAmount =
@@ -193,7 +205,7 @@ export class Subscription extends Entity<Subscription> {
         const newShippingDate: Date = this.getNewOrderDateFrom(billedOrder.shippingDate);
         const hasFreeShipping = this._coupon?.type.type === "free" && this.isCouponApplyable(); // TO DO: Add coupon isType methods
 
-        if (this.getCouponDiscount(shippingZone.cost) !== 0 || hasFreeShipping)
+        if (this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost) !== 0 || hasFreeShipping)
             this.couponChargesQtyApplied = this.couponChargesQtyApplied + 1;
 
         return new Order(
@@ -204,7 +216,7 @@ export class Subscription extends Entity<Subscription> {
             this.planVariantId,
             this.plan,
             this.plan.getPlanVariantPrice(this.planVariantId),
-            hasFreeShipping ? 0 : this.getCouponDiscount(shippingZone.cost),
+            hasFreeShipping ? 0 : this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost),
             hasFreeShipping && this.isCouponApplyable(),
             this.id,
             [],
@@ -354,7 +366,7 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getPriceWithDiscount(shippingCost: number): number {
-        return this.getPrice() - this.getCouponDiscount(shippingCost) + shippingCost;
+        return this.getPrice() - this.getCouponDiscountOr0IfIsNotApplyable(shippingCost) + shippingCost;
     }
 
     public getMaxRecipesQty(): number {

@@ -13,7 +13,6 @@ export class SkipOrdersController extends BaseController {
     protected async executeImpl(): Promise<any> {
         try {
             const dto: SkipOrdersDto = {
-                ordersIds: this.req.body.ordersIds,
                 ordersToSkip: this.req.body.ordersToSkip,
                 ordersToReactivate: this.req.body.ordersToReactivate,
                 //@ts-ignore

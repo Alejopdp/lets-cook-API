@@ -16,7 +16,7 @@
         "webpack:master": "cross-env NODE_ENV=production webpack --config webpack.config.ts",
         "build:master": "cross-env NODE_ENV=production tsc",
         "lint": "eslint . --ext .ts",
-        "test": "mocha -r ts-node/register src/bounded_contexts/**/*.test.ts"
+        "test": "mocha -r ts-node/register src/bounded_contexts/**/*.test.ts --timeout 20000"
     },
     "repository": {
         "type": "git",

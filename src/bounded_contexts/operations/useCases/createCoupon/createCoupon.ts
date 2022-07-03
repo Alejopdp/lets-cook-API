@@ -22,10 +22,10 @@ export class CreateCoupon {
             dto.discountType === "fix"
                 ? new FixedPrice(dto.discountType, dto.discountValue)
                 : dto.discountType === "free"
-                ? new FreeShipping(dto.discountType, dto.discountValue)
-                : new PercentPrice(dto.discountType, dto.discountValue);
+                    ? new FreeShipping(dto.discountType, dto.discountValue)
+                    : new PercentPrice(dto.discountType, dto.discountValue);
 
-        const productsForApplying: PlanId[] = dto.productsForApplyingValue.map((plan: any) => new PlanId(plan.id));
+        const productsForApplying: PlanId[] = (dto.productsForApplyingValue ?? []).map((plan: any) => new PlanId(plan.id));
 
         if (dto.limites.some((limit) => limit.value < 0)) throw new Error("La cantidad de aplicaciones no puede ser menor a 0");
 

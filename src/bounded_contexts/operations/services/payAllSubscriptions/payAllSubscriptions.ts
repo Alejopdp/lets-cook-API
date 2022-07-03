@@ -146,11 +146,7 @@ export class PayAllSubscriptions {
 
                     // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
                     if (paymentIntent.status === "succeeded") {
-                        logger.info(`${paymentOrderId} processing succeeded`);
-                        paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
-                        paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
-                        paymentOrdersWithHumanIdCount++;
-                        notificationDtos.push({
+                        const notificationDto = {
                             customerEmail: paymentOrderCustomer.email,
                             foodVAT: Math.round((totalAmount * 0.1 + Number.EPSILON) * 100) / 100,
                             phoneNumber: paymentOrderCustomer.personalInfo?.phone1 || "",
@@ -165,7 +161,12 @@ export class PayAllSubscriptions {
                             orders: paymentOrderOrderMap[paymentOrderId].filter((order) => !order.isCancelled()),
                             paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
                             discountAmount: paymentOrderToBill.getDiscountAmountOrShippingCostIfHasFreeShipping(),
-                        });
+                        }
+                        logger.info(`${paymentOrderId} processing succeeded`);
+                        paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
+                        paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
+                        paymentOrdersWithHumanIdCount++;
+                        notificationDtos.push(notificationDto);
                     } else {
                         logger.info(`${paymentOrderId} processing failed`);
                         paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
@@ -188,21 +189,20 @@ export class PayAllSubscriptions {
 
         // CREATE NEW ORDERS AND ASSIGN IT IN CUSTOMER MAP
         for (let subscription of activeSusbcriptions) {
-            const subscriptionIdValue = subscription.id.value;
+            const subscriptionId = subscription.id.value;
             const customerId = subscription.customer.id.value;
-            const baseOrderForCreatingThe12Order = subscriptionOrderMap[subscriptionIdValue];
+            const baseOrderForCreatingThe12Order = subscriptionOrderMap[subscriptionId];
             if (subscription.state.isCancelled()) continue;
+            if (subscription.frequency.isOneTime()) continue // TODO: End subscription
 
-            if (subscription.frequency.isOneTime()) {
-                // TO DO: End subscription
-            } else if (
+            if (
                 baseOrderForCreatingThe12Order.isActive() ||
                 baseOrderForCreatingThe12Order.isSkipped() ||
                 baseOrderForCreatingThe12Order.isPaymentRejected() ||
                 baseOrderForCreatingThe12Order.isBilled()
             ) {
                 const newOrder = subscription.getNewOrderAfterBilling(
-                    subscriptionOrderMap[subscriptionIdValue],
+                    subscriptionOrderMap[subscriptionId],
                     frequencyWeekMap[subscription.frequency.value()],
                     customerShippingZoneMap[subscription.customer.id.value]!
                 );

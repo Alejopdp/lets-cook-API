@@ -33,4 +33,5 @@ export interface IPaymentOrderRepository {
     existsBy(customerId: CustomerId): Promise<boolean>;
     delete(paymentOrderId: PaymentOrderId): Promise<void>;
     findByCustomerIdsList(customerIds: CustomerId[]): Promise<PaymentOrder[]>
+    destroyByCustomerId(customerId: CustomerId): Promise<void>
 }
