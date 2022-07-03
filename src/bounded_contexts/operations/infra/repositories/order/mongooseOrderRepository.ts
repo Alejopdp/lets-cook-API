@@ -356,7 +356,7 @@ export class MongooseOrderRepository implements IOrderRepository {
         return await this.findBy({}, locale);
     }
 
-    public async findBy(conditions: any, locale: Locale = Locale.es, sort?: { [field: string]: 'asc' | 'desc', }): Promise<Order[]> {
+    public async findBy(conditions: any, locale: Locale = Locale.es, sort: { [field: string]: 'asc' | 'desc', } | string = ""): Promise<Order[]> {
         const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false })
             .sort(sort)
             .populate("customer")
