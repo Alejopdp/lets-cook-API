@@ -27,7 +27,7 @@ export class UpdateDiscountAfterSkippingOrders {
     public async execute(dto: UpdateDiscountAfterSkippingOrdersDto): Promise<void> {
         const subscriptionId = new SubscriptionId(dto.subscriptionId)
         const [subscription, futureOrders] = await Promise.all([this.subscriptionRepository.findByIdOrThrow(subscriptionId, Locale.es), this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es)])
-        if (subscription.coupon?.maxChargeQtyType === "only_fee") return
+        // if (subscription.coupon?.maxChargeQtyType === "only_fee") return
 
         const [paymentOrders, shippingZones] = await Promise.all([this.paymentOrderRepository.findByIdList(futureOrders.map(o => o.paymentOrderId!)), this.shippingZoneRepository.findAll()])
         const customerShippingZone = shippingZones.find(zone => zone.hasAddressInside(subscription?.customer.shippingAddress?.latitude ?? -1, subscription?.customer.shippingAddress?.longitude ?? -1))
@@ -43,7 +43,7 @@ export class UpdateDiscountAfterSkippingOrders {
 
         }
 
-        if (couponRemainingApplicationQty < activeOrdersQty && subscription.coupon?.maxChargeQtyType === "more_one_fee") {
+        if (couponRemainingApplicationQty < activeOrdersQty) {
             this.reassignDiscountAmountsToOrdersSortedByDate(subscription, futureOrders, paymentOrders, discountAmount, couponRemainingApplicationQty)
         }
 
