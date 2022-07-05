@@ -183,7 +183,7 @@ export class Subscription extends Entity<Subscription> {
     private applyCoupon(order: Order, paymentOrder: PaymentOrder, shippingCost: number): void {
         const hasFreeShipping = this._coupon?.type.type === "free" && this.getCouponDiscountOr0IfIsNotApplyable(shippingCost) > 0;
 
-        if (order.isActive() || order.isSkipped()) {
+        if (order.isActive()) {
             const oldDiscountAmount = order.discountAmount;
             const newDiscountAmount = hasFreeShipping ? 0 : this.getCouponDiscountOr0IfIsNotApplyable(shippingCost);
             if (hasFreeShipping) paymentOrder.hasFreeShipping = hasFreeShipping;
