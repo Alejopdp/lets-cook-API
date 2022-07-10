@@ -29,8 +29,6 @@ export class GetPlanByIdPresenter {
                 counter++;
             }
 
-            console.log("persons: ", variant.numberOfPersons);
-
             presentedVariants.push({
                 id: variant.id.value,
                 // oldId: variant.id.value,

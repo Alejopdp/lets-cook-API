@@ -133,26 +133,4 @@ const OrderSchema = new mongoose.Schema(
     { collection: "Order", timestamps: true }
 );
 
-// OrderSchema.pre("save", async function (done) {
-//     if (this.isNew) {
-//         const count = await Order.count();
-//         //@ts-ignore
-//         this.counter = count + 20000;
-//     }
-
-//     done();
-// });
-
-// OrderSchema.pre("insertMany", async function (next: any, docs: any) {
-//     const count = await Order.count();
-
-//     console.log("COUNT: ", count);
-
-//     for (let i = 1; i <= docs.length; i++) {
-//         docs[i - 1].counter = count + 20000 + i;
-//     }
-
-//     next();
-// });
-
 export const Order = mongoose.model("Order", OrderSchema);

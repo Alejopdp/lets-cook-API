@@ -18,16 +18,12 @@ const getRandomItem = (items) => {
 
 const addRandomItem = (baseArray, firstItem) => {
     const randomItem = getRandomItem(baseArray);
-    console.log("Random item: ", randomItem);
 
     if (!!!randomItem || firstItem === randomItem) {
         addRandomItem(baseArray, firstItem);
     } else {
-        console.log("RETORNO: ", randomItem);
         return randomItem;
     }
-
-    // baseArray = [randomItem, ...baseArray];
 };
 
 const draw = (baseArray, number) => {
@@ -35,9 +31,7 @@ const draw = (baseArray, number) => {
 
     for (let i = 0; i < number; i++) {
         const randomItem = addRandomItem(baseArray, finalArray[0]);
-        console.log("FOR: ", randomItem);
         finalArray = [randomItem, ...finalArray];
-        console.log("Final Array", finalArray);
     }
 
     return finalArray;

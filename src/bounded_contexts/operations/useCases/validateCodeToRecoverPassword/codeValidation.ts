@@ -25,11 +25,10 @@ export class CodeValidation {
     public async execute(dto: CodeValidationDto): Promise<any> {
 
         const customer: Customer | undefined = await this.codeValidationRepository.findByEmail(dto.email);
-        
-        if(!customer) throw new Error("Email incorrecto");
-        // console.log(customer, dto.code)
-        if(customer?.codeToRecoverPassword !== dto.code) throw new Error("Código incorrecto");
-        
+
+        if (!customer) throw new Error("Email incorrecto");
+        if (customer?.codeToRecoverPassword !== dto.code) throw new Error("Código incorrecto");
+
         return true;
     }
 

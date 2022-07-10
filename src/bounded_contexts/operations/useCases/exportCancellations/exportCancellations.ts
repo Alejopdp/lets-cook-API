@@ -48,8 +48,6 @@ export class ExportCancellations {
             subscriptionOrdersMap[order.subscriptionId.toString()] = [...subscriptionOrdersMap[order.subscriptionId.toString()], order];
         }
 
-        console.log("A VER EL MAPA: ", subscriptionOrdersMap);
-
         for (let subscription of cancelledSubscriptions) {
             exportRows.push({
                 customerId: subscription.customer.id.value,

@@ -27,7 +27,6 @@ export class MomentTimeService {
     }
 
     public static getDateHumanLabel(date: Date, locale: Locale = Locale.es): string {
-        console.log("Locale: ", locale)
         return moment(date).locale(locale).format("dddd Do MMMM");
     }
 
