@@ -295,6 +295,11 @@ export class Subscription extends Entity<Subscription> {
     public isActive(): boolean {
         return this.state.isActive();
     }
+
+    public isCancelled(): boolean {
+        return this.state.isCancelled()
+    }
+
     public getPlanVariantLabel(locale: Locale): string {
         return this.plan.getPlanVariantLabel(this.planVariantId, locale);
     }
@@ -363,6 +368,16 @@ export class Subscription extends Entity<Subscription> {
 
     public getPrice(): number {
         return this.plan.getPlanVariantPrice(this.planVariantId);
+    }
+
+    public getCustomerLatitude(): number {
+        if (!this.customer.shippingAddress?.latitude) throw new Error("El usuario no tiene una direccion de entrega")
+        return this.customer.shippingAddress?.latitude!
+    }
+
+    public getCustomerLongitude(): number {
+        if (!this.customer.shippingAddress?.longitude) throw new Error("El usuario no tiene una direccion de entrega")
+        return this.customer.shippingAddress?.longitude!
     }
 
     public getPriceWithDiscount(shippingCost: number): number {
