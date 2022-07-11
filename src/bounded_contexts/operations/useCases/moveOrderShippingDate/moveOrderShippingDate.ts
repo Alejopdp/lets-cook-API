@@ -48,7 +48,7 @@ export class MoveOrderShippingDate {
         const weeks: Week[] = [currentWeek, ...(await this.weekRepository.findAll())]; // TO DO: Only search for the needed ones
 
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(subscription.customer.id);
-        const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
+        const paymentOrdersMap = new Map<string, PaymentOrder>()
         const billingDatePaymentOrderMap: { [billingDate: string]: PaymentOrder } = {};
         const newPaymentOrders: PaymentOrder[] = [];
 
@@ -62,17 +62,18 @@ export class MoveOrderShippingDate {
         // [] Si hoy es miercoles y quiero adelantar un martes, debería dejarme, preguntar a santi
 
         for (let paymentOrder of paymentOrders) {
-            paymentOrdersMap[paymentOrder.id.value] = paymentOrder;
+            paymentOrdersMap.set(paymentOrder.id.toString(), paymentOrder)
             billingDatePaymentOrderMap[new Date(paymentOrder.billingDate).toString()] = paymentOrder;
         }
 
         for (let order of ordersOfSubscription) {
             if (order.shippingDate >= order.shippingDate) {
-                const actualPaymentOrder = paymentOrdersMap[order.paymentOrderId?.value!];
-                const newPaymentOrderBillingDate = new Date(actualPaymentOrder.billingDate);
+                const actualPaymentOrder = paymentOrdersMap.get(order.paymentOrderId?.toString()!)!
+                const newPaymentOrderBillingDate = new Date(actualPaymentOrder.billingDate)
+                newPaymentOrderBillingDate.setDate(actualPaymentOrder.billingDate.getDate() - daysForMovingOrder);
+
                 var newPaymentOrder: PaymentOrder | undefined = billingDatePaymentOrderMap[newPaymentOrderBillingDate.toString()];
 
-                newPaymentOrderBillingDate.setDate(actualPaymentOrder.billingDate.getDate() - daysForMovingOrder);
 
                 order.shippingDate.setDate(order.shippingDate.getDate() - daysForMovingOrder);
                 const newOrderWeek: Week | undefined = weeks.find((week) => week.containsDate(order.shippingDate));
@@ -88,6 +89,7 @@ export class MoveOrderShippingDate {
                     throw new Error(`No existe una semana que contenga la nueva billing date ${newPaymentOrderBillingDate}`);
 
                 if (!!!newPaymentOrder) {
+                    console.log("Esto tiene que aparecer una vez: ")
                     newPaymentOrder = new PaymentOrder(
                         order.shippingDate,
                         PaymentOrderStateFactory.createState(actualPaymentOrder.state.title),
@@ -109,6 +111,7 @@ export class MoveOrderShippingDate {
                 } else {
                     newPaymentOrder?.addOrder(order);
                     newPaymentOrder.state = PaymentOrderStateFactory.createState(actualPaymentOrder.state.title) // TO DO: This state change overrides an unwanted state chanege in the method above (Cancelled POs to Active). Encapsulate this logic within it.
+
                 }
 
                 order.billingDate = newPaymentOrderBillingDate;
