@@ -31,7 +31,6 @@ export class MockPlanRepository implements IPlanRepository {
     }
 
     public async save(plan: Plan): Promise<void> {
-        console.log("Plan: ", plan);
         const filtered = this.database.filter((p) => !p.equals(plan));
         this.database = [...filtered, plan];
     }

@@ -28,6 +28,7 @@ import { exportCustomerActionsController } from "../../services/exportCustomerAc
 import { sendUpdateEmailEmailController } from "../../useCases/sendUpdateEmailEmail";
 import { exportAllCustomersActionsController } from "../../services/exportAllCustomersActions";
 import { Permission } from "../../../../bounded_contexts/IAM/domain/permission/Permission";
+import { deleteCustomerSubscriptionsAndOrdersController } from "../../useCases/deleteCustomerSubscriptionsAndOrders";
 
 const customerRouter = express.Router();
 
@@ -84,5 +85,8 @@ customerRouter.post("/social-auth/:token", (req, res) => socialNetworkAuthContro
 customerRouter.post("/setup-future-payment-method/:id", (req, res) => futurePaymentSetupController.execute(req, res));
 customerRouter.post("/check-if-email-exists", (req, res) => checkIfEmailExistsController.execute(req, res));
 customerRouter.post("/request-email-change/:customerId", (req, res) => sendUpdateEmailEmailController.execute(req, res));
+
+// DELETEs
+customerRouter.delete("/subscriptions/:id", (req, res) => deleteCustomerSubscriptionsAndOrdersController.execute(req, res))
 
 export { customerRouter as customerRouter };

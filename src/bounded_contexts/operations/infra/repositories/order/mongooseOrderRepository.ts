@@ -254,7 +254,7 @@ export class MongooseOrderRepository implements IOrderRepository {
                 },
             });
 
-        return aggregateSum[0].numberOfPersons;
+        return aggregateSum[0]?.numberOfPersons ?? 0;
     }
 
     public async getCountByPaymentOrderIdMap(
@@ -356,8 +356,9 @@ export class MongooseOrderRepository implements IOrderRepository {
         return await this.findBy({}, locale);
     }
 
-    public async findBy(conditions: any, locale: Locale = Locale.es): Promise<Order[]> {
+    public async findBy(conditions: any, locale: Locale = Locale.es, sort?: { [field: string]: 'asc' | 'desc', }): Promise<Order[]> {
         const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false })
+            .sort(sort)
             .populate("customer")
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("week")
@@ -367,7 +368,7 @@ export class MongooseOrderRepository implements IOrderRepository {
                     path: "recipe",
                     populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }] },
                 },
-            });
+            })
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }
@@ -447,7 +448,7 @@ export class MongooseOrderRepository implements IOrderRepository {
                 { state: ["ORDER_ACTIVE", "ORDER_SKIPPED"] },
                 { billingDate: { $gt: new Date() } },
             ],
-        });
+        }, undefined, { billingDate: 'asc' });
     }
 
     public async findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[], locale: Locale = Locale.es): Promise<Order[]> {
@@ -650,6 +651,10 @@ export class MongooseOrderRepository implements IOrderRepository {
 
     public async destroyManyBySubscriptionId(subscriptionId: SubscriptionId): Promise<void> {
         await MongooseOrder.deleteMany({ subscription: subscriptionId.value });
+    }
+
+    public async destroyByCustomerId(customerId: CustomerId): Promise<void> {
+        await MongooseOrder.deleteMany({ customer: customerId.toString() })
     }
 }
 

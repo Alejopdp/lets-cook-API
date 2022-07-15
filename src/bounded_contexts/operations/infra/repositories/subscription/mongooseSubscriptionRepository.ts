@@ -113,4 +113,8 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
     public async destroy(subscriptionId: SubscriptionId): Promise<void> {
         await MongooseSubscription.deleteOne({ _id: subscriptionId.value });
     }
+
+    public async destroyManyByCustomer(customerId: CustomerId): Promise<void> {
+        await MongooseSubscription.deleteMany({ customer: customerId.toString() })
+    }
 }

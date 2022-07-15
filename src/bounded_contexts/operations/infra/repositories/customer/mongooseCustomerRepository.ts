@@ -30,7 +30,6 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                 }
             );
         } else {
-            console.log(customerDb);
             await MongooseCustomer.create(customerDb);
         }
     }

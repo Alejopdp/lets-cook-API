@@ -29,11 +29,8 @@ export class CreateCouponController extends BaseController {
                 endDate: this.req.body.date_rage.expire,
                 state: this.req.body.state,
             };
-            // console.log("CreateCouponController: ", dto)
 
             await this.createCoupon.execute(dto);
-
-            // fs.unlinkSync(planImaePath);
 
             return this.ok(this.res);
         } catch (error) {

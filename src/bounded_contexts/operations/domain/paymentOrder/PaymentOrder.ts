@@ -62,7 +62,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         if (this.state.isPendingConfirmation()) return;
 
         this.amount = (Math.round(this.amount * 100) + Math.round(order.getTotalPrice() * 100)) / 100; // TO DO: Add price with discount
-        this.discountAmount = (Math.round(this.discountAmount * 100) + Math.round(order.discountAmount * 100)) / 100; // TO DO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
+        this.addDiscountAmount(order.discountAmount) // TODO: DONT ADD IF ITS A FREE SHIPPING COUPON AND THE PO ALREADY HAS IT
 
         if (order.hasFreeShipping) this.hasFreeShipping = true;
         if (this.state.isCancelled()) this.state.toActive(this);
@@ -70,9 +70,18 @@ export class PaymentOrder extends Entity<PaymentOrder> {
 
     public discountOrderAmount(order: Order): void {
         this.amount = (Math.round(this.amount * 100) - Math.round(order.getTotalPrice() * 100)) / 100;
-        this.discountAmount = (Math.round(this.discountAmount * 100) - Math.round(order.discountAmount * 100)) / 100;
+        this.discountDiscountAmount(order.discountAmount)
 
         if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
+    }
+
+    public addDiscountAmount(discountAmount: number): void {
+        this.discountAmount = (Math.round(this.discountAmount * 100) + Math.round(discountAmount * 100)) / 100
+    }
+
+    public discountDiscountAmount(discountAmount: number): void {
+        this.discountAmount = (Math.round(this.discountAmount * 100) - Math.round(discountAmount * 100)) / 100
+
     }
 
     public updateAmountsAfterSwappingPlan(
@@ -81,18 +90,31 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         oldPlanDiscount: number,
         newPlanDiscount: number
     ): void {
-        if (this.state.isBilled() || this.state.isCancelled()) return;
+        if (this.state.isBilled() || this.isCancelled()) return;
+        const newAmount = (Math.round(this.amount * 100) - Math.round(oldPlanPrice * 100) + Math.round(newPlanPrice * 100)) / 100;
 
-        this.amount = (Math.round(this.amount * 100) - Math.round(oldPlanPrice * 100) + Math.round(newPlanPrice * 100)) / 100;
-        if (this.discountAmount > 0)
-            this.discountAmount =
-                (Math.round(this.discountAmount * 100) - Math.round(oldPlanDiscount * 100) + Math.round(newPlanDiscount * 100)) / 100;
+        this.amount = newAmount
+
+        if (this.discountAmount > 0) {
+            const newDiscountAmount = (Math.round(this.discountAmount * 100) - Math.round(oldPlanDiscount * 100) + Math.round(newPlanDiscount * 100)) / 100;
+
+            this.discountAmount = newDiscountAmount
+        }
+
     }
 
     public discountOrdersAmount(orders: Order[]): void {
         for (let order of orders) {
             this.discountOrderAmount(order);
         }
+    }
+
+    public isCancelled(): boolean {
+        return this.state.isCancelled()
+    }
+
+    public isActive(): boolean {
+        return this.state.isActive()
     }
 
     public updateState(newState: string, orders: Order[]): void {

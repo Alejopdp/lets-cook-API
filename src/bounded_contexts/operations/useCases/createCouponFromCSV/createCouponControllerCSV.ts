@@ -32,7 +32,6 @@ export class CreateCouponControllerCSV extends BaseController {
             var workbook = XLSX.readFile(csvCouponsPath);
             var third_worksheet = workbook.Sheets[workbook.SheetNames[0]];
             var coupons_list = XLSX.utils.sheet_to_json(third_worksheet, { header: 1 });
-            // console.log("Workbook: ", coupons_list)
             const keysMapCoupons = {
                 "0": "name",
                 "1": "discount_type",
@@ -94,7 +93,6 @@ export class CreateCouponControllerCSV extends BaseController {
                 });
                 arrayNewObjectsCoupons[i]["application_limit"] = listLimits;
             }
-            console.log(arrayNewObjectsCoupons);
 
             for (let index = 0; index < arrayNewObjectsCoupons.length; index++) {
                 const dto: CreateCouponCSVDto = {

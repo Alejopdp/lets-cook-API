@@ -15,7 +15,6 @@ export class GetCustomerByName {
 
     public async execute(dto: GetCustomerByNameDto): Promise<any> {
         var customer: Customer[] = await this.customerRepository.findByName(dto.name);
-        // console.log("GetCoupon Use Case: ", coupons)
         return GetCouponListPresenter.present(customer);
     }
 
