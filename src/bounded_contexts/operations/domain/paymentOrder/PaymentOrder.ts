@@ -90,18 +90,31 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         oldPlanDiscount: number,
         newPlanDiscount: number
     ): void {
-        if (this.state.isBilled() || this.state.isCancelled()) return;
+        if (this.state.isBilled() || this.isCancelled()) return;
+        const newAmount = (Math.round(this.amount * 100) - Math.round(oldPlanPrice * 100) + Math.round(newPlanPrice * 100)) / 100;
 
-        this.amount = (Math.round(this.amount * 100) - Math.round(oldPlanPrice * 100) + Math.round(newPlanPrice * 100)) / 100;
-        if (this.discountAmount > 0)
-            this.discountAmount =
-                (Math.round(this.discountAmount * 100) - Math.round(oldPlanDiscount * 100) + Math.round(newPlanDiscount * 100)) / 100;
+        this.amount = newAmount
+
+        if (this.discountAmount > 0) {
+            const newDiscountAmount = (Math.round(this.discountAmount * 100) - Math.round(oldPlanDiscount * 100) + Math.round(newPlanDiscount * 100)) / 100;
+
+            this.discountAmount = newDiscountAmount
+        }
+
     }
 
     public discountOrdersAmount(orders: Order[]): void {
         for (let order of orders) {
             this.discountOrderAmount(order);
         }
+    }
+
+    public isCancelled(): boolean {
+        return this.state.isCancelled()
+    }
+
+    public isActive(): boolean {
+        return this.state.isActive()
     }
 
     public updateState(newState: string, orders: Order[]): void {

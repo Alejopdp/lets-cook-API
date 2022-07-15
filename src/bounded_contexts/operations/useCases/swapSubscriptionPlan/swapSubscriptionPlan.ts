@@ -58,15 +58,15 @@ export class SwapSubscriptionPlan {
         const customerRatings: RecipeRating[] = await this.recipesRatingRepository.findAllByCustomer(subscription?.customer.id!, Locale.es);
         const recipeRatingsMap: { [recipeId: string]: RecipeRating } = {};
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");
-        if (subscription.state.isCancelled()) throw new Error("No puedes cambiar el plan de una suscripción cancelada");
+        if (subscription.isCancelled()) throw new Error("No puedes cambiar el plan de una suscripción cancelada");
 
         const shippingZones = await this.shippingZoneRepository.findAll();
 
         const customerShippingZone = shippingZones.find((zone) =>
-            zone.hasAddressInside(subscription.customer.shippingAddress?.latitude!, subscription.customer.shippingAddress?.longitude!)
+            zone.hasAddressInside(subscription.getCustomerLatitude(), subscription.getCustomerLongitude())
         );
         if (!customerShippingZone) throw new Error("No te encuentras en una zona de envío disponible");
-        const oldSubscriptionPrice = subscription.plan.getPlanVariantPrice(subscription.planVariantId);
+        const oldSubscriptionPrice = subscription.getPrice()
         const oldPlan = subscription.plan;
         const oldPlanVariantId = subscription.planVariantId;
 
@@ -99,10 +99,10 @@ export class SwapSubscriptionPlan {
                 : undefined;
 
             for (let paymentOrder of paymentOrders) {
-                var oldPlanDiscount = !!coupon ? coupon.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) : 0;
-                var newPlanDiscount = !!coupon ? coupon.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost) : 0;
+                var oldPlanDiscount = coupon?.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) ?? 0;
+                var newPlanDiscount = coupon?.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost) ?? 0;
 
-                paymentOrder.updateAmountsAfterSwappingPlan(oldSubscriptionPrice, subscription.price, oldPlanDiscount, newPlanDiscount);
+                paymentOrder.updateAmountsAfterSwappingPlan(oldSubscriptionPrice, subscription.getPrice(), oldPlanDiscount, newPlanDiscount);
             }
 
             await this.paymentOrderRepository.updateMany(paymentOrders);
@@ -114,10 +114,9 @@ export class SwapSubscriptionPlan {
         this.logRepository.save(
             new Log(
                 LogType.PURCHASE_ITEM_SWAP,
-                subscription.customer.getFullNameOrEmail(),
-                "Usuario",
-                `El usuario cambió la suscripción del ${oldPlan.name} al ${
-                    subscription.plan.name
+                dto.nameOrEmailOfAdminExecutingRequest ?? subscription.customer.getFullNameOrEmail(),
+                !!dto.nameOrEmailOfAdminExecutingRequest ? "Admin" : "Usuario",
+                `El usuario cambió la suscripción del ${oldPlan.name} al ${subscription.plan.name
                 } con variante ${subscription.getPlanVariantLabel(Locale.es)}`,
                 `El usuario cambió la suscripción (${subscription.id.toString()}) del plan ${oldPlan.id.toString()} al plan ${subscription.plan.id.toString()} con variante ${subscription.planVariantId.toString()}`,
                 new Date(),

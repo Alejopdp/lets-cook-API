@@ -83,7 +83,6 @@ export class SkipOrders {
             }
 
             subscription?.skipOrder(order, relatedPaymentOrder)
-            // order.skip(relatedPaymentOrder)
             skippedOrdersToSave.push(order);
 
             for (let selection of order.recipeSelection) {
@@ -109,10 +108,7 @@ export class SkipOrders {
             const principalPlanOrders = orders.filter((o) => o.paymentOrderId?.equals(paymentOrder.id) && o.plan.isPrincipal());
 
             if (principalPlanOrders.every((o) => o.isSkipped() || o.isCancelled())) {
-                console.log("TOdas skipped");
-
                 for (let order of orders) {
-                    console.log(`${order.isActive()} ${order.paymentOrderId?.equals(paymentOrder.id)} ${!order.plan.isPrincipal()}`);
                     if (order.isActive() && order.paymentOrderId?.equals(paymentOrder.id) && !order.plan.isPrincipal()) {
                         order.skip(paymentOrder);
                         skippedOrdersToSave.push(order);

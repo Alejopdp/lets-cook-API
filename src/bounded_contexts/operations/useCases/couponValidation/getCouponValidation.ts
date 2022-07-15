@@ -22,34 +22,22 @@ export class GetCouponValidation {
 
     public async execute(dto: GetCouponValidationDto): Promise<any> {
         const coupon: Coupon | undefined = await this.couponRepository.findActiveByCode(dto.coupon);
+        if (!coupon) throw new Error("El cupón de descuento ingresado es incorrecto");
+
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const planId: PlanId = new PlanId(dto.planId);
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const plan: Plan = await this.planRepository.findByIdOrThrow(planId, Locale.es);
         const planPrice = plan.getPlanVariantPrice(planVariantId);
-        if (!coupon) throw new Error("El cupón de descuento ingresado es incorrecto");
-        console.log(
-            "Final amount: ",
-            Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)
-        );
-        if (
-            !coupon.isFreeShippingCoupon() &&
-            (Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)) / 100 < 0
-        ) {
-            console.log(
-                "A verga: ",
-                (Math.round(planPrice * 100) - Math.round(coupon.getDiscount(plan, planVariantId, dto.shippingCost) * 100)) / 100 < 0
-            );
-            throw new Error("El cupón no es aplicable al importe del plan");
-        }
+        const newPlanPriceAfterApplyingDiscount = (Math.round(planPrice * 100) - Math.round(coupon?.getDiscount(plan, planVariantId, dto.shippingCost) * 100)) / 100
 
+        if (!coupon.isFreeShippingCoupon() && newPlanPriceAfterApplyingDiscount < 0) throw new Error("El cupón no es aplicable al importe del plan")
         if (!coupon.hasStarted()) throw new Error("El cupón ingresado no es válido");
         if (coupon.isExpiredByEndDate()) throw new Error("El cupón de descuento ingresado ha expirado");
 
         const customerSubscriptions: Subscription[] = await this.subscriptionRepository.findByCustomerId(customerId, Locale.es);
 
-        if (!coupon.isValid(customerSubscriptions, plan, planVariantId, dto.shippingCost))
-            throw new Error("No puedes aplicar a este cupón");
+        if (!coupon.isValid(customerSubscriptions, plan, planVariantId, dto.shippingCost)) throw new Error("No puedes aplicar a este cupón");
 
         return coupon;
     }

@@ -35,9 +35,7 @@ export class DeleteRecipeVariant {
 
         // TO DO: Push logic to domain
 
-        console.log("Restriction of recipe variant: ", recipeVariantToDeleteRestriction.id);
         for (let subscription of subscriptionsOfOrdersWithRecipe) {
-            console.log("Subscription restriction: ", subscription.restriction?.id.toString());
             if (!!subscription.restriction?.equals(recipeVariantToDeleteRestriction)) {
                 subscriptionsWithSameRestrictionMap[subscription.id.value] = subscription;
             }

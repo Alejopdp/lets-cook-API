@@ -12,7 +12,6 @@ export class GetRateListController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
-        console.log("Query: ", this.req.query.customer);
         try {
             const dto: GetRateListDto = {
                 customerId: this.req.query.customer as string,

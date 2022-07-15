@@ -16,7 +16,6 @@ export class GetCouponList {
 
     public async execute(): Promise<any> {
         var coupons: Coupon[] = await this.couponRepository.findAll();
-        // console.log("GetCoupon Use Case: ", coupons)
         return GetCouponListPresenter.present(coupons);
     }
 

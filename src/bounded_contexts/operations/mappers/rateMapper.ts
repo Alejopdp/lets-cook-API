@@ -9,7 +9,7 @@ export class RateMapper implements Mapper<RecipeRating, any> {
     public toDomain(raw: any, locale: Locale): RecipeRating {
         const customerId = new CustomerId(raw.customer);
         const recipe = recipeMapper.toDomain(raw.recipe, locale);
-        console.log(raw.shippingDates);
+
         return new RecipeRating(
             recipe,
             customerId,
