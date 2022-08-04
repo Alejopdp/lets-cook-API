@@ -144,6 +144,8 @@ export class PayAllSubscriptions {
                         );
                     }
 
+                    paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
+                    paymentOrdersWithHumanIdCount++;
                     // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
                     if (paymentIntent.status === "succeeded") {
                         const notificationDto = {
@@ -164,8 +166,6 @@ export class PayAllSubscriptions {
                         }
                         logger.info(`${paymentOrderId} processing succeeded`);
                         paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
-                        paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
-                        paymentOrdersWithHumanIdCount++;
                         notificationDtos.push(notificationDto);
                     } else {
                         logger.info(`${paymentOrderId} processing failed`);
