@@ -98,7 +98,7 @@ export class Middleware {
                     //@ts-ignore
                     req["decode"] = decoded;
                     //@ts-ignore
-                    console.log("A VER EL DECODED: ", req["decode"]);
+                    console.log("[debug] User executing the request: ", req["decode"]?.email);
                     //@ts-ignore
                     req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
                     next();

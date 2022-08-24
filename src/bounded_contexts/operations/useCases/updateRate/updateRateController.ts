@@ -20,8 +20,6 @@ export class UpdateRateController extends BaseController {
                 commentRate: this.req.body.comment,
             };
 
-            console.log("Rate value: ", this.req.body.rating);
-            console.log("Comment value: ", this.req.body.comment);
             await this.updateRate.execute(dto);
 
             return this.ok(this.res);

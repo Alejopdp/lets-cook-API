@@ -254,7 +254,7 @@ export class MongooseOrderRepository implements IOrderRepository {
                 },
             });
 
-        return aggregateSum[0].numberOfPersons;
+        return aggregateSum[0]?.numberOfPersons ?? 0;
     }
 
     public async getCountByPaymentOrderIdMap(
