@@ -29,8 +29,7 @@ export class GetShippingRateController extends BaseController {
 
             return this.ok(this.res, presented);
         } catch (error) {
-            logger.error(error);
-            return this.fail(error);
+            return this.fail(error as Error);
         }
     }
 

@@ -2,8 +2,7 @@ import { BaseController } from "../../../../core/infra/BaseController";
 import { CreateShippingZoneDto } from "./createShippingZoneDto";
 import fs from "fs";
 import { CreateShippingZone } from "./createShippingZone";
-import { logger } from "../../../../../config";
-// import { kml } from '@mapbox/togeojson';
+import { FeatureCollection, Geometry, GeoJsonProperties } from "geojson"
 var tj = require("@mapbox/togeojson");
 const DOMParser = require("xmldom").DOMParser;
 
@@ -20,18 +19,20 @@ export class CreateShippingZoneController extends BaseController {
             if (!this.req.file) throw new Error("No ha ingresado un archivo kml");
             const shippingZoneKmlPath = this.req.file.path;
             var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
-            var converted = tj.kml(kml);
+            var geoJson: FeatureCollection<Geometry, GeoJsonProperties> = tj.kml(kml);
+            const polygonsQty = geoJson.features?.filter(feat => feat.geometry.type === "Polygon").length ?? 0
 
-            let polygonFilter = [],
-                coordinates = [];
-            if (converted.features && converted.features.length > 0) {
-                polygonFilter = converted.features.filter((val: any) => val.properties.name === this.req.body.reference);
-            }
+            if (polygonsQty < 1) throw new Error("No has ingresado ningun poligono dentro del archivo")
+            if (polygonsQty > 1) throw new Error("Ingresaste mas de 1 poligono, solo debes ingresar 1")
 
-            logger.warn(``);
-            if (polygonFilter.length > 1) throw new Error("No debe haber más de un polígono con el mismo nombre");
-            if (polygonFilter.length === 0) throw new Error("Ninguno de los polígonos coinciden con el nombre de referencia ingresado");
-            if (polygonFilter.length === 1) coordinates = converted.features[0].geometry.coordinates[0];
+            const polygon: Geometry | undefined = geoJson.features.find(feat => feat.properties?.name === this.req.body.reference)?.geometry
+            if (!polygon) throw new Error("Ninguno de los polígonos coinciden con el nombre de referencia ingresado");
+
+            let coordinates = [];
+            //@ts-ignore
+            coordinates = polygon.coordinates?.[0];
+
+            if (!coordinates) throw new Error("No se pudieron obtener las coordenadas")
 
             const dto: CreateShippingZoneDto = {
                 name: this.req.body.name,
