@@ -83,7 +83,7 @@ export class ReorderPlan {
         );
         const paymentOrdersWithHumanIdQty = await this.paymentOrderRepository.countPaymentOrdersWithHumanId();
 
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAllActive();
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(subscription.customer.shippingAddress?.latitude!, subscription.customer.shippingAddress?.longitude!)
         );

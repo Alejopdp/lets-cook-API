@@ -29,7 +29,7 @@ export class UpdateDiscountAfterSkippingOrders {
         const [subscription, futureOrders] = await Promise.all([this.subscriptionRepository.findByIdOrThrow(subscriptionId, Locale.es), this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es)])
         // if (subscription.coupon?.maxChargeQtyType === "only_fee") return
 
-        const [paymentOrders, shippingZones] = await Promise.all([this.paymentOrderRepository.findByIdList(futureOrders.map(o => o.paymentOrderId!)), this.shippingZoneRepository.findAll()])
+        const [paymentOrders, shippingZones] = await Promise.all([this.paymentOrderRepository.findByIdList(futureOrders.map(o => o.paymentOrderId!)), this.shippingZoneRepository.findAllActive()])
         const customerShippingZone = shippingZones.find(zone => zone.hasAddressInside(subscription?.customer.shippingAddress?.latitude ?? -1, subscription?.customer.shippingAddress?.longitude ?? -1))
         if (!customerShippingZone) throw new Error("Tu direccion no se encuentra en ninguna de nuestras zonas de envio")
 
