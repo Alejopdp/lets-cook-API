@@ -46,7 +46,7 @@ export class ApplyCouponToSubscription {
         const subscription: Subscription | undefined = customerSubscriptions.find((sub) => sub.id.equals(subscriptionId));
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");
 
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAllActive();
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(
                 customerSubscriptions[0].customer.shippingAddress?.latitude!,

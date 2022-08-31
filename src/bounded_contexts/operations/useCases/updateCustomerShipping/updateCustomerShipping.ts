@@ -46,7 +46,7 @@ export class UpdateCustomerShipping {
     }
 
     public async execute(dto: UpdateCustomerShippingDto): Promise<void> {
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAllActive();
         const customerNewShippingZone: ShippingZone | undefined = shippingZones.find((zone) => zone.hasAddressInside(dto.lat, dto.long));
         if (!!!customerNewShippingZone)
             throw new Error("En este momento no podemos servir en tu zona, pero puedes dejarnos tu email y te avisaremos cuando toque!");

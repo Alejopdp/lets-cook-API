@@ -1,4 +1,3 @@
-import { IStorageService } from "../../application/storageService/IStorageService";
 import { Order } from "../../domain/order/Order";
 import { ShippingZone } from "../../domain/shipping/ShippingZone";
 import { Coordinates } from "../../domain/shipping/ShippingZoneRadio/Coordinates";
@@ -23,15 +22,15 @@ export class GetShippingRate {
             zone.hasAddressInside(coordinates.latitude, coordinates.longitude)
         );
         var nextCustomerOrder: Order | undefined = undefined;
+        if (!!!shippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
         if (!!dto.currentUser) {
-            const orders: Order[] = await this.orderRepository.findByShippingDates([shippingZone?.nextShippingDate()!], dto.locale);
+            const orders: Order[] = await this.orderRepository.findByShippingDates([shippingZone.nextShippingDate()], dto.locale);
             nextCustomerOrder = orders.find(
                 (order) => order.customer.id.equals(dto.currentUser?.id) && (order.isActive() || order.isBilled())
             );
         }
 
-        if (!!!shippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
         return { shippingZone, hasNextShipping: !!nextCustomerOrder };
     }

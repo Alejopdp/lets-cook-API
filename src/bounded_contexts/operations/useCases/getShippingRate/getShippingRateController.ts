@@ -1,4 +1,3 @@
-import { logger } from "../../../../../config";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { Locale } from "../../domain/locale/Locale";
 import { GetShippingRate } from "./getShippingRate";
@@ -28,9 +27,8 @@ export class GetShippingRateController extends BaseController {
             const presented = this.getShippingRatePresenter.present(result.shippingZone, result.hasNextShipping, dto.locale);
 
             return this.ok(this.res, presented);
-        } catch (error: any) {
-            logger.error(error);
-            return this.fail(error);
+        } catch (error) {
+            return this.fail(error as Error);
         }
     }
 

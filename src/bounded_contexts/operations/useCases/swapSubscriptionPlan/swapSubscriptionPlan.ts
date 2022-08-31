@@ -60,7 +60,7 @@ export class SwapSubscriptionPlan {
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");
         if (subscription.isCancelled()) throw new Error("No puedes cambiar el plan de una suscripción cancelada");
 
-        const shippingZones = await this.shippingZoneRepository.findAll();
+        const shippingZones = await this.shippingZoneRepository.findAllActive();
 
         const customerShippingZone = shippingZones.find((zone) =>
             zone.hasAddressInside(subscription.getCustomerLatitude(), subscription.getCustomerLongitude())

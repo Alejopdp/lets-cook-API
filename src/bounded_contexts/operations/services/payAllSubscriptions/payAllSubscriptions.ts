@@ -52,7 +52,7 @@ export class PayAllSubscriptions {
         const today: Date = new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAllActive();
         const paymentOrdersToBill: PaymentOrder[] = await this.paymentOrderRepository.findByBillingDate(today);
         const ordersToBill: Order[] = await this.orderRepository.findByPaymentOrderIdList(
             paymentOrdersToBill.map((po) => po.id),
@@ -117,7 +117,7 @@ export class PayAllSubscriptions {
                 try {
                     logger.info(`Starting payment order ${paymentOrderId} processing`);
                     const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
-                    const shippingCost = customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost || 0;
+                    const shippingCost = customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost ?? 0;
                     const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some(
                         (order) => order.hasFreeShipping
                     );

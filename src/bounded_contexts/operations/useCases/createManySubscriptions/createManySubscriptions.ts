@@ -127,7 +127,7 @@ export class CreateManySubscriptions {
             totalPrice += domainPlan.getPlanVariantPrice(planVariantId);
         }
 
-        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAllActive();
 
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)

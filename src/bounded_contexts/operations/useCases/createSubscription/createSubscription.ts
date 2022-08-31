@@ -96,7 +96,7 @@ export class CreateSubscription {
             this.customerRepository.findByIdOrThrow(customerId),
             this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
             this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
-            this.shippingZoneRepository.findAll(),
+            this.shippingZoneRepository.findAllActive(),
         ]);
         const coupon: Coupon | undefined = !!dto.couponId ? await this.couponRepository.findById(new CouponId(dto.couponId)) : undefined;
         const customerSubscriptions: Subscription[] = customerSubscriptionHistory.filter((sub) => sub.isActive());
