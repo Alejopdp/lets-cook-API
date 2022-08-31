@@ -22,7 +22,7 @@ export class GetNextOrdersWithRecipesSelectionExportFilters {
         dto: GetNextOrdersWithRecipesSelectionExportFiltersDto
     ): Promise<{ weeks: Week[]; shippingDates: Date[]; billingDates: Date[]; customers: Customer[] }> {
         const weeks: Week[] = await this.weekRepository.findLastAndNextEight();
-        var shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
+        var shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAllActive();
         const customers: Customer[] = await this.customerRepository.findAll();
         var shippingDayNumbers: number[] = [];
         var thisWeekShippingDays: Date[] = [];

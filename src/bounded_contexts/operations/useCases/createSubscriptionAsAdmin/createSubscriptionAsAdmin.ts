@@ -78,7 +78,7 @@ export class CreateSubscriptionAsAdmin {
             this.customerRepository.findByIdOrThrow(customerId),
             this.planRepository.findByIdOrThrow(new PlanId(dto.planId), Locale.es),
             this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
-            this.shippingZoneRepository.findAll(),
+            this.shippingZoneRepository.findAllActive(),
         ]);
         const customerDefaultPaymentMethod: PaymentMethod | undefined = customer.getDefaultPaymentMethod();
         if (!!!customerDefaultPaymentMethod) throw new Error("El cliente no tiene ningún método de pago ingresado");

@@ -43,7 +43,7 @@ export class SendNewSubscriptionEmail {
         const [subscription, firstOrder, shippingZones]: [Subscription, Order | undefined, ShippingZone[]] = await Promise.all([
             this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale),
             this.orderRepository.getFirstOrderOfSubscription(subscriptionId, dto.locale),
-            this.shippingZoneRepository.findAll(),
+            this.shippingZoneRepository.findAllActive(),
         ]);
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(firstOrder?.paymentOrderId!);
 

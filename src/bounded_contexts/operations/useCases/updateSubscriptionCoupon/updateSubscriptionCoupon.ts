@@ -53,24 +53,24 @@ export class UpdateSubscriptionCoupon {
 
         const [customerSubscriptions, shippingZones]: [Subscription[], ShippingZone[]] = await Promise.all([
             this.subscriptionRepository.findActiveSusbcriptionsByCustomerId(customerId),
-            this.shippingZoneRepository.findAll(),
+            this.shippingZoneRepository.findAllActive(),
         ]);
         const subscription: Subscription | undefined = customerSubscriptions.find((sub) => sub.id.equals(subscriptionId));
         if (!!!subscription) throw new Error("La suscripción ingresada no existe");
 
-        const customerShippingZone: ShippingZone = shippingZones.find((zone) =>
+        const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
             zone.hasAddressInside(
                 subscription.customer.getShippingAddress().latitude!,
                 subscription.customer.getShippingAddress().longitude!
             )
-        )!;
+        );
 
         await this.couponValidationService.execute({
             coupon,
             customerSubscriptions,
             plan: subscription.plan,
             planVariantId: subscription.planVariantId,
-            shippingCost: customerShippingZone.cost,
+            shippingCost: customerShippingZone?.cost ?? 0,
         });
         const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));

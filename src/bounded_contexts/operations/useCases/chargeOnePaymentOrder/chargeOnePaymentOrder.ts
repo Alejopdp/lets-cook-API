@@ -55,7 +55,7 @@ export class ChargeOnePaymentOrder {
         const [customer, shippingZones, weeklyOrdersWeek, biweeklyOrdersWeek, monthlyOrdersWeek, paymentOrdersWithHumanIdCount] =
             await Promise.all([
                 this.customerRepository.findByIdOrThrow(paymentOrder.customerId),
-                this.shippingZoneRepository.findAll(),
+                this.shippingZoneRepository.findAllActive(),
                 this.weekRepository.findWeekTwelveWeeksLater(),
                 this.weekRepository.findWeekTwelveBiweeksLater(),
                 this.weekRepository.findWeekTwelveMonthsLater(),
@@ -85,7 +85,7 @@ export class ChargeOnePaymentOrder {
         const totalAmount = customerHasFreeShipping
             ? (Math.round(paymentOrder.amount * 100) - Math.round(paymentOrder.discountAmount * 100)) / 100
             : (Math.round(paymentOrder.amount * 100) - Math.round(paymentOrder.discountAmount * 100) + Math.round(shippingCost * 100)) /
-              100;
+            100;
 
         const paymentIntent = await this.paymentService.paymentIntent(
             totalAmount,
