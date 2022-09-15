@@ -13,6 +13,7 @@ import { IPaymentService } from "../../application/paymentService/IPaymentServic
 import { IMailingListService } from "../../application/mailingListService/IMailingListService";
 import { Locale } from "../../domain/locale/Locale";
 import { Guard } from "../../../../core/logic/Guard";
+import { PersonalInfo } from "../../domain/customer/personalInfo/PersonalInfo";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
@@ -49,8 +50,12 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
 
         if (!!!customer) {
             Guard.againstAccents(dto.email, Locale.es);
-            const newCustomerDisplayName: string = user.displayName;
             customer = Customer.create(userEmail, true, "", [], 0, new Date(), undefined, undefined, undefined, "active", undefined);
+            const newCustomerDisplayName: string = user.displayName;
+            const firstName: string = newCustomerDisplayName?.split(" ")?.[0] ?? "";
+            const lastName = newCustomerDisplayName?.split(" ")?.slice(1)?.join() ?? "";
+            const newCustomerPersonalInfo = new PersonalInfo(firstName, lastName, user.phoneNumber ?? "");
+            customer["personalInfo"] = newCustomerPersonalInfo;
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
 
             customer.stripeId = stripeCustomerId;
