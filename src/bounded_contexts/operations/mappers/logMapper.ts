@@ -2,7 +2,7 @@ import { Mapper } from "../../../core/infra/Mapper";
 import { CustomerId } from "../domain/customer/CustomerId";
 import { Log } from "../domain/customer/log/Log";
 
-export class LogMapper implements Mapper<Log> {
+export class LogMapper implements Mapper<Log, any> {
     public toDomain(raw: any): Log {
         return new Log(
             raw.type,

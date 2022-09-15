@@ -3,7 +3,7 @@ import { Locale } from "../domain/locale/Locale";
 import { RecipeRestrictionId } from "../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
 import { RecipeVariantRestriction } from "../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 
-export class RecipeRestrictionsMapper implements Mapper<RecipeVariantRestriction> {
+export class RecipeRestrictionsMapper implements Mapper<RecipeVariantRestriction, any> {
     public toDomain(raw: any, locale?: Locale): RecipeVariantRestriction {
         return new RecipeVariantRestriction(raw.label, raw.value, new RecipeRestrictionId(raw._id));
     }

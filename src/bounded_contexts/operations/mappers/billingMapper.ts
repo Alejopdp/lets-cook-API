@@ -2,7 +2,7 @@ import { Mapper } from "../../../core/infra/Mapper";
 import { Billing } from "../domain/billing/Billing";
 import { BillingId } from "../domain/billing/BillingId";
 
-export class BillingMapper implements Mapper<Billing> {
+export class BillingMapper implements Mapper<Billing, any> {
     public toDomain(raw: any): Billing {
         return new Billing(raw.latitude, raw.longitude, raw.addressName, raw.customerName, raw.addressDetails, raw.city, raw.province, raw.postalCode, raw.country, raw.identification, new BillingId(raw._id));
     }

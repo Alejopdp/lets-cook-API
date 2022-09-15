@@ -7,7 +7,6 @@ import { logger } from "../../../../../config";
 // import { CustomerSignUpPresenter } from "./customerSignUpPresenter";
 // import { kml } from '@mapbox/togeojson';
 var tj = require("@mapbox/togeojson");
-const DOMParser = require("xmldom").DOMParser;
 
 export class CreateCustomerByAdminController extends BaseController {
     private _signUp: CreateCustomerByAdmin;
@@ -54,7 +53,7 @@ export class CreateCustomerByAdminController extends BaseController {
             // const presented = this.signUpPresenter.present(result);
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -1,9 +1,6 @@
 import { CouponId } from "./../../domain/cupons/CouponId";
 import { Coupon } from "./../../domain/cupons/Cupon";
-// import { planVariantMapper } from ".";
-// import { logger } from "../../../../config";
 import { Mapper } from "../../../../core/infra/Mapper";
-import { Locale } from "../../domain/locale/Locale";
 import { ICouponType } from "../../domain/cupons/CuponType/ICuponType";
 import { FixedPrice } from "../../domain/cupons/CuponType/FixedPrice";
 import { FreeShipping } from "../../domain/cupons/CuponType/FreeShipping";
@@ -15,21 +12,21 @@ import { OnePerCustomer } from "../../domain/cupons/LimitAplication/OnePerCustom
 import { PlanId } from "../../domain/plan/PlanId";
 import { CustomerId } from "../../domain/customer/CustomerId";
 
-export class CouponMapper implements Mapper<Coupon> {
+export class CouponMapper implements Mapper<Coupon, any> {
     public toDomain(raw: any): Coupon {
         const type: ICouponType =
             raw.type.type === "fixed"
                 ? new FixedPrice(raw.type.type, raw.type.value)
                 : raw.type.type === "free"
-                ? new FreeShipping(raw.type.type, raw.type.value)
-                : new PercentPrice(raw.type.type, raw.type.value);
+                    ? new FreeShipping(raw.type.type, raw.type.value)
+                    : new PercentPrice(raw.type.type, raw.type.value);
         const productsForApplying: PlanId[] = raw.productsForApplyingValue.map((id: string) => new PlanId(id));
         const limits: ILimitAplication[] = raw.limites.map((limit: any) =>
             limit.type === "limit_qty"
                 ? new LimitQty(limit.type, limit.value)
                 : limit.type === "first_order"
-                ? new FirstOrder(limit.type, limit.value)
-                : new OnePerCustomer(limit.type, limit.value)
+                    ? new FirstOrder(limit.type, limit.value)
+                    : new OnePerCustomer(limit.type, limit.value)
         );
 
         return Coupon.create(

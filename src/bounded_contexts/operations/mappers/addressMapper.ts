@@ -4,7 +4,7 @@ import { AddressId } from "../domain/address/AddressId";
 import { IPreferredDeliveryTime } from "../domain/customer/preferredDeliveryTime/IPreferredDeliveryTime";
 import { PreferredDeliveryTimeFactory } from "../domain/customer/preferredDeliveryTime/preferredDeliveryTimeFactory";
 
-export class AddressMapper implements Mapper<Address> {
+export class AddressMapper implements Mapper<Address, any> {
     public toDomain(raw: any): Address {
         const preferredDeliveryTime: IPreferredDeliveryTime | undefined = raw.deliveryTime
             ? PreferredDeliveryTimeFactory.createDeliveryTime(raw.deliveryTime)

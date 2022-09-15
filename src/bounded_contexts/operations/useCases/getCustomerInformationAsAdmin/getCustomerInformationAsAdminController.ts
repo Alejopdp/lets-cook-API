@@ -29,7 +29,7 @@ export class GetCustomerInformationAsAdminController extends BaseController {
             const presented = this.getCustomerInformationAsAdminPresenter.present({ ...result, locale: dto.locale });
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             return this.fail(error);
         }

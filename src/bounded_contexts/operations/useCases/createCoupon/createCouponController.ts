@@ -33,7 +33,7 @@ export class CreateCouponController extends BaseController {
             await this.createCoupon.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

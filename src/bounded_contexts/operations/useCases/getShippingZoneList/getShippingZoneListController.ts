@@ -17,7 +17,7 @@ export class GetShippingListController extends BaseController {
             const result = await this.getShippingZoneList.execute();
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             return this.fail(error);
         }

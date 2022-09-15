@@ -22,7 +22,7 @@ export class CancelASubscriptionController extends BaseController {
             await this.cancelASubscription.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -72,7 +72,7 @@ export class ChooseRecipesForManyOrdersController extends BaseController {
             fs.unlinkSync(filePath);
 
             return this.ok(this.res, { inconsistentCustomerEmails, notOwnerOfOrderCustomerEmails });
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

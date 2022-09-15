@@ -46,7 +46,7 @@ export class UpdateShippingZoneController extends BaseController {
             await this.updateShippingZone.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

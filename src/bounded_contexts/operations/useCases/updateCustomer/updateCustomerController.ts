@@ -35,7 +35,7 @@ export class UpdateCustomerController extends BaseController {
             // }
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -41,6 +41,7 @@ export const adminRole: Role = new Role(
         Permission.EXPORT_COUPONS,
         Permission.VIEW_COUPONS,
         Permission.IMPORT_RECIPE_SELECTION,
+        Permission.VIEW_PAYMENT_ORDERS,
     ],
     uuid.v4()
 );
@@ -63,4 +64,5 @@ export const customerSupportRole = new Role("Atencion al cliente", [
     Permission.VIEW_SHIPPING_ZONE,
     Permission.VIEW_SUBSCRIPTION,
     Permission.VIEW_COUPONS,
+    Permission.VIEW_PAYMENT_ORDERS,
 ]);

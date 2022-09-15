@@ -1,4 +1,3 @@
-import { logger } from "../../../../../config";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { Locale } from "../../domain/locale/Locale";
 import { GetShippingRate } from "./getShippingRate";

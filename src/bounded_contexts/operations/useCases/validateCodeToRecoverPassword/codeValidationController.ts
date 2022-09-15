@@ -20,7 +20,7 @@ export class CodeValidationController extends BaseController {
             const result = await this.codeValidation.execute(dto);
 
             return this.ok(this.res, { code_validation: result });
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

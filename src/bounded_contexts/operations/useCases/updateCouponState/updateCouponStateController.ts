@@ -22,7 +22,7 @@ export class UpdateCouponStateController extends BaseController {
             await this.updateCouponState.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -19,7 +19,7 @@ export class GetDataForCreatingARecipeController extends BaseController {
             const result = await this.getDataForCreatingARecipe.execute(dto);
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

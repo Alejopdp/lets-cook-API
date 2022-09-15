@@ -8,7 +8,7 @@ import { IPaymentOrderState } from "../domain/paymentOrder/paymentOrderState/IPa
 import { PaymentOrderStateFactory } from "../domain/paymentOrder/paymentOrderState/PaymentOrderFactory";
 import { Week } from "../domain/week/Week";
 
-export class PaymentOrderMapper implements Mapper<PaymentOrder> {
+export class PaymentOrderMapper implements Mapper<PaymentOrder, any> {
     public toDomain(raw: any, locale?: Locale): PaymentOrder {
         const state: IPaymentOrderState = PaymentOrderStateFactory.createState(raw.state);
         const week: Week = weekMapper.toDomain(raw.week);

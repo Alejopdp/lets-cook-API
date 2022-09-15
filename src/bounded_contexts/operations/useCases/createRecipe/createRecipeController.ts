@@ -55,7 +55,7 @@ export class CreateRecipeController extends BaseController {
             // fs.unlinkSync(recipeImagePath);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

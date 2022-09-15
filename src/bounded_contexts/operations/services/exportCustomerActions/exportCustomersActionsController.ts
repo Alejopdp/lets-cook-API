@@ -22,7 +22,7 @@ export class ExportCustomerActionsController extends BaseController {
             await this.exportCustomers.execute(dto);
 
             return this.res.download("Acciones de cliente.xlsx", (err) => fs.unlinkSync("Acciones de cliente.xlsx"));
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

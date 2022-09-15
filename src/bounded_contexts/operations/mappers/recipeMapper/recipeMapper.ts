@@ -12,8 +12,29 @@ import { RecipeNutritionalData } from "../../domain/recipe/RecipeNutritionalData
 import { RecipeTag } from "../../domain/recipe/RecipeTag";
 import { RecipeVariant } from "../../domain/recipe/RecipeVariant/RecipeVariant";
 import { Week } from "../../domain/week/Week";
+import { DatabaseRecipeGeneralData } from "./recipeGeneralDataMapper";
+import { DatabaseRecipeVariant } from "./recipeVariantsMapper";
 
-export class RecipeMapper implements Mapper<Recipe> {
+type DatabaseNutritionalItem = {
+    key: string,
+    value: string,
+    _id: string,
+}
+
+export interface PersistenceRecipe {
+    recipeGeneralData: DatabaseRecipeGeneralData
+    recipeVariants: DatabaseRecipeVariant[]
+    tools: string[],
+    availableMonths: string[],
+    availableWeeks: (string | number)[],
+    relatedPlans: (string | number)[],
+    nutritionalInfo: DatabaseNutritionalItem[],
+    backOfficeTags: string[],
+    imageTags: string[],
+    orderPriority: number
+
+}
+export class RecipeMapper implements Mapper<Recipe, PersistenceRecipe> {
     public toDomain(raw: any, locale?: Locale): Recipe {
         const recipeGeneralData: RecipeGeneralData = recipeGeneralDataMapper.toDomain(raw.recipeGeneralData, locale);
         const recipeVariants: RecipeVariant[] = raw.recipeVariants.map((variant: any) => recipeVariantMapper.toDomain(variant, locale));
@@ -44,13 +65,15 @@ export class RecipeMapper implements Mapper<Recipe> {
         );
     }
 
-    public toPersistence(t: Recipe, locale?: Locale) {
-        const recipeGeneralData = recipeGeneralDataMapper.toPersistence(t.recipeGeneralData, locale);
-        const recipeVariants = t.recipeVariants.map((variant) => recipeVariantMapper.toPersistence(variant, locale));
+
+
+    public toPersistence(t: Recipe, locale?: Locale): PersistenceRecipe {
+        const recipeGeneralData: DatabaseRecipeGeneralData = recipeGeneralDataMapper.toPersistence(t.recipeGeneralData, locale);
+        const recipeVariants: DatabaseRecipeVariant[] = t.recipeVariants.map((variant) => recipeVariantMapper.toPersistence(variant, locale));
         const availableWeeks = t.availableWeeks.map((week) => week.id.value);
         const backOfficeTags = t.recipeBackOfficeTags.map((tag) => tag.name);
         const relatedPlans = t.relatedPlans.map((planId) => planId.value);
-        const nutritionalInfo = t.recipeNutritionalData.nutritionalItems.map((item) => ({
+        const nutritionalInfo: DatabaseNutritionalItem[] = t.recipeNutritionalData.nutritionalItems.map((item) => ({
             key: item.key,
             value: item.value,
             _id: item.id,

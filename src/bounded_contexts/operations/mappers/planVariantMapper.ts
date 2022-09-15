@@ -5,7 +5,7 @@ import { PlanVariant } from "../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantAttribute } from "../domain/plan/PlanVariant/PlanVariantAttribute";
 import { PlanVariantId } from "../domain/plan/PlanVariant/PlanVariantId";
 // import { PlanVariantWithRecipe } from "../domain/plan/PlanVariant/PlanVariantWithRecipes";
-export class PlanVariantMapper implements Mapper<PlanVariant> {
+export class PlanVariantMapper implements Mapper<PlanVariant, any> {
     public toDomain(raw: any): PlanVariant {
         const attributes: PlanVariantAttribute[] = raw.attributes.map((attr: any) => new PlanVariantAttribute(attr.key, attr.value));
 

@@ -20,7 +20,7 @@ export class ApplyCouponToSubscriptionController extends BaseController {
             await this.applyCouponToSubscription.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

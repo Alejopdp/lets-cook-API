@@ -15,7 +15,7 @@ import { SubscriptionId } from "../domain/subscription/SubscriptionId";
 import { Week } from "../domain/week/Week";
 import { customerMapper } from "./customerMapper";
 
-export class OrderMapper implements Mapper<Order> {
+export class OrderMapper implements Mapper<Order, any> {
     public toDomain(raw: any, locale: Locale = Locale.es): Order {
         const state: IOrderState = OrderStateFactory.createState(raw.state);
         const week: Week = weekMapper.toDomain(raw.week);
@@ -36,8 +36,6 @@ export class OrderMapper implements Mapper<Order> {
             week,
             planVariantId,
             plan,
-            // raw.price,
-            // raw.discountAmount,
             raw.price / 100,
             raw.discountAmount / 100,
             raw.hasFreeShipping,
@@ -65,8 +63,6 @@ export class OrderMapper implements Mapper<Order> {
             state: t.state.title,
             billingDate: t.billingDate,
             week: t.week.id.value,
-            // price: t.price,
-            // discountAmount: t.discountAmount,
             price: Math.round(t.price * 100),
             discountAmount: Math.round(t.discountAmount * 100),
             hasFreeShipping: t.hasFreeShipping,

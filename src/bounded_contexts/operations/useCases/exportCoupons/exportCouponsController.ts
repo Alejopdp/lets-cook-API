@@ -18,7 +18,7 @@ export class ExportCouponsController extends BaseController {
             await this.exportCoupons.execute(dto);
 
             return this.res.download("Cupones.xlsx", (err) => fs.unlinkSync("Cupones.xlsx"));
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

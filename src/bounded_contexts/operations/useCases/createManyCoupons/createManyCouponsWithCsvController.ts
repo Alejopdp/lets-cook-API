@@ -62,10 +62,10 @@ export class CreateManyCouponsWithCsvController extends BaseController {
                         ),
                         endDate: !!matrix[i][12]
                             ? new Date(
-                                  parseInt(matrix[i][12].split("/")[2]),
-                                  parseInt(matrix[i][12].split("/")[1]) - 1,
-                                  parseInt(matrix[i][12].split("/")[0])
-                              )
+                                parseInt(matrix[i][12].split("/")[2]),
+                                parseInt(matrix[i][12].split("/")[1]) - 1,
+                                parseInt(matrix[i][12].split("/")[0])
+                            )
                             : undefined,
                         discountType: matrix[i][13],
                         discountValue: parseInt(matrix[i][14]),
@@ -83,7 +83,7 @@ export class CreateManyCouponsWithCsvController extends BaseController {
             fs.unlinkSync(filePath);
 
             return this.ok(this.res, this.createManyCouponsPresenter.present(coupons));
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

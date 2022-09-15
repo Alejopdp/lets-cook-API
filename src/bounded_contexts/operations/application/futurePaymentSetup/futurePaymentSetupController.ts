@@ -19,7 +19,7 @@ export class FuturePaymentSetupController extends BaseController {
             const result = await this.futurePaymentSetup.execute(dto);
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error as string | Error);
         }
     }

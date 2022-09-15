@@ -25,7 +25,7 @@ export class GetCustomerPaymentOrdersController extends BaseController {
             const presentedResult = this.getCustomerPaymentOrdersPresenter.present(result.paymentOrders, result.ordersCountMap);
 
             return this.ok(this.res, presentedResult);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             return this.fail(error);
         }

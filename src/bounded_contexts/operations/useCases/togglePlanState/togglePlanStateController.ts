@@ -22,7 +22,7 @@ export class TogglePlanStateController extends BaseController {
             await this.togglePlanState.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             return this.fail(error);
         }

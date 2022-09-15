@@ -19,7 +19,7 @@ export class DeleteRateController extends BaseController {
             await this.deleteRate.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

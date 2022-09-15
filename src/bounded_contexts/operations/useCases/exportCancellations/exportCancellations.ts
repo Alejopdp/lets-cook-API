@@ -36,8 +36,8 @@ export class ExportCancellations {
                 Array.isArray(customerActiveSubscriptionsMap[actualKey]) && subscription.state.isActive()
                     ? [...customerActiveSubscriptionsMap[actualKey], subscription]
                     : subscription.state.isActive()
-                    ? [subscription]
-                    : customerActiveSubscriptionsMap[actualKey] || [];
+                        ? [subscription]
+                        : customerActiveSubscriptionsMap[actualKey] || [];
         }
 
         for (let order of ordersOfCancelledSubcriptions) {

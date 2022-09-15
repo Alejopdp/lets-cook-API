@@ -30,7 +30,7 @@ export class GetSubscriptionByIdController extends BaseController {
             );
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

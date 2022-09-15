@@ -17,7 +17,7 @@ export class BillingJob {
                 // schedule.scheduleJob("Billing job", "* * * * *", async () => {
                 await this.payAllSubscriptions.execute();
             });
-        } catch (error) {
+        } catch (error: any) {
             this.notificationService.sendErrorEmail(error.message, "Billing job", "");
         }
     }

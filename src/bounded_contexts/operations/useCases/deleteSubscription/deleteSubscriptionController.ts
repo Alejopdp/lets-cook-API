@@ -19,7 +19,7 @@ export class DeleteSubscriptionController extends BaseController {
             await this.deleteSubscription.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }
