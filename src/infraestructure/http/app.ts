@@ -11,56 +11,56 @@ import { billingJob } from "../../bounded_contexts/operations/application/billin
 const app = express();
 
 /** Sentry **/
-Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV,
-    release: "letscook1.0", // TODO: Configure automatic releases info with Github
-    integrations: [
-        // enable HTTP calls tracing
-        new Sentry.Integrations.Http({ tracing: true }),
-        // enable Express.js middleware tracing
-        new Tracing.Integrations.Express({
-            // to trace all requests to the default router
-            app,
-            // alternatively, you can specify the routes you want to trace:
-            // router: someRouter,
-        }),
-        new Sentry.Integrations.Console(),
-        // new Sentry.Integrations.ContextLines(),
-        new Sentry.Integrations.FunctionToString(),
-        new Sentry.Integrations.Modules(),
-        new Sentry.Integrations.InboundFilters(),
-        new Sentry.Integrations.FunctionToString(),
-        new Sentry.Integrations.OnUncaughtException(),
-        new Sentry.Integrations.OnUnhandledRejection(),
-        new Sentry.Integrations.LinkedErrors(),
-    ],
-    debug: true,
-    attachStacktrace: true,
-    autoSessionTracking: true,
-    // Set tracesSampleRate to 1.0 to capture 100%
-    // of transactions for performance monitoring.
-    // We recommend adjusting this value in production
-    tracesSampleRate: 1.0,
-});
+// Sentry.init({
+//     dsn: process.env.SENTRY_DSN,
+//     environment: process.env.NODE_ENV,
+//     release: "letscook1.0", // TODO: Configure automatic releases info with Github
+//     integrations: [
+//         // enable HTTP calls tracing
+//         new Sentry.Integrations.Http({ tracing: true }),
+//         // enable Express.js middleware tracing
+//         new Tracing.Integrations.Express({
+//             // to trace all requests to the default router
+//             app,
+//             // alternatively, you can specify the routes you want to trace:
+//             // router: someRouter,
+//         }),
+//         new Sentry.Integrations.Console(),
+//         // new Sentry.Integrations.ContextLines(),
+//         new Sentry.Integrations.FunctionToString(),
+//         new Sentry.Integrations.Modules(),
+//         new Sentry.Integrations.InboundFilters(),
+//         new Sentry.Integrations.FunctionToString(),
+//         new Sentry.Integrations.OnUncaughtException(),
+//         new Sentry.Integrations.OnUnhandledRejection(),
+//         new Sentry.Integrations.LinkedErrors(),
+//     ],
+//     debug: true,
+//     attachStacktrace: true,
+//     autoSessionTracking: true,
+//     // Set tracesSampleRate to 1.0 to capture 100%
+//     // of transactions for performance monitoring.
+//     // We recommend adjusting this value in production
+//     tracesSampleRate: 1.0,
+// });
 
 // RequestHandler creates a separate execution context using domains, so that every
 // transaction/span/breadcrumb is attached to its own Hub instance
-app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
+// app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
-// TracingHandler creates a trace for every incoming request
-app.use(Sentry.Handlers.tracingHandler());
+// // TracingHandler creates a trace for every incoming request
+// app.use(Sentry.Handlers.tracingHandler());
 
-// The error handler must be before any other error middleware and after all controllers
-app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
+// // The error handler must be before any other error middleware and after all controllers
+// app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 
 // Optional fallthrough error handler
-app.use(function onError(err: any, req: any, res: any, next: any) {
-    // The error id is attached to `res.sentry` to be returned
-    // and optionally displayed to the user for support.
-    res.statusCode = 500;
-    res.end(res.sentry + "\n");
-});
+// app.use(function onError(err: any, req: any, res: any, next: any) {
+//     // The error id is attached to `res.sentry` to be returned
+//     // and optionally displayed to the user for support.
+//     res.statusCode = 500;
+//     res.end(res.sentry + "\n");
+// });
 
 /** End Sentry **/
 
