@@ -76,7 +76,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             }
         }
 
-        return { plans: presentedPlans, weekLabel: week.getLabel() };
+        return { plans: presentedPlans, weekLabel: week.getLabel(locale) };
     }
 
     private async presentRecipe(recipe: Recipe): Promise<any> {

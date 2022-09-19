@@ -1,7 +1,6 @@
 import { Customer } from "../../domain/customer/Customer";
 import { Order } from "../../domain/order/Order";
 import { Subscription } from "../../domain/subscription/Subscription";
-import { v4 as uuid } from "uuid";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
@@ -33,12 +32,6 @@ export class GetSubscriptionByIdPresenter {
             preferredSchedule: customer.shippingAddress?.deliveryTime?.getLabel(Locale.es) || "",
         };
 
-        const billingData = {
-            addressName: customer.billingAddress?.customerName,
-            addressDetails: customer.billingAddress?.details,
-            name: "Alejo Scotti (Hardcoded)",
-        };
-
         const defaultPaymentMethod: PaymentMethod | undefined = customer.getDefaultPaymentMethod();
         var presentedPaymentMethod = null;
 
@@ -58,8 +51,8 @@ export class GetSubscriptionByIdPresenter {
             nextActiveOrder && nextActiveOrder.isGoingToBeShippedNextWeek()
                 ? nextActiveOrder
                 : nextSecondActiveOrder && nextSecondActiveOrder.isGoingToBeShippedNextWeek()
-                ? nextSecondActiveOrder
-                : null; // TO DO: Get 2nd Next Active order
+                    ? nextSecondActiveOrder
+                    : null; // TO DO: Get 2nd Next Active order
         const hasChosenRecipesForActualWeek = !!!actualWeekOrder ? false : actualWeekOrder.hasChosenRecipes();
         const hasChosenRecipesForNextWeek = !!!nextWeekOrder ? false : nextWeekOrder.hasChosenRecipes();
 
@@ -67,14 +60,14 @@ export class GetSubscriptionByIdPresenter {
             nextDelivery: !!nextActiveOrder
                 ? nextActiveOrder.getHumanShippmentDay(locale)
                 : !!nextSecondActiveOrder
-                ? nextSecondActiveOrder.getHumanShippmentDay(locale)
-                : "",
+                    ? nextSecondActiveOrder.getHumanShippmentDay(locale)
+                    : "",
             nextPayment:
                 !!nextActiveOrder && nextActiveOrder.billingDate > new Date()
                     ? nextActiveOrder.getHumanBillingDay(locale)
                     : !!nextSecondActiveOrder
-                    ? nextSecondActiveOrder.getHumanBillingDay(locale)
-                    : "",
+                        ? nextSecondActiveOrder.getHumanBillingDay(locale)
+                        : "",
         };
 
         const skippedOrders = this.presentOrders(
@@ -86,21 +79,21 @@ export class GetSubscriptionByIdPresenter {
         const nextTwelveOrders = this.presentOrders(orders, locale);
         const nextPaymentOrderWithShippingCost: PaymentOrder | undefined = !!actualWeekOrder
             ? paymentOrders.find(
-                  (po) =>
-                      po.week.equals(actualWeekOrder.week) &&
-                      !po.hasFreeShipping &&
-                      po.shippingCost > 0 &&
-                      po.customerId.equals(actualWeekOrder.customer.id)
-              )
+                (po) =>
+                    po.week.equals(actualWeekOrder.week) &&
+                    !po.hasFreeShipping &&
+                    po.shippingCost > 0 &&
+                    po.customerId.equals(actualWeekOrder.customer.id)
+            )
             : !!nextWeekOrder
-            ? paymentOrders.find(
-                  (po) =>
-                      po.week.equals(nextWeekOrder.week) &&
-                      !po.hasFreeShipping &&
-                      po.shippingCost > 0 &&
-                      po.customerId.equals(nextWeekOrder.customer.id)
-              )
-            : undefined;
+                ? paymentOrders.find(
+                    (po) =>
+                        po.week.equals(nextWeekOrder.week) &&
+                        !po.hasFreeShipping &&
+                        po.shippingCost > 0 &&
+                        po.customerId.equals(nextWeekOrder.customer.id)
+                )
+                : undefined;
 
         return {
             subscriptionId: subscription.id.value,
@@ -111,7 +104,6 @@ export class GetSubscriptionByIdPresenter {
             ),
             isOneTime: subscription.frequency.isOneTime(),
             shippingAddress,
-            // billingData,
             paymentMethod: presentedPaymentMethod,
             schedule,
             hasChosenRecipesForActualWeek,
@@ -164,7 +156,7 @@ export class GetSubscriptionByIdPresenter {
     private presentOrders(orders: Order[], locale: Locale): any {
         return orders.map((order) => ({
             id: order.id.value,
-            weekLabel: order.getWeekLabel(),
+            weekLabel: order.getWeekLabel(locale),
             shippingDate: order.getHumanShippmentDay(locale),
             isSkipped: order.isSkipped(),
             state: order.state.title,
@@ -233,7 +225,7 @@ export class GetSubscriptionByIdPresenter {
 
         return {
             id: order.id.value,
-            weekLabel: order.getWeekLabel(),
+            weekLabel: order.getWeekLabel(locale),
             weekId: order.week.id.value,
             recipes: presentedRecipes,
             shippingDate: order.getHumanShippmentDay(locale),

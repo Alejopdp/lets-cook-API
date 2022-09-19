@@ -38,9 +38,9 @@ export class MomentTimeService {
         return moment(date).format("DD/MM/YYYY");
     }
 
-    public static getHumanWeekRangeLabel(minDay: Date, maxDay: Date): string {
+    public static getHumanWeekRangeLabel(minDay: Date, maxDay: Date, locale: Locale): string {
         maxDay.setDate(maxDay.getDate() - 1);
-        const month = moment(maxDay).format("MMMM");
+        const month = moment(maxDay).locale(locale).format("MMMM");
         const monthWithCapitalLetter = month.charAt(0).toUpperCase() + month.slice(1);
 
         return `${moment(minDay).format("DD")} al ${moment(maxDay).format("DD")} de ${monthWithCapitalLetter}`;

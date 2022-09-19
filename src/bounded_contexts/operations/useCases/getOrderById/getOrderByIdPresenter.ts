@@ -52,7 +52,7 @@ export class GetOrderByIdPresenter {
                 restrictionId: subscription.restriction?.id.value,
                 restrictionLabel: subscription.restriction?.label,
             },
-            weekLabel: order.getWeekLabel(),
+            weekLabel: order.getWeekLabel(locale),
             isFirstOrderOfSubscription: order.isFirstOrderOfSubscription,
         };
     }

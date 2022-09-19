@@ -78,7 +78,7 @@ export class SkipOrders {
             const relatedPaymentOrder = paymentOrdersMap[order.paymentOrderId?.value!]
 
             if (!order.isSkipped() && !order.isBilled()) {
-                ordersSkippedLogString = `${ordersSkippedLogString}, ${order.getWeekLabel()}`;
+                ordersSkippedLogString = `${ordersSkippedLogString}, ${order.getWeekLabel(dto.locale)}`;
                 ordersSkippedDebugLogString = `${ordersSkippedLogString} | ${order.id.toString()}`;
             }
 
@@ -96,7 +96,7 @@ export class SkipOrders {
         for (let orderId of dto.ordersToReactivate) {
             const order = ordersMap[orderId];
             if (!order.isActive() && !order.isBilled()) {
-                ordersUnskippedLogString = `${ordersUnskippedLogString}, ${order.getWeekLabel()}`;
+                ordersUnskippedLogString = `${ordersUnskippedLogString}, ${order.getWeekLabel(dto.locale)}`;
                 ordersUnskippedDebugLogString = `${ordersUnskippedDebugLogString} | ${order.id.toString()}`;
             }
 
