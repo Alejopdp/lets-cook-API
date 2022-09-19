@@ -1,4 +1,3 @@
-import { logger } from "../../../../../config";
 import { UseCase } from "../../../../core/domain/UseCase";
 import { Either, Failure, isFailure, isSuccess } from "../../../../core/logic/Result";
 import { AdminLoginTokenPayload, ITokenService } from "../../application/tokenService/ITokenService";
