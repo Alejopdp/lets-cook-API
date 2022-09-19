@@ -22,7 +22,7 @@ export class GetDataForSwappingAPlanController extends BaseController {
             };
 
             const result = await this.getDataForSwappingAPlan.execute(dto);
-            const presented = this.getDataForSwappingAPlanPresenter.present(result.subscription, result.plans);
+            const presented = this.getDataForSwappingAPlanPresenter.present(result.subscription, result.plans, dto.locale);
 
             return this.ok(this.res, presented);
         } catch (error: any) {

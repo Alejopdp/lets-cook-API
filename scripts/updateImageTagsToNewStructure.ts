@@ -1,10 +1,13 @@
+// To run from root, execute the following:
+// npx ts-node scripts/updateImageTagsToNewStructure.ts
+
+
 import { Recipe as RecipeModel } from "../src/infraestructure/mongoose/models";
-import { v4 as uuid } from "uuid";
 import { connectToDatabase } from "../src/infraestructure/mongoose/config/config";
 
 export const updateImageTagsToNewStructure = async () => {
-    process.env.NODE_ENV = "development";
-    process.env.URLDB = "mongodb://localhost:27017/lets-cook-local";
+    process.env.NODE_ENV = "staging";
+    process.env.URLDB = "mongodb+srv://lets_cook_admin:Rwn7Bu2VJqju6Yia@ecommerce.6octe.mongodb.net/";
     console.log("Starting script");
     await connectToDatabase();
     const rawRecipes = await RecipeModel.find({}, {}, { lean: true });

@@ -24,7 +24,7 @@ export class GetPlanVariantsRecipesByWeekList {
         const week: Week | undefined = await this.weekRepository.findCurrentWeek(date_currently);
         if (!week) throw new Error("Error al obtener las recetas de la semana");
 
-        const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week.id);
+        const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week.id, dto.locale);
         const plans: Plan[] = await this.planRepository.findAll(dto.locale);
 
         return { plans, recipes, week };
