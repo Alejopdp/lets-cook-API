@@ -12,6 +12,7 @@ import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe
 import { Locale } from "../../../domain/locale/Locale";
 import { RecipeNutritionalData } from "@src/bounded_contexts/operations/domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
 import { PersistenceRecipe } from "@src/bounded_contexts/operations/mappers/recipeMapper/recipeMapper";
+import { domain } from "process";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
     public async save(recipe: Recipe, locale: Locale = Locale.es): Promise<void> {
@@ -20,6 +21,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
 
         if (alreadySavedRecipe) {
             const auxRecipeGeneralData = { ...recipeDb.recipeGeneralData };
+            //@ts-ignore
             const newImageTagsForLocale = [...(recipeDb?.imageTags ?? [])];
             delete recipeDb.recipeGeneralData;
             delete recipeDb.imageTags;
@@ -61,6 +63,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
             const newRecipe = {
                 ...recipeDb,
                 nutritionalInfo: this.getNutritionalInfoForCreatingItInMongo(recipeDb?.nutritionalInfo ?? []),
+                //@ts-ignore
                 imageTags: this.getImageTagsForCreatingThemInMongo(recipeDb?.imageTags ?? []),
             };
             await RecipeModel.create(newRecipe);
@@ -118,7 +121,14 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                 populate: [{ path: "restriction" }, { path: "ingredients" }],
             });
 
-        return recipeDb ? recipeMapper.toDomain(recipeDb, locale) : undefined;
+        let domainRecipe = undefined
+
+        if (recipeDb) {
+            domainRecipe = recipeMapper.toDomain(recipeDb, locale)
+            domainRecipe.recipeTools = recipeDb.tools // Cause admin sees the tools only in spanish
+        }
+
+        return domainRecipe
     }
 
     public async findBy(conditions: any, locale: Locale = Locale.es): Promise<Recipe[]> {
