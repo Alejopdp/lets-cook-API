@@ -1,10 +1,24 @@
+import { IReviewsService, ReviewDto } from "../../application/reviewsService/IReviewsService";
 import { GetGoogleReviewsDto } from "./getGoogleReviewsDto";
-const { google } = require("googleapis");
 
 export class GetGoogleReviews {
-    constructor() {
-        const business = google.bu;
+
+    private _reviewsRepository: IReviewsService;
+
+    constructor(reviewsRepository: IReviewsService) {
+        this._reviewsRepository = reviewsRepository
     }
 
-    public async execute(dto: GetGoogleReviewsDto): Promise<any> {}
+    public async execute(dto: GetGoogleReviewsDto): Promise<ReviewDto[]> {
+        return await this.reviewsRepository.getAll(dto.locale)
+
+    }
+
+    /**
+     * Getter reviewsRepository
+     * @return {IReviewsService}
+     */
+    public get reviewsRepository(): IReviewsService {
+        return this._reviewsRepository;
+    }
 }

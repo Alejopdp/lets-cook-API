@@ -1,1 +1,5 @@
-export interface GetGoogleReviewsDto {}
+import { Locale } from "../../domain/locale/Locale";
+
+export interface GetGoogleReviewsDto {
+    locale: Locale
+}
