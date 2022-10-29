@@ -1,6 +1,7 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { Guard } from "../../../../core/logic/Guard";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
+import { Locale } from "../locale/Locale";
 import { WeekId } from "./WeekId";
 
 export class Week extends Entity<Week> {
@@ -30,8 +31,8 @@ export class Week extends Entity<Week> {
         return this.minDay <= aDate && this.maxDay >= aDate;
     }
 
-    public getLabel(): string {
-        return MomentTimeService.getHumanWeekRangeLabel(this.minDay, this.maxDay);
+    public getLabel(locale: Locale): string {
+        return MomentTimeService.getHumanWeekRangeLabel(this.minDay, this.maxDay, locale);
     }
 
     public getShorterLabel(): string {

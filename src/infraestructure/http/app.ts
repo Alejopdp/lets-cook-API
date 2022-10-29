@@ -44,8 +44,8 @@ const app = express();
 //     tracesSampleRate: 1.0,
 // });
 
-// RequestHandler creates a separate execution context using domains, so that every
-// transaction/span/breadcrumb is attached to its own Hub instance
+// // RequestHandler creates a separate execution context using domains, so that every
+// // transaction/span/breadcrumb is attached to its own Hub instance
 // app.use(Sentry.Handlers.requestHandler() as express.RequestHandler);
 
 // // TracingHandler creates a trace for every incoming request
@@ -54,7 +54,7 @@ const app = express();
 // // The error handler must be before any other error middleware and after all controllers
 // app.use(Sentry.Handlers.errorHandler() as express.ErrorRequestHandler);
 
-// Optional fallthrough error handler
+// // Optional fallthrough error handler
 // app.use(function onError(err: any, req: any, res: any, next: any) {
 //     // The error id is attached to `res.sentry` to be returned
 //     // and optionally displayed to the user for support.
@@ -86,6 +86,7 @@ billingJob.initialize();
 
 const server = app.listen(process.env.PORT || 3001, () => {
     console.log(`[App]: Server listening on 3001`);
+    console.log(`[App]: Running in ${process.env.NODE_ENV}`)
 });
 
 setInterval(function () {

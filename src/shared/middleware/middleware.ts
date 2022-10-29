@@ -70,13 +70,15 @@ export class Middleware {
     public addCurrentUser() {
         return async (req: Request, res: Response, next: Function) => {
             const token = req.headers["authorization"];
-
             if (token) {
                 const decoded = await this.tokenService.isTokenVerified(token);
 
                 //@ts-ignore
                 req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
                 next();
+            }
+            else {
+                next()
             }
         };
     }
@@ -88,12 +90,15 @@ export class Middleware {
 
                 if (token) {
                     const decoded = await this.tokenService.isTokenVerified(token);
-                    console.log("A ver el decoded: ", decoded);
-                    const signatureFailed = !!decoded === false;
+                    const signatureFailed = !!decoded === false || typeof decoded === "string"
 
                     if (signatureFailed) {
                         return this.endRequest(403, "La sesión ha expirado.", res);
                     }
+
+                    console.log("Email of user requesting: ", decoded.email);
+                    console.log("Id of user requesting: ", decoded.id)
+
 
                     //@ts-ignore
                     req["decode"] = decoded;

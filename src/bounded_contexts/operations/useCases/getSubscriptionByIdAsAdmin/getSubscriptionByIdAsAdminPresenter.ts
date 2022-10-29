@@ -23,12 +23,6 @@ export class GetSubscriptionByIdAsAdminPresenter {
     ): Promise<any> {
         const presentedPlan = await this.presentPlan(subscription, locale);
 
-        const billingData = {
-            addressName: customer.billingAddress?.customerName,
-            addressDetails: customer.billingAddress?.details,
-            name: "Alejo Scotti (Hardcoded)",
-        };
-
         const defaultPaymentMethod: PaymentMethod | undefined = customer.getDefaultPaymentMethod();
         var presentedPaymentMethod = null;
 
@@ -128,7 +122,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
     private presentOrders(orders: Order[], locale: Locale): any {
         return orders.map((order) => ({
             id: order.id.value,
-            weekLabel: order.getWeekLabel(),
+            weekLabel: order.getWeekLabel(locale),
             shippingDate: order.getHumanShippmentDay(locale),
             isSkipped: order.isSkipped(),
         }));
@@ -159,7 +153,7 @@ export class GetSubscriptionByIdAsAdminPresenter {
 
         return {
             id: order.id.value,
-            weekLabel: order.getWeekLabel(),
+            weekLabel: order.getWeekLabel(locale),
             weekId: order.week.id.value,
             recipes: presentedRecipes,
             shippingDate: order.getHumanShippmentDay(locale),

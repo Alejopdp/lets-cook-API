@@ -120,7 +120,7 @@ export class Order extends Entity<Order> {
                 );
             if (selection.recipe.availableWeeks.every((week) => !week.id.equals(this.week.id))) {
                 // TO DO: Available weeks could grow too big
-                throw new Error(`La receta ${selection.recipe.getName()} no está disponible en la semana ${this.week.getLabel()}`);
+                throw new Error(`La receta ${selection.recipe.getName()} no está disponible en la semana ${this.week.getLabel(Locale.es)}`);
             }
         }
 
@@ -193,8 +193,8 @@ export class Order extends Entity<Order> {
         this.state.toPaymentRejected(this);
     }
 
-    public getWeekLabel(): string {
-        return this.week.getLabel();
+    public getWeekLabel(locale: Locale): string {
+        return this.week.getLabel(locale);
     }
 
     public bill(customer?: Customer): void {

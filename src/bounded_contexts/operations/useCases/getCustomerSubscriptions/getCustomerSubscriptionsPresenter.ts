@@ -1,6 +1,5 @@
 import { Subscription } from "../../domain/subscription/Subscription";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
-import { v4 as uuid } from "uuid";
 import { Order } from "../../domain/order/Order";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import _ from "lodash";
@@ -50,10 +49,6 @@ export class GetCustomerSubscriptionsPresenter {
                 nonCancelledSubscriptions.push(subscription);
             }
         }
-
-        // const subscriptionsWithoutCancelledDuplicates = _.uniqBy(subscriptions, (subscription) =>
-        //     [subscription.state.title, subscription.plan.id.value].join()
-        // );
 
         const oneTimeDeliveredStateMap = {
             es: "Entregado",

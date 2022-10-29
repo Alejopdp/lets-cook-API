@@ -1,4 +1,4 @@
-import { AdminLoginTokenPayload, ITokenService } from "./ITokenService";
+import { AdminLoginTokenPayload, CustomerLoginTokenPayload, ITokenService } from "./ITokenService";
 import jwt from "jsonwebtoken";
 
 export class JwtTokenService implements ITokenService {
@@ -23,9 +23,9 @@ export class JwtTokenService implements ITokenService {
     public getUpdateEmailToken(payload: { email: string }): string {
         return jwt.sign(payload, process.env.JWT_SEED as string, { expiresIn: "1h" });
     }
-    public async isTokenVerified(token: string): Promise<string | object> {
+    public async isTokenVerified(token: string): Promise<string | CustomerLoginTokenPayload | AdminLoginTokenPayload> {
         try {
-            const decoded: string | object = await jwt.verify(token, process.env.JWT_SEED as string);
+            const decoded: string | CustomerLoginTokenPayload | AdminLoginTokenPayload = await <string | CustomerLoginTokenPayload | AdminLoginTokenPayload>jwt.verify(token, process.env.JWT_SEED as string);
 
             return decoded;
         } catch (error: any) {

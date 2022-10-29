@@ -167,8 +167,8 @@ export class Plan extends Entity<Plan> {
         return !!!planVariant ? "" : planVariant.getLabel(locale);
     }
 
-    public getPlanVariantLabelWithPrice(planVariantId: PlanVariantId): string {
-        const variantLabel = this.getPlanVariantLabel(planVariantId);
+    public getPlanVariantLabelWithPrice(planVariantId: PlanVariantId, locale: Locale): string {
+        const variantLabel = this.getPlanVariantLabel(planVariantId, locale);
 
         if (!!!variantLabel) return "";
 

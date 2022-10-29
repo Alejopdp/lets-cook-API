@@ -7,9 +7,7 @@ import { mongooseOrderRepository } from "../../../../..//bounded_contexts/operat
 import { mongooseSubscriptionRepository } from "../../../../..//bounded_contexts/operations/infra/repositories/subscription";
 import { createCoupon } from "../../../../..//bounded_contexts/operations/useCases/createCoupon";
 import { createSubscription } from "../../../../..//bounded_contexts/operations/useCases/createSubscription";
-import { getSubscriptionById } from "../../../../..//bounded_contexts/operations/useCases/getSubscriptionById";
 import { skipOrders } from "../../../../..//bounded_contexts/operations/useCases/skipOrders";
-import { SkipOrders } from "../../../../..//bounded_contexts/operations/useCases/skipOrders/skipOrders";
 import { SkipOrdersDto } from "../../../../..//bounded_contexts/operations/useCases/skipOrders/skipOrdersDto";
 import { expect } from "chai";
 import { connectToDatabase } from "../../../../../infraestructure/mongoose/config/config";
@@ -37,7 +35,7 @@ describe("Skipping orders of a subscription w 2 apply limit coupon", function ()
             try {
                 // subscriptionOrders[0] is billed, skippable orders are in "ACTIVE" state
                 const ordersToSkip = [subscriptionOrders[1], subscriptionOrders[2], subscriptionOrders[3]].map(o => o.id.toString())
-                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [], ordersToSkip }
+                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [], ordersToSkip, locale: Locale.es }
                 await skipOrders.execute(skipOrdersDto)
                 subscription = await mongooseSubscriptionRepository.findByIdOrThrow(subscription.id, Locale.es)
                 subscriptionOrders = await mongooseOrderRepository.findNextTwelveBySubscription(subscription.id, Locale.es)
@@ -77,15 +75,15 @@ describe("Skipping orders of a subscription w 2 apply limit coupon", function ()
             try {
                 subscriptionOrders = await mongooseOrderRepository.findNextTwelveBySubscription(subscription.id, Locale.es)
                 const ordersToReactivate = [subscriptionOrders[2], subscriptionOrders[3]].map(o => o.id.toString())
-                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: ordersToReactivate, ordersToSkip: [] }
+                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: ordersToReactivate, ordersToSkip: [], locale: Locale.es }
                 await skipOrders.execute(skipOrdersDto)
-                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [subscriptionOrders[1]].map(o => o.id.toString()), ordersToSkip: [subscriptionOrders[3]].map(o => o.id.toString()) }
+                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [subscriptionOrders[1]].map(o => o.id.toString()), ordersToSkip: [subscriptionOrders[3]].map(o => o.id.toString()), locale: Locale.es }
                 await skipOrders.execute(skipOrdersDto)
-                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [subscriptionOrders[3]].map(o => o.id.toString()), ordersToSkip: [] }
+                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [subscriptionOrders[3]].map(o => o.id.toString()), ordersToSkip: [], locale: Locale.es }
                 await skipOrders.execute(skipOrdersDto)
-                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [], ordersToSkip: [subscriptionOrders[1], subscriptionOrders[2]].map(o => o.id.toString()) }
+                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [], ordersToSkip: [subscriptionOrders[1], subscriptionOrders[2]].map(o => o.id.toString()), locale: Locale.es }
                 await skipOrders.execute(skipOrdersDto)
-                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: ordersToReactivate, ordersToSkip: [] }
+                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: ordersToReactivate, ordersToSkip: [], locale: Locale.es }
                 await skipOrders.execute(skipOrdersDto)
 
                 subscription = await mongooseSubscriptionRepository.findByIdOrThrow(subscription.id, Locale.es)
@@ -138,7 +136,7 @@ describe("Skipping orders of a subscription w a 20 apply limit coupon", function
             try {
                 // subscriptionOrders[0] is billed, skippable orders are in "ACTIVE" state
                 const ordersToSkip = subscriptionOrders.map(o => o.id.toString()).slice(1)
-                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [], ordersToSkip }
+                skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: [], ordersToSkip, locale: Locale.es }
                 await skipOrders.execute(skipOrdersDto)
                 subscription = await mongooseSubscriptionRepository.findByIdOrThrow(subscription.id, Locale.es)
                 subscriptionOrders = await mongooseOrderRepository.findNextTwelveBySubscription(subscription.id, Locale.es)
@@ -179,7 +177,7 @@ describe("Skipping orders of a subscription w a 20 apply limit coupon", function
                 try {
                     subscriptionOrders = await mongooseOrderRepository.findNextTwelveBySubscription(subscription.id, Locale.es)
                     const ordersToReactivate = [subscriptionOrders[5], subscriptionOrders[6], subscriptionOrders[2], subscriptionOrders[8], subscriptionOrders[11]].map(o => o.id.toString())
-                    skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: ordersToReactivate, ordersToSkip: [] }
+                    skipOrdersDto = { nameOrEmailOfAdminExecutingRequest: "", ordersToReactivate: ordersToReactivate, ordersToSkip: [], locale: Locale.es }
                     await skipOrders.execute(skipOrdersDto)
                     subscription = await mongooseSubscriptionRepository.findByIdOrThrow(subscription.id, Locale.es)
                     subscriptionOrders = await mongooseOrderRepository.findNextTwelveBySubscription(subscription.id, Locale.es)
