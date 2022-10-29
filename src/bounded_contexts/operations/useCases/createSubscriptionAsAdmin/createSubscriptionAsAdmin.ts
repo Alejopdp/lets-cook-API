@@ -111,7 +111,7 @@ export class CreateSubscriptionAsAdmin {
         );
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
-        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency); // Skip if it is not Sunday?
+        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek())); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
 
         const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
