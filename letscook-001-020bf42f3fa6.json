@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "letscook-001",
+  "private_key_id": "020bf42f3fa6c453a98e3c69d5069b3c012c550a",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCaGeOoV1y5CYTn\nSe1vw5+m2/dIybLMdzYpUpjv/WV1yrXZExVLzkLfvNBm3O0/vKOqzzgLp4cbKUL8\ncHnQuweSCh/jUkGbUcQDad7PMumPXD76WTAEfHC5sm50QXwf1Qz5cmuOnwSNlWex\nrK0RAqBwAl99SbMwrljTnIzWIK1uMNQE5bMSit7JbhjlYkmJjaVRGsTyWv2rAZVV\nJ6XxZWFjQhxAddtau89K93mUi+IvfiOpuZOGqXGkwUHCKRSMP6kpzqyT6+bxcwGi\nxIG1/Cs8ngWUtAg43CYQaUEjgwCXxgGiBrf3dJ3IMoBfszP0RtrS56wRhlH/9rSd\noWaa7XLJAgMBAAECggEAQ+2vnfBMrkBU9oNvB7pK8Qm7mrlWeK0AEf0X74papC7k\nNDkmRRE6B1g64Wz3pAXqe4v2n6SMeNuabJ7EA8++CZEu90y2INpNNlf/4IQH0qsO\nE9smwIN+SU0vRU3sgjevDXJzmR3dqu+2EusUKxBmWpmhMCBBve7MtxMmPemPqadr\nXOzTk0yGjt38IDX1Q91plSb9iBonMtUsODf3ENJFCFaE37P68wBsOBWRUuyoRwZZ\nodZzYv1DnVK+CFXhRuoeBJxhClc+iFJUUNdUmSvT5ybSVZeJyApbtyQB/xYae5HF\n6shIXe8Q3z8NbxPcshNXQ7oOoJo/it1G7OgLpEusdQKBgQDJ4AU7WHoYaamP3+2l\nvvNUIfhvSSMusu4Y5d0Ne+PGwpYZkIEi4vSjy0rVQwBlBZPvbRe8MaJx2CRJp0if\nz2EdVr+S/4rO8qv33PBjPlVjBB9gEb9nThtbBxstapAS6YKyq+v8i5+FSICkC65K\nJW0CK1mSKxlPrNt39PbiegzMPwKBgQDDatYznb5Gix0GupfHwwdxTVQ8jjhEQE2O\nF50w7E86R6vCsATubP2Bt3fivlQw+/Qa+to+HOJKHZGWfGhDEiPciZWxCLgtRooH\nqYcwOvJIDpLIz+ax6sdIKkx/nEWwmexqxc61O+WNoJ2tTtLf2SXQHsrqHzPcJfVo\nt3TIshse9wKBgQDJqNIxHUoiNvLeOUgRaTVzVtfwezP9A1rbXku6m4bG1zzP3s1R\nRzwwnvRrIxoy0CaeZvDt2vs2FD7zoHrowWV2xGBs/H7yCfKFkJxF10++sLCS7Eey\nb5DeFrQsYyX27nLT/u+nAObiYrG2rcB2avqAz0MTw5/uOnOmWfuB83/zSwKBgQCx\nGy6u8RP10zanVo0g2rzwDul9SFfuY2jmkrhAEqtrYnFkrSqK+/R1j9XzhhO/oVmG\n6jrJeFwOV+YOwQmtX89onLkyDXj+b6PBdf+z0niqnaqinOmz7dhWqx9RuEvg1l/S\nFRxWXMabKSo+W+X6Qk9m48F7lnPl3fEgysPo8KJr2QKBgQCTzcxJuC9+pQGXMkrp\nc8wsEI70kDhkPEQnwCxyLICwpldKuDebx7qwALHcHhhHC5LZpmIsCGomjAxRoqKy\nvLBQfGCO3LIrPVoqb4NFCPGKAki5do8VTYRHS8YARYDBDBuT0TakBPxTwt6aIvfM\n5irbPk1S0gnlMzYcdr8tpQAdhw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "business-service-account@letscook-001.iam.gserviceaccount.com",
+  "client_id": "103264850082155647395",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/business-service-account%40letscook-001.iam.gserviceaccount.com"
+}
