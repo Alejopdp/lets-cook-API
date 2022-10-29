@@ -109,7 +109,7 @@ export class Subscription extends Entity<Subscription> {
             return orders;
         } else {
             for (let i = 0; i < 12; i++) {
-                if (i !== 0) billingDate.setDate(billingDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+                if (i !== 0) this.frequency.setDateUsingOffset(billingDate)
 
                 orders.push(
                     new Order(
@@ -137,7 +137,7 @@ export class Subscription extends Entity<Subscription> {
                     )
                 );
                 if (this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
-                deliveryDate.setDate(deliveryDate.getDate() + MomentTimeService.getFrequencyOffset(this.frequency));
+                this.frequency.setDateUsingOffset(deliveryDate)
             }
             return orders;
         }
@@ -238,8 +238,6 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public getFirstOrderShippingDate(shippingDayWeekNumber: number): Date {
-        // var today: Date = new Date();
-        // today.setDate(today.getDate() + 5); // Testing days
         const deliveryDate: Date = new Date(this.createdAt.getFullYear(), this.createdAt.getMonth());
         const differenceInDays = shippingDayWeekNumber - this.createdAt.getDay();
 
