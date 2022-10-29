@@ -9,6 +9,9 @@ export class OneTimeFrequency implements IPlanFrequency {
         return aPlanFrequency.value() === this.value();
     }
 
+    public setDateUsingOffset(date: Date): void {
+        return
+    }
     public getLabel(locale: Locale = Locale.es): string {
         switch (locale) {
             case Locale.es:

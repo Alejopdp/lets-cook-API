@@ -13,6 +13,10 @@ export class BiweeklyFrequency implements IPlanFrequency {
         return aPlanFrequency.value() === this.value();
     }
 
+    public setDateUsingOffset(date: Date): void {
+        date.setDate(date.getDate() + this.offset)
+    }
+
     public getNDatesWithFrequencyOffset(qtyOfDates: number, baseDate: Date): Date[] {
         const dates: Date[] = [baseDate];
         const auxDateForCalculatingRestOfDates: Date = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());

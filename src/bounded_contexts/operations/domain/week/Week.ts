@@ -28,7 +28,7 @@ export class Week extends Entity<Week> {
     }
 
     public containsDate(aDate: Date): boolean {
-        return this.minDay <= aDate && this.maxDay >= aDate;
+        return this.minDay.getTime() <= aDate.getTime() && this.maxDay.getTime() >= aDate.getTime();
     }
 
     public getLabel(locale: Locale): string {

@@ -55,7 +55,7 @@ export class MongooseWeekRepository implements IWeekRepository {
         return weeksDb.map((week: any) => weekMapper.toDomain(week));
     }
 
-    public async findNextTwelveByFrequency(frequency: IPlanFrequency, skipWeek?: boolean): Promise<Week[]> {
+    public async findNextTwelveByFrequency(frequency: IPlanFrequency, baseDate: Date, skipWeek?: boolean): Promise<Week[]> {
         const today = new Date();
         const todayIso = today.toISOString();
         var weeksDb: any[] = [];
@@ -64,12 +64,16 @@ export class MongooseWeekRepository implements IWeekRepository {
             weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
                 .limit(13);
+
+            return weeksDb.map(week => weekMapper.toDomain(week))
         }
 
         if (frequency.isWeekly()) {
             weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
                 .limit(13);
+
+            return weeksDb.map(week => weekMapper.toDomain(week))
         }
 
         if (frequency.isBiweekly()) {
@@ -85,25 +89,29 @@ export class MongooseWeekRepository implements IWeekRepository {
                 }
             }
 
-            weeksDb = [...biWeekly];
+            return biWeekly.map(week => weekMapper.toDomain(week))
         }
 
         if (frequency.isMonthly()) {
-            const monthly = [];
+            const dates = frequency.getNDatesWithFrequencyOffset(12, baseDate)
+            const monthlyWeeks: Week[] = [];
             weeksDb = await WeekModel.find({ minDay: { $gte: todayIso } })
                 .sort({ minDay: 1 })
                 .limit(52);
 
-            for (let i = 0; i < 52; i++) {
-                if (i % 4 == 1 || i === 1) {
-                    monthly.push(weeksDb[i]);
+            const domainWeeks = weeksDb.map(week => weekMapper.toDomain(week))
+
+            for (const week of domainWeeks) {
+                for (const date of dates) {
+                    if (week.containsDate(date)) monthlyWeeks.push(week)
                 }
             }
 
-            weeksDb = [...monthly];
+            return monthlyWeeks
         }
 
-        return weeksDb.map((week: any) => weekMapper.toDomain(week));
+        return []
+
     }
 
     public async findPreviousWeek(): Promise<Week | undefined> {
@@ -154,7 +162,8 @@ export class MongooseWeekRepository implements IWeekRepository {
 
     public async findWeekTwelveBiweeksLater(): Promise<Week | undefined> {
         const dayInTwelveWeeks = new Date();
-        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 14 * 12);
+        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 14 * 12 + 2); // + 2 cause if not it will get one week previous to shipping date
+
 
         const weekDb = await WeekModel.findOne({ minDay: { $lte: dayInTwelveWeeks }, maxDay: { $gte: dayInTwelveWeeks } });
 
@@ -163,7 +172,7 @@ export class MongooseWeekRepository implements IWeekRepository {
 
     public async findWeekTwelveMonthsLater(): Promise<Week | undefined> {
         const dayInTwelveWeeks = new Date();
-        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 28 * 12);
+        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 28 * 12 + 2); // + 2 cause if not it will get one week previous to shipping date
 
         const weekDb = await WeekModel.findOne({ minDay: { $lte: dayInTwelveWeeks }, maxDay: { $gte: dayInTwelveWeeks } });
 
