@@ -13,7 +13,7 @@ export class BillingJob {
 
     public async initialize(): Promise<void> {
         try {
-            schedule.scheduleJob("Billing job", "0 9 * * SAT", async () => {
+            schedule.scheduleJob("Billing job", "10 13 * * SAT", async () => {
                 // schedule.scheduleJob("Billing job", "* * * * *", async () => {
                 await this.payAllSubscriptions.execute();
             });
