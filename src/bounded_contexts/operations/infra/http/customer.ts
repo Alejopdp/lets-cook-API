@@ -38,7 +38,7 @@ const options: multer.Options = {
 
 // // GETs
 // customerRouter.get("/:email", (req, res) => emailValidatedController.execute(req, res));
-customerRouter.get("/", (req, res) => getCustomerListController.execute(req, res));
+customerRouter.get("/", middleware.ensureAdminAuthenticated(), (req, res) => getCustomerListController.execute(req, res));
 customerRouter.get("/by-name/:name", (req, res) => getCustomerByNameController.execute(req, res));
 customerRouter.get("/export", middleware.ensureAdminAuthenticated([Permission.EXPORT_CUSTOMERS]), (req, res) =>
     exportCustomersController.execute(req, res)
