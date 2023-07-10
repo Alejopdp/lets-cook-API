@@ -32,7 +32,7 @@ export class GetUserByIdController extends BaseController {
             }
 
             return this.ok(this.res, result.value);
-        } catch (err) {
+        } catch (err: any) {
             return this.fail(err);
         }
     }

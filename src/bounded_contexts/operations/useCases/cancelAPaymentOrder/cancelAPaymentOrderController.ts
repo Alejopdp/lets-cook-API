@@ -18,7 +18,7 @@ export class CancelAPaymentOrderController extends BaseController {
             await this.cancelAPaymentOrder.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

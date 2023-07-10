@@ -20,7 +20,7 @@ export class DeleteUserController extends BaseController {
             await this.deleteUser.execute(dto);
 
             return this.ok(this.res);
-        } catch (err) {
+        } catch (err: any) {
             return this.fail(err);
         }
     }

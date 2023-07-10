@@ -23,7 +23,7 @@ export class GetSubscriptionListController extends BaseController {
             const presented = this.getSubscriptionListPresenter.present(result);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

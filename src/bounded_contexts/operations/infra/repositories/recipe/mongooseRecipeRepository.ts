@@ -20,7 +20,9 @@ export class MongooseRecipeRepository implements IRecipeRepository {
         if (alreadySavedRecipe) {
             const auxRecipeGeneralData = { ...recipeDb.recipeGeneralData };
             const newImageTagsForLocale = [...recipeDb.imageTags];
+            //@ts-ignore
             delete recipeDb.recipeGeneralData;
+            //@ts-ignore
             delete recipeDb.imageTags;
             const nameWithLocaleKey = `recipeGeneralData.name.${locale}`;
             const shortDescriptionWithLocaleKey = `recipeGeneralData.recipeDescription.shortDescription.${locale}`;
@@ -33,6 +35,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                     ...recipeDb,
                     nutritionalInfo: this.getUpdatedNutritionalInfoForMongo(
                         recipe.recipeNutritionalData,
+                        //@ts-ignore
                         alreadySavedRecipe.nutritionalInfo,
                         locale
                     ),
@@ -197,7 +200,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     private getUpdatedNutritionalInfoForMongo(
         newNutritionalData: RecipeNutritionalData,
         //@ts-ignore
-        oldValues: { _id: string; [locale: string]: { key: string; value: string } }[],
+        oldValues: { _id: string;[locale: string]: { key: string; value: string } }[],
         locale: Locale
     ): any {
         const finalArray: any[] = [];

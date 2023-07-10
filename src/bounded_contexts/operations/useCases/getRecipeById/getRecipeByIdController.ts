@@ -20,7 +20,7 @@ export class GetRecipeByIdController extends BaseController {
             const result = await this.getRecipeById.execute(dto);
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -26,7 +26,7 @@ export class GetCouponValidationController extends BaseController {
             const presented = this.getCouponValidationPresenter.present(result);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

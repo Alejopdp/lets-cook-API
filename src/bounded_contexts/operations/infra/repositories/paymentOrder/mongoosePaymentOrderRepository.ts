@@ -4,9 +4,7 @@ import { IPaymentOrderRepository } from "./IPaymentOrderRepository";
 import { PaymentOrder as MongoosePaymentOrder } from "../../../../../infraestructure/mongoose/models";
 import { paymentOrderMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
-import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
-import { Subscription } from "../../../domain/subscription/Subscription";
 import { WeekId } from "@src/bounded_contexts/operations/domain/week/WeekId";
 import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 
@@ -54,13 +52,7 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     }
 
     public async findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined> {
-        const paymentOrder = await MongoosePaymentOrder.findById(paymentOrderId.value, { deletionFlag: false })
-            .populate("week")
-            .populate({
-                path: "recipes",
-                populate: { path: "recipeVariants", populate: { path: "restriction" } },
-            })
-            .populate("plan");
+        const paymentOrder = await MongoosePaymentOrder.findById(paymentOrderId.value, { deletionFlag: false }).populate("week")
 
         return paymentOrder ? paymentOrderMapper.toDomain(paymentOrder, locale) : undefined;
     }
@@ -104,27 +96,18 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async findAnActivePaymentOrder(): Promise<PaymentOrder | undefined> {
         const paymentOrderDb = await MongoosePaymentOrder.findOne({ state: "PAYMENT_ORDER_ACTIVE" })
             .populate("week")
-            .populate({
-                path: "recipes",
-                populate: { path: "recipeVariants", populate: { path: "restriction" } },
-            })
-            .populate("plan");
 
         return paymentOrderDb ? paymentOrderMapper.toDomain(paymentOrderDb) : undefined;
     }
 
     public async existsBy(customerId: CustomerId): Promise<boolean> {
+        //@ts-ignore
         return await MongoosePaymentOrder.exists({ customer: customerId.value, state: "PAYMENT_ORDER_ACTIVE" });
     }
 
     public async findActiveByCustomerAndBillingDate(billingDate: Date, customerId: CustomerId): Promise<PaymentOrder | undefined> {
         const paymentOrderDb = await MongoosePaymentOrder.findOne({ billingDate, customer: customerId.value })
             .populate("week")
-            .populate({
-                path: "recipes",
-                populate: { path: "recipeVariants", populate: { path: "restriction" } },
-            })
-            .populate("plan");
 
         return paymentOrderDb ? paymentOrderMapper.toDomain(paymentOrderDb) : undefined;
     }
@@ -152,11 +135,6 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         const paymentOrdersDb = await MongoosePaymentOrder.find({ deletionFlag: false })
             .sort({ billingDate: 1 })
             .populate("week")
-            .populate({
-                path: "recipes",
-                populate: { path: "recipeVariants", populate: { path: "restriction" } },
-            })
-            .populate("plan");
 
         return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
     }
@@ -165,11 +143,6 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         const paymentOrdersDb = await MongoosePaymentOrder.find({ ...conditions, deletionFlag: false })
             .sort({ billingDate: 1 })
             .populate("week")
-            .populate({
-                path: "recipes",
-                populate: { path: "recipeVariants", populate: { path: "restriction" } },
-            })
-            .populate("plan");
 
         return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
     }

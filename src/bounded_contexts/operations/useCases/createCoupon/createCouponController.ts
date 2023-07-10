@@ -36,7 +36,7 @@ export class CreateCouponController extends BaseController {
             // fs.unlinkSync(planImaePath);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

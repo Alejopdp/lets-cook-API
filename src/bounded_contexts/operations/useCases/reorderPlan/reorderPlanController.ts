@@ -25,7 +25,7 @@ export class ReorderPlanController extends BaseController {
             const presented = this.reorderPlanPresenter.present(result.subscription, result.paymentIntent, result.firstOrder);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

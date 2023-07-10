@@ -14,7 +14,7 @@ export class GetRoleListController extends BaseController {
             const result = await this.useCase.execute();
 
             return this.ok(this.res, result);
-        } catch (err) {
+        } catch (err: any) {
             return this.fail(err);
         }
     }

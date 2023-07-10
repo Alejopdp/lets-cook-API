@@ -17,7 +17,7 @@ export class GetCouponListController extends BaseController {
             const result = await this.getCouponList.execute();
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             return this.fail(error);
         }

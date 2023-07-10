@@ -67,7 +67,7 @@ const getGeometry = async (address: string) => {
         console.log("Repsonse: ", response.data)
 
         return response.data;
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error: ", error)
         return undefined;
     }

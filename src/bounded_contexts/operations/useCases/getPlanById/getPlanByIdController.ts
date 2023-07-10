@@ -26,7 +26,7 @@ export class GetPlanByIdController extends BaseController {
             const presentedResult = await this.getPlanByIdPresenter.present(result, dto.locale);
 
             return this.ok(this.res, presentedResult);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

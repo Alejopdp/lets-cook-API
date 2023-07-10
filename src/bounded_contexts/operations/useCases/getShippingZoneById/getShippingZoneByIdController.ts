@@ -18,7 +18,7 @@ export class GetShippingZoneByIdController extends BaseController {
             const result = await this.getShippingZoneById.execute(dto);
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -32,7 +32,7 @@ export class CreateManySubscriptionsController extends BaseController {
 
             return this.ok(this.res, presented);
             // return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error as Error);
         }
     }

@@ -25,7 +25,7 @@ export class UpdateRateController extends BaseController {
             await this.updateRate.execute(dto);
 
             return this.ok(this.res);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

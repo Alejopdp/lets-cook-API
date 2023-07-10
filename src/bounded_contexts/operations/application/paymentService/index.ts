@@ -3,7 +3,7 @@ import { IPaymentService } from "./IPaymentService";
 import { StripeService } from "./stripeService/stripeService";
 
 const stripeConfig: Stripe.StripeConfig = {
-    apiVersion: "2020-08-27",
+    apiVersion: "2022-11-15",
 };
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, stripeConfig);
 

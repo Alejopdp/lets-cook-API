@@ -24,7 +24,7 @@ export class GetNextOrdersWithRecipesSelectionExportFiltersController extends Ba
             const presented = this.getNextOrdersWithRecipesSelectionExportFiltersPresenter.present(result);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

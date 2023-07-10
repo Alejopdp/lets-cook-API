@@ -39,7 +39,7 @@ export class S3StorageService implements IStorageService {
             await this.uploadFile(objectKey, file);
 
             return objectKey;
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             throw new Error("Al cargar la imagen del plan");
         }
@@ -75,7 +75,7 @@ export class S3StorageService implements IStorageService {
             await this.uploadFile(objectKey, file);
 
             return objectKey;
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
             throw new Error("Al cargar la imagen de la receta");
         }

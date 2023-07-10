@@ -23,7 +23,7 @@ export class GetNextWeekRecipesController extends BaseController {
             const presentedResult = await this.getNextWeeRecipesPresenter.present(result);
 
             return this.ok(this.res, presentedResult);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

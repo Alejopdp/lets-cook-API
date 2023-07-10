@@ -17,7 +17,7 @@ export class ChooseRecipesForManyOrdersController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const filePath = this.req.file.path;
+            const filePath = this.req.file?.path;
             if (!!!filePath) throw new Error("No ha ingresado ningún archivo para importar");
 
             const dto: ChooseRecipesForManyOrdersDto = { selection: [] };
@@ -72,7 +72,7 @@ export class ChooseRecipesForManyOrdersController extends BaseController {
             fs.unlinkSync(filePath);
 
             return this.ok(this.res, { inconsistentCustomerEmails, notOwnerOfOrderCustomerEmails });
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

@@ -367,7 +367,7 @@ export class MongooseOrderRepository implements IOrderRepository {
                     path: "recipe",
                     populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }] },
                 },
-            });
+            }).lean()
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
     }

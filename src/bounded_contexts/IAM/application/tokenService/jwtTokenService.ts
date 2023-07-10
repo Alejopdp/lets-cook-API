@@ -11,7 +11,7 @@ export class JwtTokenService implements ITokenService {
             const decoded: AdminLoginTokenPayload = await (<AdminLoginTokenPayload>jwt.verify(token, process.env.JWT_SEED as string));
 
             return decoded;
-        } catch (error) {
+        } catch (error: any) {
             return undefined;
         }
     }
@@ -28,7 +28,7 @@ export class JwtTokenService implements ITokenService {
             const decoded: string | object = await jwt.verify(token, process.env.JWT_SEED as string);
 
             return decoded;
-        } catch (error) {
+        } catch (error: any) {
             return "";
         }
     }
@@ -47,7 +47,7 @@ export class JwtTokenService implements ITokenService {
             customerId = decoded.customerId;
 
             return { email, customerId, expiredToken };
-        } catch (error) {
+        } catch (error: any) {
             if (error.name === "TokenExpiredError") expiredToken = true;
             return { email, customerId, expiredToken };
         }

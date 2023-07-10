@@ -32,7 +32,7 @@ export class GenerateNewPasswordController extends BaseController {
             }
 
             return this.ok(this.res);
-        } catch (err) {
+        } catch (err: any) {
             return this.fail(err);
         }
     }

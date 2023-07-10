@@ -19,7 +19,7 @@ export class GetAllUsersController extends BaseController {
             const result = await this.getAllUsers.execute(dto);
 
             return this.ok(this.res, result);
-        } catch (err) {
+        } catch (err: any) {
             return this.fail(err);
         }
     }

@@ -26,7 +26,7 @@ export class GetRecipeRatingsByCustomerController extends BaseController {
             const result = this.getRecipeRatingsByCustomerPresenter.present();
 
             return this.ok(this.res, result);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }

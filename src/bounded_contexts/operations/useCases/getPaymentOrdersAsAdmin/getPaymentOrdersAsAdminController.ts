@@ -24,7 +24,7 @@ export class GetPaymentOrdersAsAdminController extends BaseController {
             const presented = await this.getPaymentOrdesAsAdminPresenter.present(result.paymentOrders, result.customers);
 
             return this.ok(this.res, presented);
-        } catch (error) {
+        } catch (error: any) {
             return this.fail(error);
         }
     }
