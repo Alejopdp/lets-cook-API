@@ -12,7 +12,6 @@ import { RecipeVariantSku } from "@src/bounded_contexts/operations/domain/recipe
 import { Locale } from "../../../domain/locale/Locale";
 import { RecipeNutritionalData } from "@src/bounded_contexts/operations/domain/recipe/RecipeNutritionalData/RecipeNutritionalData";
 import { PersistenceRecipe } from "@src/bounded_contexts/operations/mappers/recipeMapper/recipeMapper";
-import { domain } from "process";
 
 export class MongooseRecipeRepository implements IRecipeRepository {
     public async save(recipe: Recipe, locale: Locale = Locale.es): Promise<void> {
@@ -24,6 +23,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
             //@ts-ignore
             const newImageTagsForLocale = [...(recipeDb?.imageTags ?? [])];
             delete recipeDb.recipeGeneralData;
+            //@ts-ignore
             delete recipeDb.imageTags;
             const nameWithLocaleKey = `recipeGeneralData.name.${locale}`;
             const shortDescriptionWithLocaleKey = `recipeGeneralData.recipeDescription.shortDescription.${locale}`;
@@ -36,6 +36,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
                     ...recipeDb,
                     nutritionalInfo: this.getUpdatedNutritionalInfoForMongo(
                         recipe.recipeNutritionalData,
+                        //@ts-ignore
                         alreadySavedRecipe.nutritionalInfo,
                         locale
                     ),
@@ -91,7 +92,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     }
 
     public async findByRecipeVariantSkuOrThrow(recipeVariantSku: string, locale: Locale): Promise<Recipe> {
-        const recipe = await RecipeModel.findOne({ "recipeVariants.sku": recipeVariantSku })
+        const recipe: PersistenceRecipe | null = await RecipeModel.findOne({ "recipeVariants.sku": recipeVariantSku })
             .populate("availableWeeks")
             .populate({
                 path: "recipeVariants",
@@ -114,12 +115,12 @@ export class MongooseRecipeRepository implements IRecipeRepository {
     }
 
     public async findById(recipeId: RecipeId, locale: Locale = Locale.es): Promise<Recipe | undefined> {
-        const recipeDb = await RecipeModel.findById(recipeId.value)
+        const recipeDb: PersistenceRecipe | null = await RecipeModel.findById(recipeId.value)
             .populate("availableWeeks")
             .populate({
                 path: "recipeVariants",
                 populate: [{ path: "restriction" }, { path: "ingredients" }],
-            });
+            }).lean()
 
         let domainRecipe = undefined
 

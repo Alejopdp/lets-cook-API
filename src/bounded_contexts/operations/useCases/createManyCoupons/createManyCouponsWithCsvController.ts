@@ -20,7 +20,7 @@ export class CreateManyCouponsWithCsvController extends BaseController {
     }
 
     protected async executeImpl(): Promise<any> {
-        const filePath = this.req.file.path;
+        const filePath = this.req.file?.path;
         if (!!!filePath) throw new Error("No ha ingresado ningún archivo para importar");
 
         try {

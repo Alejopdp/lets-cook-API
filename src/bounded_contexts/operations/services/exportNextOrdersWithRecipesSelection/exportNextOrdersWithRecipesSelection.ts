@@ -186,7 +186,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         chooseState: order.plan.abilityToChooseRecipes ? RecipeSelectionState.AUN_NO_ELIGIO : RecipeSelectionState.NO_ELIGE,
                         pricePlan: order.getTotalPrice(),
                         kitPrice: order.getKitPrice(),
-                        coupon: subscription.coupon?.couponCode ?? "",
+                        coupon: order.couponCode,
                         planDiscount: order.discountAmount,
                         kitDiscount: order.getKitDiscount(),
                         finalPrice: order.getTotalPrice() - order.discountAmount,
@@ -254,7 +254,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         chooseState: order.choseByAdmin ? RecipeSelectionState.ELEGIDA_POR_LC : RecipeSelectionState.ELIGIO, // TO DO: Elegido por LC
                         pricePlan: order.getTotalPrice(),
                         kitPrice: order.getKitPrice(),
-                        coupon: subscription.coupon?.couponCode ?? "",
+                        coupon: order.couponCode,
                         planDiscount: order.discountAmount,
                         kitDiscount: order.getKitDiscount(),
                         finalKitPrice: order.getFinalKitPrice(),

@@ -1,10 +1,6 @@
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CustomerEmailValidationDto } from "./customerEmailValidationDto";
-import fs from "fs";
 import { CustomerEmailValidation } from "./customerEmailValidation";
-import { logger } from "../../../../../config";
-// import { kml } from '@mapbox/togeojson';
 var tj = require("@mapbox/togeojson");
 const DOMParser = require("xmldom").DOMParser;
 
