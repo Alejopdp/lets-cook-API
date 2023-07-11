@@ -1,13 +1,15 @@
 import { CustomerExport, IExportService } from "../../application/exportService/IExportService";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Customer } from "../../domain/customer/Customer";
-import { CustomerId } from "../../domain/customer/CustomerId";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
+import { performance } from 'perf_hooks';
+
+
 
 export class ExportCustomers {
     private _customerRepository: ICustomerRepository;
@@ -28,18 +30,25 @@ export class ExportCustomers {
     }
 
     public async execute(): Promise<void> {
-        const customers: Customer[] = await this.customerRepository.findAll();
-        const subscriptions: Subscription[] = await this.subscriptionRepository.findAll(Locale.es);
+
+        const start = performance.now();
+        const [customers, subscriptions]: [Customer[], Subscription[]] = await Promise.all([this.customerRepository.findAll(), this.subscriptionRepository.findAll(Locale.es)]);
+        const end = performance.now();
+        console.log(`Customers & Subscriptions tardó ${end - start} milisegundos en ejecutarse`);
+        const start2 = performance.now();
         const pastOrders: Order[] = await this.orderRepository.findPastOrdersBySubscriptionIdList(
             subscriptions.map((sub) => sub.id),
             Locale.es
         );
+        const end2 = performance.now();
+        console.log(`Past orders tardó ${end2 - start2} milisegundos en ejecutarse`);
         const subscriptionsMap: { [subscriptionId: string]: Subscription } = {};
         const customersExport: CustomerExport[] = [];
         const customerSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
         const customerActiveSubscriptionsMap: { [customerId: string]: Subscription[] } = {};
         const subscriptionCustomerMap: { [subscriptionId: string]: Customer } = {};
         const customerPastOrdersMap: { [customerId: string]: Order[] } = {};
+        const start3 = performance.now();
 
         for (let subscription of subscriptions) {
             const actualKey = subscription.customer.id.toString();
@@ -113,6 +122,9 @@ export class ExportCustomers {
                 shopifyFirstDeliveryDate: customer.firstOrderDate ?? "",
             });
         }
+        const end3 = performance.now();
+        console.log(`El resto tardó ${end3 - start3} milisegundos en ejecutarse`);
+
 
         this.exportService.exportCustomers(customersExport);
     }
