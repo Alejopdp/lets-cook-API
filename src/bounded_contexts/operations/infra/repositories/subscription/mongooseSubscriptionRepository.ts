@@ -76,7 +76,8 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
             .populate({ path: "plan", populate: { path: "additionalPlans" } })
             .populate("customer")
             .populate("restriction")
-            .populate("coupon");
+            .populate("coupon")
+            .lean()
 
         return subscriptionsDb.map((raw: any) => subscriptionMapper.toDomain(raw, locale));
     }

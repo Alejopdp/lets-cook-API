@@ -4,9 +4,7 @@ import { IPaymentOrderRepository } from "./IPaymentOrderRepository";
 import { PaymentOrder as MongoosePaymentOrder } from "../../../../../infraestructure/mongoose/models";
 import { paymentOrderMapper } from "../../../mappers";
 import { Locale } from "../../../domain/locale/Locale";
-import { logger } from "../../../../../../config";
 import { CustomerId } from "../../../domain/customer/CustomerId";
-import { Subscription } from "../../../domain/subscription/Subscription";
 import { WeekId } from "@src/bounded_contexts/operations/domain/week/WeekId";
 import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 
@@ -101,7 +99,6 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         const paymentOrderDb = await MongoosePaymentOrder.findOne({ state: "PAYMENT_ORDER_ACTIVE" })
             .populate("week")
 
-
         return paymentOrderDb ? paymentOrderMapper.toDomain(paymentOrderDb) : undefined;
     }
 
@@ -112,7 +109,6 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
     public async findActiveByCustomerAndBillingDate(billingDate: Date, customerId: CustomerId): Promise<PaymentOrder | undefined> {
         const paymentOrderDb = await MongoosePaymentOrder.findOne({ billingDate, customer: customerId.value })
             .populate("week")
-
 
         return paymentOrderDb ? paymentOrderMapper.toDomain(paymentOrderDb) : undefined;
     }
@@ -141,7 +137,6 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
             .sort({ billingDate: 1 })
             .populate("week")
 
-
         return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
     }
 
@@ -149,7 +144,6 @@ export class MongoosePaymentOrderRepository implements IPaymentOrderRepository {
         const paymentOrdersDb = await MongoosePaymentOrder.find({ ...conditions, deletionFlag: false })
             .sort({ billingDate: 1 })
             .populate("week")
-
 
         return paymentOrdersDb.map((raw: any) => paymentOrderMapper.toDomain(raw, locale));
     }

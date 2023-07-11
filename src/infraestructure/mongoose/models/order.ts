@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import * as uuid from "uuid";
 
 const OrderSchema = new mongoose.Schema(
@@ -109,6 +109,11 @@ const OrderSchema = new mongoose.Schema(
             type: String,
             ref: "Customer",
             required: true,
+        },
+
+        couponCode: {
+            type: String,
+            default: ""
         },
 
         counter: {
