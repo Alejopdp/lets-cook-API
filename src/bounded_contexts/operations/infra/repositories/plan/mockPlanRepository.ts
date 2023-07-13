@@ -5,7 +5,7 @@ import { PlanType } from "../../../domain/plan/PlanType/PlanType";
 import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { IPlanRepository } from "./IPlanRepository";
 
-export class MockPlanRepository implements IPlanRepository {
+export class InMemoryPlanRepository implements IPlanRepository {
     private _database: Plan[];
 
     constructor(database: Plan[]) {
