@@ -6,13 +6,20 @@ import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { IPlanRepository } from "./IPlanRepository";
 
 export class InMemoryPlanRepository implements IPlanRepository {
-    private _database: Plan[];
+    private _plans: Plan[];
 
-    constructor(database: Plan[]) {
-        this._database = database;
+    constructor(plans: Plan[]) {
+        this._plans = plans;
     }
-    findByIdOrThrow(planId: PlanId, locale: Locale): Promise<Plan> {
-        throw new Error("Method not implemented.");
+
+    public async findByIdOrThrow(planId: PlanId, locale: Locale): Promise<Plan> {
+        const plan = await this.plans.find((plan) => plan.id.equals(planId));
+
+        if (!plan) {
+            throw new Error("Plan not found");
+        }
+
+        return plan;
     }
     findPlanAhorro(locale: Locale): Promise<Plan | undefined> {
         throw new Error("Method not implemented.");
@@ -31,20 +38,28 @@ export class InMemoryPlanRepository implements IPlanRepository {
     }
 
     public async save(plan: Plan): Promise<void> {
-        const filtered = this.database.filter((p) => !p.equals(plan));
-        this.database = [...filtered, plan];
+        const planIndex = this.plans.findIndex((p) => p.id.equals(plan.id));
+        if (planIndex !== -1) {
+            this.plans[planIndex] = plan;
+            return;
+        }
+        else {
+            this.plans.push(plan);
+            return;
+        }
+
     }
 
     public async findById(planId: PlanId): Promise<Plan | undefined> {
-        return this.database.find((p) => p.id.equals(planId));
+        return this.plans.find((p) => p.id.equals(planId));
     }
 
     public async findAll(): Promise<Plan[]> {
-        return this.database;
+        return this.plans;
     }
 
     public async findAdditionalPlanList(): Promise<Plan[]> {
-        return this.database.filter((plan) => plan.type === PlanType.Adicional);
+        return this.plans.filter((plan) => plan.type === PlanType.Adicional);
     }
 
     public async findBy(conditions: any): Promise<Plan[]> {
@@ -52,26 +67,26 @@ export class InMemoryPlanRepository implements IPlanRepository {
     }
 
     public async findAllWithRecipesFlag(): Promise<Plan[]> {
-        return this.database.filter((plan) => plan.hasRecipes);
+        return this.plans.filter((plan) => plan.hasRecipes);
     }
 
     public async delete(planId: PlanId): Promise<void> {
-        this.database = this.database.filter((p) => !p.id.equals(planId));
+        this.plans = this.plans.filter((p) => !p.id.equals(planId));
     }
 
     /**
-     * Getter database
+     * Getter plans
      * @return {Plan[]}
      */
-    public get database(): Plan[] {
-        return this._database;
+    public get plans(): Plan[] {
+        return this._plans;
     }
 
     /**
-     * Setter database
+     * Setter plans
      * @param {Plan[]} value
      */
-    public set database(value: Plan[]) {
-        this._database = value;
+    public set plans(value: Plan[]) {
+        this._plans = value;
     }
 }

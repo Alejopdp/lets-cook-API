@@ -1,6 +1,7 @@
 import { IPaymentService } from "../IPaymentService";
 import { Stripe } from "stripe";
 import { PaymentMethod } from "../../../domain/customer/paymentMethod/PaymentMethod";
+import { PaymentIntent } from "..";
 
 export class StripeService implements IPaymentService {
     private _stripe: Stripe;
@@ -35,7 +36,7 @@ export class StripeService implements IPaymentService {
         paymentMethod: string,
         receiptEmail: string,
         customerId: string
-    ): Promise<Stripe.PaymentIntent> {
+    ): Promise<PaymentIntent> {
         const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
             amount: Math.max(Math.trunc(amount * 100), 50),
             currency: "eur",
@@ -46,7 +47,9 @@ export class StripeService implements IPaymentService {
             setup_future_usage: "off_session",
         };
 
-        return await this.stripe.paymentIntents.create(paymentIntentParams);
+        const paymentIntent = await this.stripe.paymentIntents.create(paymentIntentParams);
+
+        return { client_secret: paymentIntent.client_secret, id: paymentIntent.id, status: paymentIntent.status }
     }
 
     public async createCustomer(email: string): Promise<any> {

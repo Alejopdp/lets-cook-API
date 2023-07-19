@@ -6,25 +6,24 @@ import { ISubscriptionRepository } from "./ISubscriptionRepository";
 import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 
 export class InMemorySusbcriptionRepository implements ISubscriptionRepository {
-    findAllCancelledSubscriptions(): Promise<Subscription[]> {
-        throw new Error("Method not implemented.");
-    }
-    findByCouponId(couponId: CouponId): Promise<Subscription[]> {
-        throw new Error("Method not implemented.");
-    }
-    delete(subscriptionId: SubscriptionId): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    destroy(subscriptionId: SubscriptionId): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    destroyManyByCustomer(customerId: CustomerId): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
     private subscriptions: Subscription[] = [];
 
+    public constructor(subscriptions: Subscription[]) {
+        this.subscriptions = subscriptions;
+    }
+
     public async save(subscription: Subscription): Promise<void> {
-        this.subscriptions.push(subscription);
+        // If subscription exists update it in the same order. If not, push it to the array
+        const subscriptionIndex = this.subscriptions.findIndex((s) => s.id.equals(subscription.id));
+        if (subscriptionIndex !== -1) {
+            this.subscriptions[subscriptionIndex] = subscription;
+            return;
+        }
+        else {
+            this.subscriptions.push(subscription);
+            return;
+        }
+
     }
 
     public async bulkSave(subscriptions: Subscription[]): Promise<void> {
@@ -56,9 +55,10 @@ export class InMemorySusbcriptionRepository implements ISubscriptionRepository {
     }
 
     public async findBy(conditions: any, locale: any, options?: any): Promise<any[]> {
-        return this.subscriptions.filter((subscription) => {
+        return this.subscriptions.filter((subscription: Subscription) => {
             let match = true;
             for (const key in conditions) {
+                //@ts-ignore
                 if (subscription[key] !== conditions[key]) {
                     match = false;
                     break;
@@ -72,20 +72,39 @@ export class InMemorySusbcriptionRepository implements ISubscriptionRepository {
         return this.subscriptions.filter((subscription) => subscriptionsIds.includes(subscription.id));
     }
 
-    public async findByCustomerId(customerId: any, locale: any): Promise<any[]> {
-        return this.subscriptions.filter((subscription) => subscription.customerId === customerId);
+    public async findByCustomerId(customerId: CustomerId, locale: any): Promise<Subscription[]> {
+        return this.subscriptions.filter((subscription) => subscription.customer.id.equals(customerId));
     }
 
     public async findActiveSubscriptionByPlanVariantsIds(planVariantsIds: any[]): Promise<any[]> {
         return this.subscriptions.filter((subscription) => planVariantsIds.includes(subscription.planVariantId));
     }
 
-    public async findActiveSusbcriptionsByCustomerId(customerId: any): Promise<any[]> {
-        return this.subscriptions.filter((subscription) => subscription.customerId === customerId);
+    public async findActiveSusbcriptionsByCustomerId(customerId: CustomerId): Promise<any[]> {
+        return this.subscriptions.filter((subscription) => subscription.customer.id.equals(customerId));
     }
 
-    public async findActiveSusbcriptionsByCustomerIdList(customersIds: any[]): Promise<any[]> {
-        return this.subscriptions.filter((subscription) => customersIds.includes(subscription.customerId));
+    public async findActiveSusbcriptionsByCustomerIdList(customersIds: CustomerId[]): Promise<any[]> {
+        return []
+
     }
+
+
+    findAllCancelledSubscriptions(): Promise<Subscription[]> {
+        throw new Error("Method not implemented.");
+    }
+    findByCouponId(couponId: CouponId): Promise<Subscription[]> {
+        throw new Error("Method not implemented.");
+    }
+    delete(subscriptionId: SubscriptionId): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    destroy(subscriptionId: SubscriptionId): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    destroyManyByCustomer(customerId: CustomerId): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
 
 }

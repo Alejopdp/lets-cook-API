@@ -3,4 +3,4 @@ import { InMemorySusbcriptionRepository } from "./inMemorySubscriptionRepository
 import { MongooseSubscriptionRepository } from "./mongooseSubscriptionRepository";
 
 export const mongooseSubscriptionRepository: ISubscriptionRepository = new MongooseSubscriptionRepository();
-export const inMemorySusbcriptionRepository: ISubscriptionRepository = new InMemorySusbcriptionRepository();
+export const inMemorySusbcriptionRepository: ISubscriptionRepository = new InMemorySusbcriptionRepository([]);

@@ -191,7 +191,7 @@ export class CreateManySubscriptions {
         );
         // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.bulkSave(subscriptions);
-        await this.orderRepository.bulkSave(orders);
+        await this.orderRepository.insertMany(orders);
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);

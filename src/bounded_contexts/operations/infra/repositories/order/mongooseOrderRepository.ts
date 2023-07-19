@@ -27,7 +27,7 @@ export class MongooseOrderRepository implements IOrderRepository {
         }
     }
 
-    public async bulkSave(orders: Order[]): Promise<void> {
+    public async insertMany(orders: Order[]): Promise<void> {
         const ordersToSave = orders.map((order) => orderMapper.toPersistence(order));
 
         await MongooseOrder.insertMany(ordersToSave);
