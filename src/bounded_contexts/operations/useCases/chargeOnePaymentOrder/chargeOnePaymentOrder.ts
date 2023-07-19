@@ -161,7 +161,7 @@ export class ChargeOnePaymentOrder {
         }
 
         await this.orderRepository.saveOrdersWithNewState(orders);
-        await this.orderRepository.bulkSave(newOrders);
+        await this.orderRepository.insertMany(newOrders);
         await this.paymentOrderRepository.save(paymentOrder);
         await this.paymentOrderRepository.bulkSave(newPaymentOrders);
 
