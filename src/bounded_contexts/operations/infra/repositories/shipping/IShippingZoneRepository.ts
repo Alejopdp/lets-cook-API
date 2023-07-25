@@ -1,4 +1,3 @@
-import { Locale } from "../../../domain/locale/Locale";
 import { ShippingZone } from "../../../domain/shipping/ShippingZone";
 import { ShippingZoneId } from "../../../domain/shipping/ShippingZoneId";
 

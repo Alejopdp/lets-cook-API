@@ -298,7 +298,7 @@ class PayAllSubscriptions {
 
             // await this.orderRepository.saveOrdersWithNewState(ordersToBill);
             await this.orderRepository.updateMany(ordersToBill);
-            await this.orderRepository.bulkSave(newOrders);
+            await this.orderRepository.insertMany(newOrders);
             await this.paymentOrderRepository.updateMany(paymentOrdersToBill);
             await this.paymentOrderRepository.bulkSave(newPaymentOrders);
             await this.customerRepository.updateMany(customers);

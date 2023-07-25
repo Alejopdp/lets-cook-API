@@ -7,4 +7,6 @@ const stripeConfig: Stripe.StripeConfig = {
 };
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, stripeConfig);
 
+export type PaymentIntent = { id: string; status: string; client_secret: string | null }
+
 export const stripeService: IPaymentService = new StripeService(stripe);
