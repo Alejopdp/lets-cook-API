@@ -84,7 +84,9 @@ export class CreateRecipe {
             weeks,
             months,
             planIds,
-            dto.tools
+            dto.tools,
+            new Date(),
+            new Date()
         );
 
         await this.recipeRepository.save(recipe);
