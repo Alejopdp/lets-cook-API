@@ -1,9 +1,4 @@
-import { logger } from "../../../../../config";
-import { MomentTimeService } from "../../application/timeService/momentTimeService";
-import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
-import { PaymentOrderActive } from "../../domain/paymentOrder/paymentOrderState/PaymentOrderActive";
-import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { CreatePaymentOrders } from "../createPaymentOrders/createPaymentOrders";
 import { CreatePaymentOrdersDto } from "../createPaymentOrders/createPaymentOrdersDto";

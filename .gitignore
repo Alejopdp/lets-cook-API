@@ -6,3 +6,7 @@ dist
 /logs
 /logs/*
 .idea
+./coverage/*
+coverage
+./coverage
+./coverage/
