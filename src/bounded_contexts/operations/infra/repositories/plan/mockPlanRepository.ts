@@ -4,12 +4,13 @@ import { PlanId } from "../../../domain/plan/PlanId";
 import { PlanType } from "../../../domain/plan/PlanType/PlanType";
 import { PlanVariantId } from "../../../domain/plan/PlanVariant/PlanVariantId";
 import { IPlanRepository } from "./IPlanRepository";
+import { getMockPlans } from "../../../../../../scripts/plan"
 
 export class InMemoryPlanRepository implements IPlanRepository {
     private _plans: Plan[];
 
-    constructor(plans: Plan[]) {
-        this._plans = plans;
+    constructor(plans?: Plan[]) {
+        this._plans = plans ?? getMockPlans();
     }
 
     public async findByIdOrThrow(planId: PlanId, locale: Locale): Promise<Plan> {

@@ -1,4 +1,3 @@
-import Stripe from "stripe";
 import {
     INotificationService,
     NewSubscriptionNotificationDto,
@@ -31,13 +30,14 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
-import { UpdatePaymentOrdersShippingCostByCustomer } from "../../services/updatePaymentOrdersShippingCostByCustomer/updatePaymentOrdersShippingCostByCustomer";
 import { CreateSubscriptionDto } from "./createSubscriptionDto";
-import { createFriendCode } from "../../services/createFriendCode";
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
 import { PaymentIntent } from "../../application/paymentService";
+import { CreateFriendCode } from "../../services/createFriendCode/createFriendCode";
+import { Customer } from "../../domain/customer/Customer";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
 export class CreateSubscription {
     private _customerRepository: ICustomerRepository;
@@ -52,6 +52,7 @@ export class CreateSubscription {
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _logRepository: ILogRepository;
+    private _createFriendCodeService: CreateFriendCode;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -65,7 +66,8 @@ export class CreateSubscription {
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
         paymentOrderRepository: IPaymentOrderRepository,
-        logRepository: ILogRepository
+        logRepository: ILogRepository,
+        createFriendCodeService: CreateFriendCode
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -79,6 +81,7 @@ export class CreateSubscription {
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
         this._logRepository = logRepository;
+        this._createFriendCodeService = createFriendCodeService;
     }
 
     public async execute(dto: CreateSubscriptionDto): Promise<{
@@ -105,47 +108,9 @@ export class CreateSubscription {
         const planVariantId: PlanVariantId = new PlanVariantId(dto.planVariantId);
         const planVariant: PlanVariant | undefined = plan.getPlanVariantById(new PlanVariantId(dto.planVariantId));
         if (!!!planVariant) throw new Error("La variante ingresada no existe");
-        const addressIsChanged: boolean =
-            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
 
-        customer.changePersonalInfo(
-            dto.customerFirstName,
-            dto.customerLastName,
-            dto.phone1,
-            "",
-            //@ts-ignore
-            customer.personalInfo?.birthDate,
-            dto.locale
-        );
-
-        if (addressIsChanged) {
-            customer.changeShippingAddress(
-                dto.latitude,
-                dto.longitude,
-                dto.addressName,
-                dto.addressName,
-                dto.addressDetails,
-                dto.shippingCity,
-                dto.shippingProvince,
-                dto.shippingCountry,
-                dto.shippingPostalCode,
-                customer.shippingAddress?.deliveryTime
-            );
-            customer.changeBillingAddress(
-                dto.latitude,
-                dto.longitude,
-                dto.addressName,
-                customer.billingAddress?.customerName || `${dto.customerFirstName} ${dto.customerLastName}`,
-                dto.addressDetails,
-                customer.billingAddress?.identification || "",
-                dto.shippingCity,
-                dto.shippingProvince,
-                dto.shippingCountry,
-                dto.shippingPostalCode,
-            );
-        }
-
-        !!customer.personalInfo ? (customer.personalInfo.preferredLanguage = dto.locale) : "";
+        this.updateCustomerPersonalInformation(customer, dto)
+        this.updateCustomerShippingAddress(customer, dto)
 
         const subscription: Subscription = new Subscription(
             planVariantId,
@@ -163,11 +128,7 @@ export class CreateSubscription {
             new Date() // TO DO: Calculate
         );
 
-        const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
-            zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)
-        );
-        if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
-
+        const customerShippingZone: ShippingZone = this.getCustomerShippingZone(customer, shippingZones)
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek())); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
 
@@ -190,50 +151,17 @@ export class CreateSubscription {
 
         const hasFreeShipping =
             // TO DO: Validar que la semana proxima tiene al menos 1 envio
-            // paymentOrdersToUpdate.some(po => po.)
             coupon?.type.type === "free" ||
             customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
             customerSubscriptions.length > 0;
 
-        // newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost;
         var paymentIntent: PaymentIntent = {
             id: "",
             status: "succeeded",
             client_secret: "",
         };
 
-        const amountToBill = hasFreeShipping
-            ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
-            : newPaymentOrders[0].getTotalAmount();
-
-
-        if (amountToBill >= 0.5) {
-            paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
-                amountToBill,
-                dto.stripePaymentMethodId
-                    ? dto.stripePaymentMethodId
-                    : customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId)),
-                customer.email,
-                customer.stripeId
-            );
-        }
-
-        newPaymentOrders[0].paymentIntentId = paymentIntent.id;
-        newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
-
-        if (!!paymentIntent && paymentIntent.status === "requires_action") {
-            if (customerSubscriptionHistory.length === 0) createFriendCode.execute({ customer });
-            newPaymentOrders[0].toPendingConfirmation(orders);
-        } else if (!!paymentIntent && (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled")) {
-            await this.paymentService.removePaymentMethodFromCustomer(
-                dto.stripePaymentMethodId || customer.getPaymentMethodStripeId(new PaymentMethodId(dto.paymentMethodId))
-            );
-            throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
-        } else {
-            newPaymentOrders[0]?.toBilled(orders, customer);
-            newPaymentOrders[0] ? newPaymentOrders[0].addHumanId(paymentOrdersWithHumanIdCount) : "";
-            if (customerSubscriptionHistory.length === 0) createFriendCode.execute({ customer });
-        }
+        const billedAmount = await this.charge(customer, newPaymentOrders, hasFreeShipping, customerShippingZone.cost, customerSubscriptionHistory.length, orders, dto.paymentMethodId, paymentOrdersWithHumanIdCount, dto.stripePaymentMethodId)
 
         const notificationDto: NewSubscriptionNotificationDto = {
             customerEmail: customer.email,
@@ -261,7 +189,7 @@ export class CreateSubscription {
         if (paymentIntent.status === "succeeded") {
             const ticketDto: PaymentOrderBilledNotificationDto = {
                 customerEmail: customer.email,
-                foodVAT: Math.round((amountToBill * 0.1 + Number.EPSILON) * 100) / 100,
+                foodVAT: Math.round((billedAmount * 0.1 + Number.EPSILON) * 100) / 100,
                 orders: [orders[0]],
                 paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
                 phoneNumber: customer.personalInfo?.phone1 || "",
@@ -270,7 +198,7 @@ export class CreateSubscription {
                 shippingCost: newPaymentOrders[0].shippingCost,
                 shippingCustomerName: customer.getPersonalInfo().fullName || "",
                 shippingDate: orders[0].getHumanShippmentDay(dto.locale),
-                totalAmount: amountToBill,
+                totalAmount: billedAmount,
                 discountAmount: newPaymentOrders[0].getDiscountAmountOrShippingCostIfHasFreeShipping(),
             };
             this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
@@ -293,16 +221,110 @@ export class CreateSubscription {
             firstOrder: orders[0],
             billedPaymentOrderHumanId: newPaymentOrders[0].getHumanIdOrIdValue(),
             customerPaymentMethods: customer.paymentMethods,
-            amountBilled: amountToBill,
+            amountBilled: billedAmount,
             tax:
-                Math.round((amountToBill - newPaymentOrders[0].shippingCost) * 0.1) +
+                Math.round((billedAmount - newPaymentOrders[0].shippingCost) * 0.1) +
                 (hasFreeShipping ? 0 : Math.round(newPaymentOrders[0].shippingCost * 0.21)),
             shippingCost: hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost,
         };
     }
 
-    private async updateCustomerPersonalInformation(): Promise<void> {
+    private updateCustomerPersonalInformation(customer: Customer, dto: CreateSubscriptionDto): void {
+        customer.changePersonalInfo(
+            dto.customerFirstName,
+            dto.customerLastName,
+            dto.phone1,
+            "",
+            //@ts-ignore
+            customer.personalInfo?.birthDate,
+            dto.locale
+        );
 
+        !!customer.personalInfo ? (customer.personalInfo.preferredLanguage = dto.locale) : "";
+    }
+
+    private updateCustomerShippingAddress(customer: Customer, dto: CreateSubscriptionDto): void {
+        const addressIsChanged: boolean =
+            !!dto.latitude && !!dto.longitude && customer.hasDifferentLatAndLngAddress(dto.latitude, dto.longitude);
+
+
+        if (addressIsChanged) {
+            customer.changeShippingAddress(
+                dto.latitude,
+                dto.longitude,
+                dto.addressName,
+                dto.addressName,
+                dto.addressDetails,
+                dto.shippingCity,
+                dto.shippingProvince,
+                dto.shippingCountry,
+                dto.shippingPostalCode,
+                customer.shippingAddress?.deliveryTime
+            );
+            customer.changeBillingAddress(
+                dto.latitude,
+                dto.longitude,
+                dto.addressName,
+                customer.billingAddress?.customerName || `${dto.customerFirstName} ${dto.customerLastName}`,
+                dto.addressDetails,
+                customer.billingAddress?.identification || "",
+                dto.shippingCity,
+                dto.shippingProvince,
+                dto.shippingCountry,
+                dto.shippingPostalCode,
+            );
+        }
+    }
+
+    private getCustomerShippingZone(customer: Customer, shippingZones: ShippingZone[]): ShippingZone {
+        const customerShippingZone = shippingZones.find((zone) =>
+            zone.hasAddressInside(customer.shippingAddress?.latitude!, customer.shippingAddress?.longitude!)
+        );
+        if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
+
+        return customerShippingZone;
+    }
+
+    private async charge(customer: Customer, newPaymentOrders: PaymentOrder[], hasFreeShipping: boolean, customerShippingZoneCost: number, customerSubscriptionsQty: number, orders: Order[], paymentMethodId: string, paymentOrdersWithHumanIdCount: number, stripePaymentMethodId?: string): Promise<number> {
+        const paymentOrder = newPaymentOrders[0]
+        var paymentIntent: PaymentIntent = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+        };
+
+        const amountToBill = hasFreeShipping
+            ? (Math.round(paymentOrder.getTotalAmount() * 100) - Math.round(customerShippingZoneCost * 100)) / 100
+            : paymentOrder.getTotalAmount();
+
+
+        if (amountToBill >= 0.5) {
+            paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
+                amountToBill,
+                stripePaymentMethodId ?? customer.getPaymentMethodStripeId(new PaymentMethodId(paymentMethodId)),
+                customer.email,
+                customer.stripeId
+            );
+        }
+
+        paymentOrder.paymentIntentId = paymentIntent.id;
+        paymentOrder.shippingCost = hasFreeShipping ? 0 : customerShippingZoneCost;
+
+        if (!!paymentIntent && paymentIntent.status === "requires_action") {
+            if (customerSubscriptionsQty === 0) this.createFriendCodeService.execute({ customer });
+            paymentOrder.toPendingConfirmation(orders);
+        } else if (!!paymentIntent && (paymentIntent.status === "requires_payment_method" || paymentIntent.status === "canceled")) {
+            await this.paymentService.removePaymentMethodFromCustomer(
+                stripePaymentMethodId || customer.getPaymentMethodStripeId(new PaymentMethodId(paymentMethodId))
+            );
+            throw new Error("El pago ha fallado, por favor intente de nuevo o pruebe con una nueva tarjeta");
+        } else {
+            paymentOrder?.toBilled(orders, customer);
+            paymentOrder ? paymentOrder.addHumanId(paymentOrdersWithHumanIdCount) : "";
+            if (customerSubscriptionsQty === 0) this.createFriendCodeService.execute({ customer });
+        }
+
+        return amountToBill
     }
 
     /**
@@ -407,4 +429,14 @@ export class CreateSubscription {
     public get logRepository(): ILogRepository {
         return this._logRepository;
     }
+
+
+    /**
+     * Getter createFriendCodeService
+     * @return {CreateFriendCode}
+     */
+    public get createFriendCodeService(): CreateFriendCode {
+        return this._createFriendCodeService;
+    }
+
 }

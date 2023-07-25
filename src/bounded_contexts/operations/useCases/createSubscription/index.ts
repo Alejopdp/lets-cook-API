@@ -10,6 +10,7 @@ import { mongooseShippingZoneRepository } from "../../infra/repositories/shippin
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
 import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { assignOrdersToPaymentOrder } from "../../services/assignOrdersToPaymentOrders";
+import { createFriendCode } from "../../services/createFriendCode";
 import { CreateSubscription } from "./createSubscription";
 import { CreateSubscriptionController } from "./createSubscriptionController";
 import { CreateSubscriptionPresenter } from "./createSubscriptionPresenter";
@@ -26,7 +27,8 @@ export const createSubscription: CreateSubscription = new CreateSubscription(
     awsSesService,
     assignOrdersToPaymentOrder,
     mongoosePaymentOrderReposiotry,
-    mongooseLogRepository
+    mongooseLogRepository,
+    createFriendCode
 );
 export const createSubscriptionPresenter: CreateSubscriptionPresenter = new CreateSubscriptionPresenter();
 export const createSubscriptionController: CreateSubscriptionController = new CreateSubscriptionController(

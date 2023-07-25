@@ -27,6 +27,9 @@ import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/sh
 import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio"
 import { Coordinates } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/Coordinates"
 import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day"
+import { CreateFriendCode } from "../../../src/bounded_contexts/operations/services/createFriendCode/createFriendCode"
+import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order"
+import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/paymentOrder/PaymentOrder"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -41,8 +44,8 @@ const mockPaymentOrderRepository = new InMemoryPaymentOrderRepository([])
 const createPaymentOrdersService: CreatePaymentOrders = new CreatePaymentOrders()
 const assignOrdersToPaymentOrderService = new AssignOrdersToPaymentOrders(mockPaymentOrderRepository, createPaymentOrdersService)
 const mockLogRepository = new InMemoryLogRepository([])
-
-const createSubscriptionUseCase = new CreateSubscription(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockCouponRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockLogRepository)
+const mockCreateFriendCodeService = new CreateFriendCode(mockCouponRepository, mockCustomerRepository)
+const createSubscriptionUseCase = new CreateSubscription(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockCouponRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockLogRepository, mockCreateFriendCodeService)
 
 const customerId = new CustomerId()
 const customerPassword = UserPassword.create("Pass1234", false)
@@ -102,32 +105,281 @@ const valenciaPolygon = [
     [38.98, -0.78]   // Suroeste
 ];
 const customerShippingZoneRadio = new ShippingZoneRadio(valenciaPolygon.map((coordinates) => new Coordinates(coordinates[0], coordinates[1])))
-const customerShippingZone = ShippingZone.create("Valencia", "valencia", 10, "active", customerShippingZoneRadio, new Day(2))
+const MOCK_SHIPPING_COST = 10
+const SUNDAY = new Day(0)
+const MONDAY = new Day(1)
+const TUESDAY = new Day(2)
+const WEDNESDAY = new Day(3)
+const THURSDAY = new Day(4)
+const FRIDAY = new Day(5)
+const SATURDAY = new Day(6)
+const customerShippingZone = ShippingZone.create("Valencia", "valencia", MOCK_SHIPPING_COST, "active", customerShippingZoneRadio, TUESDAY)
 mockShippingZoneRepository.save(customerShippingZone)
 
-// TENGO QUE CREAR UN MOCK DE CREATE FRIEND ZONE, INYECTARLO COMO DEPENDENCIA Y MOCKEARLO PORQUE ESTA HARDCODEADO EN EL USE CASE.
 
-describe("Create Subscription", () => {
+describe("Create Subscription Use Case", () => {
+    let createSubscriptionDto: any
+    let firstSubscriptionResult: any
+    const CUSTOMER_FIRST_NAME = "Alejo"
+    const CUSTOMER_LAST_NAME = "Scotti"
+    const CUSTOMER_PHONE = "634135817"
+    const CUSTOMER_ADDRESS_NAME = "Vicent Blasco Ibañez 5"
+    const CUSTOMER_ADDRESS_DETAILS = "Bloque 7, Escalera 2, Puerta 9"
+    const CUSTOMER_LATITUDE = 39.4869251
+    const CUSTOMER_LONGITUDE = -0.3298131
 
-    describe("Creating a first weekly subscription for a fresh new customer", () => {
+    beforeAll(async () => {
 
-        it("Should create a subscription successfully", () => {
-            const createSubscriptionDto = {
+        createSubscriptionDto = {
+            customerId: customerId.toString(),
+            planId: gourmetPlan.id.toString(),
+            planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+            planFrequency: "weekly",
+            restrictionComment: "string",
+            stripePaymentMethodId: "",
+            couponId: undefined,
+            paymentMethodId: "string",
+            addressName: CUSTOMER_ADDRESS_NAME,
+            addressDetails: CUSTOMER_ADDRESS_DETAILS,
+            latitude: CUSTOMER_LATITUDE,
+            longitude: CUSTOMER_LONGITUDE,
+            customerFirstName: CUSTOMER_FIRST_NAME,
+            customerLastName: CUSTOMER_LAST_NAME,
+            phone1: CUSTOMER_PHONE,
+            locale: Locale.es,
+            shippingCity: "Alboraya",
+            shippingProvince: "Valencia",
+            shippingPostalCode: "46120",
+            shippingCountry: "España"
+        }
+         
+
+        firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+    })
+    describe("It creates a new weekly subscription for a first-time customer", () => {
+
+
+        describe("Use case response", () => {
+            it("Should return a subscription", () => {
+                expect(firstSubscriptionResult).toBeDefined()
+                expect(firstSubscriptionResult).toHaveProperty("subscription")
+            })
+
+            
+
+            it("Should return the first order", () => {
+                expect(firstSubscriptionResult).toHaveProperty("firstOrder")
+            })
+
+            it("Should return the customer payment methods", () => {
+                expect(firstSubscriptionResult).toHaveProperty("customerPaymentMethods")
+            })
+
+            it("Should return a billed amount", () => {
+                expect(firstSubscriptionResult).toHaveProperty("amountBilled")
+            })
+
+            it("Should return the tax", () => {
+                expect(firstSubscriptionResult).toHaveProperty("tax")
+            })
+
+            it("Should return the shipping cost", () => {
+                expect(firstSubscriptionResult).toHaveProperty("shippingCost")
+            })
+
+            it("Should return the payment order human id", () => {
+                expect(firstSubscriptionResult).toHaveProperty("billedPaymentOrderHumanId")
+            })
+        })
+
+        describe("Orders validation", () => {
+            it("Should create 12 orders", async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                expect(orders.length).toBe(12)
+            })
+
+            it("Should bill the first order", async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                const firstOrder: Order = orders[0]
+                expect(firstOrder.isBilled()).toBe(true)
+            })
+
+            it("Should have no discount on any order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.discountAmount).toBe(0)
+                }
+                )
+            })
+
+            it("Should create the shipping dates for the orders as the day of the week of the shipping zone", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                })
+            })
+
+            it("Should create the rest of orders with 7 days of difference as shipping dates", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order, index) => {
+                    const previousOrder = orders[index - 1]
+                    if (previousOrder) {
+                        const difference = order.shippingDate.getTime() - previousOrder.shippingDate.getTime()
+                        expect(difference).toBe(7 * 24 * 60 * 60 * 1000)
+                    }
+                })
+            })
+
+        })
+
+
+        describe("Customer details validation", () => {
+            it("Should update the customer name", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(customerId)
+                expect(customer.getPersonalInfo().fullName).toBe(`${CUSTOMER_FIRST_NAME} ${CUSTOMER_LAST_NAME}`)
+            })
+
+            it("Should update the customer phone", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(customerId)
+                expect(customer.getPersonalInfo().phone1).toBe(CUSTOMER_PHONE)
+            })
+
+            it("Should update the customer address", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(customerId)
+                expect(customer.getShippingAddress().addressName).toBe(CUSTOMER_ADDRESS_NAME)
+                expect(customer.getShippingAddress().addressDetails).toBe(CUSTOMER_ADDRESS_DETAILS)
+            })
+
+            it("Should update the customer latitude and longitude if changed", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(customerId)
+                expect(customer.getShippingAddress().latitude).toBe(CUSTOMER_LATITUDE)
+                expect(customer.getShippingAddress().longitude).toBe(CUSTOMER_LONGITUDE)
+            })
+
+        })
+
+        describe("Payment orders validation", () => {
+
+            it("Should create 12 pamynet orders", async () => {
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                expect(paymentOrders.length).toBe(12)
+            })
+
+            it("Should assign saturdays at 00:00 as billing dates for every payment order", async () => {
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.billingDate.getDay()).toBe(6)
+                    expect(paymentOrder.billingDate.getHours()).toBe(0)
+                    expect(paymentOrder.billingDate.getMinutes()).toBe(0)
+                    expect(paymentOrder.billingDate.getSeconds()).toBe(0)
+                })
+            })
+
+            it("Should bill the first payment order", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.isBilled()).toBe(true)
+            })
+
+            it("Should left the rest of payment orders unbilled", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.isActive()).toBe(true)
+                })
+            })
+
+            it("Should assign an human id to the billed payment order", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.humanId).toBeDefined()
+            })
+
+            it("Should bill the cost of the shipping zone correctly", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should bill the cost of the plan variant correctly", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.amount).toBe(planGourmetVariant2Persons2Recipes.getPaymentPrice())
+            })
+
+            it("Should assign the same amount to the rest of payment orders", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.amount).toBe(planGourmetVariant2Persons2Recipes.getPaymentPrice())
+                })
+            })
+
+            it("Should assign the same shipping cost to the rest of payment orders", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.shippingCost).toBe(MOCK_SHIPPING_COST)
+                })
+            })
+
+
+            it("Should create the rest of payment orders with 7 days of difference as billing dates", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder, index) => {
+                    const previousPaymentOrder = restOfPaymentOrders[index - 1]
+                    if (previousPaymentOrder) {
+                        const difference = paymentOrder.billingDate.getTime() - previousPaymentOrder.billingDate.getTime()
+                        expect(difference).toBe(7 * 24 * 60 * 60 * 1000)
+                    }
+                })
+            })
+        })
+
+        it("Should throw an error if the plan variant is not found", async () => {
+            const wrongPlanVariantId = "wrongPlanVariantId"
+            const newDto = { ...createSubscriptionDto, planVariantId: wrongPlanVariantId }
+            await expect(createSubscriptionUseCase.execute(newDto)).rejects.toThrow()
+        })
+
+        it("Should throw an error if the customer is not within any shipping zone", async () => {
+            const newDto = { ...createSubscriptionDto, latitude: 40.00, longitude: -0.50 }
+            await expect(createSubscriptionUseCase.execute(newDto)).rejects.toThrow()
+        })
+    })
+
+    describe("Create a second subscription for the same customer", () => {
+        let secondCreateSubscriptionDto: any
+        let secondSubscriptionResult
+            : any
+
+        beforeAll(async () => {
+            secondCreateSubscriptionDto = {
                 customerId: customerId.toString(),
                 planId: gourmetPlan.id.toString(),
-                planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                planVariantId: planGourmetVariant2Persons3Recipes.id.toString(),
                 planFrequency: "weekly",
                 restrictionComment: "string",
                 stripePaymentMethodId: "",
                 couponId: undefined,
                 paymentMethodId: "string",
-                addressName: "Vicent Blasco Ibañez 5",
-                addressDetails: "Bloque 7, Escalera 2, Puerta 9",
-                latitude: 39.4869251,
-                longitude: -0.3298131,
-                customerFirstName: "Alejo",
-                customerLastName: "Scotti",
-                phone1: "634135817",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
                 locale: Locale.es,
                 shippingCity: "Alboraya",
                 shippingProvince: "Valencia",
@@ -135,18 +387,71 @@ describe("Create Subscription", () => {
                 shippingCountry: "España"
             }
 
-            const result = createSubscriptionUseCase.execute(createSubscriptionDto)
+            secondSubscriptionResult = await createSubscriptionUseCase.execute(secondCreateSubscriptionDto)
+        })
 
-            expect(result).toBeDefined()
-            expect(result).toHaveProperty("subscription")
-            expect(result).toHaveProperty("firstOrder")
-            expect(result).toHaveProperty("customerPaymentMethods")
-            expect(result).toHaveProperty("amountBilled")
-            expect(result).toHaveProperty("tax")
-            expect(result).toHaveProperty("shippingCost")
-            expect(result).toHaveProperty("billedPaymentOrderHumanId")
+        describe("Orders validation", () => {
+            it("Should create another 12 orders", async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)
+                expect(orders.length).toBe(12)
+            })
 
+            it("Should bill the first order", async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)
+                const firstOrder: Order = orders[0]
+                expect(firstOrder.isBilled()).toBe(true)
+            })
+
+            it("Should be 24 orders for the customer", async () => {
+                const orders = await mockOrderRepository.findAllByCustomersIds([customerId], Locale.es)
+                expect(orders.length).toBe(24)
+            })
+
+        })
+
+        describe("Payment Orders validation", () => {
+            it("Should have 13 payment orders", async () => {
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customerId)
+                expect(paymentOrders.length).toBe(13)
+            })
+
+            it("Should bill the first payment order", async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)
+                const firstOrder: Order = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[0]
+                const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findById(firstOrder.paymentOrderId!, Locale.es)
+                expect(paymentOrder?.isBilled()).toBe(true)
+                expect(paymentOrder)
+            })
+
+            // Ver el test que hay debajo. La primer PO de la 2da suscripción no tiene coste de envío porque se entrega la semana que viene y ya se le cobró o cobraría el sábado
+            // it("Should not sum the shipping cost of the shipping zone to the existent payment orders", async () => {
+            //     const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customerId)
+            //     for (let paymentOrder of paymentOrders) {
+            //         expect(paymentOrder.shippingCost).toBe(MOCK_SHIPPING_COST)
+            //     }
+            // })
+
+            it("Should not sum the shipping cost to the first order of the second subscription if the next week it has an active order of the first subscription", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customerId)
+                const firstPaymentOrderOfSecondSubscription: PaymentOrder = paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())[1]
+                const orderOfFirstPaymentOrder = (await mockOrderRepository.findByPaymentOrderId(firstPaymentOrderOfSecondSubscription.id, Locale.es))[0]
+                const firstSubscritionOrders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                const orderOfFirstSubscriptionWithSameShippingDate: Order | undefined = firstSubscritionOrders.find((order) => order.shippingDate.getTime() === orderOfFirstPaymentOrder.shippingDate.getTime())
+
+                if (orderOfFirstSubscriptionWithSameShippingDate?.isActive()) expect(firstPaymentOrderOfSecondSubscription.shippingCost).toBe(0)
+            })
+
+
+            it("Should sum the price of the second plan variant to the existent active payment orders", async () => {
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customerId)
+                for (let paymentOrder of paymentOrders) {
+                    if (paymentOrder.isActive()) {
+                        expect(paymentOrder.amount).toBe(planGourmetVariant2Persons2Recipes.getPaymentPrice() + planGourmetVariant2Persons3Recipes.getPaymentPrice())
+                    }
+                }
+            })
         })
     })
 
 })
+
