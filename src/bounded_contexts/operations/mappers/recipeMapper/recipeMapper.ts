@@ -34,7 +34,8 @@ export interface PersistenceRecipe {
     backOfficeTags: string[],
     imageTags: { [locale: string]: string[] },
     orderPriority: number
-
+    createdAt: Date,
+    updatedAt: Date
 }
 export class RecipeMapper implements Mapper<Recipe, PersistenceRecipe> {
     public toDomain(raw: PersistenceRecipe, locale?: Locale): Recipe {
@@ -63,8 +64,10 @@ export class RecipeMapper implements Mapper<Recipe, PersistenceRecipe> {
             availableMonths,
             relatedPlansIds,
             recipeTools,
+            raw.createdAt,
+            raw.updatedAt,
             new RecipeId(raw._id),
-            raw.orderPriority || 999
+            raw.orderPriority || 999,
         );
     }
 

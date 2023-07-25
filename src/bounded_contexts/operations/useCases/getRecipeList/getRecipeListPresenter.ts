@@ -57,6 +57,8 @@ export class GetRecipeListPresenter {
                         sku: variant.sku.code,
                     };
                 }),
+                createdAt: recipe.createdAt,
+                updatedAt: recipe.updatedAt
             });
         }
         return presentedRecipes.sort((r1, r2) => r1.orderPriority! - r2.orderPriority!);

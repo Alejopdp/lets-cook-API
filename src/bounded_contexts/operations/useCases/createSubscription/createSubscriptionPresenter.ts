@@ -1,13 +1,13 @@
-import Stripe from "stripe";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { Subscription } from "../../domain/subscription/Subscription";
+import { PaymentIntent } from "../../application/paymentService";
 
 export class CreateSubscriptionPresenter {
     public present(
         subscription: Subscription,
-        paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string },
+        paymentIntent: PaymentIntent,
         firstOrder: Order,
         customerPaymentMethods: PaymentMethod[],
         amountBilled: number,

@@ -216,7 +216,7 @@ export class CreateSubscriptionAsAdmin {
             planSku: subscription.plan.planSku.code,
         };
         await this.subscriptionRepository.save(subscription);
-        await this.orderRepository.bulkSave(orders);
+        await this.orderRepository.insertMany(orders);
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);

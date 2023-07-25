@@ -135,7 +135,7 @@ export class ReorderPlan {
         // @ts-ignore
         // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated({});
         await this.subscriptionRepository.save(subscription);
-        await this.orderRepository.bulkSave(orders);
+        await this.orderRepository.insertMany(orders);
         await this.customerRepository.save(subscription.customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
         if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);

@@ -13,7 +13,7 @@ import { PlanType } from "@src/bounded_contexts/operations/domain/plan/PlanType/
 
 export interface IOrderRepository {
     save(order: Order): Promise<void>;
-    bulkSave(orders: Order[]): Promise<void>;
+    insertMany(orders: Order[]): Promise<void>;
     updateMany(orders: Order[]): Promise<void>;
     countCustomersWhoChoseRecipesByWeekGroupedByPlan(
         week: Week

@@ -1,5 +1,6 @@
 import { Stripe } from "stripe";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
+import { PaymentIntent } from ".";
 
 export type StripePaymentIntentStatus =
     | "requires_payment_method"
@@ -22,7 +23,7 @@ export interface IPaymentService {
         paymentMethod: string,
         receiptEmail: string,
         customerId: string
-    ): Promise<Stripe.PaymentIntent>;
+    ): Promise<PaymentIntent>;
     createCustomer(email: string): Promise<any>;
     getPaymentMethod(paymentMethodId: string): Promise<Stripe.PaymentMethod>;
     addPaymentMethodToCustomer(paymentMetodId: string, customerId: string): Promise<PaymentMethod>;

@@ -23,6 +23,8 @@ export class Recipe extends Entity<Recipe> {
     private _relatedPlans: PlanId[];
     private _recipeTools: string[];
     private _orderPriority?: number;
+    private _createdAt: Date;
+    private _updatedAt: Date;
 
     constructor(
         recipeGeneralData: RecipeGeneralData,
@@ -34,6 +36,8 @@ export class Recipe extends Entity<Recipe> {
         availableMonths: Month[],
         relatedPlans: PlanId[],
         recipeTools: string[],
+        createdAt: Date,
+        updatedAt: Date,
         id?: RecipeId,
         orderPriority?: number
     ) {
@@ -50,6 +54,8 @@ export class Recipe extends Entity<Recipe> {
         this._relatedPlans = relatedPlans;
         this._recipeTools = recipeTools;
         this._orderPriority = orderPriority;
+        this._createdAt = createdAt;
+        this._updatedAt = updatedAt;
     }
 
     public getName(): string {
@@ -176,6 +182,23 @@ export class Recipe extends Entity<Recipe> {
     }
 
     /**
+     * Getter createdAt
+     * @return {Date}
+     */
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    /**
+ * Getter updatedAt
+ * @return {Date}
+ */
+    public get updatedAt(): Date {
+        return this._updatedAt;
+    }
+
+
+    /**
      * Setter recipeGeneralData
      * @param {RecipeGeneralData} value
      */
@@ -254,4 +277,21 @@ export class Recipe extends Entity<Recipe> {
     public set orderPriority(value: number | undefined) {
         this._orderPriority = value;
     }
+
+    /**
+     * Setter createdAt
+     * @param {Date} value
+     */
+    public set createdAt(value: Date) {
+        this._createdAt = value;
+    }
+
+    /**
+ * Setter updatedAt
+ * @param {Date} value
+ */
+    public set updatedAt(value: Date) {
+        this._updatedAt = value;
+    }
+
 }

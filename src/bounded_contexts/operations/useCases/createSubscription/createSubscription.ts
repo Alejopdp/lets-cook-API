@@ -37,6 +37,7 @@ import { createFriendCode } from "../../services/createFriendCode";
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
+import { PaymentIntent } from "../../application/paymentService";
 
 export class CreateSubscription {
     private _customerRepository: ICustomerRepository;
@@ -82,7 +83,7 @@ export class CreateSubscription {
 
     public async execute(dto: CreateSubscriptionDto): Promise<{
         subscription: Subscription;
-        paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string };
+        paymentIntent: PaymentIntent;
         firstOrder: Order;
         customerPaymentMethods: PaymentMethod[];
         amountBilled: number;
@@ -195,7 +196,7 @@ export class CreateSubscription {
             customerSubscriptions.length > 0;
 
         // newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost;
-        var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
+        var paymentIntent: PaymentIntent = {
             id: "",
             status: "succeeded",
             client_secret: "",
@@ -249,7 +250,7 @@ export class CreateSubscription {
         };
         if (orders[0].isBilled() && dto.couponId) orders[0].couponCode = coupon?.couponCode ?? ""
         await this.subscriptionRepository.save(subscription);
-        await this.orderRepository.bulkSave(orders);
+        await this.orderRepository.insertMany(orders);
         await this.customerRepository.save(customer);
         if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
 
@@ -298,6 +299,10 @@ export class CreateSubscription {
                 (hasFreeShipping ? 0 : Math.round(newPaymentOrders[0].shippingCost * 0.21)),
             shippingCost: hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost,
         };
+    }
+
+    private async updateCustomerPersonalInformation(): Promise<void> {
+
     }
 
     /**
