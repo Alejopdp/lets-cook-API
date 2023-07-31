@@ -1,4 +1,4 @@
-import { s3Service } from "../../application/storageService";
+import { v3S3Service } from "../../application/storageService";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
 import { mongoosePlanRepository } from "../../infra/repositories/plan";
@@ -6,11 +6,10 @@ import { mongooseSubscriptionRepository } from "../../infra/repositories/subscri
 import { UpdatePlan } from "./updatePlan";
 import { UpdatePlanController } from "./updatePlanController";
 
-// export const updatePlan: UpdatePlan = new UpdatePlan(mockPlanRepository, s3Service);
 export const updatePlan: UpdatePlan = new UpdatePlan(
     mongoosePlanRepository,
     mongooseSubscriptionRepository,
-    s3Service,
+    v3S3Service,
     mongooseOrderRepository,
     mongoosePaymentOrderReposiotry
 );

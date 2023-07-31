@@ -1,4 +1,4 @@
-import { s3Service } from "../../application/storageService";
+import { v3S3Service } from "../../application/storageService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
@@ -12,7 +12,7 @@ export const getCustomerInformationAsAdmin: GetCustomerInformationAsAdmin = new 
     mongooseSubscriptionRepository,
     mongoosePaymentOrderReposiotry,
     mongooseOrderRepository,
-    s3Service
+    v3S3Service
 );
 export const getCustomerInformationAsAdminPresenter: GetCustomerInformationAsAdminPresenter = new GetCustomerInformationAsAdminPresenter();
 export const getCustomerInformationAsAdminController: GetCustomerInformationAsAdminController = new GetCustomerInformationAsAdminController(

@@ -1,7 +1,6 @@
 import * as express from "express";
 import { logger } from "../../../config";
-import { sentryService } from "../../shared/monitoring";
-import { awsSesService } from "../../shared/notificationService";
+import { awsSesV3Service } from "../../shared/notificationService";
 export abstract class BaseController {
     // or even private
     protected req: express.Request = {} as express.Request;
@@ -81,7 +80,7 @@ export abstract class BaseController {
         const endpoint: string = `${this.req.method} ${this.req.protocol}://${this.req.get("host")}${this.req.originalUrl}`;
         //@ts-ignore
         const userEmail: string | undefined = this.req.currentUser?.email;
-        awsSesService.sendErrorEmail(`[${process.env.NODE_ENV}] ${error.toString()}`, endpoint, userEmail);
+        awsSesV3Service.sendErrorEmail(`[${process.env.NODE_ENV}] ${error.toString()}`, endpoint, userEmail);
 
         return this.res.status(500).json({
             message: error.toString(),

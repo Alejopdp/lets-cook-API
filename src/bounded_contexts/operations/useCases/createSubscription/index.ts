@@ -1,4 +1,4 @@
-import { awsSesService } from "../../../../shared/notificationService";
+import { awsSesV3Service } from "../../../../shared/notificationService";
 import { stripeService } from "../../application/paymentService";
 import { mongooseCouponRepository } from "../../infra/repositories/coupon";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
@@ -23,7 +23,7 @@ export const createSubscription: CreateSubscription = new CreateSubscription(
     mongooseOrderRepository,
     mongooseCouponRepository,
     stripeService,
-    awsSesService,
+    awsSesV3Service,
     assignOrdersToPaymentOrder,
     mongoosePaymentOrderReposiotry,
     mongooseLogRepository

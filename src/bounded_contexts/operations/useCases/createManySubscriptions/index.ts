@@ -1,4 +1,4 @@
-import { awsSesService } from "../../../../shared/notificationService";
+import { awsSesV3Service } from "../../../../shared/notificationService";
 import { stripeService } from "../../application/paymentService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { mongooseLogRepository } from "../../infra/repositories/log";
@@ -8,7 +8,6 @@ import { mongoosePlanRepository } from "../../infra/repositories/plan";
 import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
 import { mongooseWeekRepository } from "../../infra/repositories/week";
-import { assignOrdersToPaymentOrder } from "../../services/assignOrdersToPaymentOrders";
 import { assignOrdersWithDifferentFreqToPaymentOrders } from "../../services/assignOrdersWithDifferentFreqToPaymentOrders";
 import { CreateManySubscriptionsPresenter } from "./ccreateManySubscriptionsPresenter";
 import { CreateManySubscriptions } from "./createManySubscriptions";
@@ -22,7 +21,7 @@ export const createManySubscriptions: CreateManySubscriptions = new CreateManySu
     mongooseWeekRepository,
     mongooseOrderRepository,
     stripeService,
-    awsSesService,
+    awsSesV3Service,
     assignOrdersWithDifferentFreqToPaymentOrders,
     mongoosePaymentOrderReposiotry,
     mongooseLogRepository

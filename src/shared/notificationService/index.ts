@@ -1,6 +1,7 @@
 import { INotificationService } from "./INotificationService";
 import aws from "aws-sdk";
 import { AwsSesService } from "./awsSesService";
+import { AwsV3SesService } from "./awsSesV3Service";
 
 const ses = new aws.SES({
     region: "eu-west-3",
@@ -8,3 +9,4 @@ const ses = new aws.SES({
 });
 
 export const awsSesService: INotificationService = new AwsSesService(ses);
+export const awsSesV3Service: INotificationService = new AwsV3SesService();

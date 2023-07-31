@@ -1,4 +1,4 @@
-import { s3Service } from "../../application/storageService";
+import { v3S3Service } from "../../application/storageService";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongooseSubscriptionRepository } from "../../infra/repositories/subscription";
 import { mongooseRateRepository } from "../../infra/repositories/rate";
@@ -14,7 +14,7 @@ export const getCustomerSubscriptions: GetCustomerSubscriptions = new GetCustome
     mongooseCustomerRepository
 );
 
-export const getCustomerSubscriptionsPresenter: GetCustomerSubscriptionsPresenter = new GetCustomerSubscriptionsPresenter(s3Service);
+export const getCustomerSubscriptionsPresenter: GetCustomerSubscriptionsPresenter = new GetCustomerSubscriptionsPresenter(v3S3Service);
 export const getCustomerSusbcriptionsController: GetCustomersubscriptionsController = new GetCustomersubscriptionsController(
     getCustomerSubscriptions,
     getCustomerSubscriptionsPresenter

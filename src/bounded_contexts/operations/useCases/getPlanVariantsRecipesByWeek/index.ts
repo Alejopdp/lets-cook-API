@@ -4,15 +4,14 @@ import { GetPlanVariantsRecipesByWeekListController } from "./getPlanVariantsRec
 import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { mongooseRecipeRepository } from "../../infra/repositories/recipe";
 import { GetPlanVariantsRecipesByWeekListPresenter } from "./getPlanVariantsRecipesByWeekListPresenter";
-import { s3Service } from "../../application/storageService";
+import { v3S3Service } from "../../application/storageService";
 
-// export const getAdditionalPlanList: GetAdditionalPlanList = new GetAdditionalPlanList(mockPlanRepository);
 export const getPlanVariantsRecipesByWeekList: GetPlanVariantsRecipesByWeekList = new GetPlanVariantsRecipesByWeekList(
     mongoosePlanRepository,
     mongooseRecipeRepository,
     mongooseWeekRepository
 );
 export const getPlanVariantsRecipesByWeekListPresenter: GetPlanVariantsRecipesByWeekListPresenter =
-    new GetPlanVariantsRecipesByWeekListPresenter(s3Service);
+    new GetPlanVariantsRecipesByWeekListPresenter(v3S3Service);
 export const getPlanVariantsRecipesByWeekListController: GetPlanVariantsRecipesByWeekListController =
     new GetPlanVariantsRecipesByWeekListController(getPlanVariantsRecipesByWeekList, getPlanVariantsRecipesByWeekListPresenter);
