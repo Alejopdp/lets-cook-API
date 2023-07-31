@@ -1,7 +1,7 @@
 import { CreateSubscriptionAsAdmin } from "./createSubscriptionAsAdmin";
 import { CreateSubscriptionAsAdminPresenter } from "./createSubscriptionAsAdminPresenter";
 import { CreateSubscriptionAsAdminController } from "./createSubscriptionAsAdminController";
-import { awsSesService } from "../../../../shared/notificationService";
+import { awsSesV3Service } from "../../../../shared/notificationService";
 import { stripeService } from "../../application/paymentService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
@@ -21,7 +21,7 @@ export const createSubscriptionAsAdmin: CreateSubscriptionAsAdmin = new CreateSu
     mongooseWeekRepository,
     mongooseOrderRepository,
     stripeService,
-    awsSesService,
+    awsSesV3Service,
     assignOrdersToPaymentOrder,
     mongoosePaymentOrderReposiotry,
     mongooseCouponRepository

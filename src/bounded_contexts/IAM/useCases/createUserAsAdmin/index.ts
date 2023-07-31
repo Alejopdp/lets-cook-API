@@ -1,14 +1,14 @@
-import { awsSesService } from "../../../../shared/notificationService";
+import { awsSesV3Service } from "../../../../shared/notificationService";
 import { jwtTokenService } from "../../application/tokenService";
-import { mockRoleRepository, mongooseRoleRepository } from "../../infra/repositories/role";
-import { mockUserRepository, mongooseUserRepository } from "../../infra/repositories/user";
+import { mongooseRoleRepository } from "../../infra/repositories/role";
+import { mongooseUserRepository } from "../../infra/repositories/user";
 import { CreateUserAsAdmin } from "./createUserAsAdmin";
 import { CreateUserAsAdminController } from "./createUserAsAdminController";
 
 export const createUserAsAdmin: CreateUserAsAdmin = new CreateUserAsAdmin(
     mongooseUserRepository,
     mongooseRoleRepository,
-    awsSesService,
+    awsSesV3Service,
     jwtTokenService
 );
 export const createUserAsAdminController: CreateUserAsAdminController = new CreateUserAsAdminController(createUserAsAdmin);
