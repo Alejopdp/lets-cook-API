@@ -21,7 +21,8 @@ export class CreateShippingZoneController extends BaseController {
             const shippingZoneKmlPath = this.req.file.path;
             // var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
             var kml = {}
-            var geoJson: FeatureCollection<Geometry, GeoJsonProperties> = tj.kml(kml);
+            // var geoJson: FeatureCollection<Geometry, GeoJsonProperties> = tj.kml(kml);
+            var geoJson: any = tj.kml(kml);
             const polygonsQty = geoJson.features?.filter((feat: any) => feat.geometry.type === "Polygon").length ?? 0
 
             if (polygonsQty < 1) throw new Error("No has ingresado ningun poligono dentro del archivo")

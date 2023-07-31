@@ -5,7 +5,7 @@ import fs from "fs";
 
 // var tj = require("@mapbox/togeojson");
 // const DOMParser = require("xmldom").DOMParser;
-var tj = { kml: (kml: any) => { } }
+var tj = { kml: (kml: any) => ({ features: [{ geometry: { coordinates: [] } }] }) }
 
 export class UpdateShippingZoneController extends BaseController {
     private _updateShippingZone: UpdateShippingZone;
@@ -17,7 +17,7 @@ export class UpdateShippingZoneController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            var coordinates = [];
+            var coordinates: any[] = [];
 
             if (!!this.req.file) {
                 const shippingZoneKmlPath = this.req.file.path;
