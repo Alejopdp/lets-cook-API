@@ -20,7 +20,6 @@ export class InMemoryOrderRepository implements IOrderRepository {
         this.orders = orders;
     }
 
-
     public async save(order: Order): Promise<void> {
         // If order exists update it in the same order. If not, push it to the array
         const orderIndex = this.orders.findIndex((o) => o.id.equals(order.id));
@@ -177,4 +176,23 @@ export class InMemoryOrderRepository implements IOrderRepository {
     findFutureActiveAndSkippedBySubscriptionOrderdByShippingDate(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");
     }
+
+    /**
+ * Getter $orders
+ * @return {Order[] }
+ */
+    public get $orders(): Order[] {
+        return this.orders;
+    }
+
+    /**
+     * Setter $orders
+     * @param {Order[] } value
+     */
+    public set $orders(value: Order[]) {
+        this.orders = value;
+    }
+
+
+
 }

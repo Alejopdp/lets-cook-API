@@ -30,6 +30,7 @@ import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day"
 import { CreateFriendCode } from "../../../src/bounded_contexts/operations/services/createFriendCode/createFriendCode"
 import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order"
 import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/paymentOrder/PaymentOrder"
+import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -150,9 +151,10 @@ describe("Create Subscription Use Case", () => {
             shippingCity: "Alboraya",
             shippingProvince: "Valencia",
             shippingPostalCode: "46120",
-            shippingCountry: "España"
+            shippingCountry: "España",
+            purchaseDate: new Date()
         }
-         
+
 
         firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
     })
@@ -165,7 +167,7 @@ describe("Create Subscription Use Case", () => {
                 expect(firstSubscriptionResult).toHaveProperty("subscription")
             })
 
-            
+
 
             it("Should return the first order", () => {
                 expect(firstSubscriptionResult).toHaveProperty("firstOrder")
@@ -359,7 +361,7 @@ describe("Create Subscription Use Case", () => {
     })
 
     describe("Create a second subscription for the same customer", () => {
-        let secondCreateSubscriptionDto: any
+        let secondCreateSubscriptionDto: CreateSubscriptionDto
         let secondSubscriptionResult
             : any
 
@@ -384,7 +386,8 @@ describe("Create Subscription Use Case", () => {
                 shippingCity: "Alboraya",
                 shippingProvince: "Valencia",
                 shippingPostalCode: "46120",
-                shippingCountry: "España"
+                shippingCountry: "España",
+                purchaseDate: new Date()
             }
 
             secondSubscriptionResult = await createSubscriptionUseCase.execute(secondCreateSubscriptionDto)
@@ -423,24 +426,23 @@ describe("Create Subscription Use Case", () => {
                 expect(paymentOrder)
             })
 
-            // Ver el test que hay debajo. La primer PO de la 2da suscripción no tiene coste de envío porque se entrega la semana que viene y ya se le cobró o cobraría el sábado
-            // it("Should not sum the shipping cost of the shipping zone to the existent payment orders", async () => {
-            //     const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customerId)
-            //     for (let paymentOrder of paymentOrders) {
-            //         expect(paymentOrder.shippingCost).toBe(MOCK_SHIPPING_COST)
-            //     }
-            // })
 
             it("Should not sum the shipping cost to the first order of the second subscription if the next week it has an active order of the first subscription", async () => {
                 const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customerId)
                 const firstPaymentOrderOfSecondSubscription: PaymentOrder = paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())[1]
-                const orderOfFirstPaymentOrder = (await mockOrderRepository.findByPaymentOrderId(firstPaymentOrderOfSecondSubscription.id, Locale.es))[0]
-                const firstSubscritionOrders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
-                const orderOfFirstSubscriptionWithSameShippingDate: Order | undefined = firstSubscritionOrders.find((order) => order.shippingDate.getTime() === orderOfFirstPaymentOrder.shippingDate.getTime())
 
-                if (orderOfFirstSubscriptionWithSameShippingDate?.isActive()) expect(firstPaymentOrderOfSecondSubscription.shippingCost).toBe(0)
+                expect(firstPaymentOrderOfSecondSubscription.shippingCost).toBe(0)
             })
 
+            it("Should not sum the shipping cost of the shipping zone to the rest of the existent payment orders", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customerId)
+                const firstPaymentOrderOfSecondSubscription: PaymentOrder = paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())[1]
+
+                for (let paymentOrder of paymentOrders) {
+                    if (paymentOrder.id.equals(firstPaymentOrderOfSecondSubscription.id)) continue
+                    expect(paymentOrder.shippingCost).toBe(MOCK_SHIPPING_COST)
+                }
+            })
 
             it("Should sum the price of the second plan variant to the existent active payment orders", async () => {
                 const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customerId)
@@ -453,5 +455,271 @@ describe("Create Subscription Use Case", () => {
         })
     })
 
+    afterAll(async () => {
+        mockSubscriptionRepository.$subscriptions = []
+        mockOrderRepository.$orders = []
+        mockPaymentOrderRepository.$paymentOrders = []
+    })
+
+})
+
+describe("Creating a subscription in different week days", () => {
+    const CUSTOMER_FIRST_NAME = "Alejo"
+    const CUSTOMER_LAST_NAME = "Scotti"
+    const CUSTOMER_PHONE = "634135817"
+    const CUSTOMER_ADDRESS_NAME = "Vicent Blasco Ibañez 5"
+    const CUSTOMER_ADDRESS_DETAILS = "Bloque 7, Escalera 2, Puerta 9"
+    const CUSTOMER_LATITUDE = 39.4869251
+    const CUSTOMER_LONGITUDE = -0.3298131
+    let createSubscriptionDto: CreateSubscriptionDto = {
+        customerId: customerId.toString(),
+        planId: gourmetPlan.id.toString(),
+        planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+        planFrequency: "weekly",
+        restrictionComment: "string",
+        stripePaymentMethodId: "",
+        couponId: undefined,
+        paymentMethodId: "string",
+        addressName: CUSTOMER_ADDRESS_NAME,
+        addressDetails: CUSTOMER_ADDRESS_DETAILS,
+        latitude: CUSTOMER_LATITUDE,
+        longitude: CUSTOMER_LONGITUDE,
+        customerFirstName: CUSTOMER_FIRST_NAME,
+        customerLastName: CUSTOMER_LAST_NAME,
+        phone1: CUSTOMER_PHONE,
+        locale: Locale.es,
+        shippingCity: "Alboraya",
+        shippingProvince: "Valencia",
+        shippingPostalCode: "46120",
+        shippingCountry: "España",
+        purchaseDate: new Date() // Change it before each test
+    }
+    let subscriptionResult: any
+
+
+    describe("Creating a susbcription for a shipping zone with shipping day on Tuesday", () => {
+
+        describe("Creating a susbcription on Monday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 6, 31) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Tuesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(8)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+        })
+        describe("Creating a susbcription on Tuesday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 1) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Tuesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(8)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+        })
+        describe("Creating a susbcription on Wednesday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 2) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+
+            it("Should create the first order with shipping date on Tuesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(8)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+        describe("Creating a susbcription on Thursday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 3) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Tuesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(8)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+        describe("Creating a susbcription on Friday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 4) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Tuesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(8)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+        describe("Creating a susbcription on Saturday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 5) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Tuesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(8)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+        describe("Creating a susbcription on Sunday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 6) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Tuesday of the next week (Skipping one tuesday)", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getDate()).toBe(15)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+    })
+
+    describe("Creating a susbcription for a shipping zone with shipping day on Wednesday", () => {
+
+        beforeAll(async () => {
+            customerShippingZone.shippingDayOfWeek = WEDNESDAY
+        })
+
+        describe("Creating a susbcription on Monday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 6, 31) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Wednesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(WEDNESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(9)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+        })
+
+        describe("Creating a susbcription on Tuesday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 1) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Wednesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(WEDNESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(9)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+        })
+
+        describe("Creating a susbcription on Wednesday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 2) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Wednesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(WEDNESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(9)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+        describe("Creating a susbcription on Thursday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 3) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Wednesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(WEDNESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(9)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+        describe("Creating a susbcription on Friday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 4) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Wednesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(WEDNESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(9)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+        describe("Creating a susbcription on Saturday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 5) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Wednesday of the next week", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(WEDNESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(9)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+        describe("Creating a susbcription on Sunday", () => {
+            beforeAll(async () => {
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 7, 6) }
+                subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should create the first order with shipping date on Wednesday of the next week (Skips one Wednesday)", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].shippingDate.getDay()).toBe(WEDNESDAY.dayNumberOfWeek)
+                expect(orders[0].shippingDate.getDate()).toBe(16)
+                expect(orders[0].shippingDate.getMonth()).toBe(7)
+                expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+        })
+
+        afterAll(async () => {
+            customerShippingZone.shippingDayOfWeek = TUESDAY
+        })
+    })
 })
 

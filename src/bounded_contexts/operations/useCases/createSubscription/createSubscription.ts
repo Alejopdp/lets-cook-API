@@ -118,7 +118,7 @@ export class CreateSubscription {
             planFrequency,
             new SubscriptionActive(),
             dto.restrictionComment,
-            new Date(),
+            dto.purchaseDate,
             customer,
             plan.getPlanVariantPrice(planVariantId),
             undefined,
@@ -129,8 +129,8 @@ export class CreateSubscription {
         );
 
         const customerShippingZone: ShippingZone = this.getCustomerShippingZone(customer, shippingZones)
-        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek())); // Skip if it is not Sunday?
-        const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
+        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDateWithoutDateDependency(customerShippingZone.getDayNumberOfWeek(), dto.purchaseDate)); // Skip if it is not Sunday?
+        const orders: Order[] = subscription.createNewOrdersWithoutDependency(customerShippingZone, nextTwelveWeeks, dto.purchaseDate);
 
         const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
             customerId: customer.id,

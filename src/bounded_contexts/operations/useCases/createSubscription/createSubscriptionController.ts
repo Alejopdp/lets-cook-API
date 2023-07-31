@@ -36,7 +36,8 @@ export class CreateSubscriptionController extends BaseController {
                 shippingCity: this.req.body.shippingCity ?? "",
                 shippingCountry: this.req.body.shippingCountry ?? "",
                 shippingPostalCode: this.req.body.shippingPostalCode ?? "",
-                shippingProvince: this.req.body.shippingProvince ?? ""
+                shippingProvince: this.req.body.shippingProvince ?? "",
+                purchaseDate: new Date(),
             };
 
             const result = await this.createSubscription.execute(dto);

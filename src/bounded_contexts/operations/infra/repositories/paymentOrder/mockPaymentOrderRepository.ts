@@ -13,6 +13,7 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
     public constructor(paymentOrders: PaymentOrder[]) {
         this.paymentOrders = paymentOrders;
     }
+
     public async save(paymentOrder: PaymentOrder): Promise<void> {
         const paymentOrderIndex = this.paymentOrders.findIndex((p) => p.id.equals(paymentOrder.id));
         if (paymentOrderIndex !== -1) {
@@ -109,6 +110,22 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
     }
     destroyByCustomerId(customerId: CustomerId): Promise<void> {
         throw new Error("Method not implemented.");
+    }
+
+    /**
+ * Getter $paymentOrders
+ * @return {PaymentOrder[] }
+ */
+    public get $paymentOrders(): PaymentOrder[] {
+        return this.paymentOrders;
+    }
+
+    /**
+     * Setter $paymentOrders
+     * @param {PaymentOrder[] } value
+     */
+    public set $paymentOrders(value: PaymentOrder[]) {
+        this.paymentOrders = value;
     }
 
 }
