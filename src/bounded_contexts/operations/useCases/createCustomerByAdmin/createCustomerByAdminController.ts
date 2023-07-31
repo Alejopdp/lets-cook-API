@@ -1,12 +1,6 @@
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { createCustomerDto } from "./createCustomerByAdminDto";
-import fs from "fs";
 import { CreateCustomerByAdmin } from "./createCustomerByAdmin";
-import { logger } from "../../../../../config";
-// import { CustomerSignUpPresenter } from "./customerSignUpPresenter";
-// import { kml } from '@mapbox/togeojson';
-var tj = require("@mapbox/togeojson");
 
 export class CreateCustomerByAdminController extends BaseController {
     private _signUp: CreateCustomerByAdmin;
