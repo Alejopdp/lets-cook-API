@@ -1,8 +1,6 @@
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CustomerEmailValidationDto } from "./customerEmailValidationDto";
 import { CustomerEmailValidation } from "./customerEmailValidation";
-var tj = require("@mapbox/togeojson");
-const DOMParser = require("xmldom").DOMParser;
 
 export class CustomerEmailValidationController extends BaseController {
     private _customerEmailValidation: CustomerEmailValidation;

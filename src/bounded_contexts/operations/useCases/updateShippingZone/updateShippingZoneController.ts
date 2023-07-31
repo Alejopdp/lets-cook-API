@@ -1,11 +1,11 @@
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { UpdateShippingZone } from "./updateShippingZone";
 import { UpdateShippingZoneDto } from "./updateShippingZoneDto";
 import fs from "fs";
 
-var tj = require("@mapbox/togeojson");
-const DOMParser = require("xmldom").DOMParser;
+// var tj = require("@mapbox/togeojson");
+// const DOMParser = require("xmldom").DOMParser;
+var tj = { kml: (kml: any) => { } }
 
 export class UpdateShippingZoneController extends BaseController {
     private _updateShippingZone: UpdateShippingZone;
@@ -21,7 +21,8 @@ export class UpdateShippingZoneController extends BaseController {
 
             if (!!this.req.file) {
                 const shippingZoneKmlPath = this.req.file.path;
-                var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
+                // var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
+                var kml = {}
                 var converted = tj.kml(kml);
                 let polygonFilter = [];
 

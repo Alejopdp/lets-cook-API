@@ -3,8 +3,9 @@ import { CreateShippingZoneDto } from "./createShippingZoneDto";
 import fs from "fs";
 import { CreateShippingZone } from "./createShippingZone";
 import { FeatureCollection, Geometry, GeoJsonProperties } from "geojson"
-var tj = require("@mapbox/togeojson");
-const DOMParser = require("xmldom").DOMParser;
+// var tj = require("@mapbox/togeojson");
+// const DOMParser = require("xmldom").DOMParser;
+var tj = { kml: (kml: any) => { } }
 
 export class CreateShippingZoneController extends BaseController {
     private _createShippingZone: CreateShippingZone;
@@ -18,14 +19,15 @@ export class CreateShippingZoneController extends BaseController {
         try {
             if (!this.req.file) throw new Error("No ha ingresado un archivo kml");
             const shippingZoneKmlPath = this.req.file.path;
-            var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
+            // var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
+            var kml = {}
             var geoJson: FeatureCollection<Geometry, GeoJsonProperties> = tj.kml(kml);
-            const polygonsQty = geoJson.features?.filter(feat => feat.geometry.type === "Polygon").length ?? 0
+            const polygonsQty = geoJson.features?.filter((feat: any) => feat.geometry.type === "Polygon").length ?? 0
 
             if (polygonsQty < 1) throw new Error("No has ingresado ningun poligono dentro del archivo")
             if (polygonsQty > 1) throw new Error("Ingresaste mas de 1 poligono, solo debes ingresar 1")
 
-            const polygon: Geometry | undefined = geoJson.features.find(feat => feat.properties?.name === this.req.body.reference)?.geometry
+            const polygon: Geometry | undefined = geoJson.features.find((feat: any) => feat.properties?.name === this.req.body.reference)?.geometry
             if (!polygon) throw new Error("Ninguno de los polígonos coinciden con el nombre de referencia ingresado");
 
             let coordinates = [];

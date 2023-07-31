@@ -28,7 +28,6 @@
         "url": "https://github.com/Alejopdp/Typescript-clean-architecture/issues"
     },
     "dependencies": {
-        "@mapbox/togeojson": "^0.16.0",
         "@sentry/node": "^7.57.0",
         "@sentry/tracing": "^7.57.0",
         "aws-sdk": "^2.1413.0",
@@ -62,8 +61,7 @@
         "typescript": "^5.1.6",
         "uuid": "^9.0.0",
         "winston": "^3.10.0",
-        "xlsx": "^0.18.5",
-        "xmldom": "^0.6.0"
+        "xlsx": "^0.18.5"
     },
     "devDependencies": {
         "@babel/core": "^7.22.8",
