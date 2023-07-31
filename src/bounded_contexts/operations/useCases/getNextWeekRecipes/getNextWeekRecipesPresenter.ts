@@ -1,4 +1,4 @@
-import { s3Service } from "../../application/storageService";
+import { v3S3Service } from "../../application/storageService";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { PlanId } from "../../domain/plan/PlanId";
 import { Recipe } from "../../domain/recipe/Recipe";
@@ -9,12 +9,12 @@ export class GetNextWeekRecipesPresenter {
         const presentedRecipes = [];
 
         for (let recipe of recipes) {
-            const recipeUrl = recipe.getMainImageUrl() ? await s3Service.getPresignedUrlForFile(recipe.getMainImageUrl()) : "";
+            const recipeUrl = recipe.getMainImageUrl() ? await v3S3Service.getPresignedUrlForFile(recipe.getMainImageUrl()) : "";
 
             const recipeImages: string[] = [];
 
             for (let imageUrl of recipe.getImagesUrls()) {
-                const presignedUrl = await s3Service.getPresignedUrlForFile(imageUrl);
+                const presignedUrl = await v3S3Service.getPresignedUrlForFile(imageUrl);
                 recipeImages.push(presignedUrl);
             }
 

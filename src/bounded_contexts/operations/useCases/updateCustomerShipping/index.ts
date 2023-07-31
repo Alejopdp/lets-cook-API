@@ -1,5 +1,5 @@
 import { awsSesV3Service } from "../../../../shared/notificationService";
-import { s3Service } from "../../application/storageService";
+import { v3S3Service } from "../../application/storageService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { mongooseLogRepository } from "../../infra/repositories/log";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
@@ -12,7 +12,7 @@ export const updateShippingCustomer: UpdateCustomerShipping = new UpdateCustomer
     mongooseCustomerRepository,
     mongoosePaymentOrderReposiotry,
     mongooseShippingZoneRepository,
-    s3Service,
+    v3S3Service,
     awsSesV3Service,
     mongooseOrderRepository,
     mongooseLogRepository

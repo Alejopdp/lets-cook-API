@@ -5,7 +5,7 @@ import { ReadStream } from "fs";
 import { logger } from "../../../../../config";
 import path from "path";
 
-export class S3StorageService implements IStorageService {
+export class V3S3StorageService implements IStorageService {
     private _s3: S3Client;
 
     constructor() {
