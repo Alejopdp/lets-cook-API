@@ -10,7 +10,6 @@ import { InMemoryCouponRepository } from "../../../src/bounded_contexts/operatio
 import { InMemoryPaymentOrderRepository } from "../../../src/bounded_contexts/operations/infra/repositories/paymentOrder/mockPaymentOrderRepository"
 import { InMemoryLogRepository } from "../../../src/bounded_contexts/operations/infra/repositories/log/mockLogRepository"
 import { MockPaymentService } from "../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService"
-import { StripeService } from "../../../src/bounded_contexts/operations/application/paymentService/stripeService/stripeService"
 import { MockNotificationService } from "../../../src/shared/notificationService/mockNotificationService"
 import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/operations/services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders"
 import { CreatePaymentOrders } from "../../../src/bounded_contexts/operations/services/createPaymentOrders/createPaymentOrders"
@@ -34,6 +33,8 @@ import { Order } from "../../../src/bounded_contexts/operations/domain/order/Ord
 import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/paymentOrder/PaymentOrder"
 import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService"
+import { SubscriptionId } from "../../../src/bounded_contexts/operations/domain/subscription/SubscriptionId"
+import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -170,13 +171,26 @@ describe("Create Subscription Use Case", () => {
 
     describe("It creates a new weekly subscription for a first-time customer", () => {
 
+        describe("Subscription validation", () => {
+            it("Should create the subscription with the created date as the purchase date", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.createdAt.getDay()).toEqual(createSubscriptionDto.purchaseDate.getDay())
+                expect(subscription.createdAt.getMonth()).toEqual(createSubscriptionDto.purchaseDate.getMonth())
+                expect(subscription.createdAt.getFullYear()).toEqual(createSubscriptionDto.purchaseDate.getFullYear())
+            })
+
+            it("Should have a restriction comment", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.restrictionComment).toBe(createSubscriptionDto.restrictionComment)
+            })
+
+        })
 
         describe("Use case response", () => {
             it("Should return a subscription", () => {
                 expect(firstSubscriptionResult).toBeDefined()
                 expect(firstSubscriptionResult).toHaveProperty("subscription")
             })
-
 
 
             it("Should return the first order", () => {
@@ -279,7 +293,7 @@ describe("Create Subscription Use Case", () => {
 
         describe("Payment orders validation", () => {
 
-            it("Should create 12 pamynet orders", async () => {
+            it("Should create 12 paymnet orders", async () => {
                 const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customer.id)
                 expect(paymentOrders.length).toBe(12)
             })
@@ -300,6 +314,14 @@ describe("Create Subscription Use Case", () => {
                 paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
                 const firstPaymentOrder = paymentOrders[0]
                 expect(firstPaymentOrder.isBilled()).toBe(true)
+            })
+
+            it("Should assign a stripeId to the first payment order", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.paymentIntentId).toBeDefined()
+                expect(firstPaymentOrder.paymentIntentId).not.toBe("")
             })
 
             it("Should left the rest of payment orders unbilled", async () => {
