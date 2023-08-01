@@ -40,14 +40,14 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
     countHalfWeekOrdersByWeek(week: Week): Promise<number> {
         throw new Error("Method not implemented.");
     }
-    findAll(locale: Locale): Promise<PaymentOrder[]> {
-        throw new Error("Method not implemented.");
+    public async findAll(locale: Locale): Promise<PaymentOrder[]> {
+        return this.paymentOrders;
     }
     findAllSortedByBillingDateAsc(locale: Locale): Promise<PaymentOrder[]> {
         throw new Error("Method not implemented.");
     }
-    findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined> {
-        throw new Error("Method not implemented.");
+    public async findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined> {
+        return this.paymentOrders.find((paymentOrder) => paymentOrder.id.equals(paymentOrderId));
     }
     findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {
         throw new Error("Method not implemented.");
@@ -55,8 +55,9 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
     findBy(conditions: any, locale: Locale): Promise<PaymentOrder[]> {
         throw new Error("Method not implemented.");
     }
-    findByCustomerId(customerId: CustomerId): Promise<PaymentOrder[]> {
-        throw new Error("Method not implemented.");
+    public async findByCustomerId(customerId: CustomerId): Promise<PaymentOrder[]> {
+        return this.paymentOrders.filter((paymentOrder) => paymentOrder.customerId.equals(customerId));
+
     }
     findNextTwelveByCustomer(customerId: CustomerId): Promise<PaymentOrder[]> {
         throw new Error("Method not implemented.");
@@ -68,7 +69,7 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
         throw new Error("Method not implemented.");
     }
     public async findActiveByCustomerAndBillingDateList(billingDates: Date[], customerId: CustomerId): Promise<PaymentOrder[]> {
-        return this.paymentOrders.filter((paymentOrder) => paymentOrder.customerId.equals(customerId) && billingDates.includes(paymentOrder.billingDate) && paymentOrder.state.isActive());
+        return this.paymentOrders.filter((paymentOrder) => paymentOrder.customerId.equals(customerId) && billingDates.some(bd => bd.getTime() === paymentOrder.billingDate.getTime()) && paymentOrder.state.isActive());
     }
     findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
         throw new Error("Method not implemented.");
@@ -108,6 +109,22 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
     }
     destroyByCustomerId(customerId: CustomerId): Promise<void> {
         throw new Error("Method not implemented.");
+    }
+
+    /**
+ * Getter $paymentOrders
+ * @return {PaymentOrder[] }
+ */
+    public get $paymentOrders(): PaymentOrder[] {
+        return this.paymentOrders;
+    }
+
+    /**
+     * Setter $paymentOrders
+     * @param {PaymentOrder[] } value
+     */
+    public set $paymentOrders(value: PaymentOrder[]) {
+        this.paymentOrders = value;
     }
 
 }

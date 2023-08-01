@@ -1,4 +1,3 @@
-import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { PaymentOrderActive } from "../../domain/paymentOrder/paymentOrderState/PaymentOrderActive";
 import { CreatePaymentOrdersDto } from "./createPaymentOrdersDto";
