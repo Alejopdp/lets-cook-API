@@ -4,7 +4,34 @@ on:
         branches:
             - master
 jobs:
+    test:
+        runs-on: ubuntu-latest
+        env:
+            URLDB: ${{ secrets.URLDB }}
+            S3_ASSETS_ACCESS_KEY_ID: ${{secrets.S3_ASSETS_ACCESS_KEY_ID}}
+            S3_ASSETS_SECRET_KEY: ${{secrets.S3_ASSETS_SECRET_KEY}}
+            S3_BUCKET_NAME: ${{secrets.S3_BUCKET_NAME}}
+            JWT_SEED: ${{secrets.JWT_SEED}}
+            SES_SECRET_ACCES_ID: ${{secrets.SES_SECRET_ACCES_ID}}
+            SES_ACCES_KEY_ID: ${{secrets.SES_ACCES_KEY_ID}}
+            STRIPE_PUBLIC_KEY: ${{secrets.STRIPE_PUBLIC_KEY}}
+            STRIPE_SECRET_KEY: ${{secrets.STRIPE_SECRET_KEY}}
+            NOTIFICATION_EMAIL_USER: ${{secrets.NOTIFICATION_EMAIL_USER}}
+            ADMIN_ORIGIN_URL: ${{secrets.ADMIN_ORIGIN_URL}}
+            MAILER_LITE_API_KEY: ${{secrets.MAILER_LITE_API_KEY}}
+            MAILING_LIST_GROUP: ${{secrets.MAILING_LIST_GROUP}}
+            ADMIN_EMAIL: ${{secrets.ADMIN_EMAIL}}
+            CUSTOMER_ORIGIN_URL: ${{secrets.STAGING_CUSTOMER_ORIGIN_URL}}
+            SENTRY_DSN: ${{secrets.STAGING_SENTRY_DSN}}
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: "14"
+            - run: npm ci
+            - run: npm run test
     build:
+        needs: test
         runs-on: ubuntu-latest
         env:
             URLDB: ${{ secrets.URLDB }}
@@ -28,7 +55,7 @@ jobs:
             - uses: actions/setup-node@v2
               with:
                   node-version: "14"
-            - run: npm install
+            - run: npm ci
             - run: npm run build:master
             - run: zip -r deploy.zip dist/ package.json .npmrc .ebextensions/ .platform/
             - name: Deploy to EB
