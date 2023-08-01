@@ -3,9 +3,8 @@ import { UpdateShippingZone } from "./updateShippingZone";
 import { UpdateShippingZoneDto } from "./updateShippingZoneDto";
 import fs from "fs";
 
-// var tj = require("@mapbox/togeojson");
-// const DOMParser = require("xmldom").DOMParser;
-var tj = { kml: (kml: any) => ({ features: [{ geometry: { coordinates: [] } }] }) }
+var tj = require("@tmcw/togeojson");
+const DOMParser = require("xmldom").DOMParser;
 
 export class UpdateShippingZoneController extends BaseController {
     private _updateShippingZone: UpdateShippingZone;
@@ -21,8 +20,7 @@ export class UpdateShippingZoneController extends BaseController {
 
             if (!!this.req.file) {
                 const shippingZoneKmlPath = this.req.file.path;
-                // var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
-                var kml = {}
+                var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
                 var converted = tj.kml(kml);
                 let polygonFilter = [];
 
