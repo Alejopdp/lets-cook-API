@@ -1,3 +1,4 @@
+jest.mock("../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService")
 import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
 import { InMemoryCustomerRepository } from "../../../src/bounded_contexts/operations/infra/repositories/customer/inMemoryCustomerRepository"
 import { InMemorySusbcriptionRepository } from "../../../src/bounded_contexts/operations/infra/repositories/subscription/inMemorySubscriptionRepository"
@@ -9,6 +10,7 @@ import { InMemoryCouponRepository } from "../../../src/bounded_contexts/operatio
 import { InMemoryPaymentOrderRepository } from "../../../src/bounded_contexts/operations/infra/repositories/paymentOrder/mockPaymentOrderRepository"
 import { InMemoryLogRepository } from "../../../src/bounded_contexts/operations/infra/repositories/log/mockLogRepository"
 import { MockPaymentService } from "../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService"
+import { StripeService } from "../../../src/bounded_contexts/operations/application/paymentService/stripeService/stripeService"
 import { MockNotificationService } from "../../../src/shared/notificationService/mockNotificationService"
 import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/operations/services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders"
 import { CreatePaymentOrders } from "../../../src/bounded_contexts/operations/services/createPaymentOrders/createPaymentOrders"
@@ -31,6 +33,7 @@ import { CreateFriendCode } from "../../../src/bounded_contexts/operations/servi
 import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order"
 import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/paymentOrder/PaymentOrder"
 import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto"
+import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -39,7 +42,7 @@ const mockPlanRepository = new InMemoryPlanRepository([])
 const mockWeekRepository = new MockWeekRepository([])
 const mockOrderRepository = new InMemoryOrderRepository([])
 const mockCouponRepository = new InMemoryCouponRepository([])
-const mockPaymentService = new MockPaymentService()
+const mockPaymentService = new MockPaymentService() as jest.Mocked<MockPaymentService>
 const mockNotificationService = new MockNotificationService()
 const mockPaymentOrderRepository = new InMemoryPaymentOrderRepository([])
 const createPaymentOrdersService: CreatePaymentOrders = new CreatePaymentOrders()
@@ -48,11 +51,24 @@ const mockLogRepository = new InMemoryLogRepository([])
 const mockCreateFriendCodeService = new CreateFriendCode(mockCouponRepository, mockCustomerRepository)
 const createSubscriptionUseCase = new CreateSubscription(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockCouponRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockLogRepository, mockCreateFriendCodeService)
 
-const customerId = new CustomerId()
-const customerPassword = UserPassword.create("Pass1234", false)
-const customerEmail = "alejoscotti@gmail.com"
+mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementation(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string): Promise<PaymentIntent> => ({
+    client_secret: "client_secret",
+    id: "id",
+    status: "succeeded"
+}))
+
+const CUSTOMER_FIRST_NAME = "Alejo"
+const CUSTOMER_LAST_NAME = "Scotti"
+const CUSTOMER_PHONE = "634135817"
+const CUSTOMER_ADDRESS_NAME = "Vicent Blasco Ibañez 5"
+const CUSTOMER_ADDRESS_DETAILS = "Bloque 7, Escalera 2, Puerta 9"
+const CUSTOMER_LATITUDE = 39.4869251
+const CUSTOMER_LONGITUDE = -0.3298131
+const CUSTOMER_ID = new CustomerId()
+const CUSTOMER_PASSWORD = UserPassword.create("Pass1234", false)
+const CUSTOMER_EMAIL = "alejoscotti@gmail.com"
 const customer = Customer.create(
-    customerEmail,
+    CUSTOMER_EMAIL,
     true,
     "",
     [],
@@ -60,11 +76,11 @@ const customer = Customer.create(
     new Date(),
     undefined,
     undefined,
-    customerPassword,
+    CUSTOMER_PASSWORD,
     "active",
     undefined,
     undefined,
-    customerId
+    CUSTOMER_ID
 )
 mockCustomerRepository.save(customer)
 const gourmetPlanSku = new PlanSku("PlanGourmet")
@@ -81,7 +97,7 @@ const planGourmetVariant2Persons2Recipes: PlanVariant = new PlanVariant(
     undefined,
     2,
     2
-);
+)
 const planGourmetVariant2Persons3Recipes: PlanVariant = new PlanVariant(
     new PlanSku("GOUR2"),
     "",
@@ -121,18 +137,11 @@ mockShippingZoneRepository.save(customerShippingZone)
 describe("Create Subscription Use Case", () => {
     let createSubscriptionDto: any
     let firstSubscriptionResult: any
-    const CUSTOMER_FIRST_NAME = "Alejo"
-    const CUSTOMER_LAST_NAME = "Scotti"
-    const CUSTOMER_PHONE = "634135817"
-    const CUSTOMER_ADDRESS_NAME = "Vicent Blasco Ibañez 5"
-    const CUSTOMER_ADDRESS_DETAILS = "Bloque 7, Escalera 2, Puerta 9"
-    const CUSTOMER_LATITUDE = 39.4869251
-    const CUSTOMER_LONGITUDE = -0.3298131
 
     beforeAll(async () => {
 
         createSubscriptionDto = {
-            customerId: customerId.toString(),
+            customerId: CUSTOMER_ID.toString(),
             planId: gourmetPlan.id.toString(),
             planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
             planFrequency: "weekly",
@@ -158,6 +167,7 @@ describe("Create Subscription Use Case", () => {
 
         firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
     })
+
     describe("It creates a new weekly subscription for a first-time customer", () => {
 
 
@@ -239,25 +249,30 @@ describe("Create Subscription Use Case", () => {
 
         describe("Customer details validation", () => {
             it("Should update the customer name", async () => {
-                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(customerId)
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
                 expect(customer.getPersonalInfo().fullName).toBe(`${CUSTOMER_FIRST_NAME} ${CUSTOMER_LAST_NAME}`)
             })
 
             it("Should update the customer phone", async () => {
-                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(customerId)
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
                 expect(customer.getPersonalInfo().phone1).toBe(CUSTOMER_PHONE)
             })
 
             it("Should update the customer address", async () => {
-                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(customerId)
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
                 expect(customer.getShippingAddress().addressName).toBe(CUSTOMER_ADDRESS_NAME)
                 expect(customer.getShippingAddress().addressDetails).toBe(CUSTOMER_ADDRESS_DETAILS)
             })
 
             it("Should update the customer latitude and longitude if changed", async () => {
-                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(customerId)
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
                 expect(customer.getShippingAddress().latitude).toBe(CUSTOMER_LATITUDE)
                 expect(customer.getShippingAddress().longitude).toBe(CUSTOMER_LONGITUDE)
+            })
+
+            it("Should create the friend code for the customer", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+                expect(customer.friendCode).toBeDefined()
             })
 
         })
@@ -369,7 +384,7 @@ describe("Create Subscription Use Case", () => {
 
         beforeAll(async () => {
             secondCreateSubscriptionDto = {
-                customerId: customerId.toString(),
+                customerId: CUSTOMER_ID.toString(),
                 planId: gourmetPlan.id.toString(),
                 planVariantId: planGourmetVariant2Persons3Recipes.id.toString(),
                 planFrequency: "weekly",
@@ -408,7 +423,7 @@ describe("Create Subscription Use Case", () => {
             })
 
             it("Should be 24 orders for the customer", async () => {
-                const orders = await mockOrderRepository.findAllByCustomersIds([customerId], Locale.es)
+                const orders = await mockOrderRepository.findAllByCustomersIds([CUSTOMER_ID], Locale.es)
                 expect(orders.length).toBe(24)
             })
 
@@ -416,7 +431,7 @@ describe("Create Subscription Use Case", () => {
 
         describe("Payment Orders validation", () => {
             it("Should have 13 payment orders", async () => {
-                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customerId)
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
                 expect(paymentOrders.length).toBe(13)
             })
 
@@ -431,14 +446,14 @@ describe("Create Subscription Use Case", () => {
 
             // O tampoco debería sumar si tiene una Order Billed
             it("Should not sum the shipping cost to the first order of the second subscription if the next week it has an active order of the first subscription", async () => {
-                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customerId)
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
                 const firstPaymentOrderOfSecondSubscription: PaymentOrder = paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())[1]
 
                 expect(firstPaymentOrderOfSecondSubscription.shippingCost).toBe(0)
             })
 
             it("Should not sum the shipping cost of the shipping zone to the rest of the existent payment orders", async () => {
-                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customerId)
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
                 const firstPaymentOrderOfSecondSubscription: PaymentOrder = paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())[1]
 
                 for (let paymentOrder of paymentOrders) {
@@ -448,7 +463,7 @@ describe("Create Subscription Use Case", () => {
             })
 
             it("Should sum the price of the second plan variant to the existent active payment orders", async () => {
-                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(customerId)
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
                 for (let paymentOrder of paymentOrders) {
                     if (paymentOrder.isActive()) {
                         expect(paymentOrder.amount).toBe(planGourmetVariant2Persons2Recipes.getPaymentPrice() + planGourmetVariant2Persons3Recipes.getPaymentPrice())
@@ -475,7 +490,7 @@ describe("Creating a subscription in different week days", () => {
     const CUSTOMER_LATITUDE = 39.4869251
     const CUSTOMER_LONGITUDE = -0.3298131
     let createSubscriptionDto: CreateSubscriptionDto = {
-        customerId: customerId.toString(),
+        customerId: CUSTOMER_ID.toString(),
         planId: gourmetPlan.id.toString(),
         planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
         planFrequency: "weekly",
@@ -726,3 +741,84 @@ describe("Creating a subscription in different week days", () => {
     })
 })
 
+describe("Creating a subscripion with the payment integration Failure (Stripe mocked)", () => {
+    const CUSTOMER_ID = new CustomerId()
+    let createSubscriptionUseCaseWithFailurePaymentService: CreateSubscription
+    let createSubscriptionDto: CreateSubscriptionDto
+
+    beforeAll(async () => {
+        mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementationOnce(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string): Promise<PaymentIntent> => {
+            return {
+                client_secret: "client_secret",
+                id: "id",
+                status: "canceled"
+            }
+        }
+        )
+        createSubscriptionUseCaseWithFailurePaymentService = new CreateSubscription(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockCouponRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockLogRepository, mockCreateFriendCodeService)
+        const customer = Customer.create(
+            "alejoscotti+stripe_failure@gmail.com",
+            true,
+            "",
+            [],
+            0,
+            new Date(),
+            undefined,
+            undefined,
+            CUSTOMER_PASSWORD,
+            "active",
+            undefined,
+            undefined,
+            CUSTOMER_ID
+        )
+
+        mockCustomerRepository.save(customer)
+
+        createSubscriptionDto = {
+            customerId: CUSTOMER_ID.toString(),
+            planId: gourmetPlan.id.toString(),
+            planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+            planFrequency: "weekly",
+            restrictionComment: "string",
+            stripePaymentMethodId: "",
+            couponId: undefined,
+            paymentMethodId: "string",
+            addressName: CUSTOMER_ADDRESS_NAME,
+            addressDetails: CUSTOMER_ADDRESS_DETAILS,
+            latitude: CUSTOMER_LATITUDE,
+            longitude: CUSTOMER_LONGITUDE,
+            customerFirstName: CUSTOMER_FIRST_NAME,
+            customerLastName: CUSTOMER_LAST_NAME,
+            phone1: CUSTOMER_PHONE,
+            locale: Locale.es,
+            shippingCity: "Alboraya",
+            shippingProvince: "Valencia",
+            shippingPostalCode: "46120",
+            shippingCountry: "España",
+            purchaseDate: new Date()
+        }
+    })
+
+    it("Should throw an error if stripe rejects the payment", async () => {
+        await expect(createSubscriptionUseCaseWithFailurePaymentService.execute(createSubscriptionDto)).rejects.toThrow()
+
+    })
+
+    it("Shouldn't create the subscription if stripe rejects the payment", async () => {
+        const customerSubscriptions = await mockSubscriptionRepository.findByCustomerId(CUSTOMER_ID, Locale.es)
+        expect(customerSubscriptions.length).toBe(0)
+    })
+
+    it("Shouldn't create any order if stripe rejects the payment", async () => {
+        const orders = await mockOrderRepository.findAllByCustomersIds([CUSTOMER_ID], Locale.es)
+        expect(orders.length).toBe(0)
+    })
+    it("Shouldn't create any payment order if stripe rejects the payment", async () => {
+        const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+        expect(paymentOrders.length).toBe(0)
+    })
+    it("Shouldn't create the customer member get member code if stripe rejects the payment", async () => {
+        const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+        expect(customer.friendCode).toBeUndefined()
+    })
+})
