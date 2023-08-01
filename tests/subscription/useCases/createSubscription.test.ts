@@ -206,6 +206,8 @@ describe("Create Subscription Use Case", () => {
                 expect(firstOrder.isBilled()).toBe(true)
             })
 
+            // El resto tiene que estar en activas
+
             it("Should have no discount on any order", async () => {
                 const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
                 orders.forEach((order) => {
@@ -427,6 +429,7 @@ describe("Create Subscription Use Case", () => {
             })
 
 
+            // O tampoco debería sumar si tiene una Order Billed
             it("Should not sum the shipping cost to the first order of the second subscription if the next week it has an active order of the first subscription", async () => {
                 const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customerId)
                 const firstPaymentOrderOfSecondSubscription: PaymentOrder = paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())[1]
