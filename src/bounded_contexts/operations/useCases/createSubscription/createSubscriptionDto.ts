@@ -21,4 +21,5 @@ export interface CreateSubscriptionDto {
     shippingProvince: string;
     shippingPostalCode: string;
     shippingCountry: string;
+    purchaseDate: Date
 }

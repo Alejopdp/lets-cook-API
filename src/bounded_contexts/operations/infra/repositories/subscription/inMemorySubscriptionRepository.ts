@@ -107,4 +107,20 @@ export class InMemorySusbcriptionRepository implements ISubscriptionRepository {
     }
 
 
+    /**
+     * Getter $subscriptions
+     * @return {Subscription[] }
+     */
+    public get $subscriptions(): Subscription[] {
+        return this.subscriptions;
+    }
+
+    /**
+     * Setter $subscriptions
+     * @param {Subscription[] } value
+     */
+    public set $subscriptions(value: Subscription[]) {
+        this.subscriptions = value;
+    }
+
 }

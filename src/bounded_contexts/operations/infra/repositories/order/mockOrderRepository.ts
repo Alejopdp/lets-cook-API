@@ -20,7 +20,6 @@ export class InMemoryOrderRepository implements IOrderRepository {
         this.orders = orders;
     }
 
-
     public async save(order: Order): Promise<void> {
         // If order exists update it in the same order. If not, push it to the array
         const orderIndex = this.orders.findIndex((o) => o.id.equals(order.id));
@@ -96,8 +95,8 @@ export class InMemoryOrderRepository implements IOrderRepository {
     findByWeek(weekId: WeekId, locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");
     }
-    findByPaymentOrderId(paymentOrderId: PaymentOrderId, locale: Locale): Promise<Order[]> {
-        throw new Error("Method not implemented.");
+    public async findByPaymentOrderId(paymentOrderId: PaymentOrderId, locale: Locale): Promise<Order[]> {
+        return await this.orders.filter((order) => order.paymentOrderId?.equals(paymentOrderId));
     }
     findByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[], locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");
@@ -132,11 +131,11 @@ export class InMemoryOrderRepository implements IOrderRepository {
     findActiveBySubscriptionIdList(subscriptionsIds: SubscriptionId[]): Promise<Order[]> {
         throw new Error("Method not implemented.");
     }
-    findAllByCustomersIds(customersIds: CustomerId[], locale: Locale): Promise<Order[]> {
-        throw new Error("Method not implemented.");
+    public async findAllByCustomersIds(customersIds: CustomerId[], locale: Locale): Promise<Order[]> {
+        return await this.orders.filter((order) => customersIds.some(id => id.equals(order.customer.id)));
     }
-    findAllBySubscriptionId(subscriptionId: SubscriptionId): Promise<Order[]> {
-        throw new Error("Method not implemented.");
+    public async findAllBySubscriptionId(subscriptionId: SubscriptionId): Promise<Order[]> {
+        return await this.orders.filter((order) => order.subscriptionId.equals(subscriptionId));
     }
     getFirstOrderOfSubscription(subscriptionId: SubscriptionId, locale: Locale): Promise<Order | undefined> {
         throw new Error("Method not implemented.");
@@ -177,4 +176,23 @@ export class InMemoryOrderRepository implements IOrderRepository {
     findFutureActiveAndSkippedBySubscriptionOrderdByShippingDate(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");
     }
+
+    /**
+ * Getter $orders
+ * @return {Order[] }
+ */
+    public get $orders(): Order[] {
+        return this.orders;
+    }
+
+    /**
+     * Setter $orders
+     * @param {Order[] } value
+     */
+    public set $orders(value: Order[]) {
+        this.orders = value;
+    }
+
+
+
 }

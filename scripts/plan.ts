@@ -1,8 +1,6 @@
 import { Locale } from "../src/bounded_contexts/operations/domain/locale/Locale";
 import { Plan } from "../src/bounded_contexts/operations/domain/plan/Plan";
-import { PlanFrequency } from "../src/bounded_contexts/operations/domain/plan/PlanFrequency";
 import { PlanFrequencyFactory } from "../src/bounded_contexts/operations/domain/plan/PlanFrequency/PlanFrequencyFactory";
-import { PlanId } from "../src/bounded_contexts/operations/domain/plan/PlanId";
 import { PlanSku } from "../src/bounded_contexts/operations/domain/plan/PlanSku";
 import { PlanSlug } from "../src/bounded_contexts/operations/domain/plan/PlanSlug";
 import { PlanType } from "../src/bounded_contexts/operations/domain/plan/PlanType/PlanType";

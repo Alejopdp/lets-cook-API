@@ -67,6 +67,83 @@ export class Subscription extends Entity<Subscription> {
         this._cancellationReason = cancellationReason;
     }
 
+    // This method was createad in order to test the CreateSubscriptionUseCase
+    public createNewOrdersWithoutDependency(shippingZone: ShippingZone, orderedWeeks: Week[], purchaseDate: Date): Order[] {
+        const orders: Order[] = [];
+        const deliveryDate: Date = this.getFirstOrderShippingDateWithoutDateDependency(shippingZone.getDayNumberOfWeek(), purchaseDate);
+        const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
+        const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
+        const skipWeek: boolean = purchaseDate.getDay() === 0;
+        if (this.coupon) this.coupon.addApplication(this.customer);
+
+        if (!this.firstShippingDateHasToSkipWeekWithoutDependency(shippingZone.getDayNumberOfWeek(), purchaseDate)) billingDate.setDate(billingDate.getDate() - 7);
+
+        if (this.frequency.isOneTime()) {
+            orders.push(
+                new Order(
+                    new Date(deliveryDate),
+                    new OrderActive(),
+                    purchaseDate,
+                    orderedWeeks[skipWeek ? 1 : 0],
+                    this.planVariantId,
+                    this.plan,
+                    this.plan.getPlanVariantPrice(this.planVariantId),
+                    hasFreeShipping ? 0 : this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost),
+                    hasFreeShipping,
+                    this._id,
+                    [],
+                    [],
+                    false,
+                    this.customer,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    true
+                )
+            );
+
+            if (this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
+
+            return orders;
+        } else {
+            for (let i = 0; i < 12; i++) {
+                if (i !== 0) this.frequency.setDateUsingOffset(billingDate)
+
+                orders.push(
+                    new Order(
+                        new Date(deliveryDate),
+                        new OrderActive(),
+                        i === 0 ? purchaseDate : new Date(billingDate),
+                        orderedWeeks[skipWeek ? i + 1 : i],
+                        this.planVariantId,
+                        this.plan,
+                        this.plan.getPlanVariantPrice(this.planVariantId),
+                        hasFreeShipping ? 0 : this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost),
+                        hasFreeShipping && this.isCouponApplyable(),
+                        this._id,
+                        [],
+                        [],
+                        false,
+                        this.customer,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        i === 0
+                    )
+                );
+                if (this.getCouponDiscountOr0IfIsNotApplyable(shippingZone.cost) !== 0 || hasFreeShipping) this.couponChargesQtyApplied += 1;
+                this.frequency.setDateUsingOffset(deliveryDate)
+            }
+            return orders;
+        }
+    }
+
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
         const orders: Order[] = [];
         const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek());
@@ -142,6 +219,9 @@ export class Subscription extends Entity<Subscription> {
             return orders;
         }
     }
+
+
+
 
     public getCouponDiscount(shippingCost: number): number {
         return this.coupon?.getDiscount(this.plan, this.planVariantId, shippingCost) ?? 0
@@ -237,6 +317,29 @@ export class Subscription extends Entity<Subscription> {
         return newDate;
     }
 
+    // This method was createad in order to test the CreateSubscriptionUseCase
+    // The new Date() is passed to the method firstShippingDateHasToSkipWeekWithoutDateDependency in order to be able to mock the date
+    public getFirstOrderShippingDateWithoutDateDependency(shippingDayWeekNumber: number, purchaseDate: Date): Date {
+        const deliveryDate: Date = new Date(purchaseDate.getFullYear(), purchaseDate.getMonth());
+        const differenceInDays = shippingDayWeekNumber - purchaseDate.getDay();
+
+        deliveryDate.setDate(purchaseDate.getDate() + differenceInDays); // Delivery day of this week
+
+        if (this.firstShippingDateHasToSkipWeekWithoutDependency(shippingDayWeekNumber, purchaseDate)) {
+            deliveryDate.setDate(deliveryDate.getDate() + 7); // Delivery day of this week
+        }
+
+        return deliveryDate;
+    }
+
+    public firstShippingDateHasToSkipWeekWithoutDependency(shippingWeekDayNumber: number, purchaseDate: Date): boolean {
+        var purchaseDayNumber: number = purchaseDate.getDay();
+
+        return (
+            purchaseDayNumber >= shippingWeekDayNumber || shippingWeekDayNumber - purchaseDayNumber <= 2 || purchaseDayNumber === 0
+        );
+    }
+
     public getFirstOrderShippingDate(shippingDayWeekNumber: number): Date {
         const deliveryDate: Date = new Date(this.createdAt.getFullYear(), this.createdAt.getMonth());
         const differenceInDays = shippingDayWeekNumber - this.createdAt.getDay();
@@ -255,7 +358,6 @@ export class Subscription extends Entity<Subscription> {
 
         return (
             todayDayNumber >= shippingWeekDayNumber || shippingWeekDayNumber - todayDayNumber <= 2 || todayDayNumber === 0
-            // todayDayNumber === 6
         );
     }
 
