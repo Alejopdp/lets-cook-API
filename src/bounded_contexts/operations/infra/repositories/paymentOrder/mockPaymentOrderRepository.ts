@@ -26,7 +26,7 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
 
     }
     public async bulkSave(paymentOrders: PaymentOrder[]): Promise<void> {
-        this.paymentOrders = this.paymentOrders.concat(paymentOrders);
+        this.paymentOrders = [...this.paymentOrders.concat(paymentOrders)]
 
     }
     public async updateMany(paymentOrders: PaymentOrder[]): Promise<void> {
