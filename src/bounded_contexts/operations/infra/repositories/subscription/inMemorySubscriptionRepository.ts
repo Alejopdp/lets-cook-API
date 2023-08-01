@@ -46,7 +46,7 @@ export class InMemorySusbcriptionRepository implements ISubscriptionRepository {
         return this.subscriptions.find((subscription) => subscription.id.equals(subscriptionId));
     }
 
-    public async findByIdOrThrow(subscriptionId: SubscriptionId, locale: any): Promise<any> {
+    public async findByIdOrThrow(subscriptionId: SubscriptionId, locale: any): Promise<Subscription> {
         const subscription = await this.findById(subscriptionId, locale);
         if (!subscription) {
             throw new Error("Subscription not found");
