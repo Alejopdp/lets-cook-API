@@ -1,4 +1,4 @@
-import { awsSesService } from "../../../../shared/notificationService";
+import { awsSesV3Service } from "../../../../shared/notificationService";
 import { stripeService } from "../../application/paymentService";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongoosePaymentOrderReposiotry } from "../../infra/repositories/paymentOrder";
@@ -18,7 +18,7 @@ export const reorderPlan: ReorderPlan = new ReorderPlan(
     mongooseWeekRepository,
     mongooseOrderRepository,
     stripeService,
-    awsSesService,
+    awsSesV3Service,
     assignOrdersToPaymentOrder,
     mongoosePaymentOrderReposiotry,
     mongooseCustomerRepository,

@@ -1,4 +1,4 @@
-import { s3Service } from "../../application/storageService";
+import { v3S3Service } from "../../application/storageService";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 
@@ -7,7 +7,7 @@ export class GetRateListPresenter {
         const presentedRates = [];
 
         for (let rate of rates) {
-            const recipeImageUrl = await s3Service.getPresignedUrlForFile(rate.recipe.getMainImageUrl());
+            const recipeImageUrl = await v3S3Service.getPresignedUrlForFile(rate.recipe.getMainImageUrl());
             presentedRates.push({
                 id: rate.id.value,
                 customer: rate.customerId.toString(),

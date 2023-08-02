@@ -1,4 +1,3 @@
-import { s3Service } from "../../application/storageService";
 import { mongooseCustomerRepository } from "../../infra/repositories/customer";
 import { mongooseLogRepository } from "../../infra/repositories/log";
 import { UpdatePasswordWithoutCode } from "./updatePasswordWithoutCode";

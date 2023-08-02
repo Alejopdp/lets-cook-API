@@ -1,4 +1,4 @@
-import { awsSesService } from "../../../../shared/notificationService";
+import { awsSesV3Service } from "../../../../shared/notificationService";
 import { mailerLiteService } from "../../application/mailingListService";
 import { mongooseLogRepository } from "../../infra/repositories/log";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
@@ -12,7 +12,7 @@ export const cancelASubscription: CancelASubscription = new CancelASubscription(
     mongooseSubscriptionRepository,
     mongooseOrderRepository,
     mongoosePaymentOrderReposiotry,
-    awsSesService,
+    awsSesV3Service,
     mailerLiteService,
     mongooseLogRepository,
     mongooseRateRepository

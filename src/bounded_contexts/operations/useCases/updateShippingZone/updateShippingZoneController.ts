@@ -1,10 +1,9 @@
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { UpdateShippingZone } from "./updateShippingZone";
 import { UpdateShippingZoneDto } from "./updateShippingZoneDto";
 import fs from "fs";
 
-var tj = require("@mapbox/togeojson");
+var tj = require("@tmcw/togeojson");
 const DOMParser = require("xmldom").DOMParser;
 
 export class UpdateShippingZoneController extends BaseController {
@@ -17,7 +16,7 @@ export class UpdateShippingZoneController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            var coordinates = [];
+            var coordinates: any[] = [];
 
             if (!!this.req.file) {
                 const shippingZoneKmlPath = this.req.file.path;

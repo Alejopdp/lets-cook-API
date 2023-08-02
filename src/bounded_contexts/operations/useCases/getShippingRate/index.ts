@@ -1,4 +1,3 @@
-import { s3Service } from "../../application/storageService";
 import { mongooseOrderRepository } from "../../infra/repositories/order";
 import { mongooseShippingZoneRepository } from "../../infra/repositories/shipping";
 import { GetShippingRate } from "./getShippingRate";

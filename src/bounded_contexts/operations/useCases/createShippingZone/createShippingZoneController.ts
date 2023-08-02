@@ -3,7 +3,7 @@ import { CreateShippingZoneDto } from "./createShippingZoneDto";
 import fs from "fs";
 import { CreateShippingZone } from "./createShippingZone";
 import { FeatureCollection, Geometry, GeoJsonProperties } from "geojson"
-var tj = require("@mapbox/togeojson");
+const tj = require("@tmcw/togeojson");
 const DOMParser = require("xmldom").DOMParser;
 
 export class CreateShippingZoneController extends BaseController {
@@ -20,12 +20,12 @@ export class CreateShippingZoneController extends BaseController {
             const shippingZoneKmlPath = this.req.file.path;
             var kml = new DOMParser().parseFromString(fs.readFileSync(shippingZoneKmlPath, "utf8"));
             var geoJson: FeatureCollection<Geometry, GeoJsonProperties> = tj.kml(kml);
-            const polygonsQty = geoJson.features?.filter(feat => feat.geometry.type === "Polygon").length ?? 0
+            const polygonsQty = geoJson.features?.filter((feat: any) => feat.geometry.type === "Polygon").length ?? 0
 
             if (polygonsQty < 1) throw new Error("No has ingresado ningun poligono dentro del archivo")
             if (polygonsQty > 1) throw new Error("Ingresaste mas de 1 poligono, solo debes ingresar 1")
 
-            const polygon: Geometry | undefined = geoJson.features.find(feat => feat.properties?.name === this.req.body.reference)?.geometry
+            const polygon: Geometry | undefined = geoJson.features.find((feat: any) => feat.properties?.name === this.req.body.reference)?.geometry
             if (!polygon) throw new Error("Ninguno de los polígonos coinciden con el nombre de referencia ingresado");
 
             let coordinates = [];
@@ -44,8 +44,6 @@ export class CreateShippingZoneController extends BaseController {
             };
 
             await this.createShippingZone.execute(dto);
-
-            // fs.unlinkSync(planImagePath);
 
             return this.ok(this.res);
         } catch (error: any) {

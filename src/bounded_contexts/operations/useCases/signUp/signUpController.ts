@@ -1,13 +1,7 @@
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
 import { SignUpDto } from "./signUpDto";
-import fs from "fs";
 import { SignUp } from "./signUp";
-import { logger } from "../../../../../config";
 import { CustomerSignUpPresenter } from "./customerSignUpPresenter";
-// import { kml } from '@mapbox/togeojson';
-var tj = require("@mapbox/togeojson");
-const DOMParser = require("xmldom").DOMParser;
 
 export class SignUpController extends BaseController {
     private _signUp: SignUp;

@@ -16,7 +16,7 @@ import { IShippingZoneRepository } from "../../src/bounded_contexts/operations/i
 import { ISubscriptionRepository } from "../../src/bounded_contexts/operations/infra/repositories/subscription/ISubscriptionRepository";
 import { IWeekRepository } from "../../src/bounded_contexts/operations/infra/repositories/week/IWeekRepository";
 import { logger } from "../../config";
-import { awsSesService } from "../../src/shared/notificationService/index";
+import { awsSesV3Service } from "../../src/shared/notificationService/index";
 import { stripeService } from "../../src/bounded_contexts/operations/application/paymentService";
 import { mongooseCustomerRepository } from "../../src/bounded_contexts/operations/infra/repositories/customer";
 import { mongooseOrderRepository } from "../../src/bounded_contexts/operations/infra/repositories/order";
@@ -392,7 +392,7 @@ async function runScript() {
         mongooseSubscriptionRepository,
         mongooseWeekRepository,
         mongooseShippingZoneRepository,
-        awsSesService
+        awsSesV3Service
     )
 
     const firstSaturday = new Date(2022, 9, 29)
