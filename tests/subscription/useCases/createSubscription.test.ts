@@ -33,7 +33,6 @@ import { Order } from "../../../src/bounded_contexts/operations/domain/order/Ord
 import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/paymentOrder/PaymentOrder"
 import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService"
-import { SubscriptionId } from "../../../src/bounded_contexts/operations/domain/subscription/SubscriptionId"
 import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
@@ -183,6 +182,44 @@ describe("Create Subscription Use Case", () => {
                 const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
                 expect(subscription.restrictionComment).toBe(createSubscriptionDto.restrictionComment)
             })
+
+            it("Should have the planId", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.plan.id).toEqual(gourmetPlan.id)
+            })
+
+            it("Should have the planSku", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.plan.planSku).toEqual(gourmetPlanSku)
+            })
+
+            it("Should have the planName", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.plan.name).toEqual(gourmetPlan.name)
+            })
+
+            it("Should have the planVariantId", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.planVariantId).toEqual(planGourmetVariant2Persons2Recipes.id)
+            })
+
+            it("Should have the planVariantSku", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                const planVariant = subscription.plan.getPlanVariantById(subscription.planVariantId)
+                expect(planVariant?.sku).toEqual(planGourmetVariant2Persons2Recipes.sku)
+            })
+
+            it("Should have the plan variant description", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                const planVariant = subscription.plan.getPlanVariantById(subscription.planVariantId)
+                expect(planVariant?.description).toEqual(planGourmetVariant2Persons2Recipes.description)
+            })
+
+            it("Should have the plan variant price", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.price).toEqual(planGourmetVariant2Persons2Recipes.getPaymentPrice())
+            })
+
 
         })
 
