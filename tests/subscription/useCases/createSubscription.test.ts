@@ -39,7 +39,7 @@ const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
 const mockShippingZoneRepository = new InMemoryShippingZoneRepository([])
 const mockPlanRepository = new InMemoryPlanRepository([])
-const mockWeekRepository = new MockWeekRepository([])
+const mockWeekRepository = new MockWeekRepository()
 const mockOrderRepository = new InMemoryOrderRepository([])
 const mockCouponRepository = new InMemoryCouponRepository([])
 const mockPaymentService = new MockPaymentService() as jest.Mocked<MockPaymentService>
@@ -295,6 +295,28 @@ describe("Create Subscription Use Case", () => {
                 })
             })
 
+            it("Should create a payment order for each order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.paymentOrderId).toBeDefined()
+                })
+            })
+
+            it("Should create a shipping date after the billing date of each payment order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach(async (order) => {
+                    const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findById(order.paymentOrderId!, Locale.es)
+                    expect(order.shippingDate.getTime()).toBeGreaterThan(paymentOrder!.billingDate.getTime())
+                })
+            })
+
+            it("Should relate a week to each order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.week).toBeDefined()
+                })
+            })
+
         })
 
 
@@ -486,6 +508,7 @@ describe("Create Subscription Use Case", () => {
                 expect(orders.length).toBe(24)
             })
 
+
         })
 
         describe("Payment Orders validation", () => {
@@ -530,12 +553,18 @@ describe("Create Subscription Use Case", () => {
                 }
             })
         })
+        afterAll(async () => {
+            mockSubscriptionRepository.delete(secondSubscriptionResult.subscription.id)
+            mockOrderRepository.$orders = mockOrderRepository.$orders.filter((order) => order.subscriptionId !== secondSubscriptionResult.subscription.id)
+            mockPaymentOrderRepository.$paymentOrders = mockPaymentOrderRepository.$paymentOrders.filter((paymentOrder) => paymentOrder.customerId !== CUSTOMER_ID)
+        })
+
     })
 
     afterAll(async () => {
-        mockSubscriptionRepository.$subscriptions = []
-        mockOrderRepository.$orders = []
-        mockPaymentOrderRepository.$paymentOrders = []
+        mockSubscriptionRepository.delete(firstSubscriptionResult.subscription.id)
+        mockOrderRepository.$orders = mockOrderRepository.$orders.filter((order) => order.subscriptionId !== firstSubscriptionResult.subscription.id)
+        mockPaymentOrderRepository.$paymentOrders = mockPaymentOrderRepository.$paymentOrders.filter((paymentOrder) => paymentOrder.customerId !== CUSTOMER_ID)
     })
 
 })

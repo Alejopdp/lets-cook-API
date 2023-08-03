@@ -20,7 +20,7 @@ export class MockNotificationService implements INotificationService {
         throw new Error("Method not implemented.");
     }
     public async notifyAdminsAboutNewSubscriptionSuccessfullyCreated(dto: NewSubscriptionNotificationDto): Promise<void> {
-        console.log("Admin notified!")
+        // console.log("Admin notified!")
     }
     notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(customerEmail: string, customerName: string, planNames: string[]): Promise<void> {
         throw new Error("Method not implemented.");
@@ -44,7 +44,7 @@ export class MockNotificationService implements INotificationService {
         throw new Error("Method not implemented.");
     }
     public async notifyCustomerAboutPaymentOrderBilled(dto: PaymentOrderBilledNotificationDto): Promise<void> {
-        console.log("Customers notified!")
+        // console.log("Customers notified!")
     }
     sendUpdateEmailEmail(userEmail: string, changeEmailUrl: string, locale: Locale): Promise<void> {
         throw new Error("Method not implemented.");

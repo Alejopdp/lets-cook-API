@@ -80,8 +80,8 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
     findByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
         throw new Error("Method not implemented.");
     }
-    findByIdList(paymentOrdersIds: PaymentOrderId[]): Promise<PaymentOrder[]> {
-        throw new Error("Method not implemented.");
+    public async findByIdList(paymentOrdersIds: PaymentOrderId[]): Promise<PaymentOrder[]> {
+        return this.paymentOrders.filter((paymentOrder) => paymentOrdersIds.some((paymentOrderId) => paymentOrderId.equals(paymentOrder.id)));
     }
     findAnActivePaymentOrder(): Promise<PaymentOrder | undefined> {
         throw new Error("Method not implemented.");
