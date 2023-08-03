@@ -5,4 +5,5 @@ export interface SkipOrdersDto {
     ordersToReactivate: string[];
     nameOrEmailOfAdminExecutingRequest: string | undefined;
     locale: Locale
+    skippingDate: Date
 }

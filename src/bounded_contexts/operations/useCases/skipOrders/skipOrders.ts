@@ -82,7 +82,7 @@ export class SkipOrders {
                 ordersSkippedDebugLogString = `${ordersSkippedLogString} | ${order.id.toString()}`;
             }
 
-            subscription?.skipOrder(order, relatedPaymentOrder)
+            subscription?.skipOrder(order, relatedPaymentOrder, dto.skippingDate)
             skippedOrdersToSave.push(order);
 
             for (let selection of order.recipeSelection) {
@@ -110,7 +110,7 @@ export class SkipOrders {
             if (principalPlanOrders.every((o) => o.isSkipped() || o.isCancelled())) {
                 for (let order of orders) {
                     if (order.isActive() && order.paymentOrderId?.equals(paymentOrder.id) && !order.plan.isPrincipal()) {
-                        order.skip(paymentOrder);
+                        order.skip(paymentOrder, dto.skippingDate);
                         skippedOrdersToSave.push(order);
                     }
                 }
