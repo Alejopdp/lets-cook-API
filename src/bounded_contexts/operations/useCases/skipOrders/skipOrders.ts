@@ -153,6 +153,7 @@ export class SkipOrders {
         await this.updateDiscountsAfterSkippingOrders.execute({ subscriptionId: incomingOrders[0].subscriptionId.toString() })
     }
 
+
     /**
      * Getter orderRepository
      * @return {IOrderRepository}
