@@ -44,43 +44,58 @@ export class MockWeekRepository implements IWeekRepository {
     findWeekTwelveMonthsLater(): Promise<Week | undefined> {
         throw new Error("Method not implemented.");
     }
-    public async findNextTwelveByFrequency(frequency: IPlanFrequency, baseDate: Date, skipWeek?: boolean): Promise<Week[]> {
+    public async findNextTwelveByFrequency(frequency: IPlanFrequency, baseDate: Date, dateOfExecution: Date, skipWeek?: boolean): Promise<Week[]> {
+        const today = new Date(dateOfExecution);
+        const todayTime = today.getTime();
 
-        // Asume que las semanas ya están ordenadas por fecha de inicio.
-        let weeks = await this.findAll();
-        let frequencyWeeks = [];
+        var weeksDb: any[] = [];
 
-        // Calcula el intervalo de salto basado en la frecuencia.
-        let skipInterval = null
+        if (frequency.isOneTime()) {
+            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= todayTime)
+                .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 12);
 
-        if (frequency.isWeekly()) skipInterval = 1
-        if (frequency.isBiweekly()) skipInterval = 2
-
-        if (skipInterval === null) throw new Error("Frecuencia no soportada")
-
-        // Si se pide saltar la semana actual, ajusta la fecha base al inicio de la próxima semana.
-        if (skipWeek) {
-            baseDate.setDate(baseDate.getDate() + 7);
+            return weeksDb
         }
 
-        // Busca las próximas 12 semanas que coincidan con la frecuencia.
-        for (let i = 0; i < weeks.length; i++) {
-            let week = weeks[i];
+        if (frequency.isWeekly()) {
+            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= todayTime)
+                .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 12);
 
-            // Si la fecha de inicio de la semana es posterior a la fecha base, la considera.
-            if (week.minDay.getTime() >= baseDate.getTime()) {
-                if (frequencyWeeks.length === 0 || i % skipInterval === 0) {
-                    frequencyWeeks.push(week);
+            return weeksDb
+        }
 
-                    // Si ya hemos encontrado 12 semanas, detiene la búsqueda.
-                    if (frequencyWeeks.length === 12) {
-                        break;
-                    }
+        if (frequency.isBiweekly()) {
+            const biWeekly = [];
+            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= todayTime)
+                .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 26);
+
+            for (let i = 0; i < 26; i++) {
+                const addWeek = skipWeek ? i % 2 == 1 : i % 2 == 0;
+                if (addWeek) {
+                    biWeekly.push(weeksDb[i]);
                 }
             }
+
+            return biWeekly
         }
 
-        return frequencyWeeks;
+        if (frequency.isMonthly()) {
+            const dates = frequency.getNDatesWithFrequencyOffset(12, baseDate)
+            const monthlyWeeks: Week[] = [];
+            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= todayTime)
+                .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 52);
+
+
+            for (const week of weeksDb) {
+                for (const date of dates) {
+                    if (week.containsDate(date)) monthlyWeeks.push(week)
+                }
+            }
+
+            return monthlyWeeks
+        }
+
+        return []
     }
     findNextWeek(): Promise<Week | undefined> {
         throw new Error("Method not implemented.");

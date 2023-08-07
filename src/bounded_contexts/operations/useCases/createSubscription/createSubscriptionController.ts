@@ -40,6 +40,7 @@ export class CreateSubscriptionController extends BaseController {
                 purchaseDate: new Date(),
             };
 
+            console.log("Dto: ", dto)
             const result = await this.createSubscription.execute(dto);
             const presented = this.createSubscriptionPresenter.present(
                 result.subscription,

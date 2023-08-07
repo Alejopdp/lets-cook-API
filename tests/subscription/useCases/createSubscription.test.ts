@@ -15,25 +15,19 @@ import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/opera
 import { CreatePaymentOrders } from "../../../src/bounded_contexts/operations/services/createPaymentOrders/createPaymentOrders"
 import { Customer } from "../../../src/bounded_contexts/operations/domain/customer/Customer"
 import { UserPassword } from "../../../src/bounded_contexts/IAM/domain/user/UserPassword"
-import { Plan } from "../../../src/bounded_contexts/operations/domain/plan/Plan"
-import { PlanSku } from "../../../src/bounded_contexts/operations/domain/plan/PlanSku"
-import { PlanType } from "../../../src/bounded_contexts/operations/domain/plan/PlanType/PlanType"
-import { PlanVariant } from "../../../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariant"
-import { PlanFrequencyFactory } from "../../../src/bounded_contexts/operations/domain/plan/PlanFrequency/PlanFrequencyFactory"
 import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale"
-import { PlanSlug } from "../../../src/bounded_contexts/operations/domain/plan/PlanSlug"
-import { PlanId } from "../../../src/bounded_contexts/operations/domain/plan/PlanId"
 import { CustomerId } from "../../../src/bounded_contexts/operations/domain/customer/CustomerId"
 import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZone"
 import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio"
 import { Coordinates } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/Coordinates"
-import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day"
 import { CreateFriendCode } from "../../../src/bounded_contexts/operations/services/createFriendCode/createFriendCode"
 import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order"
 import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/paymentOrder/PaymentOrder"
 import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService"
 import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
+import { gourmetPlan, gourmetPlanSku, planGourmetVariant2Persons2Recipes, planGourmetVariant2Persons3Recipes } from "../../mocks/plan"
+import { TUESDAY, WEDNESDAY } from "../../mocks/days"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -83,36 +77,6 @@ const customer = Customer.create(
     CUSTOMER_ID
 )
 mockCustomerRepository.save(customer)
-const gourmetPlanSku = new PlanSku("PlanGourmet")
-const gourmetPlanSlug = new PlanSlug("plan-gourmet")
-const planGourmetVariant2Persons2Recipes: PlanVariant = new PlanVariant(
-    new PlanSku("GOUR1"),
-    "",
-    35.96,
-    [],
-    "",
-    true,
-    false,
-    27.99,
-    undefined,
-    2,
-    2
-)
-const planGourmetVariant2Persons3Recipes: PlanVariant = new PlanVariant(
-    new PlanSku("GOUR2"),
-    "",
-    53.94,
-    [],
-    "",
-    false,
-    false,
-    37.99,
-    undefined,
-    2,
-    3
-);
-const gourmetPlanId = new PlanId()
-const gourmetPlan = Plan.create("Plan Gourmet", "Plan Gourmet Description", gourmetPlanSku, "", true, PlanType.Principal, [planGourmetVariant2Persons2Recipes, planGourmetVariant2Persons3Recipes], [PlanFrequencyFactory.createPlanFrequency("weekly"), PlanFrequencyFactory.createPlanFrequency("biweekly")], true, [], Locale.es, gourmetPlanSlug, true, "", "", gourmetPlanId, true)
 mockPlanRepository.save(gourmetPlan)
 
 const valenciaPolygon = [
@@ -123,13 +87,6 @@ const valenciaPolygon = [
 ];
 const customerShippingZoneRadio = new ShippingZoneRadio(valenciaPolygon.map((coordinates) => new Coordinates(coordinates[0], coordinates[1])))
 const MOCK_SHIPPING_COST = 10
-const SUNDAY = new Day(0)
-const MONDAY = new Day(1)
-const TUESDAY = new Day(2)
-const WEDNESDAY = new Day(3)
-const THURSDAY = new Day(4)
-const FRIDAY = new Day(5)
-const SATURDAY = new Day(6)
 const customerShippingZone = ShippingZone.create("Valencia", "valencia", MOCK_SHIPPING_COST, "active", customerShippingZoneRadio, TUESDAY)
 mockShippingZoneRepository.save(customerShippingZone)
 
@@ -458,6 +415,7 @@ describe("Create Subscription Use Case", () => {
         })
     })
 
+
     describe("Create a second subscription for the same customer", () => {
         let secondCreateSubscriptionDto: CreateSubscriptionDto
         let secondSubscriptionResult
@@ -618,6 +576,20 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getMonth()).toBe(7)
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
+
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
+            it("Should assign the purchase date as the createdAt date for each Order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.createdAt.getTime()).toBe(createSubscriptionDto.purchaseDate.getTime())
+                })
+            })
+
         })
         describe("Creating a susbcription on Tuesday", () => {
             beforeAll(async () => {
@@ -632,6 +604,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getMonth()).toBe(7)
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
+
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
         })
         describe("Creating a susbcription on Wednesday", () => {
             beforeAll(async () => {
@@ -648,6 +627,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
 
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
+
         })
         describe("Creating a susbcription on Thursday", () => {
             beforeAll(async () => {
@@ -662,6 +648,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getMonth()).toBe(7)
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
+
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
 
         })
         describe("Creating a susbcription on Friday", () => {
@@ -678,6 +671,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
 
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
+
         })
         describe("Creating a susbcription on Saturday", () => {
             beforeAll(async () => {
@@ -693,6 +693,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
 
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
+
         })
         describe("Creating a susbcription on Sunday", () => {
             beforeAll(async () => {
@@ -707,6 +714,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getDate()).toBe(15)
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
+
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
 
         })
     })
@@ -730,6 +744,12 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getMonth()).toBe(7)
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
+
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
         })
 
         describe("Creating a susbcription on Tuesday", () => {
@@ -745,6 +765,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getMonth()).toBe(7)
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
+
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
         })
 
         describe("Creating a susbcription on Wednesday", () => {
@@ -761,6 +788,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
 
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
+
         })
         describe("Creating a susbcription on Thursday", () => {
             beforeAll(async () => {
@@ -775,6 +809,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getMonth()).toBe(7)
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
+
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
 
         })
         describe("Creating a susbcription on Friday", () => {
@@ -791,6 +832,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
 
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
+
         })
         describe("Creating a susbcription on Saturday", () => {
             beforeAll(async () => {
@@ -806,6 +854,13 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
             })
 
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
+            })
+
+
         })
         describe("Creating a susbcription on Sunday", () => {
             beforeAll(async () => {
@@ -819,6 +874,12 @@ describe("Creating a subscription in different week days", () => {
                 expect(orders[0].shippingDate.getDate()).toBe(16)
                 expect(orders[0].shippingDate.getMonth()).toBe(7)
                 expect(orders[0].shippingDate.getFullYear()).toBe(2023)
+            })
+
+            it("Should assign a week that contains the shipping date to the first order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)
+                expect(orders[0].week.minDay.getTime()).toBeLessThan(orders[0].shippingDate.getTime())
+                expect(orders[0].week.maxDay.getTime()).toBeGreaterThan(orders[0].shippingDate.getTime())
             })
 
         })
@@ -908,5 +969,82 @@ describe("Creating a subscripion with the payment integration Failure (Stripe mo
     it("Shouldn't create the customer member get member code if stripe rejects the payment", async () => {
         const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
         expect(customer.friendCode).toBeUndefined()
+    })
+})
+
+describe("Creating a subscripion with the 3D Secure", () => {
+    const CUSTOMER_ID = new CustomerId()
+    let createSubscriptionUseCaseWith3DSecurePaymentMethod: CreateSubscription
+    let createSubscriptionDto: CreateSubscriptionDto
+    let createSubscriptionResult: any
+
+    beforeAll(async () => {
+        mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementationOnce(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string): Promise<PaymentIntent> => {
+            return {
+                client_secret: "client_secret",
+                id: "id",
+                status: "requires_action"
+            }
+        }
+        )
+        createSubscriptionUseCaseWith3DSecurePaymentMethod = new CreateSubscription(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockCouponRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockLogRepository, mockCreateFriendCodeService)
+        const customer = Customer.create(
+            "alejoscotti+requires_action@gmail.com",
+            true,
+            "",
+            [],
+            0,
+            new Date(),
+            undefined,
+            undefined,
+            CUSTOMER_PASSWORD,
+            "active",
+            undefined,
+            undefined,
+            CUSTOMER_ID
+        )
+
+        mockCustomerRepository.save(customer)
+
+        createSubscriptionDto = {
+            customerId: CUSTOMER_ID.toString(),
+            planId: gourmetPlan.id.toString(),
+            planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+            planFrequency: "weekly",
+            restrictionComment: "string",
+            stripePaymentMethodId: "",
+            couponId: undefined,
+            paymentMethodId: "string",
+            addressName: CUSTOMER_ADDRESS_NAME,
+            addressDetails: CUSTOMER_ADDRESS_DETAILS,
+            latitude: CUSTOMER_LATITUDE,
+            longitude: CUSTOMER_LONGITUDE,
+            customerFirstName: CUSTOMER_FIRST_NAME,
+            customerLastName: CUSTOMER_LAST_NAME,
+            phone1: CUSTOMER_PHONE,
+            locale: Locale.es,
+            shippingCity: "Alboraya",
+            shippingProvince: "Valencia",
+            shippingPostalCode: "46120",
+            shippingCountry: "España",
+            purchaseDate: new Date()
+        }
+
+        createSubscriptionResult = await createSubscriptionUseCaseWith3DSecurePaymentMethod.execute(createSubscriptionDto)
+    })
+
+    it("Should return a payment intent w status requires_action", async () => {
+        expect(createSubscriptionResult.paymentIntent.status).toBe("requires_action")
+
+    })
+
+    it("Should create the first payment order in PAYMENT_ORDER_PENDING_CONFIRMATION state", async () => {
+        const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+        expect(paymentOrders[0].state.title).toBe("PAYMENT_ORDER_PENDING_CONFIRMATION")
+    })
+
+    it("Should leave the order related to the pending payemnt order in state ORDER_PENDING_PAYMENT", async () => {
+        const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(createSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+        expect(orders[0].state.title).toBe("ORDER_PENDING_PAYMENT")
     })
 })
