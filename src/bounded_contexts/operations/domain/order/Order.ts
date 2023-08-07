@@ -93,12 +93,41 @@ export class Order extends Entity<Order> {
     }
 
     public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, choosingDate: Date, restriction?: RecipeVariantRestriction): void {
-        const choosingDateCopy = new Date(choosingDate).setHours(0, 0, 0, 0);
-        const createdAtCopy = new Date(this.createdAt).setHours(0, 0, 0, 0);
-        const itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing = this.createdAt.getDay() === 6 && choosingDateCopy !== createdAtCopy
+        const isSaturday = choosingDate.getDay() === 6;
+        const isSunday = choosingDate.getDay() === 0;
+        const isMonday = choosingDate.getDay() === 1;
+        const isTuesday = choosingDate.getDay() === 2;
+        const isWednesday = choosingDate.getDay() === 3;
+        const isFridayAfter23 = choosingDate.getDay() === 5 && choosingDate.getHours() >= 23 && choosingDate.getMinutes() >= 59;
+        const isChoosingTheSameDateOfCreation = MomentTimeService.isSameDay(choosingDate, this.createdAt);
+        const itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing = isSaturday && !isChoosingTheSameDateOfCreation;
 
-        if (!isAdminChoosing && itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing) {
+        if (isMonday && this.isShippingOnTuesdayOrWednesdayOfSameWeek(choosingDate)) {
+            throw new Error('No puedes elegir recetas el lunes para una entrega el martes o miércoles de la misma semana.');
+        }
+
+        if (isTuesday && MomentTimeService.isSameDay(this.shippingDate, choosingDate)) {
+            throw new Error('No puedes elegir recetas el martes para una entrega el mismo martes.');
+        }
+
+        if (isWednesday && MomentTimeService.isSameDay(this.shippingDate, choosingDate)) {
+            throw new Error('No puedes elegir recetas el miércoles para una entrega el mismo miércoles.');
+        }
+
+        if (isSaturday && !isChoosingTheSameDateOfCreation) {
+            throw new Error('No puedes elegir recetas el sábado si no es el día de creación de la suscripción.');
+        }
+
+        if (isSaturday && !isAdminChoosing && itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing) {
             throw new Error('No puedes actualizar las recetas después de las 23:59 del viernes si no eres administrador.');
+        }
+
+        if (isFridayAfter23 && this.week.startsAfterAWeekFrom(choosingDate)) {
+            throw new Error('No puedes elegir recetas para la próxima semana después de las 23:59 del viernes.');
+        }
+
+        if (isSunday && !this.week.startsTheWeekAfter(choosingDate, this.shippingDate)) {
+            throw new Error('No puedes elegir recetas el domingo para la semana que empieza, solo para la siguiente.');
         }
 
         recipeSelection = recipeSelection.filter((selection) => selection.quantity > 0);
@@ -138,6 +167,17 @@ export class Order extends Entity<Order> {
         this.choseByAdmin = isAdminChoosing;
         if (!!!this.firstDateOfRecipesSelection) this.firstDateOfRecipesSelection = new Date();
         this.lastDateOfRecipesSelection = new Date();
+    }
+
+    private isShippingOnTuesdayOrWednesdayOfSameWeek(choosingDate: Date): boolean {
+        const tuesdayOfSameWeek = new Date(choosingDate);
+        tuesdayOfSameWeek.setDate(choosingDate.getDate() + 1);
+
+        const wednesdayOfSameWeek = new Date(choosingDate);
+        wednesdayOfSameWeek.setDate(choosingDate.getDate() + 2);
+
+        return MomentTimeService.isSameDay(this.shippingDate, tuesdayOfSameWeek) ||
+            MomentTimeService.isSameDay(this.shippingDate, wednesdayOfSameWeek);
     }
 
     public isActive(): boolean {
