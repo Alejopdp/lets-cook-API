@@ -138,7 +138,7 @@ export class CreateManySubscriptions {
 
         for (let entry of frequencySusbcriptionEntries) {
             const frequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(entry[0]);
-            const weeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(frequency, entry[1][0].getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek()));
+            const weeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(frequency, entry[1][0].getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek()), new Date());
 
             for (let subscription of entry[1]) {
                 orders.push(...subscription.createNewOrders(customerShippingZone, weeks));

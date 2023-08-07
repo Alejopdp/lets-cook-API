@@ -129,7 +129,7 @@ export class CreateSubscription {
         );
 
         const customerShippingZone: ShippingZone = this.getCustomerShippingZone(customer, shippingZones)
-        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDateWithoutDateDependency(customerShippingZone.getDayNumberOfWeek(), dto.purchaseDate)); // Skip if it is not Sunday?
+        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDateWithoutDateDependency(customerShippingZone.getDayNumberOfWeek(), dto.purchaseDate), dto.purchaseDate); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrdersWithoutDependency(customerShippingZone, nextTwelveWeeks, dto.purchaseDate);
 
         const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
@@ -155,13 +155,7 @@ export class CreateSubscription {
             customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
             customerSubscriptions.length > 0;
 
-        var paymentIntent: PaymentIntent = {
-            id: "",
-            status: "succeeded",
-            client_secret: "",
-        };
-
-        const billedAmount = await this.charge(customer, newPaymentOrders, hasFreeShipping, customerShippingZone.cost, customerSubscriptionHistory.length, orders, dto.paymentMethodId, paymentOrdersWithHumanIdCount, dto.stripePaymentMethodId)
+        const { billedAmount, paymentIntent } = await this.charge(customer, newPaymentOrders, hasFreeShipping, customerShippingZone.cost, customerSubscriptionHistory.length, orders, dto.paymentMethodId, paymentOrdersWithHumanIdCount, dto.stripePaymentMethodId)
 
         const notificationDto: NewSubscriptionNotificationDto = {
             customerEmail: customer.email,
@@ -285,13 +279,13 @@ export class CreateSubscription {
         return customerShippingZone;
     }
 
-    private async charge(customer: Customer, newPaymentOrders: PaymentOrder[], hasFreeShipping: boolean, customerShippingZoneCost: number, customerSubscriptionsQty: number, orders: Order[], paymentMethodId: string, paymentOrdersWithHumanIdCount: number, stripePaymentMethodId?: string): Promise<number> {
-        const paymentOrder = newPaymentOrders[0]
+    private async charge(customer: Customer, newPaymentOrders: PaymentOrder[], hasFreeShipping: boolean, customerShippingZoneCost: number, customerSubscriptionsQty: number, orders: Order[], paymentMethodId: string, paymentOrdersWithHumanIdCount: number, stripePaymentMethodId?: string): Promise<{ billedAmount: number, paymentIntent: PaymentIntent }> {
         var paymentIntent: PaymentIntent = {
             id: "",
             status: "succeeded",
             client_secret: "",
         };
+        const paymentOrder = newPaymentOrders[0]
 
         const amountToBill = hasFreeShipping
             ? (Math.round(paymentOrder.getTotalAmount() * 100) - Math.round(customerShippingZoneCost * 100)) / 100
@@ -301,7 +295,7 @@ export class CreateSubscription {
         if (amountToBill >= 0.5) {
             paymentIntent = await this.paymentService.createPaymentIntentAndSetupForFutureUsage(
                 amountToBill,
-                stripePaymentMethodId ?? customer.getPaymentMethodStripeId(new PaymentMethodId(paymentMethodId)),
+                !stripePaymentMethodId ? customer.getPaymentMethodStripeId(new PaymentMethodId(paymentMethodId)) : stripePaymentMethodId,
                 customer.email,
                 customer.stripeId
             );
@@ -324,7 +318,7 @@ export class CreateSubscription {
             if (customerSubscriptionsQty === 0) this.createFriendCodeService.execute({ customer });
         }
 
-        return amountToBill
+        return { billedAmount: amountToBill, paymentIntent }
     }
 
     /**

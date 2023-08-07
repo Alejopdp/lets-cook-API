@@ -55,7 +55,7 @@ export class MongooseWeekRepository implements IWeekRepository {
         return weeksDb.map((week: any) => weekMapper.toDomain(week));
     }
 
-    public async findNextTwelveByFrequency(frequency: IPlanFrequency, baseDate: Date, skipWeek?: boolean): Promise<Week[]> {
+    public async findNextTwelveByFrequency(frequency: IPlanFrequency, baseDate: Date, dateOfExecution: Date, skipWeek?: boolean): Promise<Week[]> {
         const today = new Date();
         const todayIso = today.toISOString();
         var weeksDb: any[] = [];
