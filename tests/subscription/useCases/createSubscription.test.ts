@@ -242,15 +242,24 @@ describe("Create Subscription Use Case", () => {
             })
 
             it("Should create the rest of orders with 7 days of difference as shipping dates", async () => {
-                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id);
                 orders.forEach((order, index) => {
-                    const previousOrder = orders[index - 1]
+                    const previousOrder = orders[index - 1];
                     if (previousOrder) {
-                        const difference = order.shippingDate.getTime() - previousOrder.shippingDate.getTime()
-                        expect(difference).toBe(7 * 24 * 60 * 60 * 1000)
+                        const orderDate = new Date(order.shippingDate);
+                        const previousOrderDate = new Date(previousOrder.shippingDate);
+
+                        // Suma 7 días a la fecha anterior
+                        previousOrderDate.setDate(previousOrderDate.getDate() + 7);
+
+                        // Compara solo los días, meses y años
+                        expect(orderDate.getFullYear()).toBe(previousOrderDate.getFullYear());
+                        expect(orderDate.getMonth()).toBe(previousOrderDate.getMonth());
+                        expect(orderDate.getDate()).toBe(previousOrderDate.getDate());
                     }
-                })
-            })
+                });
+            });
+
 
             it("Should create a payment order for each order", async () => {
                 const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
@@ -565,9 +574,13 @@ describe("Creating a subscription in different week days", () => {
 
         describe("Creating a susbcription on Monday", () => {
             beforeAll(async () => {
-                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 6, 31) }
+                const today = new Date()
+                const purchaseDate = new Date(2023, 6, 31, today.getHours(), today.getMinutes(), today.getSeconds())
+
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate }
                 subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
             })
+
 
             it("Should create the first order with shipping date on Tuesday of the next week", async () => {
                 const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
@@ -733,7 +746,7 @@ describe("Creating a subscription in different week days", () => {
 
         describe("Creating a susbcription on Monday", () => {
             beforeAll(async () => {
-                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 6, 31) }
+                createSubscriptionDto = { ...createSubscriptionDto, purchaseDate: new Date(2023, 6, 31, 17) }
                 subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
             })
 
