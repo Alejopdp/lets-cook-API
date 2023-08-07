@@ -26,7 +26,8 @@ export class GetCustomersubscriptionsController extends BaseController {
                 result.nextOrders,
                 dto.locale,
                 result.ratings,
-                result.customer
+                result.customer,
+                new Date()
             );
 
             return this.ok(this.res, presentedResult);

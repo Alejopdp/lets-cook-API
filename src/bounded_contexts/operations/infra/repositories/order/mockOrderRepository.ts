@@ -92,8 +92,12 @@ export class InMemoryOrderRepository implements IOrderRepository {
     findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[], locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");
     }
-    findByIdOrThrow(orderId: OrderId, locale: Locale): Promise<Order> {
-        throw new Error("Method not implemented.");
+    public async findByIdOrThrow(orderId: OrderId, locale: Locale): Promise<Order> {
+        const order = this.orders.find((order) => order.id.equals(orderId));
+        if (!order) {
+            throw new Error("Order not found");
+        }
+        return order;
     }
     findForBilling(subscriptionsIds: SubscriptionId[], week: Week, locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");

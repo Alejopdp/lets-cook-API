@@ -1,10 +1,8 @@
 import { RecipeId } from "../src/bounded_contexts/operations/domain/recipe/RecipeId";
 import { NutritionalItem } from "../src/bounded_contexts/operations/domain/recipe/RecipeNutritionalData/NutritionalItem";
-import { RecipeVariantId } from "../src/bounded_contexts/operations/domain/recipe/RecipeVariant/RecipeVariantId";
 import { mongooseIngredientRepository } from "../src/bounded_contexts/operations/infra/repositories/ingredient";
 import { mongooseRecipeRepository } from "../src/bounded_contexts/operations/infra/repositories/recipe";
 import { recipeGeneralDataMapper } from "../src/bounded_contexts/operations/mappers/recipeMapper";
-import { logger } from "../config";
 import { Ingredient } from "../src/bounded_contexts/operations/domain/ingredient/ingredient";
 import { Locale } from "../src/bounded_contexts/operations/domain/locale/Locale";
 import { Plan } from "../src/bounded_contexts/operations/domain/plan/Plan";
@@ -26,9 +24,6 @@ import { Week } from "../src/bounded_contexts/operations/domain/week/Week";
 import { mongoosePlanRepository } from "../src/bounded_contexts/operations/infra/repositories/plan";
 import {
     mongooseRecipeVariantRestrictionRepository,
-    sinLactosa,
-    vegano,
-    Vegetariano,
 } from "../src/bounded_contexts/operations/infra/repositories/recipeVariantRestriction";
 import { mongooseWeekRepository } from "../src/bounded_contexts/operations/infra/repositories/week";
 
@@ -5132,6 +5127,8 @@ export const uploadProdRecipes = async () => {
             months,
             [],
             baseRecipe.tools,
+            new Date(),
+            new Date(),
             new RecipeId(baseRecipe._id)
         );
 

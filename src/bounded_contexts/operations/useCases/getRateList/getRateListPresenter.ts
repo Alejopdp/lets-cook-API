@@ -3,7 +3,7 @@ import { MomentTimeService } from "../../application/timeService/momentTimeServi
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 
 export class GetRateListPresenter {
-    public static async present(rates: RecipeRating[]): Promise<any> {
+    public static async present(rates: RecipeRating[], queryDate: Date): Promise<any> {
         const presentedRates = [];
 
         for (let rate of rates) {
@@ -19,7 +19,7 @@ export class GetRateListPresenter {
                 lastShippingDate: !!rate.getLastShippingDate() ? MomentTimeService.getDdMmYyyy(rate.getLastShippingDate()!) : "",
                 qtyDelivered: rate.getQtyDelivered(),
                 isRated: !!rate.rating && rate.rating > 0,
-                isRateable: rate.isRateable(),
+                isRateable: rate.isRateable(queryDate),
             });
         }
         return presentedRates;

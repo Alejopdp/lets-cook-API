@@ -20,7 +20,7 @@ export class GetRateList {
         if (!!dto.customerId) ratings = await this.recipeRatingRepository.findAllByCustomer(new CustomerId(dto.customerId), dto.locale);
         else ratings = await this.recipeRatingRepository.findAll(dto.locale);
 
-        return await GetRateListPresenter.present(ratings);
+        return await GetRateListPresenter.present(ratings, dto.queryDate);
     }
 
     /**

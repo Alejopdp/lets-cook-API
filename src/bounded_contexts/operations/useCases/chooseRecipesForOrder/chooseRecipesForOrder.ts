@@ -48,6 +48,7 @@ export class ChooseRecipesForOrder {
         const recipeMap: { [recipeId: string]: Recipe } = {};
         const recipeRateMap: { [recipeId: string]: RecipeRating } = {};
 
+
         for (let recipe of recipes) {
             recipeMap[recipe.id.toString()] = recipe;
         }
@@ -64,7 +65,7 @@ export class ChooseRecipesForOrder {
 
         for (let selection of dto.recipeSelection) {
             const newSelection: RecipeSelection = new RecipeSelection(
-                recipeMap[selection.recipeId], // TO DO: Optimize
+                recipeMap[selection.recipeId],
                 selection.quantity,
                 new RecipeVariantId(selection.recipeVariantId)
             );
@@ -80,7 +81,7 @@ export class ChooseRecipesForOrder {
             newRecipeSelection.push(newSelection);
         }
 
-        order.updateRecipes(newRecipeSelection, dto.isAdminChoosing);
+        order.updateRecipes(newRecipeSelection, dto.isAdminChoosing, dto.choosingDate);
         paymentOrder.lastRecipeSelectionDate = new Date();
 
         await this.orderRepository.save(order);

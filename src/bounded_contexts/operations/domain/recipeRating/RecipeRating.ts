@@ -1,6 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
 import { CustomerId } from "../customer/CustomerId";
-import { Order } from "../order/Order";
 import { Recipe } from "../recipe/Recipe";
 import { RecipeRatingId } from "./RecipeRatingId";
 
@@ -46,16 +45,6 @@ export class RecipeRating extends Entity<RecipeRating> {
 
     public addOneDelivery(lastShippingDate: Date, beforeLastShippingDate?: Date): void {
         this.shippingDates.push(lastShippingDate);
-        // if (this.qtyDelivered === 0 && !!beforeLastShippingDate) {
-        //     this.lastShippingDate = lastShippingDate;
-        //     this.beforeLastShippingDate = beforeLastShippingDate;
-        //     this.qtyDelivered = 1;
-        //     return;
-        // }
-
-        // this.beforeLastShippingDate = new Date(this.lastShippingDate);
-        // this.lastShippingDate = new Date(lastShippingDate);
-        // this.qtyDelivered = this.qtyDelivered + 1;
     }
 
     public removeOneDelivery(shippingDate: Date): void {
@@ -63,29 +52,17 @@ export class RecipeRating extends Entity<RecipeRating> {
         if (shippingDate.getTime() < today.getTime()) return;
         var idx = this.shippingDates.findIndex((date) => date.getTime() === shippingDate.getTime());
         this.shippingDates.splice(idx, 1);
-
-        // const today = new Date();
-        // if (this.qtyDelivered === 0 || this.lastShippingDate < today || (this.isRated() && this.qtyDelivered === 1)) return;
-        // this.lastShippingDate = this.beforeLastShippingDate;
-        // this.qtyDelivered = this.qtyDelivered - 1;
     }
 
     public getQtyDelivered(): number {
         return this.shippingDates.length;
-        const today = new Date();
-
-        return this.shippingDates.filter((date) => today > date).length;
-        // const today = new Date();
-        // if (this.qtyDelivered === 0) return 0;
-        // if (this.lastShippingDate < today) return this.qtyDelivered - 1;
-
-        // return this.qtyDelivered;
     }
 
-    public isRateable(): boolean {
-        return true;
-        return this.getQtyDelivered() > 0;
-        // return this.getQtyDelivered() > 0; USAR ESTE
+    public isRateable(queryDate: Date): boolean {
+        const firstShippingDate = this.getFirstShippingDate();
+        if (!firstShippingDate) return false;
+
+        return this.getQtyDelivered() >= 0 && queryDate.getTime() > firstShippingDate.getTime();
     }
 
     public isRated(): boolean {
@@ -100,6 +77,12 @@ export class RecipeRating extends Entity<RecipeRating> {
             return a > b ? a : b;
         }, baseDate);
     }
+
+    public getFirstShippingDate(): Date | undefined {
+        if (this.shippingDates.length === 0) return undefined;
+        return this.shippingDates.sort((a, b) => a.getTime() - b.getTime())[0];
+    }
+
 
     /**
      * Getter recipe

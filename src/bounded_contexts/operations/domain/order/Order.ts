@@ -92,8 +92,15 @@ export class Order extends Entity<Order> {
         this._couponCode = couponCode;
     }
 
-    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, restriction?: RecipeVariantRestriction): void {
-        // TO DO: Search for a better guard?
+    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, choosingDate: Date, restriction?: RecipeVariantRestriction): void {
+        const choosingDateCopy = new Date(choosingDate).setHours(0, 0, 0, 0);
+        const createdAtCopy = new Date(this.createdAt).setHours(0, 0, 0, 0);
+        const itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing = this.createdAt.getDay() === 6 && choosingDateCopy !== createdAtCopy
+
+        if (!isAdminChoosing && itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing) {
+            throw new Error('No puedes actualizar las recetas después de las 23:59 del viernes si no eres administrador.');
+        }
+
         recipeSelection = recipeSelection.filter((selection) => selection.quantity > 0);
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);

@@ -31,7 +31,8 @@ export class InMemoryPlanRepository implements IPlanRepository {
     }
 
     public async bulkSave(plans: Plan[]): Promise<void> {
-        throw new Error("Method not implemented.");
+        this.plans = this.plans.concat(plans);
+
     }
 
     findAdditionalPlanListById(ids: PlanId[], locale: Locale): Promise<Plan[]> {

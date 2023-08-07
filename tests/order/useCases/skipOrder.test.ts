@@ -36,6 +36,8 @@ import { PaymentIntent } from "../../../src/bounded_contexts/operations/applicat
 import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
 import { UpdateDiscountAfterSkippingOrders } from "../../../src/bounded_contexts/operations/services/updateDiscountsAfterSkippingOrders/updateDiscountsAfterSkippingOrders"
 import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
+import { gourmetPlan, planGourmetVariant2Persons2Recipes } from "../../mocks/plan"
+import { TUESDAY } from "../../mocks/days"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -88,23 +90,6 @@ const customer = Customer.create(
     CUSTOMER_ID
 )
 mockCustomerRepository.save(customer)
-const gourmetPlanSku = new PlanSku("PlanGourmet")
-const gourmetPlanSlug = new PlanSlug("plan-gourmet")
-const planGourmetVariant2Persons2Recipes: PlanVariant = new PlanVariant(
-    new PlanSku("GOUR1"),
-    "",
-    35.96,
-    [],
-    "",
-    true,
-    false,
-    27.99,
-    undefined,
-    2,
-    2
-)
-const gourmetPlanId = new PlanId()
-const gourmetPlan = Plan.create("Plan Gourmet", "Plan Gourmet Description", gourmetPlanSku, "", true, PlanType.Principal, [planGourmetVariant2Persons2Recipes], [PlanFrequencyFactory.createPlanFrequency("weekly"), PlanFrequencyFactory.createPlanFrequency("biweekly")], true, [], Locale.es, gourmetPlanSlug, true, "", "", gourmetPlanId, true)
 mockPlanRepository.save(gourmetPlan)
 
 const valenciaPolygon = [
@@ -115,7 +100,6 @@ const valenciaPolygon = [
 ];
 const customerShippingZoneRadio = new ShippingZoneRadio(valenciaPolygon.map((coordinates) => new Coordinates(coordinates[0], coordinates[1])))
 const MOCK_SHIPPING_COST = 10
-const TUESDAY = new Day(2)
 const customerShippingZone = ShippingZone.create("Valencia", "valencia", MOCK_SHIPPING_COST, "active", customerShippingZoneRadio, TUESDAY)
 mockShippingZoneRepository.save(customerShippingZone)
 
