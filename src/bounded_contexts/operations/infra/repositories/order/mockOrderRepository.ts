@@ -38,8 +38,13 @@ export class InMemoryOrderRepository implements IOrderRepository {
         this.orders = this.orders.concat(orders);
 
     }
-    updateMany(orders: Order[]): Promise<void> {
-        throw new Error("Method not implemented.");
+    public async updateMany(orders: Order[]): Promise<void> {
+        orders.forEach((order) => {
+            const orderIndex = this.orders.findIndex((o) => o.id.equals(order.id));
+            if (orderIndex !== -1) {
+                this.orders[orderIndex] = order;
+            }
+        });
     }
     countCustomersWhoChoseRecipesByWeekGroupedByPlan(week: Week): Promise<{ _id: string; chosenRecipes: number; notChosenRecipes: number; }[]> {
         throw new Error("Method not implemented.");
@@ -68,20 +73,21 @@ export class InMemoryOrderRepository implements IOrderRepository {
     findAll(locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");
     }
-    findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
-        throw new Error("Method not implemented.");
+    public async findById(orderId: OrderId, locale: Locale): Promise<Order | undefined> {
+        return this.orders.find((order) => order.id.equals(orderId));
     }
+
     findBy(conditions: any, locale: Locale, sort?: { [field: string]: "asc" | "desc"; } | undefined): Promise<Order[]> {
         throw new Error("Method not implemented.");
     }
-    findNextTwelveBySubscription(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]> {
-        throw new Error("Method not implemented.");
+    public async findNextTwelveBySubscription(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]> {
+        return this.orders.filter((order) => order.subscriptionId.equals(subscriptionId) && order.shippingDate.getTime() > new Date().getTime()).sort((o1, o2) => o1.shippingDate > o2.shippingDate ? 1 : -1);
     }
     getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[], locale: Locale): Promise<{ [key: string]: number; }> {
         throw new Error("Method not implemented.");
     }
-    findByIdList(ordersIds: OrderId[], locale: Locale): Promise<Order[]> {
-        throw new Error("Method not implemented.");
+    public async findByIdList(ordersIds: OrderId[], locale: Locale): Promise<Order[]> {
+        return this.orders.filter((order) => ordersIds.some(id => id.equals(order.id)));
     }
     findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[], locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");
@@ -98,8 +104,8 @@ export class InMemoryOrderRepository implements IOrderRepository {
     public async findByPaymentOrderId(paymentOrderId: PaymentOrderId, locale: Locale): Promise<Order[]> {
         return await this.orders.filter((order) => order.paymentOrderId?.equals(paymentOrderId));
     }
-    findByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[], locale: Locale): Promise<Order[]> {
-        throw new Error("Method not implemented.");
+    public async findByPaymentOrderIdList(paymentOrdersIds: PaymentOrderId[], locale: Locale): Promise<Order[]> {
+        return this.orders.filter((order) => paymentOrdersIds.some(id => id.equals(order.paymentOrderId)));
     }
     findActiveOrdersByPaymentOrderId(paymentOrderId: PaymentOrderId, locale: Locale): Promise<Order[]> {
         throw new Error("Method not implemented.");

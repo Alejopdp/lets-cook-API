@@ -96,8 +96,8 @@ export class InMemorySusbcriptionRepository implements ISubscriptionRepository {
     findByCouponId(couponId: CouponId): Promise<Subscription[]> {
         throw new Error("Method not implemented.");
     }
-    delete(subscriptionId: SubscriptionId): Promise<void> {
-        throw new Error("Method not implemented.");
+    public async delete(subscriptionId: SubscriptionId): Promise<void> {
+        this.subscriptions = this.subscriptions.filter((subscription) => !subscription.id.equals(subscriptionId));
     }
     destroy(subscriptionId: SubscriptionId): Promise<void> {
         throw new Error("Method not implemented.");

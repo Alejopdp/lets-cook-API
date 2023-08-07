@@ -6,6 +6,7 @@ import { Coupon } from "../cupons/Cupon";
 import { Customer } from "../customer/Customer";
 import { Locale } from "../locale/Locale";
 import { Order } from "../order/Order";
+import { OrderId } from "../order/OrderId";
 import { OrderActive } from "../order/orderState/OrderActive";
 import { PaymentOrder } from "../paymentOrder/PaymentOrder";
 import { Plan } from "../plan/Plan";
@@ -98,10 +99,10 @@ export class Subscription extends Entity<Subscription> {
                     undefined,
                     undefined,
                     undefined,
+                    new OrderId(),
+                    purchaseDate,
                     undefined,
-                    undefined,
-                    undefined,
-                    true
+                    true,
                 )
             );
 
@@ -131,8 +132,8 @@ export class Subscription extends Entity<Subscription> {
                         undefined,
                         undefined,
                         undefined,
-                        undefined,
-                        undefined,
+                        new OrderId(),
+                        purchaseDate,
                         undefined,
                         i === 0
                     )
