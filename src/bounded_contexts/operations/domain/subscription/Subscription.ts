@@ -100,7 +100,7 @@ export class Subscription extends Entity<Subscription> {
                     undefined,
                     undefined,
                     new OrderId(),
-                    undefined,
+                    purchaseDate,
                     undefined,
                     true,
                 )
@@ -133,7 +133,7 @@ export class Subscription extends Entity<Subscription> {
                         undefined,
                         undefined,
                         new OrderId(),
-                        undefined,
+                        purchaseDate,
                         undefined,
                         i === 0
                     )

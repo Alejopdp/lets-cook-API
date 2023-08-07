@@ -45,20 +45,18 @@ export class MockWeekRepository implements IWeekRepository {
         throw new Error("Method not implemented.");
     }
     public async findNextTwelveByFrequency(frequency: IPlanFrequency, baseDate: Date, dateOfExecution: Date, skipWeek?: boolean): Promise<Week[]> {
-        const today = new Date(dateOfExecution);
-        const todayTime = today.getTime();
-
+        const dateOfExecutionTime = dateOfExecution.getTime();
         var weeksDb: any[] = [];
 
         if (frequency.isOneTime()) {
-            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= todayTime)
+            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= dateOfExecutionTime)
                 .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 12);
 
             return weeksDb
         }
 
         if (frequency.isWeekly()) {
-            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= todayTime)
+            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= dateOfExecutionTime)
                 .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 12);
 
             return weeksDb
@@ -66,7 +64,7 @@ export class MockWeekRepository implements IWeekRepository {
 
         if (frequency.isBiweekly()) {
             const biWeekly = [];
-            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= todayTime)
+            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= dateOfExecutionTime)
                 .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 26);
 
             for (let i = 0; i < 26; i++) {
@@ -82,7 +80,7 @@ export class MockWeekRepository implements IWeekRepository {
         if (frequency.isMonthly()) {
             const dates = frequency.getNDatesWithFrequencyOffset(12, baseDate)
             const monthlyWeeks: Week[] = [];
-            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= todayTime)
+            weeksDb = this.weeks.filter(week => week.minDay.getTime() >= dateOfExecutionTime)
                 .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 52);
 
 

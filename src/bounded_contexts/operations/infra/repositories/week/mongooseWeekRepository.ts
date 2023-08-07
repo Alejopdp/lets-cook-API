@@ -56,7 +56,7 @@ export class MongooseWeekRepository implements IWeekRepository {
     }
 
     public async findNextTwelveByFrequency(frequency: IPlanFrequency, baseDate: Date, dateOfExecution: Date, skipWeek?: boolean): Promise<Week[]> {
-        const today = new Date(dateOfExecution);
+        const today = new Date();
         const todayIso = today.toISOString();
         var weeksDb: any[] = [];
 
