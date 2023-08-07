@@ -62,7 +62,9 @@ export class RecipeRating extends Entity<RecipeRating> {
         const firstShippingDate = this.getFirstShippingDate();
         if (!firstShippingDate) return false;
 
-        return this.getQtyDelivered() >= 0 && queryDate.getTime() > firstShippingDate.getTime();
+        const firstShippingDateAt13 = new Date(firstShippingDate.getFullYear(), firstShippingDate.getMonth(), firstShippingDate.getDate(), 13, 0, 0, 0);
+
+        return this.getQtyDelivered() >= 0 && queryDate.getTime() >= firstShippingDateAt13.getTime();
     }
 
     public isRated(): boolean {

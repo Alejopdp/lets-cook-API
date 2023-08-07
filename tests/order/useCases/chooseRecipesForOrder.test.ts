@@ -22,16 +22,13 @@ import { CreatePaymentOrders } from "../../../src/bounded_contexts/operations/se
 import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/operations/services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
 import { ChooseRecipesForOrderDto } from "../../../src/bounded_contexts/operations/useCases/chooseRecipesForOrder/chooseRecipesForOrderDto";
-import { Recipe } from "../../../src/bounded_contexts/operations/domain/recipe/Recipe";
-import { gourmetPlan, planGourmetVariant2Persons2Recipes, planVegetariano, planVegetarianoVariant2Persons2Recipes } from "../../mocks/plan";
+import { gourmetPlan, planVegetariano, planVegetarianoVariant2Persons2Recipes } from "../../mocks/plan";
 import { arepasDeCrhistian, burgerHallouli, rissotoDeBoniato } from "../../mocks/recipe";
 import { CUSTOMER_ADDRESS_DETAILS, CUSTOMER_ADDRESS_NAME, CUSTOMER_EMAIL, CUSTOMER_FIRST_NAME, CUSTOMER_LAST_NAME, CUSTOMER_LATITUDE, CUSTOMER_LONGITUDE, CUSTOMER_PASSWORD, CUSTOMER_PHONE } from "../../mocks/customer"
 import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio";
 import { Coordinates } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/Coordinates";
 import { TUESDAY } from "../../mocks/days";
 import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZone";
-import { RecipeId } from "../../../src/bounded_contexts/operations/domain/recipe/RecipeId";
-import { UniqueEntityID } from "../../../src/core/domain/UniqueEntityID";
 import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order";
 import { RecipeRating } from "../../../src/bounded_contexts/operations/domain/recipeRating/RecipeRating";
 
