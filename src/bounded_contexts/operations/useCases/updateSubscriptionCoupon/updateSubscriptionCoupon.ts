@@ -1,14 +1,7 @@
 import { UpdateSubscriptionCouponDto } from "./updateSubscriptionCouponDto";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
-import { RecipeVariantRestriction } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
-import { RecipeRestrictionId } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/recipeRestrictionId";
-import { IRecipeRestrictionRepository } from "../../infra/repositories/recipeVariantRestriction/IRecipeRestrictionRepository";
-import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { Subscription } from "../../domain/subscription/Subscription";
-import { Log } from "../../domain/customer/log/Log";
-import { LogType } from "../../domain/customer/log/LogType";
-import { INotificationService } from "@src/shared/notificationService/INotificationService";
 import { Locale } from "../../domain/locale/Locale";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
@@ -72,7 +65,7 @@ export class UpdateSubscriptionCoupon {
             planVariantId: subscription.planVariantId,
             shippingCost: customerShippingZone?.cost ?? 0,
         });
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es, dto.queryDate);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
         // subscription.updateCoupon(coupon, orders, paymentOrders, customerShippingZone.cost);

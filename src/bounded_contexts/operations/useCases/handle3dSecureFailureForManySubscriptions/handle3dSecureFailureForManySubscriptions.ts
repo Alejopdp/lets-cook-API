@@ -27,7 +27,7 @@ export class Handle3dSecureFailureForManySubscriptions {
     public async execute(dto: Handle3dSecureFailureForManySubscriptionsDto): Promise<void> {
         const subscriptionsIds: SubscriptionId[] = dto.subscriptionsIds.map((id) => new SubscriptionId(id));
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(subscriptionsIds);
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(subscriptionsIds, Locale.es);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(subscriptionsIds, Locale.es, dto.queryDate);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
         for (let subscription of subscriptions) {

@@ -82,7 +82,6 @@ export class Week extends Entity<Week> {
         const weekAfterNextMonday = new Date(nextMonday);
         weekAfterNextMonday.setDate(weekAfterNextMonday.getDate() + 7);
 
-        console.log("Next monday: ", nextMonday);
         // Comprobar si el lunes de la semana representada por esta clase es igual al lunes de la semana después de la siguiente
         return MomentTimeService.isSameDay(this._minDay, nextMonday);
     }

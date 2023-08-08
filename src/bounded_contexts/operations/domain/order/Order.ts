@@ -17,6 +17,7 @@ import { RecipeSelection } from "./RecipeSelection";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeVariant } from "../recipe/RecipeVariant/RecipeVariant";
 import { Locale } from "../locale/Locale";
+import { RecipeRating } from "../recipeRating/RecipeRating";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -215,7 +216,7 @@ export class Order extends Entity<Order> {
         paymentOrder.discountOrderAmount(this);
 
         this.discountAmount = 0
-        this.recipeSelection = [];
+        // this.recipeSelection = [];
         this.state.toSkipped(this);
     }
 

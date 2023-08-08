@@ -23,7 +23,7 @@ import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/opera
 import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
 import { ChooseRecipesForOrderDto } from "../../../src/bounded_contexts/operations/useCases/chooseRecipesForOrder/chooseRecipesForOrderDto";
 import { gourmetPlan, planVegetariano, planVegetarianoVariant2Persons2Recipes } from "../../mocks/plan";
-import { arepasDeCrhistian, burgerHallouli, rissotoDeBoniato } from "../../mocks/recipe";
+import { arepasDeCrhistian, bowlDeQuinoa, burgerHallouli, rissotoDeBoniato } from "../../mocks/recipe";
 import { CUSTOMER_ADDRESS_DETAILS, CUSTOMER_ADDRESS_NAME, CUSTOMER_EMAIL, CUSTOMER_FIRST_NAME, CUSTOMER_LAST_NAME, CUSTOMER_LATITUDE, CUSTOMER_LONGITUDE, CUSTOMER_PASSWORD, CUSTOMER_PHONE } from "../../mocks/customer"
 import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio";
 import { Coordinates } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/Coordinates";
@@ -49,6 +49,7 @@ mockPlanRepository.bulkSave([gourmetPlan, planVegetariano])
 mockRecipeRepository.save(burgerHallouli)
 mockRecipeRepository.save(arepasDeCrhistian)
 mockRecipeRepository.save(rissotoDeBoniato)
+mockRecipeRepository.save(bowlDeQuinoa)
 const mockCreateFriendCodeService = new CreateFriendCode(mockCouponRepository, mockCustomerRepository)
 const createPaymentOrdersService: CreatePaymentOrders = new CreatePaymentOrders()
 const assignOrdersToPaymentOrderService = new AssignOrdersToPaymentOrders(mockPaymentOrderRepository, createPaymentOrdersService)
@@ -918,6 +919,93 @@ describe("Update recipes selection", () => {
             await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
             arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
         })
+    })
+})
+
+describe("Given a user with selected recipes for his subscription", () => {
+    const CUSTOMER_ID = new CustomerId()
+    let customer: Customer
+    let subscriptionResult: any
+    const PURCHASE_DATE: Date = new Date(2023, 7, 3, 17)
+
+    beforeAll(async () => {
+        customer = Customer.create(
+            CUSTOMER_EMAIL,
+            true,
+            "",
+            [],
+            0,
+            new Date(),
+            undefined,
+            undefined,
+            CUSTOMER_PASSWORD,
+            "active",
+            undefined,
+            undefined,
+            CUSTOMER_ID
+        )
+        await mockCustomerRepository.save(customer)
+
+        const createSubscriptionDto = {
+            customerId: CUSTOMER_ID.toString(),
+            planId: planVegetariano.id.toString(),
+            planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+            planFrequency: "weekly",
+            restrictionComment: "string",
+            stripePaymentMethodId: "",
+            couponId: undefined,
+            paymentMethodId: "string",
+            addressName: CUSTOMER_ADDRESS_NAME,
+            addressDetails: CUSTOMER_ADDRESS_DETAILS,
+            latitude: CUSTOMER_LATITUDE,
+            longitude: CUSTOMER_LONGITUDE,
+            customerFirstName: CUSTOMER_FIRST_NAME,
+            customerLastName: CUSTOMER_LAST_NAME,
+            phone1: CUSTOMER_PHONE,
+            locale: Locale.es,
+            shippingCity: "Alboraya",
+            shippingProvince: "Valencia",
+            shippingPostalCode: "46120",
+            shippingCountry: "España",
+            purchaseDate: PURCHASE_DATE
+        }
+        subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+
+        arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+        rissotoDeBoniato.availableWeeks = [...rissotoDeBoniato.availableWeeks, subscriptionResult.firstOrder.week]
+
+        await chooseRecipesForOrderUseCase.execute({
+            isAdminChoosing: false,
+            orderId: subscriptionResult.firstOrder.id.toString(),
+            recipeSelection: [{ quantity: 1, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }, { quantity: 1, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
+            choosingDate: PURCHASE_DATE
+        })
+    })
+    describe("When he updates his recipe selection", () => {
+        beforeAll(async () => {
+
+            const bowlDeQuinoaOriginalWeeks = [...bowlDeQuinoa.availableWeeks]
+            bowlDeQuinoa.availableWeeks = [...bowlDeQuinoaOriginalWeeks, subscriptionResult.firstOrder.week]
+
+            await chooseRecipesForOrderUseCase.execute({
+                isAdminChoosing: false,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [{ quantity: 2, recipeId: bowlDeQuinoa.id.toString(), recipeVariantId: bowlDeQuinoa.recipeVariants[0].id.toString() }],
+                choosingDate: PURCHASE_DATE
+            })
+
+        })
+
+        it("Should remove the shipping dates of the previous rates", async () => {
+            const recipeRatings: RecipeRating[] = await mockRecipeRatingRepository.findAllByCustomer(CUSTOMER_ID, Locale.es)
+            const arepasRatings = recipeRatings.find(rating => rating.recipe.id.equals(arepasDeCrhistian.id))
+            const rissotoRatings = recipeRatings.find(rating => rating.recipe.id.equals(rissotoDeBoniato.id))
+
+            expect(recipeRatings).toHaveLength(3)
+            expect(arepasRatings?.shippingDates).toHaveLength(0)
+            expect(rissotoRatings?.shippingDates).toHaveLength(0)
+        })
+
     })
 })
 // describe("Choose recipes for the second time or more")

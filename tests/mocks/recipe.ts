@@ -121,3 +121,35 @@ export const rissotoDeBoniato: Recipe = new Recipe(
     new RecipeId()
 );
 
+
+export const bowlDeQuinoaData: RecipeGeneralData = new RecipeGeneralData(
+    "Bowl de quinoa",
+    new RecipeDescription("Bowl de quinoa", "Bowl de quinoa"),
+    new RecipeCookDuration(50),
+    RecipeDifficultyLevel.Dificil,
+    new RecipeWeight(150, WeightUnit.Gram),
+    new RecipeSku("BQ"),
+    ["development/bowl.jpg"]
+);
+
+const bowlDeQuinoaVariant1: RecipeVariant = new RecipeVariant(
+    [pan, tomate, lechuga, queso, carne],
+    aptoVegano,
+    new RecipeVariantSku("BQVEG")
+);
+
+export const bowlDeQuinoa: Recipe = new Recipe(
+    bowlDeQuinoaData,
+    [bowlDeQuinoaVariant1],
+    [masVendida, masRica],
+    [tagParaFiltro1],
+    new RecipeNutritionalData([]),
+    [],
+    [Month.Abril, Month.Mayo, Month.Marzo, Month.Agosto],
+    [planVegetariano.id],
+    [],
+    new Date(),
+    new Date(),
+    new RecipeId()
+);
+

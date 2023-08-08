@@ -18,6 +18,7 @@ export class CancelASubscriptionController extends BaseController {
                 cancellationReason: this.req.body.cancellationReason,
                 //@ts-ignore
                 nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
+                queryDate: new Date()
             };
             await this.cancelASubscription.execute(dto);
 

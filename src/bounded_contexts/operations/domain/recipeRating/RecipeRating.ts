@@ -1,4 +1,5 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CustomerId } from "../customer/CustomerId";
 import { Recipe } from "../recipe/Recipe";
 import { RecipeRatingId } from "./RecipeRatingId";
@@ -44,14 +45,13 @@ export class RecipeRating extends Entity<RecipeRating> {
     }
 
     public addOneDelivery(lastShippingDate: Date, beforeLastShippingDate?: Date): void {
+        const alreadyHasThisShippingDate = this.shippingDates.some((date) => MomentTimeService.isSameDay(date, lastShippingDate));
+        if (alreadyHasThisShippingDate) return;
         this.shippingDates.push(lastShippingDate);
     }
 
     public removeOneDelivery(shippingDate: Date): void {
-        const today = new Date();
-        if (shippingDate.getTime() < today.getTime()) return;
-        var idx = this.shippingDates.findIndex((date) => date.getTime() === shippingDate.getTime());
-        this.shippingDates.splice(idx, 1);
+        this.shippingDates = this.shippingDates.filter((date) => !MomentTimeService.isSameDay(date, shippingDate))
     }
 
     public getQtyDelivered(): number {

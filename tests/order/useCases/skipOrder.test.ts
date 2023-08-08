@@ -5,6 +5,7 @@ import { InMemorySusbcriptionRepository } from "../../../src/bounded_contexts/op
 import { InMemoryShippingZoneRepository } from "../../../src/bounded_contexts/operations/infra/repositories/shipping/inMemoryShippingZoneRepository"
 import { InMemoryPlanRepository } from "../../../src/bounded_contexts/operations/infra/repositories/plan/mockPlanRepository"
 import { MockWeekRepository } from "../../../src/bounded_contexts/operations/infra/repositories/week/mockWeekRepository"
+import { MockRecipeRepository } from "../../../src/bounded_contexts/operations/infra/repositories/recipe/mockRecipeRepository"
 import { InMemoryOrderRepository } from "../../../src/bounded_contexts/operations/infra/repositories/order/mockOrderRepository"
 import { InMemoryCouponRepository } from "../../../src/bounded_contexts/operations/infra/repositories/coupon/mockCouponRepository"
 import { InMemoryPaymentOrderRepository } from "../../../src/bounded_contexts/operations/infra/repositories/paymentOrder/mockPaymentOrderRepository"
@@ -15,29 +16,23 @@ import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/opera
 import { CreatePaymentOrders } from "../../../src/bounded_contexts/operations/services/createPaymentOrders/createPaymentOrders"
 import { Customer } from "../../../src/bounded_contexts/operations/domain/customer/Customer"
 import { UserPassword } from "../../../src/bounded_contexts/IAM/domain/user/UserPassword"
-import { Plan } from "../../../src/bounded_contexts/operations/domain/plan/Plan"
-import { PlanSku } from "../../../src/bounded_contexts/operations/domain/plan/PlanSku"
-import { PlanType } from "../../../src/bounded_contexts/operations/domain/plan/PlanType/PlanType"
-import { PlanVariant } from "../../../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariant"
-import { PlanFrequencyFactory } from "../../../src/bounded_contexts/operations/domain/plan/PlanFrequency/PlanFrequencyFactory"
 import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale"
-import { PlanSlug } from "../../../src/bounded_contexts/operations/domain/plan/PlanSlug"
-import { PlanId } from "../../../src/bounded_contexts/operations/domain/plan/PlanId"
 import { CustomerId } from "../../../src/bounded_contexts/operations/domain/customer/CustomerId"
 import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZone"
 import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio"
 import { Coordinates } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/Coordinates"
-import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day"
 import { CreateFriendCode } from "../../../src/bounded_contexts/operations/services/createFriendCode/createFriendCode"
 import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order"
 import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/paymentOrder/PaymentOrder"
 import { InMemoryRateRepository } from "../../../src/bounded_contexts/operations/infra/repositories/rate/inMemoryRateRepository"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService"
-import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
 import { UpdateDiscountAfterSkippingOrders } from "../../../src/bounded_contexts/operations/services/updateDiscountsAfterSkippingOrders/updateDiscountsAfterSkippingOrders"
 import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
+import { ChooseRecipesForOrder } from "../../../src/bounded_contexts/operations/useCases/chooseRecipesForOrder/chooseRecipesForOrder"
 import { gourmetPlan, planGourmetVariant2Persons2Recipes } from "../../mocks/plan"
 import { TUESDAY } from "../../mocks/days"
+import { rissotoDeBoniato, arepasDeCrhistian, bowlDeQuinoa, burgerHallouli } from "../../mocks/recipe"
+import { RecipeRating } from "../../../src/bounded_contexts/operations/domain/recipeRating/RecipeRating"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -51,12 +46,20 @@ const mockNotificationService = new MockNotificationService()
 const mockPaymentOrderRepository = new InMemoryPaymentOrderRepository([])
 const createPaymentOrdersService: CreatePaymentOrders = new CreatePaymentOrders()
 const assignOrdersToPaymentOrderService = new AssignOrdersToPaymentOrders(mockPaymentOrderRepository, createPaymentOrdersService)
+const mockRecipeRepository = new MockRecipeRepository([])
+
+mockRecipeRepository.save(rissotoDeBoniato)
+mockRecipeRepository.save(arepasDeCrhistian)
+mockRecipeRepository.save(bowlDeQuinoa)
+mockRecipeRepository.save(burgerHallouli)
+
 const mockRecipeRatingRepository = new InMemoryRateRepository([])
 const mockLogRepository = new InMemoryLogRepository([])
 const mockCreateFriendCodeService = new CreateFriendCode(mockCouponRepository, mockCustomerRepository)
 const updateDiscountsAfterSKippingOrdersService = new UpdateDiscountAfterSkippingOrders(mockSubscriptionRepository, mockOrderRepository, mockPaymentOrderRepository, mockShippingZoneRepository)
 const createSubscriptionUseCase = new CreateSubscription(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockCouponRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockLogRepository, mockCreateFriendCodeService)
 const skipOrderUseCase = new SkipOrders(mockOrderRepository, mockPaymentOrderRepository, mockLogRepository, mockRecipeRatingRepository, mockSubscriptionRepository, updateDiscountsAfterSKippingOrdersService)
+const chooseRecipesForOrderUseCase = new ChooseRecipesForOrder(mockOrderRepository, mockRecipeRepository, mockPaymentOrderRepository, mockLogRepository, mockRecipeRatingRepository)
 
 mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementation(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string): Promise<PaymentIntent> => ({
     client_secret: "client_secret",
@@ -148,7 +151,8 @@ describe("Skip Order Use case", () => {
                     locale: Locale.es,
                     ordersToSkip: [skippedOrder.id.toString()],
                     ordersToReactivate: [],
-                    nameOrEmailOfAdminExecutingRequest: ""
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: new Date()
 
                 })
             })
@@ -192,7 +196,8 @@ describe("Skip Order Use case", () => {
                     locale: Locale.es,
                     ordersToSkip: [skippedOrder.id.toString()],
                     ordersToReactivate: [],
-                    nameOrEmailOfAdminExecutingRequest: ""
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: new Date()
 
                 })
 
@@ -200,7 +205,8 @@ describe("Skip Order Use case", () => {
                     locale: Locale.es,
                     ordersToSkip: [],
                     ordersToReactivate: [skippedOrder.id.toString()],
-                    nameOrEmailOfAdminExecutingRequest: ""
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: new Date()
                 })
 
             })
@@ -251,7 +257,8 @@ describe("Skip Order Use case", () => {
                     locale: Locale.es,
                     ordersToSkip: skippedOrders.map((order) => order.id.toString()),
                     ordersToReactivate: [],
-                    nameOrEmailOfAdminExecutingRequest: ""
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: new Date()
 
                 })
 
@@ -306,9 +313,79 @@ describe("Skip Order Use case", () => {
                     locale: Locale.es,
                     ordersToSkip: [billedOrder.id.toString()],
                     ordersToReactivate: [],
-                    nameOrEmailOfAdminExecutingRequest: ""
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: new Date()
 
                 })).rejects.toThrow()
+            })
+        })
+
+        describe("When the user skips the next active order with a recipe selection", () => {
+            let skippedOrder: Order
+            const PURCHASE_DATE = new Date("2023-08-08")
+            const CHOOSING_DATE = new Date("2023-08-16")
+            const SKIPPING_DATE = new Date("2023-08-17")
+
+            beforeAll(async () => {
+                firstSubscriptionResult = await createSubscriptionUseCase.execute({ ...createSubscriptionDto, purchaseDate: PURCHASE_DATE })
+                const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                skippedOrder = orders.find((order) => order.isActive())!
+
+                const burguerHalloumiOriginalWeeks = [...burgerHallouli.availableWeeks]
+                burgerHallouli.availableWeeks = [skippedOrder.week]
+
+                await chooseRecipesForOrderUseCase.execute({ choosingDate: CHOOSING_DATE, isAdminChoosing: false, orderId: skippedOrder.id.toString(), recipeSelection: [{ quantity: 2, recipeId: burgerHallouli.id.toString(), recipeVariantId: burgerHallouli.recipeVariants[0].id.toString() }] })
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [skippedOrder.id.toString()],
+                    ordersToReactivate: [],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+
+                })
+            })
+
+            it("Should leave the recipe selection in the order", async () => {
+                expect(skippedOrder.recipeSelection).toBeDefined()
+                expect(skippedOrder.recipeSelection.length).toBe(1)
+                expect(skippedOrder.recipeSelection[0].recipe.id.toString()).toBe(burgerHallouli.id.toString())
+                expect(skippedOrder.recipeSelection[0].recipeVariantId.toString()).toBe(burgerHallouli.recipeVariants[0].id.toString())
+                expect(skippedOrder.recipeSelection[0].quantity).toBe(2)
+            })
+
+            it("Should remove the shipping date of the recipe ratings", async () => {
+                const recipeRatings: RecipeRating[] = await mockRecipeRatingRepository.findAllByCustomer(CUSTOMER_ID, Locale.es)
+
+                expect(recipeRatings.length).toBe(1)
+                expect(recipeRatings[0].shippingDates.length).toBe(0)
+            })
+
+            it("Should add the shipping date to the recipe rating if the order is reactivated", async () => {
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [],
+                    ordersToReactivate: [skippedOrder.id.toString()],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+
+                })
+
+                const recipeRatings: RecipeRating[] = await mockRecipeRatingRepository.findAllByCustomer(CUSTOMER_ID, Locale.es)
+
+                expect(recipeRatings.length).toBe(1)
+                expect(recipeRatings[0].shippingDates.length).toBe(1)
+                expect(recipeRatings[0].shippingDates[0].getTime()).toBe(skippedOrder.shippingDate.getTime())
+            })
+
+            it("Should have the recipe selection in the order after the reactivation", async () => {
+                const order: Order | undefined = await mockOrderRepository.findById(skippedOrder.id, Locale.es)
+                expect(order).toBeDefined()
+                expect(order!.recipeSelection).toBeDefined()
+                expect(order!.recipeSelection.length).toBe(1)
+                expect(order!.recipeSelection[0].recipe.id.toString()).toBe(burgerHallouli.id.toString())
+                expect(order!.recipeSelection[0].recipeVariantId.toString()).toBe(burgerHallouli.recipeVariants[0].id.toString())
+                expect(order!.recipeSelection[0].quantity).toBe(2)
             })
         })
 

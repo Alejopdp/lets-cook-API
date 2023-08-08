@@ -16,6 +16,7 @@ export class UpdateSubscriptionCouponController extends BaseController {
                 subscriptionId: this.req.params.id,
                 couponCode: this.req.body.couponCode,
                 customerId: this.req.body.customerId,
+                queryDate: new Date()
             };
 
             await this.updateSubscriptionCoupon.execute(dto);

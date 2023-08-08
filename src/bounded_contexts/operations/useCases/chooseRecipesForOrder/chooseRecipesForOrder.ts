@@ -4,6 +4,7 @@ import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { OrderId } from "../../domain/order/OrderId";
 import { RecipeSelection } from "../../domain/order/RecipeSelection";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Rate } from "../../domain/rate/Rate";
 import { Recipe } from "../../domain/recipe/Recipe";
 import { RecipeId } from "../../domain/recipe/RecipeId";
@@ -41,9 +42,7 @@ export class ChooseRecipesForOrder {
         const orderId: OrderId = new OrderId(dto.orderId);
         const recipesIds: RecipeId[] = dto.recipeSelection.map((selection) => new RecipeId(selection.recipeId));
         const order: Order = await this.orderRepository.findByIdOrThrow(orderId, Locale.es);
-        const paymentOrder = await this.paymentOrderRepository.findByIdOrThrow(order.paymentOrderId!);
-        const recipes: Recipe[] = await this.recipeRepository.findByIdList(recipesIds);
-        const recipesRates: RecipeRating[] = await this.recipeRateRepository.findAllByCustomer(order.customer.id, Locale.es);
+        const [paymentOrder, recipes, recipesRates]: [PaymentOrder, Recipe[], RecipeRating[]] = await Promise.all([this.paymentOrderRepository.findByIdOrThrow(order.paymentOrderId!), await this.recipeRepository.findByIdList(recipesIds), await this.recipeRateRepository.findAllByCustomer(order.customer.id, Locale.es)])
         const newRecipeSelection: RecipeSelection[] = [];
         const recipeMap: { [recipeId: string]: Recipe } = {};
         const recipeRateMap: { [recipeId: string]: RecipeRating } = {};
