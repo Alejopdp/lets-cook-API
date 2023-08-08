@@ -26,7 +26,7 @@ export class UpdateDiscountAfterSkippingOrders {
 
     public async execute(dto: UpdateDiscountAfterSkippingOrdersDto): Promise<void> {
         const subscriptionId = new SubscriptionId(dto.subscriptionId)
-        const [subscription, futureOrders] = await Promise.all([this.subscriptionRepository.findByIdOrThrow(subscriptionId, Locale.es), this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es)])
+        const [subscription, futureOrders] = await Promise.all([this.subscriptionRepository.findByIdOrThrow(subscriptionId, Locale.es), this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es, dto.queryDate)])
         // if (subscription.coupon?.maxChargeQtyType === "only_fee") return
 
         const [paymentOrders, shippingZones] = await Promise.all([this.paymentOrderRepository.findByIdList(futureOrders.map(o => o.paymentOrderId!)), this.shippingZoneRepository.findAllActive()])

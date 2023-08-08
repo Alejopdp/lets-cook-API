@@ -58,15 +58,15 @@ export class SkipOrders {
         const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
         const skippedOrdersToSave: Order[] = [];
         const activeOrdersToSave: Order[] = [];
-        const ratingMap: { [ratingId: string]: RecipeRating } = {};
+        const ratingMap: { [recipeId: string]: RecipeRating } = {};
 
 
         for (let rating of customerRatings) {
-            ratingMap[rating.recipe.id.value] = rating;
+            ratingMap[rating.recipe.id.toString()] = rating;
         }
 
         for (let order of orders) {
-            ordersMap[order.id.value] = order;
+            ordersMap[order.id.toString()] = order;
         }
 
         for (let paymentOrder of paymentOrders) {
@@ -98,6 +98,11 @@ export class SkipOrders {
             if (!order.isActive() && !order.isBilled()) {
                 ordersUnskippedLogString = `${ordersUnskippedLogString}, ${order.getWeekLabel(dto.locale)}`;
                 ordersUnskippedDebugLogString = `${ordersUnskippedDebugLogString} | ${order.id.toString()}`;
+            }
+            for (let selection of order.recipeSelection) {
+                var recipeRating = ratingMap[selection.recipe.id.toString()];
+
+                recipeRating.addOneDelivery(order.shippingDate);
             }
 
             order.reactivate(paymentOrdersMap[order.paymentOrderId?.value!]);
@@ -150,7 +155,7 @@ export class SkipOrders {
             );
         }
 
-        await this.updateDiscountsAfterSkippingOrders.execute({ subscriptionId: incomingOrders[0].subscriptionId.toString() })
+        await this.updateDiscountsAfterSkippingOrders.execute({ subscriptionId: incomingOrders[0].subscriptionId.toString(), queryDate: dto.queryDate })
     }
 
 

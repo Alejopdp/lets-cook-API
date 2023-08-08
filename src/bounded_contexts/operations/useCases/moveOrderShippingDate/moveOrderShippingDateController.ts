@@ -17,6 +17,7 @@ export class MoveOrderShippingDateController extends BaseController {
         try {
             const dto: MoveOrderShippingDateDto = {
                 orderId: this.req.params.orderId,
+                queryDate: new Date()
             };
 
             const result = await this.moveOrderShippingDate.execute(dto);

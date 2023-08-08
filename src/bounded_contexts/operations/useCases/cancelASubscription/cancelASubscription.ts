@@ -56,7 +56,7 @@ export class CancelASubscription {
             subscription.customer.id,
             Locale.es
         );
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es, dto.queryDate);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(subscription.customer.id);
         const customerRatings: RecipeRating[] = await this.recipeRatingRepository.findAllByCustomer(subscription?.customer.id!, Locale.es);
         const recipeRatingsMap: { [recipeId: string]: RecipeRating } = {};
@@ -87,7 +87,8 @@ export class CancelASubscription {
         if (principalSubscriptions.every((sub) => sub.state.isCancelled())) {
             moreOrdersToCancel = await this.orderRepository.findNextTwelveBySubscriptionList(
                 additionalActiveSubscriptions.map((sub) => sub.id),
-                Locale.es
+                Locale.es,
+                dto.queryDate
             );
 
             for (let sub of additionalActiveSubscriptions) {

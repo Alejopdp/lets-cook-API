@@ -7,7 +7,6 @@ import { Subscription } from "../../domain/subscription/Subscription";
 import { Customer } from "../../domain/customer/Customer";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
-import { PaymentOrderId } from "../../domain/paymentOrder/PaymentOrderId";
 import { Locale } from "../../domain/locale/Locale";
 
 export class GetSubscriptionByIdAsAdmin {
@@ -32,7 +31,7 @@ export class GetSubscriptionByIdAsAdmin {
         const subscription: Subscription | undefined = await this.subscriptionRepository.findById(subscriptionId, dto.locale);
         if (!!!subscription) throw new Error("La subscripción ingresada no existe");
 
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es, dto.queryDate);
         const nextActiveOrder: Order | undefined = subscription.getNextActiveOrder(orders);
         const nextPaymentOrder: PaymentOrder | undefined = !!nextActiveOrder
             ? await this.paymentOrderRepository.findById(nextActiveOrder.paymentOrderId!, dto.locale)

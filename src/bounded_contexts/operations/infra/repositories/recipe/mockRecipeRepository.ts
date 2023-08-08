@@ -21,8 +21,8 @@ export class MockRecipeRepository implements IRecipeRepository {
     findByRecipeVariantSkuList(recipeVariantSkus: RecipeVariantSku[]): Promise<Recipe[]> {
         throw new Error("Method not implemented.");
     }
-    findByIdList(recipesIds: RecipeId[]): Promise<Recipe[]> {
-        throw new Error("Method not implemented.");
+    public async findByIdList(recipesIds: RecipeId[]): Promise<Recipe[]> {
+        return this.database.filter((recipe) => recipesIds.some((id) => id.equals(recipe.id)));
     }
     findForOrder(order: Order, restrictionId?: RecipeRestrictionId): Promise<Recipe[]> {
         throw new Error("Method not implemented.");

@@ -16,6 +16,7 @@ export class GetNextOrdersBySubscriptionController extends BaseController {
             const dto: GetNextOrdersBySubscriptionDto = {
                 subscriptionId: this.req.params.subscriptionId,
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                queryDate: new Date()
             };
 
             const result = await this.GetNextOrdersBySubscription.execute(dto);

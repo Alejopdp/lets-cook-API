@@ -22,6 +22,7 @@ export class GetSubscriptionByIdAsAdminController extends BaseController {
             const dto: GetSubscriptionByIdAsAdminDto = {
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
                 subscriptionId: this.req.params.id,
+                queryDate: new Date()
             };
             const result = await this.getSubscriptionByIdAsAdmin.execute(dto);
             const presented = await this.getSubscriptionByIdAsAdminPresenterAsAdmin.present(

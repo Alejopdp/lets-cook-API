@@ -18,6 +18,7 @@ export class SwapSubscriptionPlanController extends BaseController {
                 newPlanVariantId: this.req.body.newPlanVariantId,
                 //@ts-ignore
                 nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
+                queryDate: new Date()
             };
 
             await this.swapSubscriptionPlan.execute(dto);
