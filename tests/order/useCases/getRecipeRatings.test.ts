@@ -244,6 +244,16 @@ describe("Given a first subscription of a new customer", () => {
             expect(rissotoRateInResult?.qtyDelivered).toBe(1)
         })
 
+        it("Should return the last shipping date as the info text", async () => {
+            const QUERY_DATE = new Date("2023-08-11")
+            const rissotoRate: RecipeRating = (await mockRecipeRatingRepository.findAllByCustomer(CUSTOMER_ID, Locale.es)).find((rate: RecipeRating) => rate.recipe.id.equals(rissotoDeBoniato.id)) as RecipeRating
+            const getRateListResult = await getRateList.execute({ customerId: CUSTOMER_ID.toString(), locale: Locale.es, queryDate: QUERY_DATE })
+            const rissotoRateInResult = getRateListResult.find((rate) => rate.recipeId === rissotoRate.recipe.id.toString())
+
+            expect(rissotoRateInResult?.lastShippingDate).toBe("08/08/2023")
+        })
+
+
         it("Should be able to see the recipe to rate", async () => {
             const dto = {
                 customerId: CUSTOMER_ID.toString(),

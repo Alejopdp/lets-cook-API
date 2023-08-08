@@ -40,7 +40,6 @@ describe("RecipeRating", () => {
 
         it("Should return 1 if the recipeRating has 2 shipping dates but query date is before the second shipping date at 13:00", () => {
             const recipeRating = new RecipeRating(rissotoDeBoniato, customer.id, 0, new Date(), new Date(), [new Date("2023-08-08"), new Date("2023-08-14")])
-            console.log("FAILING PAPAI")
             expect(recipeRating.getQtyDelivered(new Date(2023, 7, 14, 9))).toBe(1)
         })
     })

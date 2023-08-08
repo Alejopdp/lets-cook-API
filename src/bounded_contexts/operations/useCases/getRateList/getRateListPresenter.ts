@@ -37,7 +37,7 @@ export class GetRateListPresenter {
                 recipeImageUrl,
                 rating: rate.rating,
                 comment: rate.comment,
-                lastShippingDate: !!rate.getLastShippingDate() ? MomentTimeService.getDdMmYyyy(rate.getLastShippingDate()!) : "",
+                lastShippingDate: !!rate.getLastShippingDate(queryDate) ? MomentTimeService.getDdMmYyyy(rate.getLastShippingDate(queryDate)!) : "",
                 qtyDelivered: rate.getQtyDelivered(queryDate),
                 isRated: rate.isRated(),
                 isRateable: rate.isRateable(queryDate),
