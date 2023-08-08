@@ -1,3 +1,0 @@
-describe('Swap Subscription Plan', () => {
-
-})
