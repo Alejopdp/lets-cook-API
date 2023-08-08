@@ -54,7 +54,15 @@ export class RecipeRating extends Entity<RecipeRating> {
         this.shippingDates = this.shippingDates.filter((date) => !MomentTimeService.isSameDay(date, shippingDate))
     }
 
-    public getQtyDelivered(): number {
+    public getQtyDelivered(queryDate: Date): number {
+        if (this.shippingDates.length === 0) return 0;
+        const lastShippingDate = this.getLastShippingDate()!;
+        const auxLastShippingDate = new Date(lastShippingDate.getFullYear(), lastShippingDate.getMonth(), lastShippingDate.getDate(), 13, 0, 0, 0);
+
+        if (queryDate.getTime() < auxLastShippingDate.getTime()) return this.shippingDates.length - 1;
+
+        console.log("QueryDate: ", queryDate)
+        console.log("LastShippingDate: ", auxLastShippingDate)
         return this.shippingDates.length;
     }
 
@@ -64,7 +72,7 @@ export class RecipeRating extends Entity<RecipeRating> {
 
         const firstShippingDateAt13 = new Date(firstShippingDate.getFullYear(), firstShippingDate.getMonth(), firstShippingDate.getDate(), 13, 0, 0, 0);
 
-        return this.getQtyDelivered() >= 0 && queryDate.getTime() >= firstShippingDateAt13.getTime();
+        return this.getQtyDelivered(queryDate) >= 0 && queryDate.getTime() >= firstShippingDateAt13.getTime();
     }
 
     public isRated(): boolean {

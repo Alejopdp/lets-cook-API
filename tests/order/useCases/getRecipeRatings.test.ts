@@ -31,6 +31,9 @@ import { Coordinates } from "../../../src/bounded_contexts/operations/domain/shi
 import { TUESDAY } from "../../mocks/days";
 import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZone";
 import { UpdateRate } from "../../../src/bounded_contexts/operations/useCases/updateRate/updateRate";
+import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order";
+import { RecipeRating } from "../../../src/bounded_contexts/operations/domain/recipeRating/RecipeRating";
+import { MomentTimeService } from "../../../src/bounded_contexts/operations/application/timeService/momentTimeService";
 
 const mockRecipeRepository = new MockRecipeRepository([])
 mockRecipeRepository.save(burgerHallouli)
@@ -88,10 +91,10 @@ const chooseRecipesForOrder = new ChooseRecipesForOrder(mockOrderRepository, moc
 
 describe("Given a first subscription of a new customer", () => {
     const PURCHASE_DATE = new Date("2023-08-04")
+    let firstSubscriptionResult: any
 
     beforeAll(async () => {
         let createSubscriptionDto: any
-        let firstSubscriptionResult: any
 
         createSubscriptionDto = {
             customerId: CUSTOMER_ID.toString(),
@@ -202,6 +205,54 @@ describe("Given a first subscription of a new customer", () => {
             expect(result.every((rate) => rate.isRateable)).toBe(true)
             expect(result.every((rate) => rate.isRated)).toBe(true)
             expect(result[0].comment).toBeDefined()
+        })
+    })
+
+    describe("When the customer selects the same recipe for second time for a future order ", () => {
+        let secondOrder: Order
+
+        beforeAll(async () => {
+            secondOrder = (await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)).sort((a: Order, b: Order) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+            const rissotoDeBoniatoOriginalWeeks = [...rissotoDeBoniato.availableWeeks]
+            rissotoDeBoniato.availableWeeks = [...rissotoDeBoniato.availableWeeks, secondOrder.week]
+
+            await chooseRecipesForOrder.execute({
+                choosingDate: new Date("2023-08-11"),
+                orderId: secondOrder.id.toString(),
+                isAdminChoosing: false,
+                recipeSelection: [{ quantity: 2, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }]
+            })
+
+        })
+
+        it("Should be 2 shipping dates in the recipe rate list", async () => {
+            const rissotoRate: RecipeRating = (await mockRecipeRatingRepository.findAllByCustomer(CUSTOMER_ID, Locale.es)).find((rate: RecipeRating) => rate.recipe.id.equals(rissotoDeBoniato.id)) as RecipeRating
+
+            expect(rissotoRate.shippingDates.length).toBe(2)
+            expect(MomentTimeService.isSameDay(rissotoRate.shippingDates[0], firstSubscriptionResult.firstOrder.shippingDate)).toBe(true)
+            expect(MomentTimeService.isSameDay(rissotoRate.shippingDates[1], secondOrder.shippingDate)).toBe(true)
+        })
+
+        it("Should return the value 1 as the number of times the recipe has been delivered if queried before the last shipping date", async () => {
+            const QUERY_DATE = new Date("2023-08-11")
+            const rissotoRate: RecipeRating = (await mockRecipeRatingRepository.findAllByCustomer(CUSTOMER_ID, Locale.es)).find((rate: RecipeRating) => rate.recipe.id.equals(rissotoDeBoniato.id)) as RecipeRating
+            const getRateListResult = await getRateList.execute({ customerId: CUSTOMER_ID.toString(), locale: Locale.es, queryDate: QUERY_DATE })
+            const rissotoRateInResult = getRateListResult.find((rate) => rate.recipeId === rissotoRate.recipe.id.toString())
+
+            expect(rissotoRate.getQtyDelivered(QUERY_DATE)).toBe(1)
+            expect(rissotoRateInResult?.qtyDelivered).toBe(1)
+        })
+
+        it("Should be able to see the recipe to rate", async () => {
+            const dto = {
+                customerId: CUSTOMER_ID.toString(),
+                locale: Locale.es,
+                queryDate: new Date("2023-08-13")
+            }
+            const result: HttpGetRateListResponse = await getRateList.execute(dto)
+
+            expect(result.length).toBe(1)
         })
     })
 
