@@ -450,7 +450,7 @@ export class MongooseOrderRepository implements IOrderRepository {
         }, undefined, { billingDate: 'asc' });
     }
 
-    public async findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[], locale: Locale = Locale.es): Promise<Order[]> {
+    public async findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[], locale: Locale = Locale.es, queryDate: Date): Promise<Order[]> {
         return await this.findByLimited({ subscription: { $in: subscriptionsIds.map((id) => id.value) } }, locale);
     }
 

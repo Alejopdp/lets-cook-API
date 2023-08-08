@@ -3,4 +3,5 @@ export interface CancelASubscriptionDto {
     cancellationReason: string;
     cancellationComment: string;
     nameOrEmailOfAdminExecutingRequest?: string;
+    queryDate: Date;
 }

@@ -36,7 +36,7 @@ export class MoveOrderShippingDate {
 
         const [subscription, ordersOfSubscription]: [Subscription, Order[]] = await Promise.all([
             await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId, Locale.es),
-            await this.orderRepository.findNextTwelveBySubscription(order.subscriptionId, Locale.es),
+            await this.orderRepository.findNextTwelveBySubscription(order.subscriptionId, Locale.es, dto.queryDate),
         ]);
         const newShippingDateOfFirstOrder = new Date(order.shippingDate);
         newShippingDateOfFirstOrder.setDate(order.shippingDate.getDate() - daysForMovingOrder);

@@ -1,10 +1,6 @@
-import { ReadStream } from "fs";
 import { BaseController } from "../../../../core/infra/BaseController";
-import { Month } from "../../domain/recipe/Months";
-import { RecipeDifficultyLevel } from "../../domain/recipe/RecipeGeneralData/RecipeDifficultyLevel";
 import { Handle3dSecureFailureForManySubscriptions } from "./handle3dSecureFailureForManySubscriptions";
 import { Handle3dSecureFailureForManySubscriptionsDto } from "./handle3dSecureFailureForManySubscriptionsDto";
-import { Address } from "../../domain/address/Address";
 
 export class Handle3dSecureFailureForManySubscriptionsController extends BaseController {
     private _handle3dSecureFailureForManySubscriptions: Handle3dSecureFailureForManySubscriptions;
@@ -18,6 +14,7 @@ export class Handle3dSecureFailureForManySubscriptionsController extends BaseCon
         try {
             const dto: Handle3dSecureFailureForManySubscriptionsDto = {
                 subscriptionsIds: this.req.body.subscriptionsIds,
+                queryDate: new Date(),
             };
 
             await this.handle3dSecureFailureForManySubscriptions.execute(dto);

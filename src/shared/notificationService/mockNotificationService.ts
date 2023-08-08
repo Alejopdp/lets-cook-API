@@ -28,8 +28,8 @@ export class MockNotificationService implements INotificationService {
     notifyAdminAbountNewSale(): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    notifyAdminAboutACancellation(subscription: Subscription, adminNameOrEmail?: string | undefined): Promise<void> {
-        throw new Error("Method not implemented.");
+    public async notifyAdminAboutACancellation(subscription: Subscription, adminNameOrEmail?: string | undefined): Promise<void> {
+        return
     }
     notifyAdminAboutAddressChange(customer: Customer, adminNameOrEmail?: string | undefined): Promise<void> {
         throw new Error("Method not implemented.");

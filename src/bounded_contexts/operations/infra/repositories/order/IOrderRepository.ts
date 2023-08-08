@@ -31,10 +31,10 @@ export interface IOrderRepository {
     findAll(locale: Locale): Promise<Order[]>;
     findById(orderId: OrderId, locale: Locale): Promise<Order | undefined>;
     findBy(conditions: any, locale: Locale, sort?: { [field: string]: 'asc' | 'desc', }): Promise<Order[]>;
-    findNextTwelveBySubscription(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]>;
+    findNextTwelveBySubscription(subscriptionId: SubscriptionId, locale: Locale, queryDate: Date): Promise<Order[]>;
     getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[], locale: Locale): Promise<{ [key: string]: number }>;
     findByIdList(ordersIds: OrderId[], locale: Locale): Promise<Order[]>;
-    findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[], locale: Locale): Promise<Order[]>;
+    findNextTwelveBySubscriptionList(subscriptionsIds: SubscriptionId[], locale: Locale, queryDate: Date): Promise<Order[]>;
     findByIdOrThrow(orderId: OrderId, locale: Locale): Promise<Order>;
     findForBilling(subscriptionsIds: SubscriptionId[], week: Week, locale: Locale): Promise<Order[]>;
     findByWeek(weekId: WeekId, locale: Locale): Promise<Order[]>;

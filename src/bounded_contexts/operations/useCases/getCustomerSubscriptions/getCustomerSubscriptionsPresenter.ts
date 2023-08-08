@@ -18,7 +18,8 @@ export class GetCustomerSubscriptionsPresenter {
         nextOrders: Order[],
         locale: Locale,
         ratings: RecipeRating[],
-        customer: Customer
+        customer: Customer,
+        queryDate: Date
     ): Promise<any> {
         const presentedPrincipalSubscriptions = [];
         const presentedAdditionalSubscriptions = [];
@@ -121,8 +122,7 @@ export class GetCustomerSubscriptionsPresenter {
             // { type: "rate_recipes" },
         ];
 
-        //@ts-ignore
-        if (ratings.some((rating) => rating.isRateable() && !rating.isRated())) pendingActions.push({ type: "rate_recipes" });
+        if (ratings.some((rating) => rating.isRateable(queryDate) && !rating.isRated())) pendingActions.push({ type: "rate_recipes", planName: "", orderId: "", shippment: "" });
 
         if (customer.friendCode) {
             //@ts-ignore

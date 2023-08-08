@@ -49,8 +49,12 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
     public async findById(paymentOrderId: PaymentOrderId, locale: Locale): Promise<PaymentOrder | undefined> {
         return this.paymentOrders.find((paymentOrder) => paymentOrder.id.equals(paymentOrderId));
     }
-    findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {
-        throw new Error("Method not implemented.");
+    public async findByIdOrThrow(paymentOrderId: PaymentOrderId): Promise<PaymentOrder> {
+        const paymentOrder = this.paymentOrders.find((paymentOrder) => paymentOrder.id.equals(paymentOrderId));
+        if (paymentOrder === undefined) {
+            throw new Error("PaymentOrder not found");
+        }
+        return paymentOrder;
     }
     findBy(conditions: any, locale: Locale): Promise<PaymentOrder[]> {
         throw new Error("Method not implemented.");

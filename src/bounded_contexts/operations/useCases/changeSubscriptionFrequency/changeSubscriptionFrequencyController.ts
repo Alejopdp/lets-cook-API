@@ -17,6 +17,7 @@ export class ChangeSubscriptionFrequencyController extends BaseController {
                 frequency: this.req.body.frequency,
                 locale: (<any>Locale)[(this.req.query.locale as string) ?? "es"],
                 subscriptionId: this.req.params.id,
+                queryDate: new Date()
             };
 
             await this.changeSubscriptionFrequency.execute(dto);
