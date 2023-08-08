@@ -106,7 +106,7 @@ export class ChooseRecipesForManyOrders {
                         recipeVariantSkuRecipeMap[selection.recipeVariantSku.code].recipeVariantId
                     )
             );
-            order.updateRecipes(recipeSelections, true, subscriptionMap[order.subscriptionId.value].restriction);
+            order.updateRecipes(recipeSelections, true, new Date(), subscriptionMap[order.subscriptionId.value].restriction);
             paymentOrderMap[order.paymentOrderId?.value!].lastRecipeSelectionDate = new Date();
         }
 

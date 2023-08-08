@@ -3,5 +3,5 @@ export interface SwapSubscriptionPlanDto {
     newPlanId: string;
     newPlanVariantId: string;
     nameOrEmailOfAdminExecutingRequest: string | undefined;
-
+    queryDate: Date;
 }

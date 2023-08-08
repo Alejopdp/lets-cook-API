@@ -16,6 +16,7 @@ export class GetRateListController extends BaseController {
             const dto: GetRateListDto = {
                 customerId: this.req.query.customer as string,
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                queryDate: new Date()
             };
             const result = await this.getRateList.execute(dto);
 

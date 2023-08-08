@@ -1,6 +1,6 @@
 import { Entity } from "../../../../core/domain/Entity";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CustomerId } from "../customer/CustomerId";
-import { Order } from "../order/Order";
 import { Recipe } from "../recipe/Recipe";
 import { RecipeRatingId } from "./RecipeRatingId";
 
@@ -45,61 +45,54 @@ export class RecipeRating extends Entity<RecipeRating> {
     }
 
     public addOneDelivery(lastShippingDate: Date, beforeLastShippingDate?: Date): void {
+        const alreadyHasThisShippingDate = this.shippingDates.some((date) => MomentTimeService.isSameDay(date, lastShippingDate));
+        if (alreadyHasThisShippingDate) return;
         this.shippingDates.push(lastShippingDate);
-        // if (this.qtyDelivered === 0 && !!beforeLastShippingDate) {
-        //     this.lastShippingDate = lastShippingDate;
-        //     this.beforeLastShippingDate = beforeLastShippingDate;
-        //     this.qtyDelivered = 1;
-        //     return;
-        // }
-
-        // this.beforeLastShippingDate = new Date(this.lastShippingDate);
-        // this.lastShippingDate = new Date(lastShippingDate);
-        // this.qtyDelivered = this.qtyDelivered + 1;
     }
 
     public removeOneDelivery(shippingDate: Date): void {
-        const today = new Date();
-        if (shippingDate.getTime() < today.getTime()) return;
-        var idx = this.shippingDates.findIndex((date) => date.getTime() === shippingDate.getTime());
-        this.shippingDates.splice(idx, 1);
-
-        // const today = new Date();
-        // if (this.qtyDelivered === 0 || this.lastShippingDate < today || (this.isRated() && this.qtyDelivered === 1)) return;
-        // this.lastShippingDate = this.beforeLastShippingDate;
-        // this.qtyDelivered = this.qtyDelivered - 1;
+        this.shippingDates = this.shippingDates.filter((date) => !MomentTimeService.isSameDay(date, shippingDate))
     }
 
-    public getQtyDelivered(): number {
-        return this.shippingDates.length;
-        const today = new Date();
+    public getQtyDelivered(queryDate: Date): number {
+        const lastShippingDate = this.getLastShippingDate(queryDate);
+        if (!lastShippingDate) return 0;
 
-        return this.shippingDates.filter((date) => today > date).length;
-        // const today = new Date();
-        // if (this.qtyDelivered === 0) return 0;
-        // if (this.lastShippingDate < today) return this.qtyDelivered - 1;
+        const lastShippingDateAt13 = new Date(lastShippingDate.getFullYear(), lastShippingDate.getMonth(), lastShippingDate.getDate(), 13, 0, 0, 0);
 
-        // return this.qtyDelivered;
+        return this.shippingDates.filter((date) => date.getTime() <= lastShippingDateAt13.getTime()).length;
     }
 
-    public isRateable(): boolean {
-        return true;
-        return this.getQtyDelivered() > 0;
-        // return this.getQtyDelivered() > 0; USAR ESTE
+    public isRateable(queryDate: Date): boolean {
+        const firstShippingDate = this.getFirstShippingDate();
+        if (!firstShippingDate) return false;
+
+        const firstShippingDateAt13 = new Date(firstShippingDate.getFullYear(), firstShippingDate.getMonth(), firstShippingDate.getDate(), 13, 0, 0, 0);
+
+        return this.getQtyDelivered(queryDate) >= 0 && queryDate.getTime() >= firstShippingDateAt13.getTime();
     }
 
     public isRated(): boolean {
         return !!this.rating && this.rating > 0;
     }
 
-    public getLastShippingDate(): Date | undefined {
-        if (this.shippingDates.length === 0) return undefined;
-        const baseDate = new Date(1970, 1);
+    public getLastShippingDate(queryDate: Date): Date | undefined {
+        const lastShippingDate = this.shippingDates
+            .filter((date) => {
+                const auxShippingDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 13, 0, 0, 0);
+                return auxShippingDate.getTime() <= queryDate.getTime()
+            })
+            .sort((a, b) => b.getTime() - a.getTime())[0];
 
-        return this.shippingDates.reduce(function (a, b) {
-            return a > b ? a : b;
-        }, baseDate);
+        return lastShippingDate;
+
     }
+
+    public getFirstShippingDate(): Date | undefined {
+        if (this.shippingDates.length === 0) return undefined;
+        return this.shippingDates.sort((a, b) => a.getTime() - b.getTime())[0];
+    }
+
 
     /**
      * Getter recipe

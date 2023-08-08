@@ -19,6 +19,7 @@ export class GetCustomersubscriptionsController extends BaseController {
             const dto: GetCustomerSubscriptionsDto = {
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
                 customerId: this.req.params.customerId,
+                queryDate: new Date(),
             };
             const result = await this.getCustomersubscriptions.execute(dto);
             const presentedResult = await this.getCustomerSubscriptionsPresenter.present(
@@ -26,7 +27,8 @@ export class GetCustomersubscriptionsController extends BaseController {
                 result.nextOrders,
                 dto.locale,
                 result.ratings,
-                result.customer
+                result.customer,
+                new Date()
             );
 
             return this.ok(this.res, presentedResult);

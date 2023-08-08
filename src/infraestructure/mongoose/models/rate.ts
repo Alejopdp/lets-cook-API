@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import * as uuid from "uuid";
 
 const RateSchema = new mongoose.Schema(

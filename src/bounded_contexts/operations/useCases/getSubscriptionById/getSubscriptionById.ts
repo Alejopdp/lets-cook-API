@@ -5,11 +5,9 @@ import { GetSubscriptionByIdDto } from "./getSubscriptionByIdDto";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { Customer } from "../../domain/customer/Customer";
-import { logger } from "../../../../../config";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
-import { Week } from "../../domain/week/Week";
 import { WeekId } from "../../domain/week/WeekId";
 
 export class GetSubscriptionById {
@@ -36,7 +34,7 @@ export class GetSubscriptionById {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const [subscription, orders]: [Subscription, Order[]] = await Promise.all([
             this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale),
-            this.orderRepository.findNextTwelveBySubscription(subscriptionId, dto.locale),
+            this.orderRepository.findNextTwelveBySubscription(subscriptionId, dto.locale, dto.queryDate),
         ]);
         const currentAndNextWeeksIds: WeekId[] = [orders[0]?.week, orders[1]?.week].reduce(
             (acc, week) => (!!week ? [...acc, week.id] : acc),

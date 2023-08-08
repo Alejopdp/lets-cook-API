@@ -35,7 +35,7 @@ export class ChangeSubscriptionFrequency {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const [subscription, orders, weeks]: [Subscription, Order[], Week[]] = await Promise.all([
             this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale),
-            this.orderRepository.findNextTwelveBySubscription(subscriptionId, dto.locale),
+            this.orderRepository.findNextTwelveBySubscription(subscriptionId, dto.locale, dto.queryDate),
             this.weekRepository.findAll(),
         ]);
         const allCustomerPaymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(subscription.customer.id);
