@@ -38,7 +38,7 @@ export class GetRateListPresenter {
                 rating: rate.rating,
                 comment: rate.comment,
                 lastShippingDate: !!rate.getLastShippingDate() ? MomentTimeService.getDdMmYyyy(rate.getLastShippingDate()!) : "",
-                qtyDelivered: rate.getQtyDelivered(),
+                qtyDelivered: rate.getQtyDelivered(queryDate),
                 isRated: rate.isRated(),
                 isRateable: rate.isRateable(queryDate),
             });
