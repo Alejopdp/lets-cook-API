@@ -5,11 +5,13 @@ import { mongooseWeekRepository } from "../../infra/repositories/week";
 import { mongooseRecipeRepository } from "../../infra/repositories/recipe";
 import { GetPlanVariantsRecipesByWeekListPresenter } from "./getPlanVariantsRecipesByWeekListPresenter";
 import { v3S3Service } from "../../application/storageService";
+import { mongooseRateRepository } from "../../infra/repositories/rate";
 
 export const getPlanVariantsRecipesByWeekList: GetPlanVariantsRecipesByWeekList = new GetPlanVariantsRecipesByWeekList(
     mongoosePlanRepository,
     mongooseRecipeRepository,
-    mongooseWeekRepository
+    mongooseWeekRepository,
+    mongooseRateRepository
 );
 export const getPlanVariantsRecipesByWeekListPresenter: GetPlanVariantsRecipesByWeekListPresenter =
     new GetPlanVariantsRecipesByWeekListPresenter(v3S3Service);
