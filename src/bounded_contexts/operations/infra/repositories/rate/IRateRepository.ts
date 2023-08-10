@@ -1,7 +1,5 @@
 import { RecipeRating } from "../../../domain/recipeRating/RecipeRating";
 import { CustomerId } from "../../../domain/customer/CustomerId";
-import { Rate } from "../../../domain/rate/Rate";
-import { RateId } from "../../../domain/rate/RateId";
 import { RecipeRatingId } from "@src/bounded_contexts/operations/domain/recipeRating/RecipeRatingId";
 import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
 import { RecipeId } from "@src/bounded_contexts/operations/domain/recipe/RecipeId";
