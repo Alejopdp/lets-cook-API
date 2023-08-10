@@ -55,17 +55,21 @@ export class ExportRecipeRatings {
         const orderPromises: Promise<void>[] = customer_recipe_tuples.map(async (tuple) => {
             const orders = await this.orderRepository.getOrdersForRecipeRatingsExport(tuple, Locale.es);
             const key = `${tuple[0]}_${tuple[1]}`;
+            console.log("Kery: ", key)
             customerRecipeOrderMap.set(key, orders);
         });
 
         await Promise.all(orderPromises);
+
 
         for (let customer of customers) {
             customersMap.set(customer.id.toString(), customer);
         }
 
         for (let rating of recipeRatings) {
-            if (!rating.rating) continue;
+            if (!rating.isRated()) continue;
+            const customerAndRecipeOrders = customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [];
+            if (customerAndRecipeOrders.length === 0) continue;
             const { order: orderForExport, restriction } = await this.getOrderForExport(rating, customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [])
 
             for (let i = 0; i < rating.shippingDates.length; i++) {
@@ -84,7 +88,7 @@ export class ExportRecipeRatings {
                     ciudad: customersMap.get(rating.customerId.toString())?.getShippingAddress().city ?? "",
                     "Fecha review": rating.ratingDate?.toISOString() ?? rating.updatedAt.toISOString(),
                     "Fecha consumo": rating.shippingDates[i].toISOString(),
-                    "Valoración": i === 0 ? rating.rating : "",
+                    "Valoración": i === 0 ? rating.rating ?? "" : "",
                     "Comentario": rating.comment ?? "",
                     "Código SKU receta": rating.recipe.recipeGeneralData.recipeSku.code,
                     "Variante SKU receta": recipeVariantOfOrder?.sku.code ?? "",
