@@ -104,7 +104,6 @@ export class ExportRecipeRatings {
         // Obtener todos los ids de suscripción de las ordenes sin duplicados
         const subscriptionIds = orders.map(order => order.subscriptionId).filter((value, index, self) => self.indexOf(value) === index);
         const subscriptions = await this.subscriptionRepository.findByIdList(subscriptionIds);
-        console.log("Subscriptions: ", subscriptions)
         // Si hay varias suscripciones y solo 1 tiene una restricción, me quedo con sus ordenes
         if (subscriptions.length > 1) {
             const subscriptionsWithRestrictions = subscriptions.filter(subscription => !!subscription.restriction);
@@ -163,7 +162,7 @@ export class ExportRecipeRatings {
             const prevDiff = Math.abs(now.getTime() - prev.shippingDate.getTime());
             const currDiff = Math.abs(now.getTime() - curr.shippingDate.getTime());
             return prevDiff < currDiff ? prev : curr;
-        });
+        }, orders[0]);
 
         return { order, restriction };
     }
