@@ -13,6 +13,7 @@ export class RecipeRating extends Entity<RecipeRating> {
     private _shippingDates: Date[];
     private _rating?: number;
     private _comment?: string;
+    private _dontRate: boolean;
 
     constructor(
         recipe: Recipe,
@@ -21,6 +22,7 @@ export class RecipeRating extends Entity<RecipeRating> {
         lastShippingDate: Date,
         beforeLastShippingDate: Date,
         shippingDates: Date[],
+        dontRate: boolean,
         rating?: number,
         comment?: string,
         id?: RecipeRatingId
@@ -34,6 +36,7 @@ export class RecipeRating extends Entity<RecipeRating> {
         this._shippingDates = shippingDates;
         this._comment = comment;
         this._qtyDelivered = qtyDelivered;
+        this._dontRate = dontRate;
     }
 
     public updateRating(rating: number, comment: string): void {
@@ -42,6 +45,7 @@ export class RecipeRating extends Entity<RecipeRating> {
 
         this.rating = rating;
         this.comment = comment;
+        this.dontRate = false
     }
 
     public addOneDelivery(lastShippingDate: Date, beforeLastShippingDate?: Date): void {
@@ -91,6 +95,11 @@ export class RecipeRating extends Entity<RecipeRating> {
     public getFirstShippingDate(): Date | undefined {
         if (this.shippingDates.length === 0) return undefined;
         return this.shippingDates.sort((a, b) => a.getTime() - b.getTime())[0];
+    }
+
+    public rateLater(): void {
+        if (this.isRated()) return
+        this.dontRate = true;
     }
 
 
@@ -157,6 +166,24 @@ export class RecipeRating extends Entity<RecipeRating> {
     public get shippingDates(): Date[] {
         return this._shippingDates;
     }
+
+
+    /**
+     * Getter dontRate
+     * @return {boolean}
+     */
+    public get dontRate(): boolean {
+        return this._dontRate;
+    }
+
+    /**
+     * Setter dontRate
+     * @param {boolean} value
+     */
+    public set dontRate(value: boolean) {
+        this._dontRate = value;
+    }
+
 
     /**
      * Setter qtyDelivered

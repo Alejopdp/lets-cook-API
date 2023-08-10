@@ -41,6 +41,11 @@ const RateSchema = new mongoose.Schema(
                 type: Date,
             },
         ],
+        dontRate: {
+            type: Boolean,
+            isRequired: true,
+            default: false,
+        },
         deletionFlag: {
             type: Boolean,
             isRequired: true,
