@@ -65,4 +65,5 @@ export interface IOrderRepository {
     destroyManyBySubscriptionId(subscriptionId: SubscriptionId): Promise<void>;
     destroyByCustomerId(customerId: CustomerId): Promise<void>
     findFutureActiveAndSkippedBySubscriptionOrderdByShippingDate(subscriptionId: SubscriptionId, locale: Locale): Promise<Order[]>;
+    getOrdersForRecipeRatingsExport(tuples: [string, string], locale: Locale): Promise<Order[]>;
 }

@@ -22,7 +22,7 @@ export class UpdateRate {
 
         if (!!!rating) throw new Error("No se encontró la receta para valorarla");
 
-        rating.updateRating(dto.rateValue, dto.commentRate);
+        rating.updateRating(dto.rateValue, dto.commentRate, dto.ratingDate);
 
         await this.rateRepository.save(rating);
     }

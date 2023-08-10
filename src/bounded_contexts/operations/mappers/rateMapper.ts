@@ -21,6 +21,9 @@ export class RateMapper implements Mapper<RecipeRating, any> {
             raw.rating,
             raw.comment,
             new RecipeRatingId(raw._id),
+            raw.ratingDate,
+            raw.createdAt,
+            raw.updatedAt
         );
     }
     public toPersistence(t: RecipeRating): any {
@@ -34,7 +37,10 @@ export class RateMapper implements Mapper<RecipeRating, any> {
             rating: t.rating,
             comment: t.comment,
             _id: t.id.value,
-            dontRate: t.dontRate
+            dontRate: t.dontRate,
+            ratingDate: t.ratingDate,
+            createdAt: t.createdAt,
+            updatedAt: t.updatedAt
         };
     }
 }
