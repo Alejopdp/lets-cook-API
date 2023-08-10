@@ -4,7 +4,7 @@
     "description": "Let's Cook Now API",
     "main": "server.ts",
     "engines": {
-        "npm": ">=7.0.0",
+        "npm": ">=6.0.0",
         "node": ">=14.0.0"
     },
     "scripts": {

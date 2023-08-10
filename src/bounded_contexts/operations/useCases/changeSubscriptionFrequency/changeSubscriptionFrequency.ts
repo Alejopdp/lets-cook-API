@@ -59,8 +59,6 @@ export class ChangeSubscriptionFrequency {
         const newBillingDates: Date[] = subscription.frequency.getNDatesWithFrequencyOffset(orders.length, nextSaturday);
         const newShippingDates: Date[] = subscription.frequency.getNDatesWithFrequencyOffset(orders.length, orders[0].shippingDate);
 
-        console.log("SATURDAY: ", nextSaturday);
-
         for (let i = 0; i < orders.length; i++) {
             if (orders[i]?.isBilled()) continue;
             const billingDate = newBillingDates[i];
