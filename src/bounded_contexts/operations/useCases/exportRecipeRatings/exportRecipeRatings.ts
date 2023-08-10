@@ -4,6 +4,8 @@ import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { RecipeVariantRestriction } from "../../domain/recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
+import { Subscription } from "../../domain/subscription/Subscription";
+import { SubscriptionId } from "../../domain/subscription/SubscriptionId";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
@@ -55,11 +57,22 @@ export class ExportRecipeRatings {
         const orderPromises: Promise<void>[] = customer_recipe_tuples.map(async (tuple) => {
             const orders = await this.orderRepository.getOrdersForRecipeRatingsExport(tuple, Locale.es);
             const key = `${tuple[0]}_${tuple[1]}`;
-            console.log("Kery: ", key)
             customerRecipeOrderMap.set(key, orders);
         });
 
         await Promise.all(orderPromises);
+
+        const allSubscriptionIds = Array.from(customerRecipeOrderMap.values()).reduce((acc, orders) => {
+            const subscriptionIds = orders.map(order => order.subscriptionId);
+
+            return [...acc, ...subscriptionIds];
+        }, [] as SubscriptionId[]);
+
+        const allSubscriptions = await this.subscriptionRepository.findByIdList(allSubscriptionIds);
+        // Mapear las suscripciones por su ID para un acceso rápido
+        const subscriptionMap = new Map<string, Subscription | undefined>(
+            allSubscriptions.map(sub => [sub.id.toString(), sub])
+        );
 
 
         for (let customer of customers) {
@@ -70,7 +83,7 @@ export class ExportRecipeRatings {
             if (!rating.isRated()) continue;
             const customerAndRecipeOrders = customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [];
             if (customerAndRecipeOrders.length === 0) continue;
-            const { order: orderForExport, restriction } = await this.getOrderForExport(rating, customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [])
+            const { order: orderForExport, restriction } = await this.getOrderForExport(rating, customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [], subscriptionMap)
 
             for (let i = 0; i < rating.shippingDates.length; i++) {
                 const planVariant = orderForExport.plan.getPlanVariantById(orderForExport.planVariantId);
@@ -103,51 +116,54 @@ export class ExportRecipeRatings {
 
     }
 
-    private async getOrderForExport(recipeRating: RecipeRating, orders: Order[]): Promise<{ order: Order, restriction: RecipeVariantRestriction | undefined }> {
+    private async getOrderForExport(recipeRating: RecipeRating, orders: Order[], subscriptionMap: Map<string, Subscription | undefined>): Promise<{ order: Order, restriction: RecipeVariantRestriction | undefined }> {
         let restriction: RecipeVariantRestriction | undefined;
         // Obtener todos los ids de suscripción de las ordenes sin duplicados
-        const subscriptionIds = orders.map(order => order.subscriptionId).filter((value, index, self) => self.indexOf(value) === index);
-        const subscriptions = await this.subscriptionRepository.findByIdList(subscriptionIds);
+        const uniqueSubscriptionIds = Array.from(new Set(orders.map(order => order.subscriptionId)));
+
+        // Usar el mapa de suscripciones en lugar de realizar consultas adicionales
+        const subscriptions = uniqueSubscriptionIds.map(id => subscriptionMap.get(id.toString()) ?? undefined);
+
         // Si hay varias suscripciones y solo 1 tiene una restricción, me quedo con sus ordenes
         if (subscriptions.length > 1) {
-            const subscriptionsWithRestrictions = subscriptions.filter(subscription => !!subscription.restriction);
+            const subscriptionsWithRestrictions = subscriptions.filter(subscription => !!subscription?.restriction);
 
             if (subscriptionsWithRestrictions.length === 1) {
-                orders = orders.filter(order => order.subscriptionId === subscriptionsWithRestrictions[0].id);
-                restriction = subscriptionsWithRestrictions[0].restriction;
+                orders = orders.filter(order => order.subscriptionId === subscriptionsWithRestrictions[0]?.id);
+                restriction = subscriptionsWithRestrictions[0]?.restriction;
             }
 
             if (subscriptionsWithRestrictions.length > 1) {
-                const aptoVeganoSinGluten = subscriptionsWithRestrictions.find(subscription => subscription.restriction?.value === "VG");
+                const aptoVeganoSinGluten = subscriptionsWithRestrictions.find(subscription => subscription?.restriction?.value === "VG");
                 if (aptoVeganoSinGluten) {
                     orders = orders.filter(order => order.subscriptionId === aptoVeganoSinGluten.id);
                     restriction = aptoVeganoSinGluten.restriction;
                 } else {
-                    const vegano = subscriptionsWithRestrictions.find(subscription => subscription.restriction?.value === "VE");
+                    const vegano = subscriptionsWithRestrictions.find(subscription => subscription?.restriction?.value === "VE");
                     if (vegano) {
                         orders = orders.filter(order => order.subscriptionId === vegano.id);
                         restriction = vegano.restriction;
                     }
                     else {
-                        const sinGlutenYLactosa = subscriptionsWithRestrictions.find(subscription => subscription.restriction?.value === "LG");
+                        const sinGlutenYLactosa = subscriptionsWithRestrictions.find(subscription => subscription?.restriction?.value === "LG");
                         if (sinGlutenYLactosa) {
                             orders = orders.filter(order => order.subscriptionId === sinGlutenYLactosa.id);
                             restriction = sinGlutenYLactosa.restriction;
                         }
                         else {
-                            const sinGluten = subscriptionsWithRestrictions.find(subscription => subscription.restriction?.value === "GL");
+                            const sinGluten = subscriptionsWithRestrictions.find(subscription => subscription?.restriction?.value === "GL");
                             if (sinGluten) {
                                 orders = orders.filter(order => order.subscriptionId === sinGluten.id);
                                 restriction = sinGluten.restriction;
                             }
                             else {
-                                const sinLactosa = subscriptionsWithRestrictions.find(subscription => subscription.restriction?.value === "LA");
+                                const sinLactosa = subscriptionsWithRestrictions.find(subscription => subscription?.restriction?.value === "LA");
                                 if (sinLactosa) {
                                     orders = orders.filter(order => order.subscriptionId === sinLactosa.id);
                                     restriction = sinLactosa.restriction;
                                 }
                                 else {
-                                    const aptoTodo = subscriptionsWithRestrictions.find(subscription => subscription.restriction?.value === "" || subscription.restriction?.value === "apto_todo");
+                                    const aptoTodo = subscriptionsWithRestrictions.find(subscription => subscription?.restriction?.value === "" || subscription?.restriction?.value === "apto_todo");
                                     if (aptoTodo) {
                                         orders = orders.filter(order => order.subscriptionId === aptoTodo.id);
                                         restriction = aptoTodo.restriction;
