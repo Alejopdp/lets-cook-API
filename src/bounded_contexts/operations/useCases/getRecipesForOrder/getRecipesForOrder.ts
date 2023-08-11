@@ -8,6 +8,7 @@ import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
 import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { GetRecipesForOrderDto } from "./getRecipesForOrderDto";
+import { performance } from "perf_hooks";
 
 export class GetRecipesForOrder {
     private _orderRepository: IOrderRepository;
@@ -27,6 +28,8 @@ export class GetRecipesForOrder {
         const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId, dto.locale);
         const recipes: Recipe[] = await this.recipeRepository.findForOrder(order, subscription.restriction?.id, dto.locale);
         const customerRecipesRatings = await this.recipeRatingRepository.findAllByCustomer(order.customer.id, dto.locale);
+        const start = performance.now();
+
         const ratingPromises = recipes.map((recipe) =>
             this.recipeRatingRepository.findAverageRatingByRecipe(recipe.id)
                 .then((rating) => ({ id: recipe.id.toString(), rating }))
@@ -34,7 +37,8 @@ export class GetRecipesForOrder {
 
         const ratings = await Promise.all(ratingPromises);
         const averageRecipeRatingsMap = new Map<string, number>(ratings.map(({ id, rating }) => [id, rating]));
-
+        const end = performance.now();
+        console.log(`Tiempo de ejecución: ${(end - start) / 1000} s`);
         recipes.forEach(
             (recipe) =>
             (recipe.recipeVariants = recipe.recipeVariants.filter((variant) =>
