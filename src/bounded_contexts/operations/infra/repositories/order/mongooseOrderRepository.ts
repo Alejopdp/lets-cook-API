@@ -358,16 +358,15 @@ export class MongooseOrderRepository implements IOrderRepository {
 
     public async findBy(conditions: any, locale: Locale = Locale.es, sort?: { [field: string]: 'asc' | 'desc', }): Promise<Order[]> {
         const ordersDb = await MongooseOrder.find({ ...conditions, deletionFlag: false }, undefined, { sort })
-            .populate({ path: "customer", options: { lean: true } })
-            .populate({ path: "plan", populate: { path: "additionalPlans" }, options: { lean: true } })
-            .populate({ path: "week", options: { lean: true } })
+            .populate("customer")
+            .populate({ path: "plan", populate: { path: "additionalPlans" } })
+            .populate("week")
             .populate({
                 path: "recipeSelection",
                 populate: {
                     path: "recipe",
-                    populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }], options: { lean: true } },
+                    populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }] },
                 },
-                options: { lean: true },
             }).lean()
 
         return ordersDb.map((raw: any) => orderMapper.toDomain(raw, locale));
