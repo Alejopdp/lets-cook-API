@@ -55,7 +55,7 @@ export class Middleware {
     //     }
     //   }
 
-    private async getCurrentUser(isAdmin: boolean, customerOrUserId: string): Promise<User | Customer> {
+    private async getCurrentUser(isAdmin: boolean, customerOrUserId: string, withoutTrowing: boolean): Promise<User | Customer | undefined> {
         if (isAdmin) {
             const user: User | undefined = await this.userRepository.findById(new UserId(customerOrUserId));
 
@@ -64,16 +64,16 @@ export class Middleware {
             return user;
         }
 
-        return await this.customerRepository.findByIdOrThrow(new CustomerId(customerOrUserId));
+        return withoutTrowing ? await this.customerRepository.findById(new CustomerId(customerOrUserId)) : await this.customerRepository.findByIdOrThrow(new CustomerId(customerOrUserId));
     }
 
-    public addCurrentUser() {
+    public addCurrentUser(withoutTrowing: boolean) {
         return async (req: Request, res: Response, next: Function) => {
             const token = req.headers["authorization"];
             if (token) {
                 const decoded = await this.tokenService.isTokenVerified(token);
                 //@ts-ignore
-                req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
+                req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id, withoutTrowing);
                 next();
             }
             else {

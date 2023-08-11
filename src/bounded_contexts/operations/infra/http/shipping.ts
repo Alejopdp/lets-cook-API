@@ -20,7 +20,7 @@ const options: multer.Options = {
 shippingRouter.get("/", middleware.ensureAdminAuthenticated([Permission.VIEW_SHIPPING_ZONE]), (req, res) =>
     getShippingListController.execute(req, res)
 );
-shippingRouter.get("/shipping-rate/:latitude/:longitude", middleware.addCurrentUser(), (req, res) =>
+shippingRouter.get("/shipping-rate/:latitude/:longitude", middleware.addCurrentUser(false), (req, res) =>
     getShippingRateController.execute(req, res)
 );
 

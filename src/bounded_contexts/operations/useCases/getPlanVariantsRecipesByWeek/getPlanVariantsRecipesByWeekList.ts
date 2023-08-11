@@ -8,6 +8,7 @@ import { Recipe } from "../../domain/recipe/Recipe";
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
+import { performance } from "perf_hooks";
 
 export class GetPlanVariantsRecipesByWeekList {
     private _planRepository: IPlanRepository;
@@ -32,12 +33,16 @@ export class GetPlanVariantsRecipesByWeekList {
         const plans: Plan[] = await this.planRepository.findAll(dto.locale);
         const customerRecipesRatings = !dto.customerId ? [] : await this.recipeRatingRepository.findAllByCustomer(new CustomerId(dto.customerId), dto.locale);
 
+        const start = performance.now();
         const ratingPromises = recipes.map((recipe) =>
             this.recipeRatingRepository.findAverageRatingByRecipe(recipe.id)
                 .then((rating) => ({ id: recipe.id.toString(), rating }))
         );
 
         const ratings = await Promise.all(ratingPromises);
+        const end = performance.now();
+        console.log(`Tiempo de ejecución: ${(end - start) / 1000} s`);
+
         const averageRecipeRatingsMap = new Map<string, number>(ratings.map(({ id, rating }) => [id, rating]));
 
 
