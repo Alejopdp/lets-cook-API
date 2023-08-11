@@ -4,6 +4,7 @@ import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
 import { PlanId } from "../../domain/plan/PlanId";
 import { Recipe } from "../../domain/recipe/Recipe";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { Week } from "../../domain/week/Week";
 
@@ -13,11 +14,16 @@ export class GetRecipesForOrderPresenter {
     constructor(storageService: IStorageService) {
         this._storageService = storageService;
     }
-    public async present(recipes: Recipe[], order: Order, subscription: Subscription, locale: Locale): Promise<any> {
+    public async present(recipes: Recipe[], order: Order, subscription: Subscription, locale: Locale, recipeRatings: RecipeRating[], averageRecipeRatingsMap: Map<string, number>): Promise<any> {
         const presentedRecipes = [];
+        const recipeRateMap = new Map<string, number>();
+
+        for (let recipeRating of recipeRatings) {
+            recipeRateMap.set(recipeRating.recipe.id.toString(), recipeRating.rating ?? 0);
+        }
 
         for (let recipe of recipes) {
-            presentedRecipes.push(await this.presentRecipe(recipe, subscription));
+            presentedRecipes.push(await this.presentRecipe(recipe, subscription, recipeRateMap.get(recipe.id.toString()) ?? 0, averageRecipeRatingsMap));
         }
 
         return {
@@ -34,7 +40,7 @@ export class GetRecipesForOrderPresenter {
         };
     }
 
-    private async presentRecipe(recipe: Recipe, subscription: Subscription): Promise<any> {
+    private async presentRecipe(recipe: Recipe, subscription: Subscription, recipeRating: number, averageRecipeRatingsMap: Map<string, number>): Promise<any> {
         const recipeUrl = recipe.getMainImageUrl() ? await this.storageService.getPresignedUrlForFile(recipe.getMainImageUrl()) : "";
 
         const recipeImages: string[] = [];
@@ -84,6 +90,8 @@ export class GetRecipesForOrderPresenter {
                         sku: variant.sku.code,
                     };
                 }),
+            userRating: recipeRating,
+            averageRating: averageRecipeRatingsMap.get(recipe.id.toString()) ?? 0,
         };
     }
 

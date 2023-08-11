@@ -1,4 +1,5 @@
 import { Order } from "../../domain/order/Order";
+import { RecipeRatingExportRow } from "../../useCases/exportRecipeRatings/exportRecipeRatings";
 
 export enum RecipeSelectionState {
     ELIGIO = "Eligió",
@@ -192,4 +193,5 @@ export interface IExportService {
     exportCoupons(couponsExport: CouponExport[]): void;
     exportNextOrdersWithRecipesSelection(ordersWithRecipeSelectionExport: OrdersWithRecipeSelectionExport[]): void;
     exportAllCustomersActions(actionsExport: ActionExport[]): void;
+    exportRecipeRatings(rows: RecipeRatingExportRow[]): void
 }

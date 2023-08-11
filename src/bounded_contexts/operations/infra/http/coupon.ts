@@ -25,7 +25,7 @@ couponRouter.get("/", middleware.ensureAdminAuthenticated([Permission.VIEW_COUPO
 couponRouter.get("/:id", middleware.ensureAdminAuthenticated([Permission.VIEW_COUPONS]), (req, res) =>
     getCouponByIdController.execute(req, res)
 );
-couponRouter.get("/validation/:code", middleware.addCurrentUser(), (req, res) => getCouponValidationController.execute(req, res));
+couponRouter.get("/validation/:code", middleware.addCurrentUser(false), (req, res) => getCouponValidationController.execute(req, res));
 
 // // PUT
 couponRouter.put(

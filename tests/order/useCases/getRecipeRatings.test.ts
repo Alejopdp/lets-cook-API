@@ -189,7 +189,8 @@ describe("Given a first subscription of a new customer", () => {
             rateRecipeUseCase.execute({
                 commentRate: "Muy rico",
                 rateId: rates[0].id.toString(),
-                rateValue: 5
+                rateValue: 5,
+                ratingDate: new Date(2023, 7, 8, 13, 0, 0)
             })
         })
 

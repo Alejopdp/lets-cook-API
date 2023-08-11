@@ -636,6 +636,10 @@ export class MongooseOrderRepository implements IOrderRepository {
         return ordersDb.map((orderDb: any) => orderMapper.toDomain(orderDb, locale));
     }
 
+    public async getOrdersForRecipeRatingsExport(tuples: [string, string], locale: Locale): Promise<Order[]> {
+        return await this.findBy({ "customer": tuples[0], "recipeSelection.recipe": tuples[1] }, locale)
+    }
+
     public async addCustomerToOrderOfSubscription(subscriptionId: SubscriptionId, customerId: CustomerId): Promise<void> {
         await MongooseOrder.updateMany({ subscription: subscriptionId.value }, { customer: customerId.value });
     }

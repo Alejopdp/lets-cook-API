@@ -1,4 +1,3 @@
-import { Rate } from "../../../domain/rate/Rate";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { RateId } from "../../../domain/rate/RateId";
 import { IRateRepository } from "./IRateRepository";
@@ -6,7 +5,8 @@ import { Rate as MongooseRate } from "../../../../../infraestructure/mongoose/mo
 import { rateMapper } from "../../../mappers";
 import { RecipeRating } from "../../../domain/recipeRating/RecipeRating";
 import { RecipeRatingId } from "../../../domain/recipeRating/RecipeRatingId";
-import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
+import { Locale } from "../../../domain/locale/Locale";
+import { RecipeId } from "../../../domain/recipe/RecipeId";
 export class MongooseRateRepository implements IRateRepository {
     public async save(rate: RecipeRating): Promise<void> {
         const rateDb = rateMapper.toPersistence(rate);
@@ -27,7 +27,7 @@ export class MongooseRateRepository implements IRateRepository {
     }
 
     public async findAll(locale: Locale): Promise<RecipeRating[]> {
-        return await this.findBy({}, locale);
+        return await this.findBy({ rating: { $gt: 0 } }, locale);
     }
 
     public async findAllByCustomer(customerId: CustomerId, locale: Locale): Promise<RecipeRating[]> {
@@ -43,9 +43,21 @@ export class MongooseRateRepository implements IRateRepository {
         const rateDb = await MongooseRate.find({ ...conditions, deletionFlag: false }).populate({
             path: "recipe",
             populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }] },
-        });
+        }).lean()
 
         return rateDb.map((raw: any) => rateMapper.toDomain(raw, locale));
+    }
+
+    public async findAverageRatingByRecipe(recipeId: RecipeId): Promise<number> {
+        const ratesDb = await MongooseRate.find({ recipe: recipeId.toString() }).populate({
+            path: "recipe",
+            populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }] },
+        });
+        if (ratesDb.length === 0) return 0;
+        const rates = ratesDb.map((rate) => rateMapper.toDomain(rate, Locale.es));
+        const total = rates.reduce((acc, rate) => acc + (rate.rating ?? 0), 0);
+
+        return total / rates.length;
     }
 
     public async updateMany(ratings: RecipeRating[]): Promise<void> {

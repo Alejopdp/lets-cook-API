@@ -3,6 +3,7 @@ import { Locale } from "@src/bounded_contexts/operations/domain/locale/Locale";
 import { RecipeRating } from "@src/bounded_contexts/operations/domain/recipeRating/RecipeRating";
 import { RecipeRatingId } from "@src/bounded_contexts/operations/domain/recipeRating/RecipeRatingId";
 import { IRateRepository } from "./IRateRepository";
+import { RecipeId } from "@src/bounded_contexts/operations/domain/recipe/RecipeId";
 
 export class InMemoryRateRepository implements IRateRepository {
 
@@ -11,6 +12,9 @@ export class InMemoryRateRepository implements IRateRepository {
 
     constructor(rates: RecipeRating[]) {
         this._rates = rates;
+    }
+    findAverageRatingByRecipe(recipeId: RecipeId): Promise<number> {
+        throw new Error("Method not implemented.");
     }
 
     public async save(rate: RecipeRating | undefined): Promise<void> {

@@ -138,7 +138,7 @@ export class MongooseRecipeRepository implements IRecipeRepository {
             .populate({
                 path: "recipeVariants",
                 populate: [{ path: "restriction" }, { path: "ingredients" }],
-            });
+            })
 
         return recipesDb.map((recipe: any) => recipeMapper.toDomain(recipe, locale));
     }

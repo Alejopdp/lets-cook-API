@@ -72,7 +72,7 @@ export class ChooseRecipesForOrder {
             var rating = recipeRateMap[selection.recipeId];
 
             if (!!!rating) {
-                rating = new RecipeRating(recipeMap[selection.recipeId], order.customer.id, 0, order.shippingDate, order.shippingDate, []);
+                rating = new RecipeRating(recipeMap[selection.recipeId], order.customer.id, 0, order.shippingDate, order.shippingDate, [], false);
                 recipesRates.push(rating);
             }
 

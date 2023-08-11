@@ -19,6 +19,9 @@ export class InMemoryOrderRepository implements IOrderRepository {
     public constructor(orders: Order[]) {
         this.orders = orders;
     }
+    getOrdersForRecipeRatingsExport(tuples: [string, string], locale: Locale): Promise<Order[]> {
+        throw new Error("Method not implemented.");
+    }
 
     public async save(order: Order): Promise<void> {
         // If order exists update it in the same order. If not, push it to the array
