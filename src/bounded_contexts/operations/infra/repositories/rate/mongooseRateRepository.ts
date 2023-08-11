@@ -27,7 +27,7 @@ export class MongooseRateRepository implements IRateRepository {
     }
 
     public async findAll(locale: Locale): Promise<RecipeRating[]> {
-        return await this.findBy({}, locale);
+        return await this.findBy({ rating: { $gt: 0 } }, locale);
     }
 
     public async findAllByCustomer(customerId: CustomerId, locale: Locale): Promise<RecipeRating[]> {
@@ -43,7 +43,7 @@ export class MongooseRateRepository implements IRateRepository {
         const rateDb = await MongooseRate.find({ ...conditions, deletionFlag: false }).populate({
             path: "recipe",
             populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }] },
-        });
+        }).lean()
 
         return rateDb.map((raw: any) => rateMapper.toDomain(raw, locale));
     }

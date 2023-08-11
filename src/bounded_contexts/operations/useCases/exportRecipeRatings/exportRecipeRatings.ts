@@ -11,6 +11,7 @@ import { IOrderRepository } from "../../infra/repositories/order/IOrderRepositor
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { ExportRecipeRatingsDto } from "./exportRecipeRatingsDto";
+import { performance } from 'perf_hooks';
 
 export interface RecipeRatingExportRow {
     email: string;
@@ -49,18 +50,42 @@ export class ExportRecipeRatings {
 
     public async execute(dto: ExportRecipeRatingsDto): Promise<any> {
         const rows: RecipeRatingExportRow[] = [];
-        const recipeRatings: RecipeRating[] = await this.recipeRatingRepository.findAll(Locale.es);
-        const customers = await this.customerRepository.findAll();
+        const [recipeRatings, customers]: [RecipeRating[], Customer[]] = await Promise.all([this.recipeRatingRepository.findAll(Locale.es), this.customerRepository.findAll()]);
         const customersMap = new Map<string, Customer>();
         const customer_recipe_tuples: [string, string][] = recipeRatings.map(rating => [rating.customerId.toString(), rating.recipe.id.toString()])
         const customerRecipeOrderMap = new Map<string, Order[]>();
-        const orderPromises: Promise<void>[] = customer_recipe_tuples.map(async (tuple) => {
-            const orders = await this.orderRepository.getOrdersForRecipeRatingsExport(tuple, Locale.es);
-            const key = `${tuple[0]}_${tuple[1]}`;
-            customerRecipeOrderMap.set(key, orders);
+        const start = performance.now();
+        const orders = (await this.orderRepository.findAll(Locale.es))
+        const ordersMap = new Map<string, Order[]>();
+        orders.forEach(order => {
+            order.recipeSelection.forEach(recipeSelection => {
+                const key = `${order.customer.id.toString()}_${recipeSelection.recipe.id.toString()}`;
+                ordersMap.set(key, [...(ordersMap.get(key) || []), order]);
+            })
         });
 
-        await Promise.all(orderPromises);
+        customer_recipe_tuples.forEach(tuple => {
+            const key = `${tuple[0]}_${tuple[1]}`;
+            customerRecipeOrderMap.set(key, ordersMap.get(key) || []);
+        });
+
+        // Populte the customerRecipeOrderMap, using the customer_recipe_tuples as keys and the orders as values. The orders should match de filter criteria
+
+
+
+        // const orderPromises: Promise<void>[] = customer_recipe_tuples.map(async (tuple) => {
+        //     const orders = await this.orderRepository.getOrdersForRecipeRatingsExport(tuple, Locale.es);
+        //     const key = `${tuple[0]}_${tuple[1]}`;
+        //     customerRecipeOrderMap.set(key, orders);
+        // });
+
+
+
+        // await Promise.all(orderPromises);
+        const end = performance.now();
+        console.log("Orders took: ", (end - start) / 1000)
+        const start_process = performance.now();
+
 
         const allSubscriptionIds = Array.from(customerRecipeOrderMap.values()).reduce((acc, orders) => {
             const subscriptionIds = orders.map(order => order.subscriptionId);
@@ -83,7 +108,8 @@ export class ExportRecipeRatings {
             if (!rating.isRated()) continue;
             const customerAndRecipeOrders = customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [];
             if (customerAndRecipeOrders.length === 0) continue;
-            const { order: orderForExport, restriction } = await this.getOrderForExport(rating, customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [], subscriptionMap)
+            const { order: orderForExport, restriction } = this.getOrderForExport(rating, customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [], subscriptionMap)
+            if (!orderForExport) continue;
 
             for (let i = 0; i < rating.shippingDates.length; i++) {
                 const planVariant = orderForExport.plan.getPlanVariantById(orderForExport.planVariantId);
@@ -112,11 +138,13 @@ export class ExportRecipeRatings {
             }
         }
 
+        const end_process = performance.now();
+        console.log("Process took: ", (end_process - start_process) / 1000)
         this.exportService.exportRecipeRatings(rows);
 
     }
 
-    private async getOrderForExport(recipeRating: RecipeRating, orders: Order[], subscriptionMap: Map<string, Subscription | undefined>): Promise<{ order: Order, restriction: RecipeVariantRestriction | undefined }> {
+    private getOrderForExport(recipeRating: RecipeRating, orders: Order[], subscriptionMap: Map<string, Subscription | undefined>): { order: Order, restriction: RecipeVariantRestriction | undefined } {
         let restriction: RecipeVariantRestriction | undefined;
         // Obtener todos los ids de suscripción de las ordenes sin duplicados
         const uniqueSubscriptionIds = Array.from(new Set(orders.map(order => order.subscriptionId)));
