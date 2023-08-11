@@ -41,6 +41,7 @@ export class GetRateListPresenter {
                 qtyDelivered: rate.getQtyDelivered(queryDate),
                 isRated: rate.isRated(),
                 isRateable: rate.isRateable(queryDate),
+                dontRate: rate.dontRate
             });
         }
         return presentedRates;

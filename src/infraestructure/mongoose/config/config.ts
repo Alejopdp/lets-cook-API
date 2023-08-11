@@ -7,7 +7,7 @@ export const connectToDatabase = async () => {
     // const mongoUri: string = ((process.env.URLDB as string) + "staging") as string;
 
     try {
-        await mongoose.connect(mongoUri);
+        await mongoose.connect(mongoUri, { maxPoolSize: 400 });
         mongoose.set("debug", IS_NOT_RUNNING_IN_DEVELOPMENT);
 
         // await resetDatabase();

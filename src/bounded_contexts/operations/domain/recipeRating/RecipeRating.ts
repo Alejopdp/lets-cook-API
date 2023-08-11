@@ -13,6 +13,10 @@ export class RecipeRating extends Entity<RecipeRating> {
     private _shippingDates: Date[];
     private _rating?: number;
     private _comment?: string;
+    private _dontRate: boolean;
+    private _ratingDate?: Date;
+    private _createdAt: Date;
+    private _updatedAt: Date;
 
     constructor(
         recipe: Recipe,
@@ -21,9 +25,14 @@ export class RecipeRating extends Entity<RecipeRating> {
         lastShippingDate: Date,
         beforeLastShippingDate: Date,
         shippingDates: Date[],
+        dontRate: boolean,
         rating?: number,
         comment?: string,
-        id?: RecipeRatingId
+        id?: RecipeRatingId,
+        ratingDate?: Date,
+        createdAt?: Date,
+        updatedAt?: Date
+
     ) {
         super(id);
         this._recipe = recipe;
@@ -34,14 +43,20 @@ export class RecipeRating extends Entity<RecipeRating> {
         this._shippingDates = shippingDates;
         this._comment = comment;
         this._qtyDelivered = qtyDelivered;
+        this._dontRate = dontRate;
+        this._ratingDate = ratingDate;
+        this._createdAt = createdAt || new Date();
+        this._updatedAt = updatedAt || new Date();
     }
 
-    public updateRating(rating: number, comment: string): void {
+    public updateRating(rating: number, comment: string, ratingDate: Date): void {
         if (rating > 5) throw new Error("La calificación no puede ser mayor a 5");
         // TO DO: Agregar validación para que no se pueda ratear si shippingDate > today
 
         this.rating = rating;
         this.comment = comment;
+        this.dontRate = false
+        if (!this.ratingDate) this.ratingDate = ratingDate;
     }
 
     public addOneDelivery(lastShippingDate: Date, beforeLastShippingDate?: Date): void {
@@ -91,6 +106,11 @@ export class RecipeRating extends Entity<RecipeRating> {
     public getFirstShippingDate(): Date | undefined {
         if (this.shippingDates.length === 0) return undefined;
         return this.shippingDates.sort((a, b) => a.getTime() - b.getTime())[0];
+    }
+
+    public rateLater(): void {
+        if (this.isRated()) return
+        this.dontRate = true;
     }
 
 
@@ -156,6 +176,82 @@ export class RecipeRating extends Entity<RecipeRating> {
      */
     public get shippingDates(): Date[] {
         return this._shippingDates;
+    }
+
+
+    /**
+     * Getter dontRate
+     * @return {boolean}
+     */
+    public get dontRate(): boolean {
+        return this._dontRate;
+    }
+
+    /**
+ * Getter ratingDate
+ * @return {Date | undefined}
+ */
+    public get ratingDate(): Date | undefined {
+        return this._ratingDate;
+    }
+
+
+    /**
+     * Getter createdAt
+     * @return {Date}
+     */
+    public get createdAt(): Date {
+        return this._createdAt;
+    }
+
+    /**
+     * Getter updatedAt
+     * @return {Date}
+     */
+    public get updatedAt(): Date {
+        return this._updatedAt;
+    }
+
+    /**
+     * Setter createdAt
+     * @param {Date} value
+     */
+    public set createdAt(value: Date) {
+        this._createdAt = value;
+    }
+
+    /**
+     * Setter updatedAt
+     * @param {Date} value
+     */
+    public set updatedAt(value: Date) {
+        this._updatedAt = value;
+    }
+
+
+    /**
+     * Setter ratingDate
+     * @return {Date | undefined}
+     */
+    public set ratingDate(ratingDate: Date | undefined) {
+        this._ratingDate = ratingDate
+    }
+
+
+    /**
+     * Setter dontRate
+     * @param {boolean} value
+     */
+    public set dontRate(value: boolean) {
+        this._dontRate = value;
+    }
+
+    /**
+     * Setter recipeRating
+     * @param {Date | undefined} value
+     */
+    public set recipeRating(value: Date | undefined) {
+        this.recipeRating = value;
     }
 
     /**

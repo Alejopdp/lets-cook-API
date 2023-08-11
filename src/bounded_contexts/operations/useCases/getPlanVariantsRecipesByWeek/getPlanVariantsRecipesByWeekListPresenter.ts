@@ -6,6 +6,7 @@ import { Recipe } from "../../domain/recipe/Recipe";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { Locale } from "../../domain/locale/Locale";
+import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 
 export class GetPlanVariantsRecipesByWeekListPresenter {
     private _storageService: IStorageService;
@@ -14,16 +15,22 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
         this._storageService = storageService;
     }
 
-    public async present(plans: Plan[], recipes: Recipe[], week: Week, locale: Locale): Promise<any> {
+    public async present(plans: Plan[], recipes: Recipe[], week: Week, locale: Locale, averageRecipeRatingsMap: Map<string, number>, userRatings: RecipeRating[]): Promise<any> {
         const presentedPlans = [];
         const planRecipeMap: { [key: string]: any[] } = {};
         const presentedRecipes = [];
         const presentedAdditionalPlansMap: { [key: string]: any[] } = {};
         var uniqAdditionalPlansIds: PlanId[] = [];
+        const recipeRateMap = new Map<string, number>();
+
+        for (let recipeRating of userRatings) {
+            recipeRateMap.set(recipeRating.recipe.id.toString(), recipeRating.rating ?? 0);
+        }
+
 
         // Recipes
         for (let recipe of recipes) {
-            const presentedRecipe = await this.presentRecipe(recipe);
+            const presentedRecipe = await this.presentRecipe(recipe, averageRecipeRatingsMap.get(recipe.id.toString()) ?? 0, recipeRateMap.get(recipe.id.toString()) ?? 0);
 
             presentedRecipes.push(presentedRecipe);
 
@@ -79,7 +86,7 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
         return { plans: presentedPlans, weekLabel: week.getLabel(locale) };
     }
 
-    private async presentRecipe(recipe: Recipe): Promise<any> {
+    private async presentRecipe(recipe: Recipe, averageRating: number, userRating: number): Promise<any> {
         const recipeUrl = recipe.getMainImageUrl() ? await this.storageService.getPresignedUrlForFile(recipe.getMainImageUrl()) : "";
 
         const recipeImages: string[] = [];
@@ -128,6 +135,8 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
                     sku: variant.sku.code,
                 };
             }),
+            averageRating,
+            userRating,
         };
     }
 

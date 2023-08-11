@@ -18,6 +18,7 @@ export class UpdateRateController extends BaseController {
                 rateId: this.req.params.id,
                 rateValue: this.req.body.rating,
                 commentRate: this.req.body.comment,
+                ratingDate: new Date(),
             };
 
             await this.updateRate.execute(dto);

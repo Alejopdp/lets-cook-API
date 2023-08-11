@@ -72,7 +72,6 @@ export class Middleware {
             const token = req.headers["authorization"];
             if (token) {
                 const decoded = await this.tokenService.isTokenVerified(token);
-
                 //@ts-ignore
                 req["currentUser"] = await this.getCurrentUser(!!decoded.roleId || !!decoded.roleTitle, decoded.id);
                 next();
