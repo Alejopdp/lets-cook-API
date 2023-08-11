@@ -30,7 +30,7 @@ export class GetPlanVariantsRecipesByWeekList {
 
         const recipes: Recipe[] = await this.recipeRepository.findByWeekId(week.id, dto.locale);
         const plans: Plan[] = await this.planRepository.findAll(dto.locale);
-        const customerRecipesRatings = await this.recipeRatingRepository.findAllByCustomer(new CustomerId(dto.customerId), dto.locale);
+        const customerRecipesRatings = !dto.customerId ? [] : await this.recipeRatingRepository.findAllByCustomer(new CustomerId(dto.customerId), dto.locale);
 
         const ratingPromises = recipes.map((recipe) =>
             this.recipeRatingRepository.findAverageRatingByRecipe(recipe.id)
