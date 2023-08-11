@@ -49,10 +49,10 @@ export class MongooseRateRepository implements IRateRepository {
     }
 
     public async findAverageRatingByRecipe(recipeId: RecipeId): Promise<number> {
-        const ratesDb = await MongooseRate.find({ recipe: recipeId.toString() }).populate({
+        const ratesDb = await MongooseRate.find({ recipe: recipeId.toString(), rating: { $gt: 0 } }).populate({
             path: "recipe",
             populate: { path: "recipeVariants", populate: [{ path: "restriction" }, { path: "ingredients" }] },
-        });
+        }).lean()
         if (ratesDb.length === 0) return 0;
         const rates = ratesDb.map((rate) => rateMapper.toDomain(rate, Locale.es));
         const total = rates.reduce((acc, rate) => acc + (rate.rating ?? 0), 0);
