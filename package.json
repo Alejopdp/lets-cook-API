@@ -8,7 +8,7 @@
         "node": ">=14.0.0"
     },
     "scripts": {
-        "start": "node dist/src/index",
+        "start": "node dist/src/index --max-old-space-size=1024",
         "dev": "node dist/index",
         "webpack": "cross-env NODE_ENV=development webpack --config webpack.config.ts",
         "build:staging": "cross-env NODE_ENV=staging tsc",
