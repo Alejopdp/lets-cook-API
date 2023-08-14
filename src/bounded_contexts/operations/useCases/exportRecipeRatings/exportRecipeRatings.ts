@@ -55,14 +55,17 @@ export class ExportRecipeRatings {
         const customer_recipe_tuples: [string, string][] = recipeRatings.map(rating => [rating.customerId.toString(), rating.recipe.id.toString()])
         const customerRecipeOrderMap = new Map<string, Order[]>();
         const start = performance.now();
-        const orders = (await this.orderRepository.findAll(Locale.es))
+        const memory_start = process.memoryUsage().heapUsed / 1024 / 1024;
+        const orders = (await this.orderRepository.findBy({ state: { $in: ["ORDER_BILLED"], }, deletionFlag: false, "recipeSelection.0": { "$exists": true } }, Locale.es))
         const ordersMap = new Map<string, Order[]>();
         orders.forEach(order => {
             order.recipeSelection.forEach(recipeSelection => {
                 const key = `${order.customer.id.toString()}_${recipeSelection.recipe.id.toString()}`;
-                ordersMap.set(key, [...(ordersMap.get(key) || []), order]);
+                if (customer_recipe_tuples.some(tuple => tuple[0] === order.customer.id.toString() && tuple[1] === recipeSelection.recipe.id.toString())) ordersMap.set(key, [...(ordersMap.get(key) || []), order]);
             })
         });
+        const memory_end = process.memoryUsage().heapUsed / 1024 / 1024;
+        console.log("Memory used: ", memory_end - memory_start);
 
         customer_recipe_tuples.forEach(tuple => {
             const key = `${tuple[0]}_${tuple[1]}`;

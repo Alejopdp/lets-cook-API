@@ -7,7 +7,7 @@ import * as Tracing from "@sentry/tracing";
 import * as http from "http";
 import { v1Router } from "./api/v1";
 import { billingJob } from "../../bounded_contexts/operations/application/billingJob";
-
+import v8 from "v8"
 const app = express();
 
 /** Sentry **/
@@ -81,6 +81,8 @@ app.use(
 app.use("/api/v1", v1Router);
 
 billingJob.initialize();
+
+console.log("HEAP STATISTICS - New: ", v8.getHeapStatistics());
 
 // New api versions can go here
 
