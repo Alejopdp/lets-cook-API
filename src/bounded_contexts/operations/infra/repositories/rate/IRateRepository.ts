@@ -6,6 +6,7 @@ import { RecipeId } from "@src/bounded_contexts/operations/domain/recipe/RecipeI
 
 export interface IRateRepository {
     save(rate: RecipeRating | undefined): Promise<void>;
+    findBy(conditions: any, locale: Locale): Promise<RecipeRating[]>
     findById(recipeRatingId: RecipeRatingId, locale: Locale): Promise<RecipeRating | undefined>;
     findAll(locale: Locale): Promise<RecipeRating[]>;
     findAllByCustomer(customerId: CustomerId, locale: Locale): Promise<RecipeRating[]>;
