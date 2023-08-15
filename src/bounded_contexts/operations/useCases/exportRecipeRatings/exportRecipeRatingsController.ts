@@ -12,7 +12,7 @@ export class ExportRecipeRatingsController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            await this.exportCustomers.execute({ queryDate: new Date() });
+            await this.exportCustomers.execute({ queryDate: new Date(), shippingDate: !this.req.query.shippingDate ? undefined : new Date(this.req.query.shippingDate as string) });
 
             return this.res.download("Valoración de recetas.xlsx", (err) => fs.unlinkSync("Valoración de recetas.xlsx"));
         } catch (error: any) {

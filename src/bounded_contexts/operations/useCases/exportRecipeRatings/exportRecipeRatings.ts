@@ -1,4 +1,6 @@
+import moment from "moment";
 import { IExportService } from "../../application/exportService/IExportService";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Customer } from "../../domain/customer/Customer";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
@@ -50,13 +52,18 @@ export class ExportRecipeRatings {
 
     public async execute(dto: ExportRecipeRatingsDto): Promise<any> {
         const rows: RecipeRatingExportRow[] = [];
-        const [recipeRatings, customers]: [RecipeRating[], Customer[]] = await Promise.all([this.recipeRatingRepository.findAll(Locale.es), this.customerRepository.findAll()]);
+        const ratingsFilter: any = { rating: { "$gt": 0 }, deletionFlag: false, "recipeSelection.0": { "$exists": true } }
+        if (dto.shippingDate) ratingsFilter["shippingDates"] = { "$elemMatch": { "$gte": dto.shippingDate } };
+        const [recipeRatings, customers]: [RecipeRating[], Customer[]] = await Promise.all([this.recipeRatingRepository.findBy(ratingsFilter, Locale.es), this.customerRepository.findAll()]);
         const customersMap = new Map<string, Customer>();
         const customer_recipe_tuples: [string, string][] = recipeRatings.map(rating => [rating.customerId.toString(), rating.recipe.id.toString()])
         const customerRecipeOrderMap = new Map<string, Order[]>();
         const start = performance.now();
         const memory_start = process.memoryUsage().heapUsed / 1024 / 1024;
-        const orders = (await this.orderRepository.findBy({ state: { $in: ["ORDER_BILLED"], }, deletionFlag: false, "recipeSelection.0": { "$exists": true } }, Locale.es))
+        let ordersFilter: any = { state: { $in: ["ORDER_BILLED"], }, deletionFlag: false, "recipeSelection.0": { "$exists": true } }
+        if (dto.shippingDate) ordersFilter["shippingDate"] = { "$gte": dto.shippingDate };
+
+        const orders = (await this.orderRepository.findBy(!dto.shippingDate ? {} : { shippingDate: { "$gte": dto.shippingDate } }, Locale.es))
         const ordersMap = new Map<string, Order[]>();
         orders.forEach(order => {
             order.recipeSelection.forEach(recipeSelection => {
@@ -115,6 +122,7 @@ export class ExportRecipeRatings {
             if (!orderForExport) continue;
 
             for (let i = 0; i < rating.shippingDates.length; i++) {
+                if (dto.shippingDate && moment(rating.shippingDates[i]).isBefore(dto.shippingDate)) continue;
                 const planVariant = orderForExport.plan.getPlanVariantById(orderForExport.planVariantId);
                 const recipeSelection = orderForExport.recipeSelection.find(selection => selection.recipe.id.toString() === rating.recipe.id.toString())
                 const recipeVariantOfOrder = recipeSelection?.recipe.recipeVariants.find(recipeVariant => !restriction ? recipeVariant.restriction.value === "apto_todo" : recipeVariant.restriction.id.equals(restriction.id))

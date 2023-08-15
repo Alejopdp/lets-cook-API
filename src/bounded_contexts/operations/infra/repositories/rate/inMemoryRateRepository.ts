@@ -13,6 +13,9 @@ export class InMemoryRateRepository implements IRateRepository {
     constructor(rates: RecipeRating[]) {
         this._rates = rates;
     }
+    findBy(conditions: any, locale: Locale): Promise<RecipeRating[]> {
+        throw new Error("Method not implemented.");
+    }
     findAverageRatingByRecipe(recipeId: RecipeId): Promise<number> {
         throw new Error("Method not implemented.");
     }
