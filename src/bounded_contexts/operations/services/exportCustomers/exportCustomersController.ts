@@ -12,7 +12,10 @@ export class ExportCustomersController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            await this.exportCustomers.execute();
+            const dto = {
+                createdAt: this.req.query.createdAt ? new Date(this.req.query.createdAt as string) : undefined,
+            }
+            await this.exportCustomers.execute(dto);
 
             return this.res.download("Clientes.xlsx", (err) => fs.unlinkSync("Clientes.xlsx"));
         } catch (error: any) {
