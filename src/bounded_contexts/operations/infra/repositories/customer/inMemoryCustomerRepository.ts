@@ -10,6 +10,10 @@ export class InMemoryCustomerRepository implements ICustomerRepository {
         this.customers = customers;
     }
 
+    public async findBy(conditions: any): Promise<Customer[]> {
+        throw new Error("Method not implemented.");
+    }
+
     public async save(customer: Customer): Promise<void> {
         const customerIndex = this.customers.findIndex((c) => c.id.equals(customer.id));
         if (customerIndex !== -1) {

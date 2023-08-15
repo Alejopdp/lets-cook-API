@@ -8,6 +8,7 @@ import { ICustomerRepository } from "../../infra/repositories/customer/ICustomer
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { performance } from 'perf_hooks';
+import { ExportCustomersDto } from "./exportCustomersDto";
 
 
 
@@ -29,10 +30,11 @@ export class ExportCustomers {
         this._exportService = exportService;
     }
 
-    public async execute(): Promise<void> {
+    public async execute(dto: ExportCustomersDto): Promise<void> {
 
         const start = performance.now();
-        const [customers, subscriptions]: [Customer[], Subscription[]] = await Promise.all([this.customerRepository.findAll(), this.subscriptionRepository.findAll(Locale.es)]);
+        const customers: Customer[] = await this.customerRepository.findBy(dto.createdAt ? { createdAt: { $gte: dto.createdAt } } : {});
+        const subscriptions: Subscription[] = await this.subscriptionRepository.findBy({ customer: { $in: customers.map((customer) => customer.id.toString()) } }, Locale.es)
         const end = performance.now();
         console.log(`Customers & Subscriptions tardó ${end - start} milisegundos en ejecutarse`);
         const start2 = performance.now();
