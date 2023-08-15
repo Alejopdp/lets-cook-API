@@ -58,15 +58,15 @@ export class SkipOrders {
         const paymentOrdersMap: { [paymentOrderId: string]: PaymentOrder } = {};
         const skippedOrdersToSave: Order[] = [];
         const activeOrdersToSave: Order[] = [];
-        const ratingMap: { [ratingId: string]: RecipeRating } = {};
+        const ratingMap: { [recipeId: string]: RecipeRating } = {};
 
 
         for (let rating of customerRatings) {
-            ratingMap[rating.recipe.id.value] = rating;
+            ratingMap[rating.recipe.id.toString()] = rating;
         }
 
         for (let order of orders) {
-            ordersMap[order.id.value] = order;
+            ordersMap[order.id.toString()] = order;
         }
 
         for (let paymentOrder of paymentOrders) {
@@ -82,7 +82,7 @@ export class SkipOrders {
                 ordersSkippedDebugLogString = `${ordersSkippedLogString} | ${order.id.toString()}`;
             }
 
-            subscription?.skipOrder(order, relatedPaymentOrder, dto.skippingDate)
+            subscription?.skipOrder(order, relatedPaymentOrder, dto.queryDate)
             skippedOrdersToSave.push(order);
 
             for (let selection of order.recipeSelection) {
@@ -99,6 +99,11 @@ export class SkipOrders {
                 ordersUnskippedLogString = `${ordersUnskippedLogString}, ${order.getWeekLabel(dto.locale)}`;
                 ordersUnskippedDebugLogString = `${ordersUnskippedDebugLogString} | ${order.id.toString()}`;
             }
+            for (let selection of order.recipeSelection) {
+                var recipeRating = ratingMap[selection.recipe.id.toString()];
+
+                recipeRating.addOneDelivery(order.shippingDate);
+            }
 
             order.reactivate(paymentOrdersMap[order.paymentOrderId?.value!]);
             activeOrdersToSave.push(order);
@@ -110,7 +115,7 @@ export class SkipOrders {
             if (principalPlanOrders.every((o) => o.isSkipped() || o.isCancelled())) {
                 for (let order of orders) {
                     if (order.isActive() && order.paymentOrderId?.equals(paymentOrder.id) && !order.plan.isPrincipal()) {
-                        order.skip(paymentOrder, dto.skippingDate);
+                        order.skip(paymentOrder, dto.queryDate);
                         skippedOrdersToSave.push(order);
                     }
                 }
@@ -150,7 +155,7 @@ export class SkipOrders {
             );
         }
 
-        await this.updateDiscountsAfterSkippingOrders.execute({ subscriptionId: incomingOrders[0].subscriptionId.toString() })
+        await this.updateDiscountsAfterSkippingOrders.execute({ subscriptionId: incomingOrders[0].subscriptionId.toString(), queryDate: dto.queryDate })
     }
 
 

@@ -4,7 +4,7 @@
     "description": "Let's Cook Now API",
     "main": "server.ts",
     "engines": {
-        "npm": ">=7.0.0",
+        "npm": ">=6.0.0",
         "node": ">=14.0.0"
     },
     "scripts": {
@@ -16,7 +16,7 @@
         "webpack:master": "cross-env NODE_ENV=production webpack --config webpack.config.ts",
         "build:master": "cross-env NODE_ENV=production tsc",
         "lint": "eslint . --ext .ts",
-        "test": "jest"
+        "test": "jest --verbose"
     },
     "repository": {
         "type": "git",

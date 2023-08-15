@@ -19,6 +19,7 @@ export class GetSubscriptionByIdController extends BaseController {
             const dto: GetSubscriptionByIdDto = {
                 subscriptionId: this.req.params.id,
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                queryDate: new Date(),
             };
             const result = await this.getSubscriptionById.execute(dto);
             const presented = await this.getSubscriptionByIdPresenter.present(

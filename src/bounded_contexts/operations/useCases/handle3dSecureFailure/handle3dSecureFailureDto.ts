@@ -4,4 +4,5 @@ import { Customer } from "../../domain/customer/Customer";
 export interface Handle3dSecureFailureDto {
     subscriptionId: string;
     currentCustomer: Customer | User;
+    queryDate: Date;
 }

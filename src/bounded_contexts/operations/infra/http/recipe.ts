@@ -15,6 +15,7 @@ import { getNextWeekRecipesController } from "../../useCases/getNextWeekRecipes"
 import { deleteRecipeVariantController } from "../../useCases/deleteRecipeVariant";
 import { getActualWeekRecipesController } from "../../useCases/getActualWeekRecipes";
 import { Permission } from "../../../../bounded_contexts/IAM/domain/permission/Permission";
+import { exportRecipeRatingsController } from "../../useCases/exportRecipeRatings";
 
 const recipeRouter = express.Router();
 
@@ -31,6 +32,7 @@ recipeRouter.get("/for-order/:orderId", (req, res) => getRecipesForOrderControll
 recipeRouter.get("/filters", (req, res) => getRecipeFiltersController.execute(req, res));
 recipeRouter.get("/actual-week", (req, res) => getActualWeekRecipesController.execute(req, res));
 recipeRouter.get("/next-week", (req, res) => getNextWeekRecipesController.execute(req, res));
+recipeRouter.get("/export-ratings", middleware.ensureAdminAuthenticated([]), (req, res) => exportRecipeRatingsController.execute(req, res));
 recipeRouter.get("/:id", (req, res) => getRecipeByIdController.execute(req, res));
 recipeRouter.get("/recipes-list/by-restrictions", (req, res) => getRecipesByRestrictionsController.execute(req, res));
 

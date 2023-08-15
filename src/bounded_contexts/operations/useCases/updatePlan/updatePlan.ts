@@ -2,7 +2,7 @@ import { IStorageService } from "../../application/storageService/IStorageServic
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Plan } from "../../domain/plan/Plan";
-import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
+import { PlanFrequencyFactory, PlanFrequencyType } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanSku } from "../../domain/plan/PlanSku";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
@@ -47,10 +47,10 @@ export class UpdatePlan {
         const additionalPlans: Plan[] =
             dto.additionalPlansIds.length > 0
                 ? await this.planRepository.findAdditionalPlanListById(
-                      //@ts-ignore
-                      dto.additionalPlansIds.map((id: string | number) => new PlanId(id)),
-                      dto.locale
-                  )
+                    //@ts-ignore
+                    dto.additionalPlansIds.map((id: string | number) => new PlanId(id)),
+                    dto.locale
+                )
                 : [];
 
         const planSku: PlanSku = new PlanSku(dto.planSku);
@@ -151,7 +151,7 @@ export class UpdatePlan {
         //     plan.iconLinealColorUrl = iconLinealColorUrl;
         // }
 
-        plan.availablePlanFrecuencies = dto.availablePlanFrecuencies.map((freq: string) => PlanFrequencyFactory.createPlanFrequency(freq));
+        plan.availablePlanFrecuencies = dto.availablePlanFrecuencies.map((freq: PlanFrequencyType) => PlanFrequencyFactory.createPlanFrequency(freq));
         plan.description = dto.planDescription;
         plan.isActive = dto.isActive;
         plan.name = dto.planName;

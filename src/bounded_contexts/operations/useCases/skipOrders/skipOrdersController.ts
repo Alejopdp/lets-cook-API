@@ -19,7 +19,7 @@ export class SkipOrdersController extends BaseController {
                 ordersToReactivate: this.req.body.ordersToReactivate,
                 //@ts-ignore
                 nameOrEmailOfAdminExecutingRequest: this.req.currentUser?.role ? this.req.currentUser.getFullName() : undefined,
-                skippingDate: new Date()
+                queryDate: new Date(),
             };
             const result = await this.skipOrders.execute(dto);
 

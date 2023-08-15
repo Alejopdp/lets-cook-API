@@ -1,4 +1,4 @@
-import { Order } from "../../domain/order/Order";
+import { RecipeRatingExportRow } from "../../useCases/exportRecipeRatings/exportRecipeRatings";
 import {
     ActionExport,
     CancellationExport,
@@ -71,5 +71,13 @@ export class XlsxService implements IExportService {
 
         utils.book_append_sheet(workbook, sheet, "Selección recetas");
         writeFile(workbook, "Selección de recetas.xlsx");
+    }
+
+    public exportRecipeRatings(rows: RecipeRatingExportRow[]): void {
+        const workbook: WorkBook = utils.book_new();
+        const sheet: WorkSheet = utils.json_to_sheet(rows);
+
+        utils.book_append_sheet(workbook, sheet, "Valoración de recetas");
+        writeFile(workbook, "Valoración de recetas.xlsx");
     }
 }

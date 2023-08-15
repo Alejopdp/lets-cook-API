@@ -68,7 +68,7 @@ export class ApplyCouponToSubscription {
         };
         await this.couponValidationService.execute(isCouponValidDto);
 
-        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es);
+        const orders: Order[] = await this.orderRepository.findNextTwelveBySubscription(subscriptionId, Locale.es, dto.queryDate);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(orders.map((order) => order.paymentOrderId!));
 
         subscription.addCoupon(orders, paymentOrders, coupon, customerShippingZone.cost);

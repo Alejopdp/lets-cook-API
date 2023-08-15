@@ -21,6 +21,9 @@ export class GetPlanVariantsRecipesByWeekListController extends BaseController {
         try {
             const dto: GetPlanVariantsRecipesByWeekListDto = {
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                //@ts-ignore
+                customerId: this.req.currentUser?.id.toString(),
+
             };
 
             const result = await this.getPlanVariantsRecipesByWeekList.execute(dto);
@@ -28,7 +31,9 @@ export class GetPlanVariantsRecipesByWeekListController extends BaseController {
                 result.plans,
                 result.recipes,
                 result.week,
-                dto.locale
+                dto.locale,
+                result.averageRecipeRatingsMap,
+                result.userRatings
             );
 
             return this.ok(this.res, presented);

@@ -2,6 +2,7 @@ import { ReadStream } from "fs";
 import { Locale } from "../../domain/locale/Locale";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
+import { PlanFrequencyType } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 
 export interface UpdatePlanDto {
     id: string | number;
@@ -13,7 +14,7 @@ export interface UpdatePlanDto {
     planType: PlanType;
     planVariants: Array<any>;
     isActive: boolean;
-    availablePlanFrecuencies: PlanFrequency[];
+    availablePlanFrecuencies: PlanFrequencyType[];
     hasRecipes: boolean;
     additionalPlansIds: string[] | number[];
     planSlug: string;

@@ -35,7 +35,7 @@ export class ChangeSubscriptionFrequency {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const [subscription, orders, weeks]: [Subscription, Order[], Week[]] = await Promise.all([
             this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale),
-            this.orderRepository.findNextTwelveBySubscription(subscriptionId, dto.locale),
+            this.orderRepository.findNextTwelveBySubscription(subscriptionId, dto.locale, dto.queryDate),
             this.weekRepository.findAll(),
         ]);
         const allCustomerPaymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByCustomerId(subscription.customer.id);
@@ -58,8 +58,6 @@ export class ChangeSubscriptionFrequency {
         const nextSaturday: Date = orders[0].billingDate.getDay() === 6 ? orders[0].billingDate : saturday;
         const newBillingDates: Date[] = subscription.frequency.getNDatesWithFrequencyOffset(orders.length, nextSaturday);
         const newShippingDates: Date[] = subscription.frequency.getNDatesWithFrequencyOffset(orders.length, orders[0].shippingDate);
-
-        console.log("SATURDAY: ", nextSaturday);
 
         for (let i = 0; i < orders.length; i++) {
             if (orders[i]?.isBilled()) continue;

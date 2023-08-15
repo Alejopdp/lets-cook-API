@@ -38,7 +38,7 @@ export class GetCustomerSubscriptions {
             this.recipeRatingRepository.findAllByCustomer(customerId, dto.locale),
         ]);
         const subscriptionsIds: SubscriptionId[] = subscriptions.map((subscription) => subscription.id);
-        const nextOrders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(subscriptionsIds, dto.locale);
+        const nextOrders: Order[] = await this.orderRepository.findNextTwelveBySubscriptionList(subscriptionsIds, dto.locale, dto.queryDate);
 
         return { subscriptions, nextOrders, ratings, customer };
     }

@@ -3,7 +3,7 @@ import { Mapper } from "../../../core/infra/Mapper";
 import { Locale } from "../domain/locale/Locale";
 import { Plan } from "../domain/plan/Plan";
 import { IPlanFrequency } from "../domain/plan/PlanFrequency/IPlanFrequency";
-import { PlanFrequencyFactory } from "../domain/plan/PlanFrequency/PlanFrequencyFactory";
+import { PlanFrequencyFactory, PlanFrequencyType } from "../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../domain/plan/PlanId";
 import { PlanSku } from "../domain/plan/PlanSku";
 import { PlanSlug } from "../domain/plan/PlanSlug";
@@ -14,7 +14,7 @@ export class PlanMapper implements Mapper<Plan, any> {
     public toDomain(raw: any, locale: Locale): Plan {
         const sku: PlanSku = new PlanSku(raw.sku);
         const type: PlanType = (<any>PlanType)[raw.type];
-        const frequencies: IPlanFrequency[] = raw.availableFrequencies.map((freq: string) =>
+        const frequencies: IPlanFrequency[] = raw.availableFrequencies.map((freq: PlanFrequencyType) =>
             PlanFrequencyFactory.createPlanFrequency(freq)
         );
         const variants: PlanVariant[] = raw.variants.map((variant: any) => planVariantMapper.toDomain(variant));

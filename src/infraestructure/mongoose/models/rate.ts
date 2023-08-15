@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import * as uuid from "uuid";
 
 const RateSchema = new mongoose.Schema(
@@ -41,6 +41,16 @@ const RateSchema = new mongoose.Schema(
                 type: Date,
             },
         ],
+        dontRate: {
+            type: Boolean,
+            isRequired: true,
+            default: false,
+        },
+
+        recipeRating: {
+            type: Date,
+            isRequired: false,
+        },
         deletionFlag: {
             type: Boolean,
             isRequired: true,

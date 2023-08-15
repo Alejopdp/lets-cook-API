@@ -53,6 +53,44 @@ export class Week extends Entity<Week> {
         return aWeek.minDay.getTime() === auxDate.getTime();
     }
 
+    public startsAfterAWeekFrom(aDate: Date): boolean {
+        // Encontrar el lunes de la semana que contiene la fecha dada
+        const currentMonday = new Date(aDate);
+        currentMonday.setDate(currentMonday.getDate() - (currentMonday.getDay() - 1 + 7) % 7);
+
+        // Encontrar el lunes de la semana siguiente a esa semana
+        const nextMonday = new Date(currentMonday);
+        nextMonday.setDate(nextMonday.getDate() + 7);
+
+        // Comprobar si el lunes de la semana representada por esta clase es igual al lunes de la semana siguiente
+        return this._minDay.getTime() === nextMonday.getTime();
+    }
+    public startsTheWeekAfter(aDate: Date, tuVieja: Date): boolean {
+        // Encontrar el lunes de la semana que contiene la fecha dada
+        const currentMonday = new Date(aDate);
+        if (currentMonday.getDay() === 0) { // Si es domingo
+            currentMonday.setDate(currentMonday.getDate() + 1); // Sumar un día para llegar al lunes
+        } else {
+            currentMonday.setDate(currentMonday.getDate() - (currentMonday.getDay() - 1) + 7); // Calcula el lunes de la semana actual
+        }
+
+        // Encontrar el lunes de la semana siguiente a esa semana
+        const nextMonday = new Date(currentMonday);
+        nextMonday.setDate(nextMonday.getDate() + 7);
+
+        // Encontrar el lunes de la semana después de la siguiente semana
+        const weekAfterNextMonday = new Date(nextMonday);
+        weekAfterNextMonday.setDate(weekAfterNextMonday.getDate() + 7);
+
+        // Comprobar si el lunes de la semana representada por esta clase es igual al lunes de la semana después de la siguiente
+        return MomentTimeService.isSameDay(this._minDay, nextMonday);
+    }
+
+
+
+
+
+
     /**
      * Getter minDay
      * @return {Date}
