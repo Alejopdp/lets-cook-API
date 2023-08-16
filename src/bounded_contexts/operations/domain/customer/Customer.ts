@@ -11,6 +11,7 @@ import { Locale } from "../locale/Locale";
 import { IPreferredDeliveryTime } from "./preferredDeliveryTime/IPreferredDeliveryTime";
 import { Subscription } from "../subscription/Subscription";
 import { Order } from "../order/Order";
+import { Wallet } from "./wallet/Wallet";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -28,6 +29,7 @@ export class Customer extends Entity<Customer> {
     private _createdAt: Date;
     private _shopifyReceivedOrdersQuantity: number | undefined;
     private _firstOrderDate: Date | undefined;
+    private _wallet: Wallet | undefined;
 
     protected constructor(
         email: string,
@@ -45,7 +47,8 @@ export class Customer extends Entity<Customer> {
         id?: CustomerId,
         friendCode?: string,
         shopifyReceivedOrdersQuantity?: number,
-        firstOrderDate?: Date
+        firstOrderDate?: Date,
+        wallet?: Wallet
     ) {
         super(id);
         this._email = email;
@@ -63,6 +66,7 @@ export class Customer extends Entity<Customer> {
         this._createdAt = createdAt;
         this._shopifyReceivedOrdersQuantity = shopifyReceivedOrdersQuantity;
         this._firstOrderDate = firstOrderDate;
+        this._wallet = wallet;
     }
 
     public static create(
@@ -81,7 +85,8 @@ export class Customer extends Entity<Customer> {
         id?: CustomerId,
         friendCode?: string,
         shopifyReceivedOrdersQuantity?: number,
-        firstOrderDate?: Date
+        firstOrderDate?: Date,
+        wallet?: Wallet
     ): Customer {
         return new Customer(
             email,
@@ -100,6 +105,7 @@ export class Customer extends Entity<Customer> {
             friendCode,
             shopifyReceivedOrdersQuantity,
             firstOrderDate,
+            wallet
         );
     }
 
@@ -478,6 +484,24 @@ export class Customer extends Entity<Customer> {
     public get createdAt(): Date {
         return this._createdAt;
     }
+
+
+    /**
+     * Getter wallet
+     * @return {Wallet | undefined}
+     */
+    public get wallet(): Wallet | undefined {
+        return this._wallet;
+    }
+
+    /**
+     * Setter wallet
+     * @param {Wallet | undefined} value
+     */
+    public set wallet(value: Wallet | undefined) {
+        this._wallet = value;
+    }
+
 
     /**
      * Setter email

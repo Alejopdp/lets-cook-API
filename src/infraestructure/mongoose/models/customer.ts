@@ -189,6 +189,28 @@ const PaymentMethodSchema = new mongoose.Schema({
     },
 });
 
+const WalletSchema = new mongoose.Schema({
+    _id: {
+        type: String,
+        default: uuid.v4,
+    },
+    balance: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
+    amountToCharge: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
+    paymentMethodForCharging: {
+        type: String,
+        required: true,
+        default: "",
+    }
+});
+
 const CustomerSchema = new mongoose.Schema(
     {
         _id: {
@@ -246,6 +268,9 @@ const CustomerSchema = new mongoose.Schema(
         },
         firstOrderDate: {
             type: Date,
+        },
+        wallet: {
+            type: WalletSchema,
         },
         deletionFlag: {
             type: Boolean,
