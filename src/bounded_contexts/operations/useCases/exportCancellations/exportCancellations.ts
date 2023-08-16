@@ -19,7 +19,7 @@ export class ExportCancellations {
     public async execute(dto: ExportCancellationsDto): Promise<any> {
         const [subscriptions, cancelledSubscriptions]: [Subscription[], Subscription[]] = await Promise.all([
             this.subscriptionRepository.findAll(Locale.es),
-            this.subscriptionRepository.findAllCancelledSubscriptions(),
+            this.subscriptionRepository.findAllCancelledSubscriptions(dto.cancellationDate),
         ]);
         const ordersOfCancelledSubcriptions: Order[] = await this.orderRepository.findPastOrdersBySubscriptionIdList(
             cancelledSubscriptions.map((sub) => sub.id),

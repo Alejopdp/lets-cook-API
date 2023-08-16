@@ -21,7 +21,7 @@ export interface ISubscriptionRepository {
     findActiveSubscriptionByPlanVariantsIds(planVariantsIds: PlanVariantId[]): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerId(customerId: CustomerId): Promise<Subscription[]>;
     findActiveSusbcriptionsByCustomerIdList(customersIds: CustomerId[]): Promise<Subscription[]>;
-    findAllCancelledSubscriptions(): Promise<Subscription[]>;
+    findAllCancelledSubscriptions(cancellationDate: Date | undefined): Promise<Subscription[]>;
     findByCouponId(couponId: CouponId): Promise<Subscription[]>;
     delete(subscriptionId: SubscriptionId): Promise<void>;
     destroy(subscriptionId: SubscriptionId): Promise<void>;

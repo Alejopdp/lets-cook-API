@@ -1,1 +1,3 @@
-export interface ExportCancellationsDto {}
+export interface ExportCancellationsDto {
+    cancellationDate: Date | undefined;
+}
