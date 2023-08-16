@@ -13,7 +13,7 @@ export class ExportCancellationsController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const dto: ExportCancellationsDto = {};
+            const dto: ExportCancellationsDto = { cancellationDate: this.req.query.cancellationDate ? new Date(this.req.query.cancellationDate as string) : undefined };
 
             await this.exportCancellations.execute(dto);
 

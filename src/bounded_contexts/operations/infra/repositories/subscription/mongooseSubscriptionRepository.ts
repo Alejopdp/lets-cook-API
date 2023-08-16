@@ -67,8 +67,11 @@ export class MongooseSubscriptionRepository implements ISubscriptionRepository {
         return await this.findBy({}, locale);
     }
 
-    public async findAllCancelledSubscriptions(): Promise<Subscription[]> {
-        return await this.findBy({ state: "SUBSCRIPTION_CANCELLED" }, undefined, { sort: { "cancellation.date": -1 } });
+    public async findAllCancelledSubscriptions(cancellationDate: Date | undefined): Promise<Subscription[]> {
+        const query = { state: "SUBSCRIPTION_CANCELLED" } as any
+        if (cancellationDate) query["cancellation.date"] = { $gte: cancellationDate }
+
+        return await this.findBy(query, undefined, { sort: { "cancellation.date": -1 } });
     }
 
     public async findBy(conditions: any, locale: Locale = Locale.es, options?: QueryOptions): Promise<Subscription[]> {
