@@ -31,6 +31,9 @@ import { TUESDAY } from "../../mocks/days";
 import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZone";
 import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order";
 import { RecipeRating } from "../../../src/bounded_contexts/operations/domain/recipeRating/RecipeRating";
+import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day";
+import { MoveOrderShippingDate } from "../../../src/bounded_contexts/operations/useCases/moveOrderShippingDate/moveOrderShippingDate"
+import { MomentTimeService } from "../../../src/bounded_contexts/operations/application/timeService/momentTimeService";
 
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
 const mockShippingZoneRepository = new InMemoryShippingZoneRepository([])
@@ -546,6 +549,20 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
                     arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
                 })
+
+                it("Should be able to select recipes for the next week (+1) if it is an admin", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: true,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 5, 17)
+                    }
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
 
             describe("When it's sunday", () => {
@@ -710,6 +727,20 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
                     arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
                 })
+
+                it("Should be able to select recipes for the current week if it is an admin", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: true,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 7, 17)
+                    }
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
 
 
@@ -777,6 +808,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
                     arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
                 })
+
                 it("Shouldn't be able to select recipes for the current week", async () => {
                     const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
                         isAdminChoosing: false,
@@ -791,33 +823,514 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
                     arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
                 })
+
+                it("Should be able to select recipes for the current week if it is an admin", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: true,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 8, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
         })
 
         describe("When has a shipping day set to Wednesdays", () => {
+            beforeAll(async () => {
+                customerShippingZone.shippingDayOfWeek = new Day(3)
+            })
+
             describe("When it's thursday", () => {
-                it("Should be able to select recipes for the next week (+1)", async () => { })
+                const CUSTOMER_ID = new CustomerId()
+                const THURSDAY_PURCHASE_DATE: Date = new Date(2023, 7, 3, 17)
+
+                beforeAll(async () => {
+                    customer = Customer.create(
+                        CUSTOMER_EMAIL,
+                        true,
+                        "",
+                        [],
+                        0,
+                        THURSDAY_PURCHASE_DATE,
+                        undefined,
+                        undefined,
+                        CUSTOMER_PASSWORD,
+                        "active",
+                        undefined,
+                        undefined,
+                        CUSTOMER_ID
+                    )
+                    await mockCustomerRepository.save(customer)
+
+                    const createSubscriptionDto = {
+                        customerId: CUSTOMER_ID.toString(),
+                        planId: planVegetariano.id.toString(),
+                        planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+                        planFrequency: "weekly",
+                        restrictionComment: "string",
+                        stripePaymentMethodId: "",
+                        couponId: undefined,
+                        paymentMethodId: "string",
+                        addressName: CUSTOMER_ADDRESS_NAME,
+                        addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                        latitude: CUSTOMER_LATITUDE,
+                        longitude: CUSTOMER_LONGITUDE,
+                        customerFirstName: CUSTOMER_FIRST_NAME,
+                        customerLastName: CUSTOMER_LAST_NAME,
+                        phone1: CUSTOMER_PHONE,
+                        locale: Locale.es,
+                        shippingCity: "Alboraya",
+                        shippingProvince: "Valencia",
+                        shippingPostalCode: "46120",
+                        shippingCountry: "España",
+                        purchaseDate: THURSDAY_PURCHASE_DATE
+                    }
+                    subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+                })
+
+                it("Should be able to select recipes for the next week (+1)", async () => {
+                    const THURSDAY_PURCHASE_DATE: Date = new Date(2023, 7, 3, 17)
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [],
+                        choosingDate: THURSDAY_PURCHASE_DATE
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
             describe("When it's friday", () => {
-                it("Should be able to select recipes for the next week (+1)", async () => { })
+                const CUSTOMER_ID = new CustomerId()
+                const FRIDAY_PURCHASE_DATE: Date = new Date(2023, 7, 4, 17)
+
+                beforeAll(async () => {
+                    customer = Customer.create(
+                        CUSTOMER_EMAIL,
+                        true,
+                        "",
+                        [],
+                        0,
+                        FRIDAY_PURCHASE_DATE,
+                        undefined,
+                        undefined,
+                        CUSTOMER_PASSWORD,
+                        "active",
+                        undefined,
+                        undefined,
+                        CUSTOMER_ID
+                    )
+                    await mockCustomerRepository.save(customer)
+
+                    const createSubscriptionDto = {
+                        customerId: CUSTOMER_ID.toString(),
+                        planId: planVegetariano.id.toString(),
+                        planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+                        planFrequency: "weekly",
+                        restrictionComment: "string",
+                        stripePaymentMethodId: "",
+                        couponId: undefined,
+                        paymentMethodId: "string",
+                        addressName: CUSTOMER_ADDRESS_NAME,
+                        addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                        latitude: CUSTOMER_LATITUDE,
+                        longitude: CUSTOMER_LONGITUDE,
+                        customerFirstName: CUSTOMER_FIRST_NAME,
+                        customerLastName: CUSTOMER_LAST_NAME,
+                        phone1: CUSTOMER_PHONE,
+                        locale: Locale.es,
+                        shippingCity: "Alboraya",
+                        shippingProvince: "Valencia",
+                        shippingPostalCode: "46120",
+                        shippingCountry: "España",
+                        purchaseDate: FRIDAY_PURCHASE_DATE
+                    }
+                    subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+                })
+                it("Should be able to select recipes for the next week (+1)", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: FRIDAY_PURCHASE_DATE
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
             describe("When it's saturday", () => {
-                it("Shouldn't be able to select recipes for the next week (+1)", async () => { })
+                const CUSTOMER_ID = new CustomerId()
+                const FRIDAY_PURCHASE_DATE: Date = new Date(2023, 7, 4, 17)
+
+                beforeAll(async () => {
+                    customer = Customer.create(
+                        CUSTOMER_EMAIL,
+                        true,
+                        "",
+                        [],
+                        0,
+                        FRIDAY_PURCHASE_DATE,
+                        undefined,
+                        undefined,
+                        CUSTOMER_PASSWORD,
+                        "active",
+                        undefined,
+                        undefined,
+                        CUSTOMER_ID
+                    )
+                    await mockCustomerRepository.save(customer)
+
+                    const createSubscriptionDto = {
+                        customerId: CUSTOMER_ID.toString(),
+                        planId: planVegetariano.id.toString(),
+                        planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+                        planFrequency: "weekly",
+                        restrictionComment: "string",
+                        stripePaymentMethodId: "",
+                        couponId: undefined,
+                        paymentMethodId: "string",
+                        addressName: CUSTOMER_ADDRESS_NAME,
+                        addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                        latitude: CUSTOMER_LATITUDE,
+                        longitude: CUSTOMER_LONGITUDE,
+                        customerFirstName: CUSTOMER_FIRST_NAME,
+                        customerLastName: CUSTOMER_LAST_NAME,
+                        phone1: CUSTOMER_PHONE,
+                        locale: Locale.es,
+                        shippingCity: "Alboraya",
+                        shippingProvince: "Valencia",
+                        shippingPostalCode: "46120",
+                        shippingCountry: "España",
+                        purchaseDate: FRIDAY_PURCHASE_DATE
+                    }
+                    subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+                })
+
+                it("Shouldn't be able to select recipes for the next week (+1)", async () => {
+
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 5, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
+
+                it("Should be able to select recipes for the next week (+1) if it is an admin", async () => {
+
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: true,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 5, 17)
+                    }
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
             describe("When it's sunday", () => {
-                it("Should be able to select recipes for the next week (+2)", async () => { })
+                const CUSTOMER_ID = new CustomerId()
+                const FRIDAY_PURCHASE_DATE: Date = new Date(2023, 7, 4, 17)
+
+                beforeAll(async () => {
+                    customer = Customer.create(
+                        CUSTOMER_EMAIL,
+                        true,
+                        "",
+                        [],
+                        0,
+                        FRIDAY_PURCHASE_DATE,
+                        undefined,
+                        undefined,
+                        CUSTOMER_PASSWORD,
+                        "active",
+                        undefined,
+                        undefined,
+                        CUSTOMER_ID
+                    )
+                    await mockCustomerRepository.save(customer)
+
+                    const createSubscriptionDto = {
+                        customerId: CUSTOMER_ID.toString(),
+                        planId: planVegetariano.id.toString(),
+                        planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+                        planFrequency: "weekly",
+                        restrictionComment: "string",
+                        stripePaymentMethodId: "",
+                        couponId: undefined,
+                        paymentMethodId: "string",
+                        addressName: CUSTOMER_ADDRESS_NAME,
+                        addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                        latitude: CUSTOMER_LATITUDE,
+                        longitude: CUSTOMER_LONGITUDE,
+                        customerFirstName: CUSTOMER_FIRST_NAME,
+                        customerLastName: CUSTOMER_LAST_NAME,
+                        phone1: CUSTOMER_PHONE,
+                        locale: Locale.es,
+                        shippingCity: "Alboraya",
+                        shippingProvince: "Valencia",
+                        shippingPostalCode: "46120",
+                        shippingCountry: "España",
+                        purchaseDate: FRIDAY_PURCHASE_DATE
+                    }
+                    subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+                })
+
+                it("Shouldn't be able to select recipes for the next week (+1)", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 6, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
+
+                it("Should be able to select recipes for the next week (+2)", async () => {
+                    const orders = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.week.minDay.getTime() - b.week.minDay.getTime())
+                    const secondOrder: Order = orders[1]
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: secondOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 6, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, secondOrder.week]
+                    expect(secondOrder.shippingDate.getDay())
+
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
             describe("When it's monday", () => {
-                it("Should be able to select recipes for the next week (+2)", async () => { })
+                const CUSTOMER_ID = new CustomerId()
+                const FRIDAY_PURCHASE_DATE: Date = new Date(2023, 7, 4, 17)
+
+                beforeAll(async () => {
+                    customer = Customer.create(
+                        CUSTOMER_EMAIL,
+                        true,
+                        "",
+                        [],
+                        0,
+                        FRIDAY_PURCHASE_DATE,
+                        undefined,
+                        undefined,
+                        CUSTOMER_PASSWORD,
+                        "active",
+                        undefined,
+                        undefined,
+                        CUSTOMER_ID
+                    )
+                    await mockCustomerRepository.save(customer)
+
+                    const createSubscriptionDto = {
+                        customerId: CUSTOMER_ID.toString(),
+                        planId: planVegetariano.id.toString(),
+                        planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+                        planFrequency: "weekly",
+                        restrictionComment: "string",
+                        stripePaymentMethodId: "",
+                        couponId: undefined,
+                        paymentMethodId: "string",
+                        addressName: CUSTOMER_ADDRESS_NAME,
+                        addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                        latitude: CUSTOMER_LATITUDE,
+                        longitude: CUSTOMER_LONGITUDE,
+                        customerFirstName: CUSTOMER_FIRST_NAME,
+                        customerLastName: CUSTOMER_LAST_NAME,
+                        phone1: CUSTOMER_PHONE,
+                        locale: Locale.es,
+                        shippingCity: "Alboraya",
+                        shippingProvince: "Valencia",
+                        shippingPostalCode: "46120",
+                        shippingCountry: "España",
+                        purchaseDate: FRIDAY_PURCHASE_DATE
+                    }
+                    subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+                })
+
+                it("Should be able to select recipes for the next week (+2)", async () => {
+                    const orders = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.week.minDay.getTime() - b.week.minDay.getTime())
+                    const secondOrder = orders[1]
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: secondOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 7, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, secondOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
+
+                it("Shouldn't be able to select recipes for the current week", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 7, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
+
+                it("Should be able to select recipes for the current week if it is an admin", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: true,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 7, 17)
+                    }
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
             describe("When it's tuesday", () => {
-                it("Should be able to select recipes for the next week (+2)", async () => { })
+                const CUSTOMER_ID = new CustomerId()
+                const FRIDAY_PURCHASE_DATE: Date = new Date(2023, 7, 4, 17)
+
+                beforeAll(async () => {
+                    customer = Customer.create(
+                        CUSTOMER_EMAIL,
+                        true,
+                        "",
+                        [],
+                        0,
+                        FRIDAY_PURCHASE_DATE,
+                        undefined,
+                        undefined,
+                        CUSTOMER_PASSWORD,
+                        "active",
+                        undefined,
+                        undefined,
+                        CUSTOMER_ID
+                    )
+                    await mockCustomerRepository.save(customer)
+
+                    const createSubscriptionDto = {
+                        customerId: CUSTOMER_ID.toString(),
+                        planId: planVegetariano.id.toString(),
+                        planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+                        planFrequency: "weekly",
+                        restrictionComment: "string",
+                        stripePaymentMethodId: "",
+                        couponId: undefined,
+                        paymentMethodId: "string",
+                        addressName: CUSTOMER_ADDRESS_NAME,
+                        addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                        latitude: CUSTOMER_LATITUDE,
+                        longitude: CUSTOMER_LONGITUDE,
+                        customerFirstName: CUSTOMER_FIRST_NAME,
+                        customerLastName: CUSTOMER_LAST_NAME,
+                        phone1: CUSTOMER_PHONE,
+                        locale: Locale.es,
+                        shippingCity: "Alboraya",
+                        shippingProvince: "Valencia",
+                        shippingPostalCode: "46120",
+                        shippingCountry: "España",
+                        purchaseDate: FRIDAY_PURCHASE_DATE
+                    }
+                    subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+                })
+
+                it("Should be able to select recipes for the next week (+2)", async () => {
+                    const orders = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.week.minDay.getTime() - b.week.minDay.getTime())
+                    const secondOrder = orders[1]
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: secondOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 8, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, secondOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
+
+                it("Shouldn't be able to select recipes for the current week", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: false,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 8, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
+
+                it("Should be able to select recipes for the current week if it is an admin", async () => {
+                    const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                        isAdminChoosing: true,
+                        orderId: subscriptionResult.firstOrder.id.toString(),
+                        recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                        choosingDate: new Date(2023, 7, 8, 17)
+                    }
+
+                    const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+                    arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+                    await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+                    arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+                })
             })
             describe("When it's wednesday", () => {
                 it("Should be able to select recipes for the next week (+2)", async () => { })
             })
         })
 
+        afterAll(async () => {
+            customerShippingZone.shippingDayOfWeek = new Day(2)
+        })
 
 
     })
@@ -835,6 +1348,21 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
             await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+        })
+
+        it("Should not throw an error if an admin its selecting", async () => {
+            const SATURDAY_PURCHASE_DATE = new Date(2023, 7, 5, 17)
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: true,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [],
+                choosingDate: SATURDAY_PURCHASE_DATE
+            }
+
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
             arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
         })
     })
@@ -918,6 +1446,21 @@ describe("Update recipes selection", () => {
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
             await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
             arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+        })
+
+        it("Should not throw an error if an admin its selecting", async () => {
+            const FRIDAY_AFTER_PURCHASE_DATE = new Date(2023, 7, 5, 0, 0)
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: true,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                choosingDate: FRIDAY_AFTER_PURCHASE_DATE
+            }
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+
         })
     })
 })
@@ -1008,4 +1551,98 @@ describe("Given a user with selected recipes for his subscription", () => {
 
     })
 })
-// describe("Choose recipes for the second time or more")
+
+describe("Given a new subscription with a skipped week", () => {
+    const CUSTOMER_ID = new CustomerId()
+    let customer: Customer
+    let subscriptionResult: any
+    const PURCHASE_DATE: Date = new Date(2023, 7, 14, 17)
+
+    beforeAll(async () => {
+        customer = Customer.create(
+            CUSTOMER_EMAIL,
+            true,
+            "",
+            [],
+            0,
+            new Date(),
+            undefined,
+            undefined,
+            CUSTOMER_PASSWORD,
+            "active",
+            undefined,
+            undefined,
+            CUSTOMER_ID
+        )
+        await mockCustomerRepository.save(customer)
+
+        const createSubscriptionDto = {
+            customerId: CUSTOMER_ID.toString(),
+            planId: planVegetariano.id.toString(),
+            planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+            planFrequency: "weekly",
+            restrictionComment: "string",
+            stripePaymentMethodId: "",
+            couponId: undefined,
+            paymentMethodId: "string",
+            addressName: CUSTOMER_ADDRESS_NAME,
+            addressDetails: CUSTOMER_ADDRESS_DETAILS,
+            latitude: CUSTOMER_LATITUDE,
+            longitude: CUSTOMER_LONGITUDE,
+            customerFirstName: CUSTOMER_FIRST_NAME,
+            customerLastName: CUSTOMER_LAST_NAME,
+            phone1: CUSTOMER_PHONE,
+            locale: Locale.es,
+            shippingCity: "Alboraya",
+            shippingProvince: "Valencia",
+            shippingPostalCode: "46120",
+            shippingCountry: "España",
+            purchaseDate: PURCHASE_DATE
+        }
+        subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+
+    })
+
+
+    describe("When an admin moves the shipping date", () => {
+        const MOVING_DATE = new Date(2023, 7, 14, 18)
+        const CHOOSING_DATE = new Date(2023, 7, 14, 19)
+
+        beforeAll(async () => {
+            const moveOrderUseCase: MoveOrderShippingDate = new MoveOrderShippingDate(mockOrderRepository, mockSubscriptionRepository, mockPaymentOrderRepository, mockWeekRepository)
+            const firstOrder: Order = subscriptionResult.firstOrder
+            await moveOrderUseCase.execute({ orderId: firstOrder.id.toString(), queryDate: MOVING_DATE })
+        })
+
+        it("Should be able to choose recipes if an admin is selecting", async () => {
+            const firstOrder: Order = subscriptionResult.firstOrder
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: true,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                choosingDate: CHOOSING_DATE
+            }
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+
+        })
+
+        it("Should throw an error if a customer is choosing", async () => {
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: false,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                choosingDate: CHOOSING_DATE
+            }
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+
+        })
+    })
+})
