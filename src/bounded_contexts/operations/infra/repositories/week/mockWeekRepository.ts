@@ -98,8 +98,12 @@ export class MockWeekRepository implements IWeekRepository {
     findNextWeek(): Promise<Week | undefined> {
         throw new Error("Method not implemented.");
     }
-    findCurrentWeek(date: Date): Promise<Week> {
-        throw new Error("Method not implemented.");
+    public async findCurrentWeek(date: Date): Promise<Week> {
+        const week = this.weeks.find((week) => week.containsDate(date));
+
+        if (!!!week) throw new Error(`No existe una semana que contenga la fecha ${date}`);
+
+        return week;
     }
 
     bulkSave(weeks: Week[]): Promise<void> {
