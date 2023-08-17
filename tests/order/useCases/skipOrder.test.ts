@@ -323,14 +323,15 @@ describe("Skip Order Use case", () => {
         describe("When the user skips the next active order with a recipe selection", () => {
             let skippedOrder: Order
             const PURCHASE_DATE = new Date("2023-08-08")
-            const CHOOSING_DATE = new Date("2023-08-16")
+            // const CHOOSING_DATE = new Date("2023-08-16")
+            const CHOOSING_DATE = new Date(2023, 7, 16, 17)
             const SKIPPING_DATE = new Date("2023-08-17")
 
             beforeAll(async () => {
                 firstSubscriptionResult = await createSubscriptionUseCase.execute({ ...createSubscriptionDto, purchaseDate: PURCHASE_DATE })
                 const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
                 skippedOrder = orders.find((order) => order.isActive())!
-
+                console.log("/////////  SKIPPED ORDER SHIPPING DATE: ", skippedOrder.shippingDate)
                 const burguerHalloumiOriginalWeeks = [...burgerHallouli.availableWeeks]
                 burgerHallouli.availableWeeks = [skippedOrder.week]
 
