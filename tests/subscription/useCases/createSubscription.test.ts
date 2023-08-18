@@ -93,7 +93,7 @@ mockShippingZoneRepository.save(customerShippingZone)
 
 
 describe("Create Subscription Use Case", () => {
-    let createSubscriptionDto: any
+    let createSubscriptionDto: CreateSubscriptionDto
     let firstSubscriptionResult: any
 
     beforeAll(async () => {
@@ -409,6 +409,7 @@ describe("Create Subscription Use Case", () => {
                         const difference = moment(paymentOrder.billingDate).diff(moment(previousPaymentOrder.billingDate), 'days')
                         expect(difference).toBe(7)
                     }
+
                 })
             })
         })

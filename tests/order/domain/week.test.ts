@@ -75,7 +75,6 @@ describe('Week', () => {
 describe('Week', () => {
     describe("Starts the week after (+2) from sunday", () => {
         it('should return true if the week starts after a week from the given date', () => {
-            console.log("EL test que nov a")
             const date = new Date('2023-08-06');
             const shipping_date = new Date('2023-08-14');
             expect(WEEK_14_AGO_2023.startsTheWeekAfter(date, shipping_date)).toBe(true);
