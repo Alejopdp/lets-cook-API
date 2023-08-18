@@ -19,6 +19,7 @@ export class GetGoogleReviewsController extends BaseController {
 
             const result = await this.getGoogleReviews.execute(dto);
 
+            this.res.header("X-Robots-Tag", "noindex")
             return this.ok(this.res, result);
         } catch (error) {
             return this.fail(error as Error);
