@@ -47,6 +47,11 @@ const RateSchema = new mongoose.Schema(
             default: false,
         },
 
+        ratingDate: {
+            type: Date,
+            isRequired: false,
+        },
+
         recipeRating: {
             type: Date,
             isRequired: false,
