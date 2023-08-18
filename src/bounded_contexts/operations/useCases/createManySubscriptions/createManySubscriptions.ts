@@ -15,7 +15,7 @@ import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Plan } from "../../domain/plan/Plan";
 import { PlanFrequency } from "../../domain/plan/PlanFrequency";
 import { IPlanFrequency } from "../../domain/plan/PlanFrequency/IPlanFrequency";
-import { PlanFrequencyFactory } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
+import { PlanFrequencyFactory, PlanFrequencyType } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 import { PlanId } from "../../domain/plan/PlanId";
 import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { PlanVariantId } from "../../domain/plan/PlanVariant/PlanVariantId";
@@ -137,7 +137,7 @@ export class CreateManySubscriptions {
         const frequencySusbcriptionEntries = Object.entries(frequencySubscriptionMap);
 
         for (let entry of frequencySusbcriptionEntries) {
-            const frequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(entry[0]);
+            const frequency: IPlanFrequency = PlanFrequencyFactory.createPlanFrequency(entry[0] as PlanFrequencyType);
             const weeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(frequency, entry[1][0].getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek()), new Date());
 
             for (let subscription of entry[1]) {

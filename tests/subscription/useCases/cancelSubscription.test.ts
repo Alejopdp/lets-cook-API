@@ -34,6 +34,7 @@ import { Order } from "../../../src/bounded_contexts/operations/domain/order/Ord
 import { RecipeRating } from "../../../src/bounded_contexts/operations/domain/recipeRating/RecipeRating";
 import { IMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/IMailingListService";
 import { MockMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/mockMailingListService";
+import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto";
 
 
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -105,7 +106,7 @@ describe('Cancel subscriptiont tests', () => {
             )
             await mockCustomerRepository.save(customer)
 
-            const createSubscriptionDto = {
+            const createSubscriptionDto: CreateSubscriptionDto = {
                 customerId: CUSTOMER_ID.toString(),
                 planId: planVegetariano.id.toString(),
                 planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),

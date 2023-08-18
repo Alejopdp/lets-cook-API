@@ -254,10 +254,10 @@ export class Subscription extends Entity<Subscription> {
         coupon.addApplication(this.customer);
     }
 
-    public skipOrder(orderToSkip: Order, relatedPaymentOrder: PaymentOrder): void {
+    public skipOrder(orderToSkip: Order, relatedPaymentOrder: PaymentOrder, skippingDate: Date): void {
         // TODO: Mover descuento para free shipping tmb
         if (orderToSkip.discountAmount > 0) this.couponChargesQtyApplied--
-        orderToSkip.skip(relatedPaymentOrder)
+        orderToSkip.skip(relatedPaymentOrder, skippingDate)
 
     }
 

@@ -197,14 +197,22 @@ export class Order extends Entity<Order> {
         return this.state.isPaymentRejected();
     }
 
-    public skip(paymentOrder: PaymentOrder): void {
-        // If 
+    public skip(paymentOrder: PaymentOrder, skippingDate: Date): void {
+        if (skippingDate > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
         if (this.isBilled()) throw new Error("No es posible saltar una orden que ya fue cobrada");
-        const today = new Date();
-
         if (this.isSkipped()) return;
 
-        if (today > this.shippingDate) throw new Error("No es posible saltar una orden pasada");
+        let lastFriday = new Date(this.shippingDate.getTime());
+
+        // Restar días hasta llegar al viernes anterior
+        while (lastFriday.getDay() !== 5) { // 5 es viernes
+            lastFriday.setDate(lastFriday.getDate() - 1);
+        }
+
+        // Establecer la hora a 23:59
+        lastFriday.setHours(23, 59, 59, 999);
+
+        if (skippingDate.getTime() > lastFriday.getTime()) throw new Error("No es posible saltar una orden después del viernes a las 23:59")
 
         paymentOrder.discountOrderAmount(this);
 
