@@ -1,10 +1,11 @@
 import { Locale } from "../../domain/locale/Locale";
+import { PlanFrequencyType } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 
 export interface CreateSubscriptionDto {
     customerId: string | number;
     planId: string | number;
     planVariantId: string | number;
-    planFrequency: string;
+    planFrequency: PlanFrequencyType;
     restrictionComment: string;
     stripePaymentMethodId: string;
     couponId?: string | number;

@@ -1,6 +1,7 @@
 import { ReadStream } from "fs";
 import { Locale } from "../../domain/locale/Locale";
 import { PlanType } from "../../domain/plan/PlanType/PlanType";
+import { PlanFrequencyType } from "../../domain/plan/PlanFrequency/PlanFrequencyFactory";
 
 export interface CreatePlanDto {
     planName: string;
@@ -11,7 +12,7 @@ export interface CreatePlanDto {
     planType: PlanType;
     planVariants: Array<any>;
     isActive: boolean;
-    availablePlanFrecuencies: string[];
+    availablePlanFrecuencies: PlanFrequencyType[];
     hasRecipes: boolean;
     additionalPlansIds: string[];
     planSlug: string;
