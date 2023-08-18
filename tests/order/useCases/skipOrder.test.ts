@@ -193,7 +193,7 @@ describe("Skip Order Use case", () => {
             })
         })
 
-        describe("When the user reactivate the skipped order", () => {
+        describe("When the user reactivates the skipped order", () => {
             let skippedOrder: Order
 
             beforeAll(async () => {
