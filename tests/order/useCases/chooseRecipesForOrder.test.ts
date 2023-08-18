@@ -591,7 +591,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     )
                     await mockCustomerRepository.save(customer)
 
-                    const createSubscriptionDto = {
+                    const createSubscriptionDto: CreateSubscriptionDto = {
                         customerId: CUSTOMER_ID.toString(),
                         planId: planVegetariano.id.toString(),
                         planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
@@ -612,7 +612,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         shippingProvince: "Valencia",
                         shippingPostalCode: "46120",
                         shippingCountry: "España",
-                        purchaseDate: FRIDAY_PURCHASE_DATE
+                        purchaseDate: FRIDAY_PURCHASE_DATE,
                     }
                     subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
                 })
@@ -675,7 +675,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     )
                     await mockCustomerRepository.save(customer)
 
-                    const createSubscriptionDto = {
+                    const createSubscriptionDto: CreateSubscriptionDto = {
                         customerId: CUSTOMER_ID.toString(),
                         planId: planVegetariano.id.toString(),
                         planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
@@ -771,7 +771,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     )
                     await mockCustomerRepository.save(customer)
 
-                    const createSubscriptionDto = {
+                    const createSubscriptionDto: CreateSubscriptionDto = {
                         customerId: CUSTOMER_ID.toString(),
                         planId: planVegetariano.id.toString(),
                         planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
@@ -873,7 +873,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     )
                     await mockCustomerRepository.save(customer)
 
-                    const createSubscriptionDto = {
+                    const createSubscriptionDto: CreateSubscriptionDto = {
                         customerId: CUSTOMER_ID.toString(),
                         planId: planVegetariano.id.toString(),
                         planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
@@ -937,7 +937,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     )
                     await mockCustomerRepository.save(customer)
 
-                    const createSubscriptionDto = {
+                    const createSubscriptionDto: CreateSubscriptionDto = {
                         customerId: CUSTOMER_ID.toString(),
                         planId: planVegetariano.id.toString(),
                         planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
@@ -999,7 +999,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                     )
                     await mockCustomerRepository.save(customer)
 
-                    const createSubscriptionDto = {
+                    const createSubscriptionDto: CreateSubscriptionDto = {
                         customerId: CUSTOMER_ID.toString(),
                         planId: planVegetariano.id.toString(),
                         planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
@@ -1587,7 +1587,7 @@ describe("Given a new subscription", () => {
         )
         await mockCustomerRepository.save(customer)
 
-        const createSubscriptionDto = {
+        const createSubscriptionDto: CreateSubscriptionDto = {
             customerId: CUSTOMER_ID.toString(),
             planId: planVegetariano.id.toString(),
             planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
@@ -1662,7 +1662,7 @@ describe("Given a new subscription with a skipped week", () => {
         )
         await mockCustomerRepository.save(customer)
 
-        const createSubscriptionDto = {
+        const createSubscriptionDto: CreateSubscriptionDto = {
             customerId: CUSTOMER_ID.toString(),
             planId: planVegetariano.id.toString(),
             planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
