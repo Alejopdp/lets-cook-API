@@ -15,9 +15,7 @@ import { OrderId } from "./OrderId";
 import { IOrderState } from "./orderState/IOrderState";
 import { RecipeSelection } from "./RecipeSelection";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
-import { RecipeVariant } from "../recipe/RecipeVariant/RecipeVariant";
 import { Locale } from "../locale/Locale";
-import { RecipeRating } from "../recipeRating/RecipeRating";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -102,20 +100,26 @@ export class Order extends Entity<Order> {
         const isFridayAfter23 = choosingDate.getDay() === 5 && choosingDate.getHours() >= 23 && choosingDate.getMinutes() >= 59;
         const isChoosingTheSameDateOfCreation = MomentTimeService.isSameDay(choosingDate, this.createdAt);
         const itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing = isSaturday && !isChoosingTheSameDateOfCreation;
+        const isChoosingRecipesForTheCurrentWeek = this.week.containsDate(choosingDate) && this.week.containsDate(this.shippingDate);
 
-        if (isMonday && this.isShippingOnTuesdayOrWednesdayOfSameWeek(choosingDate)) {
+        if (isMonday && isChoosingRecipesForTheCurrentWeek && !isAdminChoosing) {
             throw new Error('No puedes elegir recetas el lunes para una entrega el martes o miércoles de la misma semana.');
         }
 
-        if (isTuesday && MomentTimeService.isSameDay(this.shippingDate, choosingDate)) {
-            throw new Error('No puedes elegir recetas el martes para una entrega el mismo martes.');
+        if (isTuesday && isChoosingRecipesForTheCurrentWeek && !isAdminChoosing) {
+            throw new Error('No puedes elegir recetas el martes para una entrega el martes o miércoles de la misma semana.');
         }
 
-        if (isWednesday && MomentTimeService.isSameDay(this.shippingDate, choosingDate)) {
+        if (isWednesday && isChoosingRecipesForTheCurrentWeek && !isAdminChoosing) {
+            throw new Error('No puedes elegir recetas el miércoles para una entrega el martes o miércoles de la misma semana.');
+        }
+
+
+        if (isWednesday && MomentTimeService.isSameDay(this.shippingDate, choosingDate) && !isAdminChoosing) {
             throw new Error('No puedes elegir recetas el miércoles para una entrega el mismo miércoles.');
         }
 
-        if (isSaturday && !isChoosingTheSameDateOfCreation) {
+        if (isSaturday && !isChoosingTheSameDateOfCreation && !isAdminChoosing) {
             throw new Error('No puedes elegir recetas el sábado si no es el día de creación de la suscripción.');
         }
 
@@ -123,11 +127,11 @@ export class Order extends Entity<Order> {
             throw new Error('No puedes actualizar las recetas después de las 23:59 del viernes si no eres administrador.');
         }
 
-        if (isFridayAfter23 && this.week.startsAfterAWeekFrom(choosingDate)) {
+        if (isFridayAfter23 && this.week.startsAfterAWeekFrom(choosingDate) && !isAdminChoosing) {
             throw new Error('No puedes elegir recetas para la próxima semana después de las 23:59 del viernes.');
         }
 
-        if (isSunday && !this.week.startsTheWeekAfter(choosingDate, this.shippingDate)) {
+        if (isSunday && !this.week.startsTheWeekAfter(choosingDate, this.shippingDate) && !isAdminChoosing) {
             throw new Error('No puedes elegir recetas el domingo para la semana que empieza, solo para la siguiente.');
         }
 
@@ -168,17 +172,6 @@ export class Order extends Entity<Order> {
         this.choseByAdmin = isAdminChoosing;
         if (!!!this.firstDateOfRecipesSelection) this.firstDateOfRecipesSelection = new Date();
         this.lastDateOfRecipesSelection = new Date();
-    }
-
-    private isShippingOnTuesdayOrWednesdayOfSameWeek(choosingDate: Date): boolean {
-        const tuesdayOfSameWeek = new Date(choosingDate);
-        tuesdayOfSameWeek.setDate(choosingDate.getDate() + 1);
-
-        const wednesdayOfSameWeek = new Date(choosingDate);
-        wednesdayOfSameWeek.setDate(choosingDate.getDate() + 2);
-
-        return MomentTimeService.isSameDay(this.shippingDate, tuesdayOfSameWeek) ||
-            MomentTimeService.isSameDay(this.shippingDate, wednesdayOfSameWeek);
     }
 
     public isActive(): boolean {

@@ -9,6 +9,7 @@ export interface ICustomerRepository {
     isEmailVerified(email: string): Promise<boolean>;
     updateMany(customers: Customer[]): Promise<void>;
     findByEmail(email: string): Promise<Customer | undefined>;
+    findBy(conditions: any): Promise<Customer[]>
     findById(id: CustomerId): Promise<Customer | undefined>;
     findByIdList(ids: CustomerId[]): Promise<Customer[]>;
     findByIdOrThrow(id: CustomerId): Promise<Customer>;

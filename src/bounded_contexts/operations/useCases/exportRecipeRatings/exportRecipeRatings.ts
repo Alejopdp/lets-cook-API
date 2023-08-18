@@ -1,4 +1,6 @@
+import moment from "moment";
 import { IExportService } from "../../application/exportService/IExportService";
+import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { Customer } from "../../domain/customer/Customer";
 import { Locale } from "../../domain/locale/Locale";
 import { Order } from "../../domain/order/Order";
@@ -50,12 +52,12 @@ export class ExportRecipeRatings {
 
     public async execute(dto: ExportRecipeRatingsDto): Promise<any> {
         const rows: RecipeRatingExportRow[] = [];
-        const [recipeRatings, customers]: [RecipeRating[], Customer[]] = await Promise.all([this.recipeRatingRepository.findAll(Locale.es), this.customerRepository.findAll()]);
+        const [recipeRatings, customers]: [RecipeRating[], Customer[]] = await Promise.all([this.recipeRatingRepository.findBy(!dto.shippingDate ? {} : { shippingDates: { "$elemMatch": { "$gte": dto.shippingDate } } }, Locale.es), this.customerRepository.findAll()]);
         const customersMap = new Map<string, Customer>();
         const customer_recipe_tuples: [string, string][] = recipeRatings.map(rating => [rating.customerId.toString(), rating.recipe.id.toString()])
         const customerRecipeOrderMap = new Map<string, Order[]>();
         const start = performance.now();
-        const orders = (await this.orderRepository.findAll(Locale.es))
+        const orders = (await this.orderRepository.findBy(!dto.shippingDate ? {} : { shippingDate: { "$gte": dto.shippingDate } }, Locale.es))
         const ordersMap = new Map<string, Order[]>();
         orders.forEach(order => {
             order.recipeSelection.forEach(recipeSelection => {
@@ -112,6 +114,7 @@ export class ExportRecipeRatings {
             if (!orderForExport) continue;
 
             for (let i = 0; i < rating.shippingDates.length; i++) {
+                if (dto.shippingDate && moment(rating.shippingDates[i]).isBefore(dto.shippingDate)) continue;
                 const planVariant = orderForExport.plan.getPlanVariantById(orderForExport.planVariantId);
                 const recipeSelection = orderForExport.recipeSelection.find(selection => selection.recipe.id.toString() === rating.recipe.id.toString())
                 const recipeVariantOfOrder = recipeSelection?.recipe.recipeVariants.find(recipeVariant => !restriction ? recipeVariant.restriction.value === "apto_todo" : recipeVariant.restriction.id.equals(restriction.id))
