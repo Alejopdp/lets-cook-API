@@ -1,3 +1,4 @@
+import Big from 'big.js';
 import { Entity } from "../../../../core/domain/Entity";
 import { MomentTimeService } from "../../application/timeService/momentTimeService";
 import { CustomerId } from "../customer/CustomerId";
@@ -69,7 +70,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
     }
 
     public discountOrderAmount(order: Order): void {
-        this.amount = (Math.round(this.amount * 100) - Math.round(order.getTotalPrice() * 100)) / 100;
+        const bigPaymentOrderAmount = new Big(this.amount);
+        const bigOrderPrice = new Big(order.getTotalPrice());
+
+        this.amount = Number(bigPaymentOrderAmount.minus(bigOrderPrice));
         this.discountDiscountAmount(order.discountAmount)
 
         if (this.amount === 0 && (this.state.isActive() || this.state.isPendingConfirmation())) this.toCancelled([]);
