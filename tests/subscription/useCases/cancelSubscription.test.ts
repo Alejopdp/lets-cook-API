@@ -139,7 +139,8 @@ describe('Cancel subscriptiont tests', () => {
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 1, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }, { quantity: 1, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
-                choosingDate: PURCHASE_DATE
+                choosingDate: PURCHASE_DATE,
+                isInCheckout: false
             })
         })
 

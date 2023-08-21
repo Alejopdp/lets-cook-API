@@ -20,7 +20,7 @@ export class MockStorageService implements IStorageService {
     }
 
     public async getPresignedUrlForFile(objectKey: string): Promise<string> {
-        throw new Error("Method not implemented.");
+        return ""
     }
 
     public async getObject(objectKey: string): Promise<any> {

@@ -7,14 +7,15 @@ import { GetSubscriptionById } from "./getSubscriptionById";
 import { GetSubscriptionByIdController } from "./getSubscriptionByIdController";
 import { GetSubscriptionByIdPresenter } from "./getSubscriptionByIdPresenter";
 
+const getSubscriptionByIdPresenter: GetSubscriptionByIdPresenter = new GetSubscriptionByIdPresenter(v3S3Service);
 export const getSubscriptionById: GetSubscriptionById = new GetSubscriptionById(
     mongooseSubscriptionRepository,
     mongooseOrderRepository,
     mongoosePaymentOrderReposiotry,
-    mongooseWeekRepository
-);
-export const getSubscriptionByIdPresenter: GetSubscriptionByIdPresenter = new GetSubscriptionByIdPresenter(v3S3Service);
-export const getSubscriptionByIdController: GetSubscriptionByIdController = new GetSubscriptionByIdController(
-    getSubscriptionById,
+    mongooseWeekRepository,
     getSubscriptionByIdPresenter
+);
+
+export const getSubscriptionByIdController: GetSubscriptionByIdController = new GetSubscriptionByIdController(
+    getSubscriptionById
 );
