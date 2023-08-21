@@ -254,10 +254,10 @@ export class Subscription extends Entity<Subscription> {
         coupon.addApplication(this.customer);
     }
 
-    public skipOrder(orderToSkip: Order, relatedPaymentOrder: PaymentOrder): void {
+    public skipOrder(orderToSkip: Order, relatedPaymentOrder: PaymentOrder, skippingDate: Date): void {
         // TODO: Mover descuento para free shipping tmb
         if (orderToSkip.discountAmount > 0) this.couponChargesQtyApplied--
-        orderToSkip.skip(relatedPaymentOrder)
+        orderToSkip.skip(relatedPaymentOrder, skippingDate)
 
     }
 
@@ -436,6 +436,7 @@ export class Subscription extends Entity<Subscription> {
     public getNextShipmentLabel(orders: Order[] = [], locale: Locale): string {
         const nextOrder = orders.find((order) => order.isActive() || order.isBilled());
 
+        // if (!!!nextOrder) return "No tienes una próxima entrega";
         if (!!!nextOrder) return "No tienes una próxima entrega";
 
         return nextOrder.getHumanShippmentDay(locale);

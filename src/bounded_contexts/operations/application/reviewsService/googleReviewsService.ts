@@ -66,7 +66,8 @@ export class GoogleReviewsService implements IReviewsService {
 
             const goodReview: ReviewDto = {
                 id: review.reviewId,
-                avatar: review.reviewer.profilePhotoUrl,
+                avatar: "",
+                // avatar: review.reviewer.profilePhotoUrl,
                 text: review.comment,
                 name: review.reviewer.displayName,
                 stars: STAR_RATING_MAP.get(review.starRating) ?? 0,

@@ -30,6 +30,7 @@ import { TUESDAY } from "../../mocks/days";
 import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZone";
 import { IMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/IMailingListService";
 import { MockMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/mockMailingListService";
+import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto";
 
 
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -101,7 +102,7 @@ describe('Cancel subscriptiont tests', () => {
             )
             await mockCustomerRepository.save(customer)
 
-            const createSubscriptionDto = {
+            const createSubscriptionDto: CreateSubscriptionDto = {
                 customerId: CUSTOMER_ID.toString(),
                 planId: planVegetariano.id.toString(),
                 planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
@@ -134,7 +135,8 @@ describe('Cancel subscriptiont tests', () => {
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 1, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }, { quantity: 1, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
-                choosingDate: PURCHASE_DATE
+                choosingDate: PURCHASE_DATE,
+                isInCheckout: false
             })
         })
 

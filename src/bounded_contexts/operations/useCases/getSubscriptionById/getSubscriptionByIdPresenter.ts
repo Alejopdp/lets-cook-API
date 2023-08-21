@@ -10,6 +10,109 @@ import { PlanVariant } from "../../domain/plan/PlanVariant/PlanVariant";
 import { Locale } from "../../domain/locale/Locale";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
+type PresentedPlanVariant = {
+    id: string;
+    isDefault: boolean
+    description: string;
+    price: number
+    numberOfPersons: string | number
+    numberOfRecipes: string | number
+}
+
+type PresentedPlan = {
+    id: string;
+    planName: string;
+    planVariantDescription: string;
+    variants: PresentedPlanVariant[];
+    state: {
+        state: string;
+        stateTitle: string
+    },
+    servingsLabel: string;
+    price: number,
+    priceLabel: string
+    icon: string
+}
+
+
+type PresentedRecipe = {
+    id: string;
+    name: string;
+    imageUrl: string;
+    imagesUrls: string[],
+    sku: string,
+    shortDescription: string,
+    longDescription: string,
+    cookDuration: string,
+    cookDurationNumberValue: number,
+    difficultyLevel: string,
+    weight: string,
+    weightNumberValue: number,
+    backOfficeTags: string[],
+    imageTags: string[],
+    availableWeeks: { id: string, label: string }[],
+    nutritionalInfo: { key: string, value: string }[],
+    availableMonths: string[],
+    relatedPlans: string[],
+    tools: string[],
+    recipeVariants: { ingredients: string[], restriction: { id: string, value: string, label: string }, sku: string }
+}
+
+type PresentedOrder = {
+    id: string,
+    weekLabel: string,
+    shippingDate: string,
+    isSkipped: boolean,
+    state: string,
+    isReanudable: boolean,
+}
+
+export type GetSubscriptionByIdResponse = {
+    subscriptionId: string
+    plan: PresentedPlan,
+    actualPlanVariant: PresentedPlanVariant,
+    isOneTime: boolean
+    shippingAddress: {
+        addressName: string | undefined;
+        addressDetails: string | undefined;
+        preferredSchedule: string;
+    },
+    paymentMethod: {
+        id: string;
+        cardLabel: string;
+        expirationDateLabel: string;
+        default: boolean,
+    } | null,
+    schedule: {
+        nextDelivery: string;
+        nextPayment: string
+    },
+    hasChosenRecipesForActualWeek: boolean,
+    hasChosenRecipesForNextWeek: boolean,
+    actualWeekOrder: {
+        id: string,
+        weekLabel: string,
+        weekId: string,
+        recipes: PresentedRecipe[],
+        shippingDate: string
+    } | undefined,
+    nextWeekOrder: {
+        id: string,
+        weekLabel: string,
+        weekId: string,
+        recipes: PresentedRecipe[],
+        shippingDate: string
+    } | undefined,
+    canChooseRecipesForNextWeekOrder: boolean,
+    skippedOrders: PresentedOrder[],
+    canChooseRecipes: boolean,
+    nextTwelveOrders: PresentedOrder[],
+    hasRecipes: boolean,
+    shippingCost: number,
+    portionsQuantity: string | number,
+    portionPrice: string | number,
+}
+
 export class GetSubscriptionByIdPresenter {
     private _storageService: IStorageService;
 
@@ -22,8 +125,9 @@ export class GetSubscriptionByIdPresenter {
         orders: Order[],
         customer: Customer,
         paymentOrders: PaymentOrder[],
-        locale: Locale
-    ): Promise<any> {
+        locale: Locale,
+        queryDate: Date
+    ): Promise<GetSubscriptionByIdResponse> {
         const presentedPlan = await this.presentPlan(subscription, locale);
 
         const shippingAddress = {
@@ -37,7 +141,7 @@ export class GetSubscriptionByIdPresenter {
 
         if (!!defaultPaymentMethod) {
             presentedPaymentMethod = {
-                id: defaultPaymentMethod.id.value,
+                id: defaultPaymentMethod.id.toString(),
                 cardLabel: customer.getDefaultPaymentMethodCardLabel(locale),
                 expirationDateLabel: customer.getDefaultPaymentMethodExpirationDateLabel(locale),
                 default: true,
@@ -63,7 +167,7 @@ export class GetSubscriptionByIdPresenter {
                     ? nextSecondActiveOrder.getHumanShippmentDay(locale)
                     : "",
             nextPayment:
-                !!nextActiveOrder && nextActiveOrder.billingDate > new Date()
+                !!nextActiveOrder && nextActiveOrder.billingDate > queryDate
                     ? nextActiveOrder.getHumanBillingDay(locale)
                     : !!nextSecondActiveOrder
                         ? nextSecondActiveOrder.getHumanBillingDay(locale)
@@ -96,10 +200,10 @@ export class GetSubscriptionByIdPresenter {
                 : undefined;
 
         return {
-            subscriptionId: subscription.id.value,
+            subscriptionId: subscription.id.toString(),
             plan: presentedPlan,
             actualPlanVariant: this.presentPlanVariant(
-                subscription.plan.planVariants.find((variant) => subscription.planVariantId.equals(variant.id))!,
+                subscription.plan.getPlanVariantById(subscription.planVariantId)!,
                 locale
             ),
             isOneTime: subscription.frequency.isOneTime(),
@@ -110,7 +214,7 @@ export class GetSubscriptionByIdPresenter {
             hasChosenRecipesForNextWeek,
             actualWeekOrder: actualWeekOrder ? await this.presentWeekRecipes(actualWeekOrder, locale) : null,
             nextWeekOrder: nextWeekOrder ? await this.presentWeekRecipes(nextWeekOrder, locale) : null,
-            canChooseRecipesForNextWeekOrder: nextWeekOrder && nextWeekOrder.isInTimeToChooseRecipes() && canChooseRecipes,
+            canChooseRecipesForNextWeekOrder: !!nextWeekOrder && nextWeekOrder.isInTimeToChooseRecipes() && canChooseRecipes,
             skippedOrders,
             canChooseRecipes,
             nextTwelveOrders,
@@ -121,9 +225,9 @@ export class GetSubscriptionByIdPresenter {
         };
     }
 
-    private async presentPlan(subscription: Subscription, locale: Locale): Promise<any> {
+    private async presentPlan(subscription: Subscription, locale: Locale): Promise<PresentedPlan> {
         return {
-            id: subscription.plan.id.value,
+            id: subscription.plan.id.toString(),
             planName: subscription.plan.name,
             planVariantDescription: subscription.getPlanVariantLabel(locale),
             variants: subscription.plan.planVariants

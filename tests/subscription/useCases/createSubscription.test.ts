@@ -1,4 +1,5 @@
 jest.mock("../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService")
+import moment from "moment"
 import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
 import { InMemoryCustomerRepository } from "../../../src/bounded_contexts/operations/infra/repositories/customer/inMemoryCustomerRepository"
 import { InMemorySusbcriptionRepository } from "../../../src/bounded_contexts/operations/infra/repositories/subscription/inMemorySubscriptionRepository"
@@ -92,7 +93,7 @@ mockShippingZoneRepository.save(customerShippingZone)
 
 
 describe("Create Subscription Use Case", () => {
-    let createSubscriptionDto: any
+    let createSubscriptionDto: CreateSubscriptionDto
     let firstSubscriptionResult: any
 
     beforeAll(async () => {
@@ -405,9 +406,10 @@ describe("Create Subscription Use Case", () => {
                 restOfPaymentOrders.forEach((paymentOrder, index) => {
                     const previousPaymentOrder = restOfPaymentOrders[index - 1]
                     if (previousPaymentOrder) {
-                        const difference = paymentOrder.billingDate.getTime() - previousPaymentOrder.billingDate.getTime()
-                        expect(difference).toBe(7 * 24 * 60 * 60 * 1000)
+                        const difference = moment(paymentOrder.billingDate).diff(moment(previousPaymentOrder.billingDate), 'days')
+                        expect(difference).toBe(7)
                     }
+
                 })
             })
         })

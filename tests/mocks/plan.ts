@@ -1,11 +1,13 @@
 import { Locale } from "../../src/bounded_contexts/operations/domain/locale/Locale"
 import { Plan } from "../../src/bounded_contexts/operations/domain/plan/Plan"
+import { PlanFrequency } from "../../src/bounded_contexts/operations/domain/plan/PlanFrequency"
 import { PlanFrequencyFactory } from "../../src/bounded_contexts/operations/domain/plan/PlanFrequency/PlanFrequencyFactory"
 import { PlanId } from "../../src/bounded_contexts/operations/domain/plan/PlanId"
 import { PlanSku } from "../../src/bounded_contexts/operations/domain/plan/PlanSku"
 import { PlanSlug } from "../../src/bounded_contexts/operations/domain/plan/PlanSlug"
 import { PlanType } from "../../src/bounded_contexts/operations/domain/plan/PlanType/PlanType"
 import { PlanVariant } from "../../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariant"
+import { PlanVariantAttribute } from "../../src/bounded_contexts/operations/domain/plan/PlanVariant/PlanVariantAttribute"
 
 const gourmetPlanSlug = new PlanSlug("plan-gourmet")
 export const planGourmetVariant2Persons2Recipes: PlanVariant = new PlanVariant(
@@ -170,3 +172,6 @@ export const planVegetariano: Plan = Plan.create(
     "development/plan-vegetariano.svg",
     "development/plan-vegetariano-color.svg"
 );
+
+export const planAdicionalFrutasVariante1: PlanVariant = new PlanVariant(new PlanSku("FR500-01"), "Frutas 1", 10, [new PlanVariantAttribute("key_1", "value_1")], "Una descri", true, false)
+export const planAdicionalFrutas: Plan = Plan.create("Plan adicional frutas", "Frutas", new PlanSku("FR500"), "", true, PlanType.Adicional, [planAdicionalFrutasVariante1], [PlanFrequencyFactory.createPlanFrequency("one_time"), PlanFrequencyFactory.createPlanFrequency("weekly")], false, [], Locale.es, new PlanSlug("plan-frutas"), false, "", "")

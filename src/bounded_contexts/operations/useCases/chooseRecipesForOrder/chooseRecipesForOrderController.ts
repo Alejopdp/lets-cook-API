@@ -19,6 +19,7 @@ export class ChooseRecipesForOrderController extends BaseController {
                 //@ts-ignore
                 isAdminChoosing: this.req.decode?.roleTitle === "Administrador",
                 choosingDate: new Date(),
+                isInCheckout: this.req.body.isInCheckout
             };
 
             await this.chooseRecipesForOrder.execute(dto);

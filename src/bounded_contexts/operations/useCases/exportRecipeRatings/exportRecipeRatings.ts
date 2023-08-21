@@ -52,19 +52,27 @@ export class ExportRecipeRatings {
 
     public async execute(dto: ExportRecipeRatingsDto): Promise<any> {
         const rows: RecipeRatingExportRow[] = [];
-        const [recipeRatings, customers]: [RecipeRating[], Customer[]] = await Promise.all([this.recipeRatingRepository.findBy(!dto.shippingDate ? {} : { shippingDates: { "$elemMatch": { "$gte": dto.shippingDate } } }, Locale.es), this.customerRepository.findAll()]);
+        const ratingsFilter: any = { rating: { "$gt": 0 } }
+        if (dto.shippingDate) ratingsFilter["shippingDates"] = { "$elemMatch": { "$gte": dto.shippingDate } };
+        const [recipeRatings, customers]: [RecipeRating[], Customer[]] = await Promise.all([this.recipeRatingRepository.findBy(ratingsFilter, Locale.es), this.customerRepository.findAll()]);
         const customersMap = new Map<string, Customer>();
         const customer_recipe_tuples: [string, string][] = recipeRatings.map(rating => [rating.customerId.toString(), rating.recipe.id.toString()])
         const customerRecipeOrderMap = new Map<string, Order[]>();
         const start = performance.now();
-        const orders = (await this.orderRepository.findBy(!dto.shippingDate ? {} : { shippingDate: { "$gte": dto.shippingDate } }, Locale.es))
+        const memory_start = process.memoryUsage().heapUsed / 1024 / 1024;
+        let ordersFilter: any = { state: { $in: ["ORDER_BILLED"], }, deletionFlag: false, "recipeSelection.0": { "$exists": true } }
+        if (dto.shippingDate) ordersFilter["shippingDate"] = { "$gte": dto.shippingDate };
+
+        const orders = (await this.orderRepository.findBy(ordersFilter, Locale.es))
         const ordersMap = new Map<string, Order[]>();
         orders.forEach(order => {
             order.recipeSelection.forEach(recipeSelection => {
                 const key = `${order.customer.id.toString()}_${recipeSelection.recipe.id.toString()}`;
-                ordersMap.set(key, [...(ordersMap.get(key) || []), order]);
+                if (customer_recipe_tuples.some(tuple => tuple[0] === order.customer.id.toString() && tuple[1] === recipeSelection.recipe.id.toString())) ordersMap.set(key, [...(ordersMap.get(key) || []), order]);
             })
         });
+        const memory_end = process.memoryUsage().heapUsed / 1024 / 1024;
+        console.log("Memory used: ", memory_end - memory_start);
 
         customer_recipe_tuples.forEach(tuple => {
             const key = `${tuple[0]}_${tuple[1]}`;
@@ -113,6 +121,8 @@ export class ExportRecipeRatings {
             const { order: orderForExport, restriction } = this.getOrderForExport(rating, customerRecipeOrderMap.get(`${rating.customerId.toString()}_${rating.recipe.id.toString()}`) ?? [], subscriptionMap)
             if (!orderForExport) continue;
 
+            let alreadyAddedRatingToExport = false
+
             for (let i = 0; i < rating.shippingDates.length; i++) {
                 if (dto.shippingDate && moment(rating.shippingDates[i]).isBefore(dto.shippingDate)) continue;
                 const planVariant = orderForExport.plan.getPlanVariantById(orderForExport.planVariantId);
@@ -130,7 +140,7 @@ export class ExportRecipeRatings {
                     ciudad: customersMap.get(rating.customerId.toString())?.getShippingAddress().city ?? "",
                     "Fecha review": rating.ratingDate?.toISOString() ?? rating.updatedAt.toISOString(),
                     "Fecha consumo": rating.shippingDates[i].toISOString(),
-                    "Valoración": i === 0 ? rating.rating ?? "" : "",
+                    "Valoración": !alreadyAddedRatingToExport ? rating.rating ?? "" : "",
                     "Comentario": rating.comment ?? "",
                     "Código SKU receta": rating.recipe.recipeGeneralData.recipeSku.code,
                     "Variante SKU receta": recipeVariantOfOrder?.sku.code ?? "",
@@ -138,6 +148,8 @@ export class ExportRecipeRatings {
                     "Modificación": "Solamente se guarda 1 linea y definimos que se guarda la primera vez que lo valora",
                     "Cantidad de entregas": rating.getQtyDelivered(dto.queryDate)
                 })
+
+                alreadyAddedRatingToExport = true;
             }
         }
 

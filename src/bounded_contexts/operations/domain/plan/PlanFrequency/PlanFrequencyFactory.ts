@@ -4,8 +4,9 @@ import { MonthlyFrequency } from "./MonthlyFrequency";
 import { OneTimeFrequency } from "./OneTimeFrequency";
 import { WeeklyFrequency } from "./WeeklyFrequency";
 
+export type PlanFrequencyType = "one_time" | "weekly" | "biweekly" | "monthly";
 export class PlanFrequencyFactory {
-    public static createPlanFrequency(value: string): IPlanFrequency {
+    public static createPlanFrequency(value: PlanFrequencyType): IPlanFrequency {
         switch (value) {
             case "one_time":
                 return new OneTimeFrequency();

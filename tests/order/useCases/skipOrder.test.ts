@@ -1,4 +1,5 @@
 jest.mock("../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService")
+import Big from "big.js"
 import { SkipOrders } from "../../../src/bounded_contexts/operations/useCases/skipOrders/skipOrders"
 import { InMemoryCustomerRepository } from "../../../src/bounded_contexts/operations/infra/repositories/customer/inMemoryCustomerRepository"
 import { InMemorySusbcriptionRepository } from "../../../src/bounded_contexts/operations/infra/repositories/subscription/inMemorySubscriptionRepository"
@@ -29,10 +30,13 @@ import { PaymentIntent } from "../../../src/bounded_contexts/operations/applicat
 import { UpdateDiscountAfterSkippingOrders } from "../../../src/bounded_contexts/operations/services/updateDiscountsAfterSkippingOrders/updateDiscountsAfterSkippingOrders"
 import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
 import { ChooseRecipesForOrder } from "../../../src/bounded_contexts/operations/useCases/chooseRecipesForOrder/chooseRecipesForOrder"
-import { gourmetPlan, planGourmetVariant2Persons2Recipes } from "../../mocks/plan"
+import { gourmetPlan, planAdicionalFrutas, planAdicionalFrutasVariante1, planGourmetVariant2Persons2Recipes } from "../../mocks/plan"
 import { TUESDAY } from "../../mocks/days"
 import { rissotoDeBoniato, arepasDeCrhistian, bowlDeQuinoa, burgerHallouli } from "../../mocks/recipe"
 import { RecipeRating } from "../../../src/bounded_contexts/operations/domain/recipeRating/RecipeRating"
+import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day"
+import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto"
+import { PlanFrequency } from "../../../src/bounded_contexts/operations/domain/plan/PlanFrequency"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -94,6 +98,7 @@ const customer = Customer.create(
 )
 mockCustomerRepository.save(customer)
 mockPlanRepository.save(gourmetPlan)
+mockPlanRepository.save(planAdicionalFrutas)
 
 const valenciaPolygon = [
     [39.75, -0.78],  // Noroeste
@@ -103,6 +108,9 @@ const valenciaPolygon = [
 ];
 const customerShippingZoneRadio = new ShippingZoneRadio(valenciaPolygon.map((coordinates) => new Coordinates(coordinates[0], coordinates[1])))
 const MOCK_SHIPPING_COST = 10
+const DAY = new Day(2)
+const PURCHASE_DATE = new Date(2023)
+
 const customerShippingZone = ShippingZone.create("Valencia", "valencia", MOCK_SHIPPING_COST, "active", customerShippingZoneRadio, TUESDAY)
 mockShippingZoneRepository.save(customerShippingZone)
 
@@ -134,7 +142,7 @@ describe("Skip Order Use case", () => {
                 shippingProvince: "Valencia",
                 shippingPostalCode: "46120",
                 shippingCountry: "España",
-                purchaseDate: new Date()
+                purchaseDate: new Date(2023, 7, 3, 10, 0, 0)
             }
 
 
@@ -186,7 +194,7 @@ describe("Skip Order Use case", () => {
             })
         })
 
-        describe("When the user reactivate the skipped order", () => {
+        describe("When the user reactivates the skipped order", () => {
             let skippedOrder: Order
 
             beforeAll(async () => {
@@ -320,10 +328,42 @@ describe("Skip Order Use case", () => {
             })
         })
 
+        // describe("When the user skips an already skipped order", () => {
+        //     const CUSTOMER_ID = new CustomerId()
+        //     let customer: Customer
+        //     let subscriptionResult: any
+        //     let skippedOrder: Order
+
+        // beforeAll(async () => {
+        //     customer = Customer.create(
+        //         CUSTOMER_EMAIL,
+        //         true,
+        //         "",
+        //         [],
+        //         0,
+        //         new Date(),
+        //         undefined,
+        //         undefined,
+        //         CUSTOMER_PASSWORD,
+        //         "active",
+        //         undefined,
+        //         undefined,
+        //         CUSTOMER_ID
+        //     )
+
+        //     await mockCustomerRepository.save(customer)
+        //     subscriptionResult = await createSubscriptionUseCase.execute({ ...createSubscriptionDto, customerId: CUSTOMER_ID.toString(), purchaseDate: new Date(2023, 7, 1, 11), })
+        //     const orders = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+        //     skippedOrder = orders[3]
+        // })
+        // })
+
         describe("When the user skips the next active order with a recipe selection", () => {
             let skippedOrder: Order
+            let paymentOrderAmount: number | undefined
             const PURCHASE_DATE = new Date("2023-08-08")
-            const CHOOSING_DATE = new Date("2023-08-16")
+            // const CHOOSING_DATE = new Date("2023-08-16")
+            const CHOOSING_DATE = new Date(2023, 7, 16, 17)
             const SKIPPING_DATE = new Date("2023-08-17")
 
             beforeAll(async () => {
@@ -334,7 +374,7 @@ describe("Skip Order Use case", () => {
                 const burguerHalloumiOriginalWeeks = [...burgerHallouli.availableWeeks]
                 burgerHallouli.availableWeeks = [skippedOrder.week]
 
-                await chooseRecipesForOrderUseCase.execute({ choosingDate: CHOOSING_DATE, isAdminChoosing: false, orderId: skippedOrder.id.toString(), recipeSelection: [{ quantity: 2, recipeId: burgerHallouli.id.toString(), recipeVariantId: burgerHallouli.recipeVariants[0].id.toString() }] })
+                await chooseRecipesForOrderUseCase.execute({ choosingDate: CHOOSING_DATE, isAdminChoosing: false, orderId: skippedOrder.id.toString(), recipeSelection: [{ quantity: 2, recipeId: burgerHallouli.id.toString(), recipeVariantId: burgerHallouli.recipeVariants[0].id.toString() }], isInCheckout: false })
 
                 await skipOrderUseCase.execute({
                     locale: Locale.es,
@@ -342,8 +382,24 @@ describe("Skip Order Use case", () => {
                     ordersToReactivate: [],
                     nameOrEmailOfAdminExecutingRequest: "",
                     queryDate: SKIPPING_DATE
-
                 })
+                paymentOrderAmount = (await mockPaymentOrderRepository.findById(skippedOrder.paymentOrderId!, Locale.es))?.amount
+
+                burgerHallouli.availableWeeks = burguerHalloumiOriginalWeeks
+            })
+
+            it("Should leave the skipped order in ORDER_SKIPPED", async () => {
+                const order: Order | undefined = await mockOrderRepository.findById(skippedOrder.id, Locale.es)
+                expect(order).toBeDefined()
+                expect(order!.isSkipped()).toBe(true)
+            })
+
+            it("Should leave the related payment order as it was after the first skip", async () => {
+                const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findById(skippedOrder.paymentOrderId!, Locale.es)
+                expect(paymentOrder).toBeDefined()
+                expect(paymentOrder!.amount).toBe(paymentOrderAmount)
+
+
             })
 
             it("Should leave the recipe selection in the order", async () => {
@@ -389,14 +445,781 @@ describe("Skip Order Use case", () => {
             })
         })
 
+
         describe("When the user skips an order after Friday 23:59", () => {
-            it("Should throw an error", () => { })
+            const CUSTOMER_ID = new CustomerId()
+            let customer: Customer
+            let subscriptionResult: any
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+
+                await mockCustomerRepository.save(customer)
+                subscriptionResult = await createSubscriptionUseCase.execute({ ...createSubscriptionDto, customerId: CUSTOMER_ID.toString(), purchaseDate: new Date(2023, 7, 1, 11) })
+            })
+
+            it("Should throw an error", async () => {
+                const orderToSkip = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                expect(skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [orderToSkip.id.toString()],
+                    ordersToReactivate: [],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: new Date(2023, 7, 12, 0, 0, 0)
+
+                })).rejects.toThrow()
+            })
         })
 
 
 
-        describe("Given a user with 1 main plan subscription and 1 additional plan subscription", () => { })
-        describe("Given a user with 2 main plan subscriptions", () => { })
-        describe("Given a user with 2 main plan subscriptions and 1 additional plan subscription", () => { })
+        describe("Given a user with 1 main plan subscription and 1 additional plan subscription", () => {
+            let CUSTOMER_ID = new CustomerId()
+            let CUSTOMER = Customer.create(CUSTOMER_EMAIL, true, "", [], 0, new Date(), undefined, undefined, CUSTOMER_PASSWORD, "active", undefined, undefined, CUSTOMER_ID)
+            let MAIN_PLAN_PURCHASE_DATE = new Date(2023, 7, 15, 11)
+            let ADDITIONAL_PURCHASE_DATE = new Date(2023, 7, 15, 12)
+            let MAIN_PLAN_SUBSCRIPTION_DTO: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                addressName: CUSTOMER_ADDRESS_NAME,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                purchaseDate: MAIN_PLAN_PURCHASE_DATE,
+                locale: Locale.es,
+                paymentMethodId: "string",
+                phone1: CUSTOMER_PHONE,
+                planFrequency: "weekly",
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                restrictionComment: "",
+                shippingCity: "Alboraya",
+                shippingCountry: "España",
+                shippingPostalCode: "46120",
+                shippingProvince: "Valencia",
+                stripePaymentMethodId: ""
+            }
+
+            let ADDITIONAL_PLAN_SUBSCRIPTION_DTO: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                addressName: CUSTOMER_ADDRESS_NAME,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                purchaseDate: ADDITIONAL_PURCHASE_DATE,
+                locale: Locale.es,
+                paymentMethodId: "string",
+                phone1: CUSTOMER_PHONE,
+                planFrequency: "weekly",
+                planId: planAdicionalFrutas.id.toString(),
+                planVariantId: planAdicionalFrutasVariante1.id.toString(),
+                restrictionComment: "",
+                shippingCity: "Alboraya",
+                shippingCountry: "España",
+                shippingPostalCode: "46120",
+                shippingProvince: "Valencia",
+                stripePaymentMethodId: ""
+            }
+            let mainPlanSubscriptionResult: any;
+            let additionalPlanSubscriptionResult: any;
+
+            beforeAll(async () => {
+                await mockCustomerRepository.save(CUSTOMER)
+                mainPlanSubscriptionResult = await createSubscriptionUseCase.execute(MAIN_PLAN_SUBSCRIPTION_DTO)
+                additionalPlanSubscriptionResult = await createSubscriptionUseCase.execute(ADDITIONAL_PLAN_SUBSCRIPTION_DTO)
+            })
+
+            describe("When it skips a main plan order", () => {
+                const SKIPPING_DATE = new Date(2023, 7, 23, 11)
+                let skippedMainOrder: Order
+
+                beforeAll(async () => {
+                    skippedMainOrder = (await mockOrderRepository.findAllBySubscriptionId(mainPlanSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                    await skipOrderUseCase.execute({
+                        locale: Locale.es,
+                        ordersToSkip: [skippedMainOrder.id.toString()],
+                        ordersToReactivate: [],
+                        nameOrEmailOfAdminExecutingRequest: "",
+                        queryDate: SKIPPING_DATE
+                    })
+                })
+
+                it("Should skip the additional plan order as well", async () => {
+                    const skippedAdditionalOrder: Order = (await mockOrderRepository.findAllBySubscriptionId(additionalPlanSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                    expect(skippedAdditionalOrder.isSkipped).toBeTruthy()
+                })
+
+                it("Should leave the related payment order amount equal to 0", async () => {
+                    const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedMainOrder.paymentOrderId!)
+                    expect(paymentOrder.amount).toBe(0)
+                })
+
+                it("Should leave the related payment order status as 'PAYMENT_ORDER_CANCELLED'", async () => {
+                    const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedMainOrder.paymentOrderId!)
+                    expect(paymentOrder.isCancelled()).toBeTruthy()
+
+                })
+            })
+
+            describe("When it skips an additional plan order", () => {
+                const SKIPPING_DATE = new Date(2023, 7, 24, 11)
+                let skippedAdditionalOrder: Order
+
+                beforeAll(async () => {
+                    skippedAdditionalOrder = (await mockOrderRepository.findAllBySubscriptionId(additionalPlanSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[2]
+                    await skipOrderUseCase.execute({
+                        locale: Locale.es,
+                        ordersToSkip: [skippedAdditionalOrder.id.toString()],
+                        ordersToReactivate: [],
+                        nameOrEmailOfAdminExecutingRequest: "",
+                        queryDate: SKIPPING_DATE
+                    })
+                })
+
+                it("Should not skip the main plan order", async () => {
+                    const mainOrder: Order = (await mockOrderRepository.findAllBySubscriptionId(mainPlanSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[2]
+                    expect(mainOrder.isSkipped()).toBeFalsy()
+                })
+
+                it("Should leave the related payment order amount equal to the main plan price", async () => {
+                    const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedAdditionalOrder.paymentOrderId!)
+                    expect(paymentOrder.amount).toBe(planGourmetVariant2Persons2Recipes.getPaymentPrice())
+                })
+
+                it("Should leave the related payment order status as 'PAYMENT_ORDER_ACTIVE'", async () => {
+                    const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedAdditionalOrder.paymentOrderId!)
+                    expect(paymentOrder.isActive()).toBeTruthy()
+                })
+            })
+
+            describe("When it tries to reactivate the skipped order of the additional plan, having the main plan order skipped", () => {
+                const SKIPPING_DATE = new Date(2023, 7, 24, 11)
+                let skippedMainOrder: Order
+                let skippedAdditionalOrder: Order
+
+                beforeAll(async () => {
+                    skippedMainOrder = (await mockOrderRepository.findAllBySubscriptionId(mainPlanSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                    skippedAdditionalOrder = (await mockOrderRepository.findAllBySubscriptionId(additionalPlanSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                    await skipOrderUseCase.execute({
+                        locale: Locale.es,
+                        nameOrEmailOfAdminExecutingRequest: "",
+                        ordersToReactivate: [],
+                        ordersToSkip: [skippedMainOrder.id.toString()],
+                        queryDate: SKIPPING_DATE
+                    })
+                    await skipOrderUseCase.execute({
+                        locale: Locale.es,
+                        nameOrEmailOfAdminExecutingRequest: "",
+                        ordersToReactivate: [],
+                        ordersToSkip: [skippedAdditionalOrder.id.toString()],
+                        queryDate: SKIPPING_DATE
+                    })
+
+
+                })
+
+                it("Should not reactivate the order an error", async () => {
+                    await skipOrderUseCase.execute({
+                        locale: Locale.es,
+                        ordersToSkip: [],
+                        ordersToReactivate: [skippedAdditionalOrder.id.toString()],
+                        nameOrEmailOfAdminExecutingRequest: "",
+                        queryDate: SKIPPING_DATE
+                    })
+                    expect(skippedAdditionalOrder.isSkipped()).toBeTruthy()
+                })
+            })
+        })
+    })
+
+
+    describe("Given a user with 2 main plan subscriptions", () => {
+        const CUSTOMER_ID = new CustomerId()
+        const FIRST_SUBSCRIPTION_PURCHASE_DATE = new Date(2023, 7, 15, 11)
+        const SECOND_SUBSCRIPTION_PURCHASE_DATE = new Date(2023, 7, 15, 12)
+        const SKIPPING_DATE = new Date(2023, 7, 15, 13)
+        let firstSubscriptionResult: any
+        let secondSubscriptionResult: any
+
+
+        beforeAll(async () => {
+            const customer = Customer.create(
+                CUSTOMER_EMAIL,
+                true,
+                "",
+                [],
+                0,
+                new Date(),
+                undefined,
+                undefined,
+                CUSTOMER_PASSWORD,
+                "active",
+                undefined,
+                undefined,
+                CUSTOMER_ID
+            )
+
+            await mockCustomerRepository.save(customer)
+
+            let firstSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: undefined,
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: FIRST_SUBSCRIPTION_PURCHASE_DATE
+            }
+            let secondSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: undefined,
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: SECOND_SUBSCRIPTION_PURCHASE_DATE
+            }
+
+
+            firstSubscriptionResult = await createSubscriptionUseCase.execute(firstSubscriptionDto)
+            secondSubscriptionResult = await createSubscriptionUseCase.execute(secondSubscriptionDto)
+        })
+
+        describe("When it skips an order of the first subscription", () => {
+            let skippedOrder: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                skippedOrder = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [skippedOrder.id.toString()],
+                    ordersToReactivate: [],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+            it("Should rest the first subscription amount to the payment order", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(27.99)
+                expect(paymentOrder?.getTotalAmount()).toBe(37.99)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_ACTIVE'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.isActive()).toBeTruthy()
+            })
+            it("Should leave the second subscription order status as 'ORDER_ACTIVE'", async () => {
+                const nextActiveOrderOfSecondSusbcription: Order = (await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                expect(nextActiveOrderOfSecondSusbcription.isActive()).toBeTruthy()
+            })
+        })
+
+        describe("When it skips an order of the second subscription", () => {
+            let skippedOrder: Order
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)
+                skippedOrder = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [skippedOrder.id.toString()],
+                    ordersToReactivate: [],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+
+            it("Should set the payment order amount to 0", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(0)
+                expect(paymentOrder?.getTotalAmount()).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_CANCELLED'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.isCancelled()).toBeTruthy()
+            })
+        })
+
+        describe("When it reactivates the skipped order of the first subscription", () => {
+            let orderToReactivate: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orderToReactivate = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [],
+                    ordersToReactivate: [orderToReactivate.id.toString()],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+
+            it("Should set the payment order amount to the plan variant price", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(27.99)
+                expect(paymentOrder?.getTotalAmount()).toBe(37.99)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_ACTIVE'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.isActive()).toBeTruthy()
+            })
+        })
+
+        describe("When it reactivates the skipped order of the second subscription", () => {
+            let orderToReactivate: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)
+                orderToReactivate = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [],
+                    ordersToReactivate: [orderToReactivate.id.toString()],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+
+            it("Should set the payment order amount to the plan variant price", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(55.98)
+                expect(paymentOrder?.getTotalAmount()).toBe(65.98)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_ACTIVE'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.isActive()).toBeTruthy()
+            })
+        })
+    })
+    describe("Given a user with 2 main plan subscriptions and 1 additional plan subscription", () => {
+        const CUSTOMER_ID = new CustomerId()
+        const FIRST_SUBSCRIPTION_PURCHASE_DATE = new Date(2023, 7, 15, 11)
+        const SECOND_SUBSCRIPTION_PURCHASE_DATE = new Date(2023, 7, 15, 12)
+        const ADDITIONAL_SUBSCRIPTION_PURCHASE_DATE = new Date(2023, 7, 15, 13)
+        const SKIPPING_DATE = new Date(2023, 7, 15, 14)
+        let firstSubscriptionResult: any
+        let secondSubscriptionResult: any
+        let additionalSubscriptionResult: any
+
+
+        beforeAll(async () => {
+            const customer = Customer.create(
+                CUSTOMER_EMAIL,
+                true,
+                "",
+                [],
+                0,
+                new Date(),
+                undefined,
+                undefined,
+                CUSTOMER_PASSWORD,
+                "active",
+                undefined,
+                undefined,
+                CUSTOMER_ID
+            )
+
+            await mockCustomerRepository.save(customer)
+
+            let firstSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: undefined,
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: FIRST_SUBSCRIPTION_PURCHASE_DATE
+            }
+
+            let secondSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: undefined,
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: SECOND_SUBSCRIPTION_PURCHASE_DATE
+            }
+
+            let additionalSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: planAdicionalFrutas.id.toString(),
+                planVariantId: planAdicionalFrutasVariante1.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: undefined,
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: ADDITIONAL_SUBSCRIPTION_PURCHASE_DATE
+            }
+
+            firstSubscriptionResult = await createSubscriptionUseCase.execute(firstSubscriptionDto)
+            secondSubscriptionResult = await createSubscriptionUseCase.execute(secondSubscriptionDto)
+            additionalSubscriptionResult = await createSubscriptionUseCase.execute(additionalSubscriptionDto)
+        })
+
+        describe("When it skips an order of the first subscription", () => {
+            let skippedOrder: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                skippedOrder = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [skippedOrder.id.toString()],
+                    ordersToReactivate: [],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+            it("Should rest the first subscription amount to the payment order", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(37.99)
+                expect(paymentOrder?.getTotalAmount()).toBe(47.99)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_ACTIVE'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.isActive()).toBeTruthy()
+            })
+            it("Should leave the second subscription order status as 'ORDER_ACTIVE'", async () => {
+                const nextActiveOrderOfSecondSusbcription: Order = (await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                expect(nextActiveOrderOfSecondSusbcription.isActive()).toBeTruthy()
+            })
+            it("Should leave the additional subscription order status as 'ORDER_ACTIVE'", async () => {
+                const nextActiveOrderOfAdditionalSusbcription: Order = (await mockOrderRepository.findAllBySubscriptionId(additionalSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                expect(nextActiveOrderOfAdditionalSusbcription.isActive()).toBeTruthy()
+            })
+        })
+
+        describe("When it skips an order of the second subscription", () => {
+            let skippedOrder: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)
+                skippedOrder = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [skippedOrder.id.toString()],
+                    ordersToReactivate: [],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+
+            it("Should set the payment order amount to 0", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(0)
+                expect(paymentOrder?.getTotalAmount()).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_CANCELLED'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(skippedOrder.paymentOrderId!)
+
+                expect(paymentOrder?.isCancelled()).toBeTruthy()
+            })
+
+            it("Should skip the additional subscription order", async () => {
+                const skippedAdditionalOrder: Order = (await mockOrderRepository.findAllBySubscriptionId(additionalSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                expect(skippedAdditionalOrder.isSkipped()).toBeTruthy()
+            })
+        })
+
+        describe("When it tries to reactivate the additional subscription order", () => {
+            let skippedOrder: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(additionalSubscriptionResult.subscription.id)
+                skippedOrder = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [],
+                    ordersToReactivate: [skippedOrder.id.toString()],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+
+            it("Should not reactivate the order an error", async () => {
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [],
+                    ordersToReactivate: [skippedOrder.id.toString()],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+                expect(skippedOrder.isSkipped()).toBeTruthy()
+            })
+        })
+
+        describe("When it reactivates the skipped order of the first subscription", () => {
+            let orderToReactivate: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orderToReactivate = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [],
+                    ordersToReactivate: [orderToReactivate.id.toString()],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+
+            it("Should set the payment order amount to the plan variant price", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(27.99)
+                expect(paymentOrder?.getTotalAmount()).toBe(37.99)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_ACTIVE'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.isActive()).toBeTruthy()
+            })
+
+            it("Should leave the second subscription order status as 'ORDER_SKIPPED'", async () => {
+                const skippedOrderOfSecondSusbcription: Order = (await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                expect(skippedOrderOfSecondSusbcription.isSkipped()).toBeTruthy()
+            })
+
+            it("Should leave the additional subscription order status as 'ORDER_SKIPPED'", async () => {
+                const skippedOrderOfAdditionalSusbcription: Order = (await mockOrderRepository.findAllBySubscriptionId(additionalSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                expect(skippedOrderOfAdditionalSusbcription.isSkipped()).toBeTruthy()
+            })
+        })
+
+        describe("When it reactivates the skipped order of the second subscription", () => {
+            let orderToReactivate: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)
+                orderToReactivate = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [],
+                    ordersToReactivate: [orderToReactivate.id.toString()],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+
+            it("Should set the payment order amount to the plan variant price", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(55.98)
+                expect(paymentOrder?.getTotalAmount()).toBe(65.98)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_ACTIVE'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.isActive()).toBeTruthy()
+            })
+
+            it("Should leave the additional subscription order status as 'ORDER_SKIPPED'", async () => {
+                const skippedOrderOfAdditionalSusbcription: Order = (await mockOrderRepository.findAllBySubscriptionId(additionalSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+                expect(skippedOrderOfAdditionalSusbcription.isSkipped()).toBeTruthy()
+            })
+        })
+
+        describe("When it reactivates the skipped order of the additional subscription", () => {
+            let orderToReactivate: Order
+
+            beforeAll(async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(additionalSubscriptionResult.subscription.id)
+                orderToReactivate = orders.sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())[1]
+
+                await skipOrderUseCase.execute({
+                    locale: Locale.es,
+                    ordersToSkip: [],
+                    ordersToReactivate: [orderToReactivate.id.toString()],
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    queryDate: SKIPPING_DATE
+                })
+            })
+
+            it("Should set the payment order amount to the plan variant price", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.amount).toBe(65.98)
+                expect(paymentOrder?.getTotalAmount()).toBe(75.98)
+            })
+
+            it("Should leave the shipping cost of the payment order as it was", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should leave the related payment order status as 'PAYMENT_ORDER_ACTIVE'", async () => {
+                const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(orderToReactivate.paymentOrderId!)
+
+                expect(paymentOrder?.isActive()).toBeTruthy()
+            })
+        })
+
     })
 })
