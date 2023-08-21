@@ -91,7 +91,7 @@ export class Order extends Entity<Order> {
         this._couponCode = couponCode;
     }
 
-    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, choosingDate: Date, restriction?: RecipeVariantRestriction): void {
+    public updateRecipes(recipeSelection: RecipeSelection[], isAdminChoosing: boolean, choosingDate: Date, isInCheckout: boolean, restriction?: RecipeVariantRestriction): void {
         const isSaturday = choosingDate.getDay() === 6;
         const isSunday = choosingDate.getDay() === 0;
         const isMonday = choosingDate.getDay() === 1;
@@ -99,7 +99,6 @@ export class Order extends Entity<Order> {
         const isWednesday = choosingDate.getDay() === 3;
         const isFridayAfter23 = choosingDate.getDay() === 5 && choosingDate.getHours() >= 23 && choosingDate.getMinutes() >= 59;
         const isChoosingTheSameDateOfCreation = MomentTimeService.isSameDay(choosingDate, this.createdAt);
-        const itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing = isSaturday && !isChoosingTheSameDateOfCreation;
         const isChoosingRecipesForTheCurrentWeek = this.week.containsDate(choosingDate) && this.week.containsDate(this.shippingDate);
 
         if (isMonday && isChoosingRecipesForTheCurrentWeek && !isAdminChoosing) {
@@ -119,11 +118,7 @@ export class Order extends Entity<Order> {
             throw new Error('No puedes elegir recetas el miércoles para una entrega el mismo miércoles.');
         }
 
-        if (isSaturday && !isChoosingTheSameDateOfCreation && !isAdminChoosing) {
-            throw new Error('No puedes elegir recetas el sábado si no es el día de creación de la suscripción.');
-        }
-
-        if (isSaturday && !isAdminChoosing && itsSaturdayAndItsNotChoosingForFirstTimeAfterPurchasing) {
+        if (isSaturday && !isInCheckout && !isAdminChoosing) {
             throw new Error('No puedes actualizar las recetas después de las 23:59 del viernes si no eres administrador.');
         }
 

@@ -374,7 +374,7 @@ describe("Skip Order Use case", () => {
                 const burguerHalloumiOriginalWeeks = [...burgerHallouli.availableWeeks]
                 burgerHallouli.availableWeeks = [skippedOrder.week]
 
-                await chooseRecipesForOrderUseCase.execute({ choosingDate: CHOOSING_DATE, isAdminChoosing: false, orderId: skippedOrder.id.toString(), recipeSelection: [{ quantity: 2, recipeId: burgerHallouli.id.toString(), recipeVariantId: burgerHallouli.recipeVariants[0].id.toString() }] })
+                await chooseRecipesForOrderUseCase.execute({ choosingDate: CHOOSING_DATE, isAdminChoosing: false, orderId: skippedOrder.id.toString(), recipeSelection: [{ quantity: 2, recipeId: burgerHallouli.id.toString(), recipeVariantId: burgerHallouli.recipeVariants[0].id.toString() }], isInCheckout: false })
 
                 await skipOrderUseCase.execute({
                     locale: Locale.es,
