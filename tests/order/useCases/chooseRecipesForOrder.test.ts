@@ -134,7 +134,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 1, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }, { quantity: 1, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_PURCHASE_DATE
+                choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             const originalWeeksRissoto = [...rissotoDeBoniato.availableWeeks]
@@ -157,7 +158,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_PURCHASE_DATE
+                choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -177,6 +179,7 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 1, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }, { quantity: 1, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
                 choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             const originalWeeksRissoto = [...rissotoDeBoniato.availableWeeks]
@@ -203,7 +206,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_PURCHASE_DATE
+                choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -224,7 +228,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_PURCHASE_DATE
+                choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -244,7 +249,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_PURCHASE_DATE
+                choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             const testWeeks = await mockWeekRepository.findAll()
@@ -261,7 +267,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: burgerHallouli.id.toString(), recipeVariantId: burgerHallouli.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_PURCHASE_DATE
+                choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
         })
@@ -271,7 +278,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 8, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_PURCHASE_DATE
+                choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
 
@@ -282,7 +290,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 1, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_PURCHASE_DATE
+                choosingDate: FRIDAY_PURCHASE_DATE,
+                isInCheckout: true
             }
             await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
 
@@ -347,7 +356,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: FRIDAY_PURCHASE_DATE
+                        choosingDate: FRIDAY_PURCHASE_DATE,
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -412,7 +422,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: FRIDAY_PURCHASE_DATE
+                        choosingDate: FRIDAY_PURCHASE_DATE,
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -477,7 +488,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: FRIDAY_PURCHASE_DATE
+                        choosingDate: FRIDAY_PURCHASE_DATE,
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -543,7 +555,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 5, 17)
+                        choosingDate: new Date(2023, 7, 5, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -559,7 +572,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: true,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 5, 17)
+                        choosingDate: new Date(2023, 7, 5, 17),
+                        isInCheckout: false
                     }
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
                     arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -622,7 +636,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 6, 17)
+                        choosingDate: new Date(2023, 7, 6, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -641,7 +656,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: secondOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 6, 17)
+                        choosingDate: new Date(2023, 7, 6, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -708,7 +724,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: secondOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 7, 17)
+                        choosingDate: new Date(2023, 7, 7, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -723,7 +740,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 7, 17)
+                        choosingDate: new Date(2023, 7, 7, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -738,7 +756,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: true,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 7, 17)
+                        choosingDate: new Date(2023, 7, 7, 17),
+                        isInCheckout: false
                     }
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
                     arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -804,7 +823,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: secondOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 8, 17)
+                        choosingDate: new Date(2023, 7, 8, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -819,7 +839,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 8, 17)
+                        choosingDate: new Date(2023, 7, 8, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -834,7 +855,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: true,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 8, 17)
+                        choosingDate: new Date(2023, 7, 8, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -905,7 +927,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [],
-                        choosingDate: THURSDAY_PURCHASE_DATE
+                        choosingDate: THURSDAY_PURCHASE_DATE,
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -967,7 +990,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: FRIDAY_PURCHASE_DATE
+                        choosingDate: FRIDAY_PURCHASE_DATE,
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1031,7 +1055,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 5, 17)
+                        choosingDate: new Date(2023, 7, 5, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1048,7 +1073,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: true,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 5, 17)
+                        choosingDate: new Date(2023, 7, 5, 17),
+                        isInCheckout: false
                     }
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
                     arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -1113,7 +1139,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 6, 17)
+                        choosingDate: new Date(2023, 7, 6, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1131,7 +1158,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: secondOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 6, 17)
+                        choosingDate: new Date(2023, 7, 6, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1198,7 +1226,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: secondOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 7, 17)
+                        choosingDate: new Date(2023, 7, 7, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1213,7 +1242,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 7, 17)
+                        choosingDate: new Date(2023, 7, 7, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1228,7 +1258,9 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: true,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 7, 17)
+                        choosingDate: new Date(2023, 7, 7, 17),
+                        isInCheckout: false
+
                     }
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
                     arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -1292,7 +1324,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: secondOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 8, 17)
+                        choosingDate: new Date(2023, 7, 8, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1307,7 +1340,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: false,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 8, 17)
+                        choosingDate: new Date(2023, 7, 8, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1322,7 +1356,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                         isAdminChoosing: true,
                         orderId: subscriptionResult.firstOrder.id.toString(),
                         recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                        choosingDate: new Date(2023, 7, 8, 17)
+                        choosingDate: new Date(2023, 7, 8, 17),
+                        isInCheckout: false
                     }
 
                     const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1346,14 +1381,14 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
 
     describe("When he chooses recipes on Saturday", () => {
 
-        // TODO: Testear si no salí del flujo de compra. Me debería dejar en ese caso
         it("Should throw an error", async () => {
             const SATURDAY_PURCHASE_DATE = new Date(2023, 7, 5, 17)
             const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [],
-                choosingDate: SATURDAY_PURCHASE_DATE
+                choosingDate: SATURDAY_PURCHASE_DATE,
+                isInCheckout: false
             }
 
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1368,7 +1403,8 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
                 isAdminChoosing: true,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [],
-                choosingDate: SATURDAY_PURCHASE_DATE
+                choosingDate: SATURDAY_PURCHASE_DATE,
+                isInCheckout: false
             }
 
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
@@ -1379,7 +1415,93 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
     })
 })
 
-describe("Given a user with a brand new subscription purchased on Saturday", () => { })
+describe("Given a user with a brand new subscription purchased on Saturday", () => {
+    let customer: Customer;
+    const CUSTOMER_ID = new CustomerId()
+    const SATURDAY_PURCHASE_DATE: Date = new Date(2023, 7, 5, 17)
+    let subscriptionResult: any
+
+    beforeAll(async () => {
+        customer = Customer.create(
+            CUSTOMER_EMAIL,
+            true,
+            "",
+            [],
+            0,
+            SATURDAY_PURCHASE_DATE,
+            undefined,
+            undefined,
+            CUSTOMER_PASSWORD,
+            "active",
+            undefined,
+            undefined,
+            CUSTOMER_ID
+        )
+        await mockCustomerRepository.save(customer)
+
+        const createSubscriptionDto: CreateSubscriptionDto = {
+            customerId: CUSTOMER_ID.toString(),
+            planId: planVegetariano.id.toString(),
+            planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+            planFrequency: "weekly",
+            restrictionComment: "string",
+            stripePaymentMethodId: "",
+            couponId: undefined,
+            paymentMethodId: "string",
+            addressName: CUSTOMER_ADDRESS_NAME,
+            addressDetails: CUSTOMER_ADDRESS_DETAILS,
+            latitude: CUSTOMER_LATITUDE,
+            longitude: CUSTOMER_LONGITUDE,
+            customerFirstName: CUSTOMER_FIRST_NAME,
+            customerLastName: CUSTOMER_LAST_NAME,
+            phone1: CUSTOMER_PHONE,
+            locale: Locale.es,
+            shippingCity: "Alboraya",
+            shippingProvince: "Valencia",
+            shippingPostalCode: "46120",
+            shippingCountry: "España",
+            purchaseDate: SATURDAY_PURCHASE_DATE
+        }
+        subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+    })
+    describe("When the user choose recipes at the checkout", () => {
+        it("Should be able to choose recipes", async () => {
+            const SATURDAY_CHOOSE_DATE = new Date(2023, 7, 5, 17, 1)
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: false,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [],
+                choosingDate: SATURDAY_CHOOSE_DATE,
+                isInCheckout: true
+            }
+
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+        })
+    })
+
+    describe("When the user choose recipes after the checkout", () => {
+        it("Should throw an error", async () => {
+            const SATURDAY_CHOOSE_DATE = new Date(2023, 7, 5, 17, 1)
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: false,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [],
+                choosingDate: SATURDAY_CHOOSE_DATE,
+                isInCheckout: false
+            }
+
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+        })
+    })
+
+})
+
 describe("Update recipes selection", () => {
     const CUSTOMER_ID = new CustomerId()
     let customer: Customer
@@ -1437,7 +1559,8 @@ describe("Update recipes selection", () => {
             isAdminChoosing: false,
             orderId: subscriptionResult.firstOrder.id.toString(),
             recipeSelection: [{ quantity: 1, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }, { quantity: 1, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
-            choosingDate: THURSDAY_PURCHASE_DATE
+            choosingDate: THURSDAY_PURCHASE_DATE,
+            isInCheckout: false
         })
 
         arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
@@ -1451,7 +1574,8 @@ describe("Update recipes selection", () => {
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_AFTER_PURCHASE_DATE
+                choosingDate: FRIDAY_AFTER_PURCHASE_DATE,
+                isInCheckout: false
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -1465,7 +1589,8 @@ describe("Update recipes selection", () => {
                 isAdminChoosing: true,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: FRIDAY_AFTER_PURCHASE_DATE
+                choosingDate: FRIDAY_AFTER_PURCHASE_DATE,
+                isInCheckout: false
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -1532,7 +1657,8 @@ describe("Given a user with selected recipes for his subscription", () => {
             isAdminChoosing: false,
             orderId: subscriptionResult.firstOrder.id.toString(),
             recipeSelection: [{ quantity: 1, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }, { quantity: 1, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
-            choosingDate: PURCHASE_DATE
+            choosingDate: PURCHASE_DATE,
+            isInCheckout: false
         })
     })
     describe("When he updates his recipe selection", () => {
@@ -1545,7 +1671,8 @@ describe("Given a user with selected recipes for his subscription", () => {
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: bowlDeQuinoa.id.toString(), recipeVariantId: bowlDeQuinoa.recipeVariants[0].id.toString() }],
-                choosingDate: PURCHASE_DATE
+                choosingDate: PURCHASE_DATE,
+                isInCheckout: false
             })
 
         })
@@ -1613,7 +1740,7 @@ describe("Given a new subscription", () => {
         subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
     })
 
-    describe("When the customer cancels the subscription before the delivery date", () => {
+    describe("When the customer cancels the subscription before the delivery date but after paying", () => {
         const CANCELLATION_DATE = new Date(2023, 7, 10, 17)
         beforeAll(async () => {
             const mockMailingListService = new MockMailingListService()
@@ -1627,7 +1754,8 @@ describe("Given a new subscription", () => {
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: new Date(2023, 7, 11, 17)
+                choosingDate: new Date(2023, 7, 11, 17),
+                isInCheckout: false
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -1636,6 +1764,102 @@ describe("Given a new subscription", () => {
             arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
         })
     })
+
+})
+
+describe("Given a new subscription", () => {
+    const CUSTOMER_ID = new CustomerId()
+    let customer: Customer
+    let subscriptionResult: any
+    const PURCHASE_DATE: Date = new Date(2023, 7, 10, 17)
+
+    beforeAll(async () => {
+        customer = Customer.create(
+            CUSTOMER_EMAIL,
+            true,
+            "",
+            [],
+            0,
+            new Date(),
+            undefined,
+            undefined,
+            CUSTOMER_PASSWORD,
+            "active",
+            undefined,
+            undefined,
+            CUSTOMER_ID
+        )
+        await mockCustomerRepository.save(customer)
+
+        const createSubscriptionDto: CreateSubscriptionDto = {
+            customerId: CUSTOMER_ID.toString(),
+            planId: planVegetariano.id.toString(),
+            planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+            planFrequency: "weekly",
+            restrictionComment: "string",
+            stripePaymentMethodId: "",
+            couponId: undefined,
+            paymentMethodId: "string",
+            addressName: CUSTOMER_ADDRESS_NAME,
+            addressDetails: CUSTOMER_ADDRESS_DETAILS,
+            latitude: CUSTOMER_LATITUDE,
+            longitude: CUSTOMER_LONGITUDE,
+            customerFirstName: CUSTOMER_FIRST_NAME,
+            customerLastName: CUSTOMER_LAST_NAME,
+            phone1: CUSTOMER_PHONE,
+            locale: Locale.es,
+            shippingCity: "Alboraya",
+            shippingProvince: "Valencia",
+            shippingPostalCode: "46120",
+            shippingCountry: "España",
+            purchaseDate: PURCHASE_DATE
+        }
+        subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+    })
+
+    describe("When the customer cancels the subscription before the delivery date but before paying it", () => {
+        const CANCELLATION_DATE = new Date(2023, 7, 17, 17)
+        beforeAll(async () => {
+            const mockMailingListService = new MockMailingListService()
+            const cancelSubscriptionUseCase: CancelASubscription = new CancelASubscription(mockSubscriptionRepository, mockOrderRepository, mockPaymentOrderRepository, mockNotificationService, mockMailingListService, mockLogRepository, mockRecipeRatingRepository)
+
+            await cancelSubscriptionUseCase.execute({ subscriptionId: subscriptionResult.subscription.id.toString(), queryDate: CANCELLATION_DATE, cancellationComment: "", cancellationReason: "" })
+        })
+
+        it("Should not be able to choose recipes for the order", async () => {
+            const orderToSkip = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.week.minDay.getTime() - b.week.minDay.getTime())[1]
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: false,
+                orderId: orderToSkip.id.toString(),
+                recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                choosingDate: new Date(2023, 7, 17, 18),
+                isInCheckout: false
+            }
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+        })
+
+        it("Should be able to choose recipes for the order if it is an admin", async () => {
+            const orderToSkip = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.week.minDay.getTime() - b.week.minDay.getTime())[1]
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: true,
+                orderId: orderToSkip.id.toString(),
+                recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                choosingDate: new Date(2023, 7, 17, 18),
+                isInCheckout: false
+            }
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week, orderToSkip.week]
+
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+        })
+
+    })
+
 })
 
 describe("Given a new subscription with a skipped week", () => {
@@ -1705,7 +1929,8 @@ describe("Given a new subscription with a skipped week", () => {
                 isAdminChoosing: true,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: CHOOSING_DATE
+                choosingDate: CHOOSING_DATE,
+                isInCheckout: false
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
@@ -1720,7 +1945,8 @@ describe("Given a new subscription with a skipped week", () => {
                 isAdminChoosing: false,
                 orderId: subscriptionResult.firstOrder.id.toString(),
                 recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
-                choosingDate: CHOOSING_DATE
+                choosingDate: CHOOSING_DATE,
+                isInCheckout: false
             }
             const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
             arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]

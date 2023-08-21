@@ -39,14 +39,16 @@ export class GetCustomerSubscriptionsPresenter {
         }
 
         for (let subscription of subscriptions.sort((sub1, sub2) => (sub2.state.isActive() ? 1 : -1))) {
+            const HAS_A_PENDING_SHIPMENT = !!subscription.getNextOrderToShip(orderSubscriptionMap[subscription.id.toString()]);
             if (subscription.isActive()) planSubscriptionMap[subscription.plan.id.toString()] = subscription;
             if (
-                subscription.state.isCancelled() &&
+                subscription.isCancelled() &&
                 !cancelledSubscriptions.some((s) => s.plan.id.equals(subscription.plan.id)) &&
                 !planSubscriptionMap[subscription.plan.id.toString()]
             ) {
                 cancelledSubscriptions.push(subscription);
-            } else if (!subscription.state.isCancelled()) {
+            }
+            else if (!subscription.isCancelled() || (subscription.isCancelled() && HAS_A_PENDING_SHIPMENT)) {
                 nonCancelledSubscriptions.push(subscription);
             }
         }

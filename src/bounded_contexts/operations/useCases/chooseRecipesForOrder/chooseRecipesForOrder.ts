@@ -80,7 +80,7 @@ export class ChooseRecipesForOrder {
             newRecipeSelection.push(newSelection);
         }
 
-        order.updateRecipes(newRecipeSelection, dto.isAdminChoosing, dto.choosingDate);
+        order.updateRecipes(newRecipeSelection, dto.isAdminChoosing, dto.choosingDate, dto.isInCheckout);
         paymentOrder.lastRecipeSelectionDate = new Date();
 
         await this.orderRepository.save(order);

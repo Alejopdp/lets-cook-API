@@ -436,6 +436,7 @@ export class Subscription extends Entity<Subscription> {
     public getNextShipmentLabel(orders: Order[] = [], locale: Locale): string {
         const nextOrder = orders.find((order) => order.isActive() || order.isBilled());
 
+        // if (!!!nextOrder) return "No tienes una próxima entrega";
         if (!!!nextOrder) return "No tienes una próxima entrega";
 
         return nextOrder.getHumanShippmentDay(locale);

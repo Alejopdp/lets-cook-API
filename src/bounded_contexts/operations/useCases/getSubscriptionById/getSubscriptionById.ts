@@ -9,28 +9,32 @@ import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/I
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { WeekId } from "../../domain/week/WeekId";
+import { GetSubscriptionByIdPresenter, GetSubscriptionByIdResponse } from "./getSubscriptionByIdPresenter";
 
 export class GetSubscriptionById {
     private _subscriptionRepository: ISubscriptionRepository;
     private _orderRepository: IOrderRepository;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _weekRepository: IWeekRepository;
+    private _presenter: GetSubscriptionByIdPresenter;
 
     constructor(
         subscriptionRepository: ISubscriptionRepository,
         orderRepository: IOrderRepository,
         paymentOrderRepository: IPaymentOrderRepository,
-        weekRepository: IWeekRepository
+        weekRepository: IWeekRepository,
+        presenter: GetSubscriptionByIdPresenter
     ) {
         this._subscriptionRepository = subscriptionRepository;
         this._orderRepository = orderRepository;
         this._paymentOrderRepository = paymentOrderRepository;
         this._weekRepository = weekRepository;
+        this._presenter = presenter;
     }
 
     public async execute(
         dto: GetSubscriptionByIdDto
-    ): Promise<{ subscription: Subscription; orders: Order[]; customer: Customer; paymentOrders: PaymentOrder[] }> {
+    ): Promise<GetSubscriptionByIdResponse> {
         const subscriptionId: SubscriptionId = new SubscriptionId(dto.subscriptionId);
         const [subscription, orders]: [Subscription, Order[]] = await Promise.all([
             this.subscriptionRepository.findByIdOrThrow(subscriptionId, dto.locale),
@@ -42,8 +46,9 @@ export class GetSubscriptionById {
         );
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByWeeks(currentAndNextWeeksIds);
 
-        return { subscription, orders, customer: subscription.customer, paymentOrders };
+        return await this.presenter.present(subscription, orders, subscription.customer, paymentOrders, dto.locale, dto.queryDate)
     }
+
 
     /**
      * Getter subscriptionRepository
@@ -76,4 +81,13 @@ export class GetSubscriptionById {
     public get weekRepository(): IWeekRepository {
         return this._weekRepository;
     }
+
+    /**
+     * Getter presenter
+     * @return {GetSubscriptionByIdPresenter}
+     * */
+    public get presenter(): GetSubscriptionByIdPresenter {
+        return this._presenter;
+    }
+
 }

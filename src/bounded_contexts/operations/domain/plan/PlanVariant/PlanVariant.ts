@@ -86,7 +86,6 @@ export class PlanVariant extends Entity<PlanVariant> {
     }
 
     public getPortionPrice(discount: number = 0): number {
-        // if (!this.numberOfRecipes || !this.numberOfPersons) return 0;
         return Utils.roundTwoDecimals(this.getPaymentPrice() / this.getPortionsQuantity());
     }
 
@@ -125,7 +124,7 @@ export class PlanVariant extends Entity<PlanVariant> {
             attributes["Recetas"] = recetasValues.includes(this.numberOfRecipes)
                 ? recetasValues
                 : //@ts-ignore
-                  [...recetasValues, this.numberOfRecipes];
+                [...recetasValues, this.numberOfRecipes];
         }
         for (let attr of this.attributes) {
             const actualValues = attributes[attr.key];

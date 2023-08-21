@@ -128,7 +128,8 @@ describe("Given a first subscription of a new customer", () => {
             choosingDate: new Date("2023-08-04"),
             orderId: firstSubscriptionResult.firstOrder.id.toString(),
             isAdminChoosing: false,
-            recipeSelection: [{ quantity: 2, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }]
+            recipeSelection: [{ quantity: 2, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
+            isInCheckout: false
         })
 
         rissotoDeBoniato.availableWeeks = [...originalWeeksRissoto]
@@ -222,7 +223,8 @@ describe("Given a first subscription of a new customer", () => {
                 choosingDate: new Date("2023-08-11"),
                 orderId: secondOrder.id.toString(),
                 isAdminChoosing: false,
-                recipeSelection: [{ quantity: 2, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }]
+                recipeSelection: [{ quantity: 2, recipeId: rissotoDeBoniato.id.toString(), recipeVariantId: rissotoDeBoniato.recipeVariants[0].id.toString() }],
+                isInCheckout: false
             })
 
         })

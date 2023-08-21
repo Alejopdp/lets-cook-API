@@ -209,6 +209,7 @@ export class CreateSubscription {
             customer.id
         );
         this.logRepository.save(log);
+
         return {
             subscription,
             paymentIntent,
