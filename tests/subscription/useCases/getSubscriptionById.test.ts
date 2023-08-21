@@ -41,6 +41,7 @@ import { MockStorageService } from "../../../src/bounded_contexts/operations/app
 import { Plan } from "../../../src/bounded_contexts/operations/domain/plan/Plan"
 import { PlanFrequency } from "../../../src/bounded_contexts/operations/domain/plan/PlanFrequency"
 import { PlanFrequencyFactory } from "../../../src/bounded_contexts/operations/domain/plan/PlanFrequency/PlanFrequencyFactory"
+import { CancelASubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/cancelASubscription/cancelASubscriptionDto"
 
 
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -369,6 +370,225 @@ describe('Get Subscription By Id', () => {
 
                     expect(getSubscriptionByIdResponse.hasChosenRecipesForNextWeek).toEqual(false)
                 })
+            })
+        })
+    })
+
+    describe("Given a cancelled subscription", () => {
+        const PURCHASE_DATE: Date = new Date(2023, 7, 21, 17)
+        const CANCELLATION_DATE: Date = new Date(2023, 7, 21, 17, 10)
+        const QUERY_DATE: Date = new Date(2023, 7, 21, 17, 15)
+        const CUSTOMER_ID = new CustomerId()
+        let createSubscriptionUseCaseResponse: any
+        let subscription: Subscription
+        let customer: Customer
+
+        beforeAll(async () => {
+            customer = Customer.create(CUSTOMER_EMAIL,
+                true,
+                "",
+                [],
+                0,
+                new Date(),
+                undefined,
+                undefined,
+                CUSTOMER_PASSWORD,
+                "active",
+                undefined,
+                undefined,
+                CUSTOMER_ID)
+            mockCustomerRepository.save(customer)
+
+            const createSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: planVegetariano.id.toString(),
+                planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: undefined,
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: PURCHASE_DATE
+
+            }
+            createSubscriptionUseCaseResponse = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            subscription = createSubscriptionUseCaseResponse.subscription
+
+            const cancelSubscriptionDTO: CancelASubscriptionDto = {
+                cancellationComment: "string",
+                cancellationReason: "string",
+                queryDate: CANCELLATION_DATE,
+                subscriptionId: subscription.id.toString()
+            }
+
+            await cancelASubscriptionUseCase.execute(cancelSubscriptionDTO)
+        })
+
+        describe("When the user queries before the shipping date", () => {
+            it("Should return the subscription id", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.subscriptionId).toEqual(subscription.id.toString())
+            })
+
+            it("Should return the subscription plan id", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.plan.id).toEqual(subscription.plan.id.toString())
+            })
+
+            it("Should return the subscription plan variant", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.actualPlanVariant.id).toEqual(subscription.planVariantId.toString())
+                expect(getSubscriptionByIdResponse.actualPlanVariant.description).toEqual(planVegetarianoVariant2Persons2Recipes.getLabelWithPrice(Locale.es))
+                expect(getSubscriptionByIdResponse.actualPlanVariant.price).toEqual(planVegetarianoVariant2Persons2Recipes.priceWithOffer ?? planVegetarianoVariant2Persons2Recipes.price)
+                expect(getSubscriptionByIdResponse.actualPlanVariant.isDefault).toEqual(planVegetarianoVariant2Persons2Recipes.isDefault)
+                expect(getSubscriptionByIdResponse.actualPlanVariant.numberOfPersons).toEqual(planVegetarianoVariant2Persons2Recipes.numberOfPersons)
+                expect(getSubscriptionByIdResponse.actualPlanVariant.numberOfRecipes).toEqual(planVegetarianoVariant2Persons2Recipes.numberOfRecipes)
+            })
+
+            it("Should return if the subscription is a one time", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.isOneTime).toEqual(subscription.frequency === PlanFrequencyFactory.createPlanFrequency("one_time"))
+            })
+
+            it("Should return the shipping address", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.shippingAddress.addressName).toEqual(CUSTOMER_ADDRESS_NAME)
+                expect(getSubscriptionByIdResponse.shippingAddress.addressDetails).toEqual(CUSTOMER_ADDRESS_DETAILS)
+                expect(getSubscriptionByIdResponse.shippingAddress.preferredSchedule).toEqual(customer.shippingAddress?.deliveryTime?.getLabel(Locale.es) ?? "")
+            })
+
+            it("Should return the payment method or null", async () => {
+                const customerPaymentPethod = customer.getDefaultPaymentMethod()
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                if (!customerPaymentPethod) expect(getSubscriptionByIdResponse.paymentMethod).toBeNull()
+                else {
+                    expect(getSubscriptionByIdResponse.paymentMethod?.cardLabel).toEqual(customerPaymentPethod.getCardLabel(Locale.es))
+                    expect(getSubscriptionByIdResponse.paymentMethod?.default).toEqual(customerPaymentPethod.isDefault)
+                    expect(getSubscriptionByIdResponse.paymentMethod?.id).toEqual(customerPaymentPethod.id.toString())
+                    expect(getSubscriptionByIdResponse.paymentMethod?.expirationDateLabel).toEqual(customer.getDefaultPaymentMethodExpirationDateLabel(Locale.es))
+                }
+            })
+
+            it("Should return the schedule", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.schedule.nextDelivery).toEqual("martes 29º agosto")
+                expect(getSubscriptionByIdResponse.schedule.nextPayment).toEqual("")
+            })
+
+            it("Should return false as hasChosenRecipesForActualWeek", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.hasChosenRecipesForActualWeek).toEqual(false)
+            })
+
+            it("Should return false as hasChosenRecipesForNextWeek", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.hasChosenRecipesForNextWeek).toEqual(false)
+            })
+
+            it("Should return the next week order info", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+                const billedOrder = createSubscriptionUseCaseResponse.firstOrder
+
+                expect(getSubscriptionByIdResponse.nextWeekOrder?.id).toEqual(billedOrder.id.toString())
+                expect(getSubscriptionByIdResponse.nextWeekOrder?.shippingDate).toEqual("martes 29º agosto")
+                expect(getSubscriptionByIdResponse.nextWeekOrder?.weekLabel).toBeDefined()
+            })
+
+            it("Should return true as canChooseRecipesForNextWeekOrder", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.canChooseRecipesForNextWeekOrder).toEqual(true)
+            })
+
+            it("Should return the skipped orders", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.skippedOrders.length).toEqual(0)
+            })
+
+            it("Should return if the plan is able to choose recipes", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.canChooseRecipes).toBeTruthy()
+            })
+
+            it("Should return the next 11 orders", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                getSubscriptionByIdResponse.nextTwelveOrders.forEach((order, index) => {
+                    expect(order.id).toBeDefined()
+                    expect(order.weekLabel).toBeDefined()
+                    expect(order.isReanudable).toBeDefined()
+                    expect(order.shippingDate).toBeDefined()
+                    expect(order.isSkipped).toBeDefined()
+                    expect(order.state).toBeDefined()
+                })
+
+                expect(getSubscriptionByIdResponse.nextTwelveOrders.length).toEqual(12)
+
+            })
+
+            it("Should return true if the plan has recipes asscioated", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const getSubscriptionByIdResponse = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(getSubscriptionByIdResponse.hasRecipes).toEqual(subscription.plan.hasRecipes)
+            })
+
+            it("Should return the shipping cost", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const response = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(response.shippingCost).toEqual(MOCK_SHIPPING_COST)
+            })
+
+            it("Should return the portions quantity", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const response = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(response.portionsQuantity).toEqual(4)
+            })
+
+            it("Should return the porcion price", async () => {
+                const getSubscriptionByIdDto = { subscriptionId: subscription.id.toString(), locale: Locale.es, queryDate: QUERY_DATE }
+                const response = await getSubscriptionById.execute(getSubscriptionByIdDto)
+
+                expect(response.portionPrice).toEqual(6.62)
             })
         })
     })

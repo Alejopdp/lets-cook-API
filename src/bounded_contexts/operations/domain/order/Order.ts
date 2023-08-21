@@ -130,6 +130,8 @@ export class Order extends Entity<Order> {
             throw new Error('No puedes elegir recetas el domingo para la semana que empieza, solo para la siguiente.');
         }
 
+        if (this.isCancelled() && !isAdminChoosing) throw new Error("No puedes elegir recetas para un orden cancelada");
+
         recipeSelection = recipeSelection.filter((selection) => selection.quantity > 0);
         const planVariant: PlanVariant = this.plan.getPlanVariantById(this.planVariantId)!;
         const totalIncomingRecipes = recipeSelection.reduce((acc, recipeSelection) => acc + recipeSelection.quantity, 0);
