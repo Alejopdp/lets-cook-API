@@ -121,10 +121,10 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         return this.state.isActive()
     }
 
-    public updateState(newState: string, orders: Order[]): void {
+    public updateState(newState: string, orders: Order[], queryDate: Date): void {
         const newPaymentOrderState: IPaymentOrderState = PaymentOrderStateFactory.createState(newState);
 
-        if (newPaymentOrderState.isActive()) this.toActive(orders);
+        if (newPaymentOrderState.isActive()) this.toActive(orders, queryDate);
         if (newPaymentOrderState.isBilled()) this.toBilled(orders);
         if (newPaymentOrderState.isPendingConfirmation()) this.toPendingConfirmation(orders);
         if (newPaymentOrderState.isRejected()) this.toRejected(orders);
@@ -145,9 +145,9 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this.state.toBilled(this);
     }
 
-    public toActive(orders: Order[]): void {
+    public toActive(orders: Order[], queryDate: Date): void {
         for (let order of orders) {
-            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(this); // TO DO: Handle this?
+            if (order.paymentOrderId && order.paymentOrderId.equals(this.id)) order.reactivate(this, queryDate); // TO DO: Handle this?
         }
 
         this.state.toActive(this);

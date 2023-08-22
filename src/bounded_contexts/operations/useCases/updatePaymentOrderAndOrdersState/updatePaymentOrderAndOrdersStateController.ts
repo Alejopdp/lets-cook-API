@@ -19,6 +19,7 @@ export class UpdatePaymentOrderAndOrdersStateController extends BaseController {
             const dto: UpdatePaymentOrderAndOrdersStateDto = {
                 paymentOrderId: this.req.params.id,
                 paymentOrderState: this.req.body.state,
+                queryDate: new Date(),
             };
 
             const result = await this.updatePaymentOrderAndOrdersState.execute(dto);
