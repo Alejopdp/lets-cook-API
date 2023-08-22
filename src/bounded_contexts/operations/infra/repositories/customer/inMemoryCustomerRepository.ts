@@ -28,6 +28,10 @@ export class InMemoryCustomerRepository implements ICustomerRepository {
 
     }
 
+    public async findAllWithWalletEnabled(): Promise<Customer[]> {
+        return this.customers.filter((customer) => customer.wallet?.isEnabled);
+    }
+
     public async findByEmail(email: string): Promise<any | undefined> {
         return this.customers.find((customer) => customer.email === email);
     }
@@ -52,8 +56,10 @@ export class InMemoryCustomerRepository implements ICustomerRepository {
         return this.customers.filter((customer) => customer.getPersonalInfo().fullName === name);
     }
 
-    updateMany(customers: Customer[]): Promise<void> {
-        throw new Error("Method not implemented.");
+    public async updateMany(customers: Customer[]): Promise<void> {
+        for (const customer of customers) {
+            await this.save(customer);
+        }
     }
     public async findByIdOrThrow(id: CustomerId): Promise<Customer> {
         const customer = await this.findById(id);

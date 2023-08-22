@@ -33,7 +33,8 @@ export class CustomerMapper implements Mapper<Customer, any> {
             new CustomerId(raw._id),
             raw.friendCode || undefined,
             raw.shopifyReceivedOrdersQuantity,
-            raw.firstOrderDate
+            raw.firstOrderDate,
+            raw.wallet
         );
     }
     public toPersistence(t: Customer): any {
@@ -55,6 +56,7 @@ export class CustomerMapper implements Mapper<Customer, any> {
             friendCode: t.friendCode,
             shopifyReceivedOrdersQuantity: t.shopifyReceivedOrdersQuantity,
             firstOrderDate: t.firstOrderDate,
+            wallet: t.wallet ? { balance: t.wallet.balance, amountToCharge: t.wallet.amountToCharge, paymentMethodForCharging: t.wallet.paymentMethodForCharging } : null,
         };
     }
 }

@@ -171,4 +171,8 @@ export class MongooseCustomerRepository implements ICustomerRepository {
     public async delete(customerId: CustomerId): Promise<void> {
         await MongooseCustomer.updateOne({ _id: customerId.value }, { $set: { deletionFlag: true } });
     }
+
+    public async findAllWithWalletEnabled(): Promise<Customer[]> {
+        return await this.findBy({ "wallet.isEnabled": true });
+    }
 }

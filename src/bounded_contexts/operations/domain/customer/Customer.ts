@@ -11,6 +11,9 @@ import { Locale } from "../locale/Locale";
 import { IPreferredDeliveryTime } from "./preferredDeliveryTime/IPreferredDeliveryTime";
 import { Subscription } from "../subscription/Subscription";
 import { Order } from "../order/Order";
+import { Wallet } from "./wallet/Wallet";
+import { UniqueEntityID } from "../../../../core/domain/UniqueEntityID";
+import { DateOfCharge } from "./wallet/DateOfCharge";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -28,6 +31,7 @@ export class Customer extends Entity<Customer> {
     private _createdAt: Date;
     private _shopifyReceivedOrdersQuantity: number | undefined;
     private _firstOrderDate: Date | undefined;
+    private _wallet: Wallet | undefined;
 
     protected constructor(
         email: string,
@@ -45,7 +49,8 @@ export class Customer extends Entity<Customer> {
         id?: CustomerId,
         friendCode?: string,
         shopifyReceivedOrdersQuantity?: number,
-        firstOrderDate?: Date
+        firstOrderDate?: Date,
+        wallet?: Wallet
     ) {
         super(id);
         this._email = email;
@@ -63,6 +68,7 @@ export class Customer extends Entity<Customer> {
         this._createdAt = createdAt;
         this._shopifyReceivedOrdersQuantity = shopifyReceivedOrdersQuantity;
         this._firstOrderDate = firstOrderDate;
+        this._wallet = wallet;
     }
 
     public static create(
@@ -81,7 +87,8 @@ export class Customer extends Entity<Customer> {
         id?: CustomerId,
         friendCode?: string,
         shopifyReceivedOrdersQuantity?: number,
-        firstOrderDate?: Date
+        firstOrderDate?: Date,
+        wallet?: Wallet
     ): Customer {
         return new Customer(
             email,
@@ -100,7 +107,44 @@ export class Customer extends Entity<Customer> {
             friendCode,
             shopifyReceivedOrdersQuantity,
             firstOrderDate,
+            wallet
         );
+    }
+
+    public createWallet(amountToCharge: number, paymentMethodForCharging: string, datesOfCharge: DateOfCharge[]): void {
+        if (this.wallet) throw new Error("Ya tienes una billetera creada");
+        if (!paymentMethodForCharging) throw new Error("Tienes que ingresar un método de pago para cargar la billetera");
+        const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.value === paymentMethodForCharging);
+
+        if (!paymentMethod) throw new Error("El método de pago ingresado para cargar la billetera no existe");
+
+        this.wallet = new Wallet(0, amountToCharge, paymentMethodForCharging, true, datesOfCharge, new UniqueEntityID());
+    }
+
+    public chargeMoneyToWallet(amountToCharge: number): void {
+        if (!this.wallet) throw new Error("No se puede cargar dinero a la billetera porque no existe");
+        this.wallet.chargeMoney(amountToCharge);
+    }
+
+    public updateWallet(amountToCharge: number, paymentMethodForCharging: string, isEnabled: boolean, datesOfCharge: DateOfCharge[]): void {
+        if (!this.wallet) throw new Error("No se puede actualizar la billetera porque no existe");
+        if (!this.wallet?.isEnabled && !isEnabled) throw new Error("Tienes que habilitar la billetera para poder actualizarla");
+        const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.toString() === paymentMethodForCharging);
+        if (!paymentMethod) throw new Error("El método de pago ingresado para cargar la billetera no existe");
+
+        this.wallet.updateAmountToCharge(amountToCharge);
+        this.wallet.updateDatesOfCharge(datesOfCharge);
+        this.wallet.paymentMethodForCharging = paymentMethodForCharging;
+        this.wallet.isEnabled = isEnabled
+    }
+
+    public getPaymentMethodForChargingTheWallet(): PaymentMethod {
+        if (!this.wallet) throw new Error("No se puede cargar dinero a la billetera porque no existe");
+
+        const paymentMethod = this.paymentMethods.find((method) => method.id.toString() === this.wallet?.paymentMethodForCharging);
+        if (!paymentMethod) throw new Error("No hay un método de pago para cargar la billetera");
+
+        return paymentMethod;
     }
 
     public createFriendCode(codeNumber: number): void {
@@ -478,6 +522,24 @@ export class Customer extends Entity<Customer> {
     public get createdAt(): Date {
         return this._createdAt;
     }
+
+
+    /**
+     * Getter wallet
+     * @return {Wallet | undefined}
+     */
+    public get wallet(): Wallet | undefined {
+        return this._wallet;
+    }
+
+    /**
+     * Setter wallet
+     * @param {Wallet | undefined} value
+     */
+    public set wallet(value: Wallet | undefined) {
+        this._wallet = value;
+    }
+
 
     /**
      * Setter email
