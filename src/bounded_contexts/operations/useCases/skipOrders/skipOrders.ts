@@ -105,7 +105,7 @@ export class SkipOrders {
                 recipeRating.addOneDelivery(order.shippingDate);
             }
 
-            order.reactivate(paymentOrdersMap[order.paymentOrderId?.value!]);
+            order.reactivate(paymentOrdersMap[order.paymentOrderId?.value!], dto.queryDate);
             activeOrdersToSave.push(order);
         }
 
