@@ -30,13 +30,13 @@ describe("Charge money to wallet job", () => {
 
     })
 
-    // describe("When the job is scheduled for every day at 00", () => {
-    //     beforeAll(async () => {
-    //         const job = schedule.scheduleJob({ hour: 0, minute: 0 }, async () => {
-    //             await chargeWalletJob.execute({ executionDate: undefined })
-    //         })
-    //     })
-    // })
+    describe("When the job is scheduled for every day at 00", () => {
+        beforeAll(async () => {
+            const job = schedule.scheduleJob({ hour: 0, minute: 0 }, async () => {
+                await chargeWalletJob.execute({ executionDate: undefined })
+            })
+        })
+    })
 
     describe("Given many customers with wallets", () => {
         let customers: Customer[]

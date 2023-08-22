@@ -15,6 +15,7 @@ export class ChargeWalletJob {
     }
 
     public async execute(dto: ChargeWalletJobDto): Promise<schedule.Job[]> {
+        console.log("*********************************** STARTING WALLET JOB ***********************************")
         const customers = await this.customerRepository.findAllWithWalletEnabled();
         const jobs = [];
 
@@ -37,6 +38,7 @@ export class ChargeWalletJob {
             }
         }
 
+        console.log("*********************************** ENDING WALLET JOB ***********************************")
 
         return jobs
     }
