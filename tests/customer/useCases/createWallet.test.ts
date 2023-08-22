@@ -35,6 +35,9 @@ import { Order } from "../../../src/bounded_contexts/operations/domain/order/Ord
 import { RecipeRating } from "../../../src/bounded_contexts/operations/domain/recipeRating/RecipeRating";
 import { IMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/IMailingListService";
 import { MockMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/mockMailingListService";
+import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod";
+import { DateOfCharge } from "../../../src/bounded_contexts/operations/domain/customer/wallet/DateOfCharge";
+import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day";
 
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
 const mockShippingZoneRepository = new InMemoryShippingZoneRepository([])
@@ -56,6 +59,8 @@ describe("Create wallet Use Case", () => {
     describe("Given a customer", () => {
         const CUSTOMER_ID = new CustomerId()
         let customer: Customer
+        const GOOD_DATES_OF_CHARGE = [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }]
+        const DUPLICATED_DATES_OF_CHARGE = [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 1, hour: "17", minute: "30" }, { dayNumber: 3, hour: "17", minute: "30" }]
 
         beforeAll(async () => {
             customer = Customer.create(
@@ -77,14 +82,32 @@ describe("Create wallet Use Case", () => {
             await mockCustomerRepository.save(customer)
         })
 
-        describe("When the customer wants to create a wallet", () => {
+        describe("When the customer wants to create a wallet with a wrong payment method", () => {
+
+            it("Should throw an error", async () => {
+                await expect(createWalletUseCase.execute({
+                    customerId: CUSTOMER_ID.toString(),
+                    amountToCharge: 0,
+                    paymentMethodForChargingId: "wrongId",
+                    datesOfCharge: GOOD_DATES_OF_CHARGE
+                })).rejects.toThrow("El método de pago ingresado para cargar la billetera no existe")
+            })
+
+        })
+
+        describe("When the customer wants to create a wallet with a correct payment method", () => {
+            let customerPaymentMethod: PaymentMethod;
+
             beforeAll(async () => {
+                customerPaymentMethod = new PaymentMethod("visa", "4242", 8, 2030, "420", false, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
                 const createWallet = new CreateWallet(mockCustomerRepository)
 
                 await createWallet.execute({
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0,
-                    paymentMethodForChargingId: "wrongId"
+                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    datesOfCharge: GOOD_DATES_OF_CHARGE
                 })
             })
 
@@ -94,7 +117,39 @@ describe("Create wallet Use Case", () => {
                 expect(customerWithWallet.wallet).toBeDefined()
                 expect(customerWithWallet.wallet?.balance).toBe(0)
                 expect(customerWithWallet.wallet?.amountToCharge).toBe(0)
-                expect(customerWithWallet.wallet?.paymentMethodForCharging).toBe("wrongId")
+                expect(customerWithWallet.wallet?.paymentMethodForCharging).toBe(customerPaymentMethod.id.toString())
+            })
+        })
+        describe("When the customer wants to create a wallet with a duplicated day of charge", () => {
+            it("Should throw an error", async () => {
+                await expect(createWalletUseCase.execute({
+                    customerId: CUSTOMER_ID.toString(),
+                    amountToCharge: 0,
+                    paymentMethodForChargingId: "wrongId",
+                    datesOfCharge: DUPLICATED_DATES_OF_CHARGE
+                })).rejects.toThrow()
+            })
+        })
+
+        describe("When the customer wants to create a wallet with more than 7 days of charge", () => {
+            it("Should throw an error", async () => {
+                await expect(createWalletUseCase.execute({
+                    customerId: CUSTOMER_ID.toString(),
+                    amountToCharge: 0,
+                    paymentMethodForChargingId: "wrongId",
+                    datesOfCharge: [{ dayNumber: 3, hour: "17", minute: "30" }, { dayNumber: 5, hour: "17", minute: "30" }, { dayNumber: 6, hour: "17", minute: "30" }, { dayNumber: 0, hour: "17", minute: "30" }, { dayNumber: 4, hour: "17", minute: "30" }, { dayNumber: 2, hour: "17", minute: "30" }, { dayNumber: 1, hour: "17", minute: "30" }, { dayNumber: 3, hour: "17", minute: "30" }]
+                })).rejects.toThrow()
+            })
+        })
+
+        describe("When te customer wants to create a wallet without specifyng the date of charge", () => {
+            it("Should throw an error", async () => {
+                await expect(createWalletUseCase.execute({
+                    customerId: CUSTOMER_ID.toString(),
+                    amountToCharge: 0,
+                    paymentMethodForChargingId: "wrongId",
+                    datesOfCharge: []
+                })).rejects.toThrow()
             })
         })
     })

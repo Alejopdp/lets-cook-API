@@ -12,6 +12,8 @@ import { IPreferredDeliveryTime } from "./preferredDeliveryTime/IPreferredDelive
 import { Subscription } from "../subscription/Subscription";
 import { Order } from "../order/Order";
 import { Wallet } from "./wallet/Wallet";
+import { UniqueEntityID } from "../../../../core/domain/UniqueEntityID";
+import { DateOfCharge } from "./wallet/DateOfCharge";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -107,6 +109,20 @@ export class Customer extends Entity<Customer> {
             firstOrderDate,
             wallet
         );
+    }
+
+    public createWallet(amountToCharge: number, paymentMethodForCharging: string, datesOfCharge: DateOfCharge[]): void {
+        const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.value === paymentMethodForCharging);
+
+        if (!paymentMethod) throw new Error("El método de pago ingresado para cargar la billetera no existe");
+
+        // Dates of 
+
+        this.wallet = new Wallet(0, amountToCharge, paymentMethodForCharging, true, datesOfCharge, new UniqueEntityID());
+    }
+
+    public updateWallet(amountToCharge: number, paymentMethodForCharging: string, isEnabled: boolean, datesOfCharge: DateOfCharge[]): void {
+
     }
 
     public createFriendCode(codeNumber: number): void {

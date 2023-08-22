@@ -362,7 +362,6 @@ describe("Skip Order Use case", () => {
             let skippedOrder: Order
             let paymentOrderAmount: number | undefined
             const PURCHASE_DATE = new Date("2023-08-08")
-            // const CHOOSING_DATE = new Date("2023-08-16")
             const CHOOSING_DATE = new Date(2023, 7, 16, 17)
             const SKIPPING_DATE = new Date("2023-08-17")
 

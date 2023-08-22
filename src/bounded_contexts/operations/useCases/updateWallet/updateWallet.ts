@@ -2,22 +2,22 @@ import { CustomerId } from "../../domain/customer/CustomerId";
 import { DateOfCharge } from "../../domain/customer/wallet/DateOfCharge";
 import { Day } from "../../domain/day/Day";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
-import { CreateWalletDto } from "./createWalletDto";
+import { UpdateWalletDto } from "./updateWalletDto";
 
-export class CreateWallet {
+export class UpateWallet {
     private _customerRepository: ICustomerRepository;
 
-    constructor(repository1: ICustomerRepository) {
-        this._customerRepository = repository1
+    constructor(customerRepository: ICustomerRepository) {
+        this._customerRepository = customerRepository
+
     }
-    public async execute(dto: CreateWalletDto): Promise<any> {
+    public async execute(dto: UpdateWalletDto): Promise<any> {
         const customer = await this.customerRepository.findByIdOrThrow(new CustomerId(dto.customerId));
         const datesOfCharge = dto.datesOfCharge.map(dateOfCharge => new DateOfCharge(new Day(dateOfCharge.dayNumber), dateOfCharge.hour, dateOfCharge.minute))
 
-        customer.createWallet(dto.amountToCharge, dto.paymentMethodForChargingId, datesOfCharge);
-
-        await this._customerRepository.save(customer);
+        customer.updateWallet(dto.amountToCharge, dto.paymentMethodForChargingId, dto.isEnabled, datesOfCharge);
     }
+
 
 
     /**
