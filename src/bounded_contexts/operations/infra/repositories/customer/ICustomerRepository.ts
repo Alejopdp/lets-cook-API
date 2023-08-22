@@ -20,4 +20,5 @@ export interface ICustomerRepository {
     countNewLeadsByWeek(week: Week): Promise<number>;
     delete(customerId: CustomerId): void;
     findByName(name: string): Promise<Customer[]>;
+    findAllWithWalletEnabled(): Promise<Customer[]>;
 }

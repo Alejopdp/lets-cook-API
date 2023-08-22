@@ -1,6 +1,7 @@
 import { Entity } from "../../../../../core/domain/Entity";
 import { UniqueEntityID } from "../../../../../core/domain/UniqueEntityID";
 import { DateOfCharge } from "./DateOfCharge";
+import Big from 'big.js';
 
 export class Wallet extends Entity<Wallet>  {
     private _balance: number;
@@ -13,7 +14,7 @@ export class Wallet extends Entity<Wallet>  {
     constructor(balance: number, amountToCharge: number, paymentMethodForCharging: string, isEnabled: boolean, datesOfCharge: DateOfCharge[], id: UniqueEntityID) {
         if (datesOfCharge.length > 7) throw new Error("You cannot select more than 7 days of charge");
         if (amountToCharge < 0.5) throw new Error("Amount to charge must be greater than 0.5");
-        const days = datesOfCharge.map(dateOfCharge => dateOfCharge.day);
+        const days = datesOfCharge.map(dateOfCharge => dateOfCharge.day.dayNumberOfWeek);
         const hasDuplicates = (new Set(days)).size !== days.length;
         if (hasDuplicates) throw new Error("You cannot select a day of charge more than once");
 
@@ -25,11 +26,29 @@ export class Wallet extends Entity<Wallet>  {
         this._datesOfCharge = datesOfCharge;
     }
 
+    public chargeMoney(amount: number): void {
+        if (amount < 0.5) throw new Error("Amount to charge must be greater than 0.5");
+        const bigAmountToCharge = new Big(amount);
+        const bigBalance = new Big(this.balance);
 
+        this.balance = Number(bigAmountToCharge.plus(bigBalance));
+    }
 
     public updateAmountToCharge(amountToCharge: number): void {
-        if (this.amountToCharge < 0.5) throw new Error("Amount to charge must be greater than 0.5");
-        this._amountToCharge = amountToCharge;
+        if (amountToCharge < 0.5) throw new Error("Amount to charge must be greater than 0.5");
+
+        this.amountToCharge = amountToCharge;
+    }
+
+    public updateDatesOfCharge(datesOfCharge: DateOfCharge[]): void {
+        if (datesOfCharge.length > 7) throw new Error("You cannot select more than 7 days of charge");
+        const days = datesOfCharge.map(dateOfCharge => dateOfCharge.day.dayNumberOfWeek);
+        const hasDuplicates = (new Set(days)).size !== days.length;
+        if (hasDuplicates) throw new Error("You cannot select a day of charge more than once");
+        if (datesOfCharge.length === 0) throw new Error("Tienes que ingresar al menos una fecha de cobro");
+
+
+        this.datesOfCharge = datesOfCharge;
     }
 
     /**

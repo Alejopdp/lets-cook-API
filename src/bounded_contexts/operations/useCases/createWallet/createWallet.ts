@@ -7,8 +7,8 @@ import { CreateWalletDto } from "./createWalletDto";
 export class CreateWallet {
     private _customerRepository: ICustomerRepository;
 
-    constructor(repository1: ICustomerRepository) {
-        this._customerRepository = repository1
+    constructor(customerRepository: ICustomerRepository) {
+        this._customerRepository = customerRepository
     }
     public async execute(dto: CreateWalletDto): Promise<any> {
         const customer = await this.customerRepository.findByIdOrThrow(new CustomerId(dto.customerId));
@@ -16,7 +16,7 @@ export class CreateWallet {
 
         customer.createWallet(dto.amountToCharge, dto.paymentMethodForChargingId, datesOfCharge);
 
-        await this._customerRepository.save(customer);
+        await this.customerRepository.save(customer);
     }
 
 

@@ -16,6 +16,8 @@ export class UpateWallet {
         const datesOfCharge = dto.datesOfCharge.map(dateOfCharge => new DateOfCharge(new Day(dateOfCharge.dayNumber), dateOfCharge.hour, dateOfCharge.minute))
 
         customer.updateWallet(dto.amountToCharge, dto.paymentMethodForChargingId, dto.isEnabled, datesOfCharge);
+
+        await this.customerRepository.save(customer);
     }
 
 

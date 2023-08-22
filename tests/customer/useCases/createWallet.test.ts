@@ -58,6 +58,7 @@ const createWalletUseCase = new CreateWallet(mockCustomerRepository)
 describe("Create wallet Use Case", () => {
     describe("Given a customer", () => {
         const CUSTOMER_ID = new CustomerId()
+        let customerPaymentMethod: PaymentMethod;
         let customer: Customer
         const GOOD_DATES_OF_CHARGE = [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }]
         const DUPLICATED_DATES_OF_CHARGE = [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 1, hour: "17", minute: "30" }, { dayNumber: 3, hour: "17", minute: "30" }]
@@ -96,7 +97,6 @@ describe("Create wallet Use Case", () => {
         })
 
         describe("When the customer wants to create a wallet with a correct payment method", () => {
-            let customerPaymentMethod: PaymentMethod;
 
             beforeAll(async () => {
                 customerPaymentMethod = new PaymentMethod("visa", "4242", 8, 2030, "420", false, "stripe_id")
@@ -105,7 +105,7 @@ describe("Create wallet Use Case", () => {
 
                 await createWallet.execute({
                     customerId: CUSTOMER_ID.toString(),
-                    amountToCharge: 0,
+                    amountToCharge: 0.5,
                     paymentMethodForChargingId: customerPaymentMethod.id.toString(),
                     datesOfCharge: GOOD_DATES_OF_CHARGE
                 })
@@ -116,16 +116,28 @@ describe("Create wallet Use Case", () => {
 
                 expect(customerWithWallet.wallet).toBeDefined()
                 expect(customerWithWallet.wallet?.balance).toBe(0)
-                expect(customerWithWallet.wallet?.amountToCharge).toBe(0)
+                expect(customerWithWallet.wallet?.amountToCharge).toBe(0.5)
                 expect(customerWithWallet.wallet?.paymentMethodForCharging).toBe(customerPaymentMethod.id.toString())
             })
         })
+
+        describe("When the customer wanst to creat a wallet with less than 0.5", () => {
+            it("Should throw an error", async () => {
+                await expect(createWalletUseCase.execute({
+                    customerId: CUSTOMER_ID.toString(),
+                    amountToCharge: 0.4,
+                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    datesOfCharge: GOOD_DATES_OF_CHARGE
+                })).rejects.toThrow()
+            })
+        })
+
         describe("When the customer wants to create a wallet with a duplicated day of charge", () => {
             it("Should throw an error", async () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0,
-                    paymentMethodForChargingId: "wrongId",
+                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
                     datesOfCharge: DUPLICATED_DATES_OF_CHARGE
                 })).rejects.toThrow()
             })
@@ -136,7 +148,7 @@ describe("Create wallet Use Case", () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0,
-                    paymentMethodForChargingId: "wrongId",
+                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
                     datesOfCharge: [{ dayNumber: 3, hour: "17", minute: "30" }, { dayNumber: 5, hour: "17", minute: "30" }, { dayNumber: 6, hour: "17", minute: "30" }, { dayNumber: 0, hour: "17", minute: "30" }, { dayNumber: 4, hour: "17", minute: "30" }, { dayNumber: 2, hour: "17", minute: "30" }, { dayNumber: 1, hour: "17", minute: "30" }, { dayNumber: 3, hour: "17", minute: "30" }]
                 })).rejects.toThrow()
             })
@@ -147,8 +159,19 @@ describe("Create wallet Use Case", () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0,
-                    paymentMethodForChargingId: "wrongId",
+                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
                     datesOfCharge: []
+                })).rejects.toThrow()
+            })
+        })
+
+        describe("When the customer wants to create a wallet having a wallet already", () => {
+            it("Should throw an error", async () => {
+                await expect(createWalletUseCase.execute({
+                    customerId: CUSTOMER_ID.toString(),
+                    amountToCharge: 10,
+                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    datesOfCharge: GOOD_DATES_OF_CHARGE
                 })).rejects.toThrow()
             })
         })

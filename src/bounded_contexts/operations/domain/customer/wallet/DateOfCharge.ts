@@ -11,6 +11,10 @@ export class DateOfCharge {
         this._minute = minute;
     }
 
+    public matches(day: Day): boolean {
+        return this.day.equals(day);
+    }
+
 
     /**
      * Getter day
