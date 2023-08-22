@@ -20,7 +20,7 @@ export class UpdatePaymentOrderAndOrdersState {
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
         const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId, Locale.es);
 
-        paymentOrder.updateState(dto.paymentOrderState, orders);
+        paymentOrder.updateState(dto.paymentOrderState, orders, dto.queryDate);
 
         if (dto.paymentOrderState === "PAYMENT_ORDER_BILLED") {
             const paymentOrdersWithHumanIdCount = await this.paymentOrderRepository.countPaymentOrdersWithHumanId();
