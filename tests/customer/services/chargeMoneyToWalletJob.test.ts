@@ -105,22 +105,32 @@ describe("Charge money to wallet job", () => {
                     expect(jobs[i].nextInvocation().getMinutes()).toEqual(45)
                 }
             })
+
+            afterAll(() => {
+                for (let i = 0; i < 8; i++) {
+                    jobs[i].cancel()
+                }
+            })
         })
 
         describe("When the jobs runs", () => {
-            it("Should charge the money to the wallet", async () => {
+
+            beforeAll(() => {
                 for (let i = 0; i < 8; i++) {
                     jobs[i].invoke()
                 }
-                setTimeout(async () => {
-                    for (let i = 0; i < 9; i++) {
-                        const customerDb: Customer = await mockCustomerRepository.findByIdOrThrow(customers[i].id)
-
-                        if (i < 8) expect(customerDb.wallet?.balance).toBe(27.99)
-                        else expect(customerDb.wallet?.balance).toBe(0)
-                    }
-                }, 1000)
             })
+
+            it("Should charge the money to the wallet", async () => {
+
+                for (let i = 0; i < 9; i++) {
+                    const customerDb: Customer = await mockCustomerRepository.findByIdOrThrow(customers[i].id)
+
+                    if (i < 8) expect(customerDb.wallet?.balance).toBe(27.99)
+                    else expect(customerDb.wallet?.balance).toBe(0)
+                }
+            })
+
         })
     })
 })
