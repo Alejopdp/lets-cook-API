@@ -13,6 +13,7 @@ import { IMailingListService } from "../../application/mailingListService/IMaili
 import { Locale } from "../../domain/locale/Locale";
 import { Guard } from "../../../../core/logic/Guard";
 import { PersonalInfo } from "../../domain/customer/personalInfo/PersonalInfo";
+import { UserRecord } from "firebase-admin/lib/auth/user-record";
 
 type Response = Either<Failure<LoginWithEmailErrors.InvalidArguments | LoginWithEmailErrors.InactiveUser>, any>;
 
@@ -39,7 +40,7 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
     }
 
     public async execute(dto: LoginWithSocialMediaDto): Promise<Response> {
-        var user: any = null;
+        var user: UserRecord | null = null;
         var userEmail: string = "";
         const decodedToken = await app.auth().verifyIdToken(dto.idToken);
         user = await app.auth().getUser(decodedToken.uid);
@@ -49,10 +50,10 @@ export class LoginWithSocialNetwork implements UseCase<LoginWithSocialMediaDto, 
 
         if (!!!customer) {
             Guard.againstAccents(dto.email, Locale.es);
-            const newCustomerDisplayName: string = user.displayName;
+            const newCustomerDisplayName: string | undefined = user.displayName;
             customer = Customer.create(userEmail, true, "", [], 0, new Date(), undefined, undefined, undefined, "active", undefined);
             const firstName: string = newCustomerDisplayName?.split(" ")?.[0] ?? "";
-            const lastName = newCustomerDisplayName?.split(" ")?.slice(1)?.join() ?? "";
+            const lastName = newCustomerDisplayName?.split(" ")?.slice(1)?.join() ?? " ";
             const newCustomerPersonalInfo = new PersonalInfo(firstName, lastName, user.phoneNumber ?? "");
             customer["personalInfo"] = newCustomerPersonalInfo;
             const stripeCustomerId = await this.paymentService.createCustomer(customer.email);
