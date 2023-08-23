@@ -16,7 +16,7 @@
         "webpack:master": "cross-env NODE_ENV=production webpack --config webpack.config.ts",
         "build:master": "cross-env NODE_ENV=production tsc",
         "lint": "eslint . --ext .ts",
-        "test": "jest --verbose"
+        "test": "jest --verbose --detectOpenHandles"
     },
     "repository": {
         "type": "git",

@@ -20,6 +20,12 @@ export class GetCustomerByIdPresenter {
                 expirationDate: method.getExpirationDate(locale),
                 isDefault: method.isDefault,
             })),
+            wallet: customer.wallet ? {
+                balance: customer.wallet.balance,
+                amountToCharge: customer.wallet.amountToCharge,
+                paymentMethodForCharging: customer.wallet.paymentMethodForCharging,
+                last4Numbers: customer.paymentMethods.find(pm => pm.id.toString() === customer.wallet?.paymentMethodForCharging)?.last4Numbers ?? ""
+            } : undefined,
         };
     }
 }
