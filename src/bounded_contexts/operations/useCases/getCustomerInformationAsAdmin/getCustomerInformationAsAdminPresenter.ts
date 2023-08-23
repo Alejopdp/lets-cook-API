@@ -20,19 +20,25 @@ export class GetCustomerInformationAsAdminPresenter {
     }): any {
         return {
             friendCode: customer.friendCode,
-            personalData: {
-                id: customer.id.value.toString(),
-                email: customer.email,
-                ...customer.getPersonalInfo(),
-                shippingAddress: customer.getShippingAddress(),
-                billingData: customer.getBillingData(),
-                paymentMethods: customer.paymentMethods.map((method) => ({
-                    id: method.id.value,
-                    card: method.getCardLabel(locale),
-                    expirationDate: method.getExpirationDate(locale),
-                    isDefault: method.isDefault,
-                })),
-            },
+            id: customer.id.value.toString(),
+            email: customer.email,
+            ...customer.getPersonalInfo(),
+            shippingAddress: customer.getShippingAddress(),
+            billingData: customer.getBillingData(),
+            paymentMethods: customer.paymentMethods.map((method) => ({
+                id: method.id.value,
+                card: method.getCardLabel(locale),
+                expirationDate: method.getExpirationDate(locale),
+                isDefault: method.isDefault,
+            })),
+            wallet: customer.wallet ? {
+                balance: customer.wallet.balance,
+                amountToCharge: customer.wallet.amountToCharge,
+                paymentMethodForCharging: customer.wallet.paymentMethodForCharging,
+                last4Numbers: customer.paymentMethods.find(pm => pm.id.toString() === customer.wallet?.paymentMethodForCharging)?.last4Numbers ?? "",
+                isEnabled: customer.wallet.isEnabled,
+            } : undefined,
+
             subscriptions: this.presentSubscriptions(subscriptions, locale),
             orders: this.presentOrders(
                 orders
