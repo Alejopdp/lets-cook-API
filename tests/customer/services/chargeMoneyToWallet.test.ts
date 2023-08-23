@@ -86,7 +86,7 @@ describe("Charge money to wallet service", () => {
 
 
             await mockCustomerRepository.save(customer)
-            await createWallet.execute({ amountToCharge: 10, customerId: CUSTOMER_ID.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, paymentMethodForChargingId: customerPaymentMethod.id.toString() })
+            await createWallet.execute({ amountToCharge: 10, customerId: CUSTOMER_ID.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, paymentMethodForCharging: customerPaymentMethod.id.toString() })
         })
 
         describe("When it tries to charge money to the wallet with a negative amount", () => {

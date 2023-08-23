@@ -10,12 +10,16 @@ import { paymentMethodMapper } from ".";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
 import { PersonalInfo } from "../../domain/customer/personalInfo/PersonalInfo";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
+import { Wallet } from "../../domain/customer/wallet/Wallet";
+import { DateOfCharge } from "../../domain/customer/wallet/DateOfCharge";
+import { Day } from "../../domain/day/Day";
 export class CustomerMapper implements Mapper<Customer, any> {
     public toDomain(raw: any): Customer {
         const shippingAddress: Address | undefined = raw.shippingAddress ? addressMapper.toDomain(raw.shippingAddress) : undefined;
         const billingAddress: Billing | undefined = raw.billingAddress ? billingMapper.toDomain(raw.billingAddress) : undefined;
         const paymentMethods: PaymentMethod[] = raw.paymentMethods.map((rawMethod: any) => paymentMethodMapper.toDomain(rawMethod));
         const personalInfo: PersonalInfo | undefined = raw.personalInfo ? personalInfoMapper.toDomain(raw.personalInfo) : undefined;
+        const wallet: Wallet | undefined = raw.wallet ? new Wallet(raw.wallet.balance, raw.wallet.amountToCharge, raw.wallet.paymentMethodForCharging, raw.wallet.isEnabled, raw.wallet.datesOfCharge.map((dateOfCharge: any) => new DateOfCharge(new Day(dateOfCharge.dayNumber), dateOfCharge.hour, dateOfCharge.minute))) : undefined;
 
         return Customer.create(
             raw.email,
@@ -34,7 +38,7 @@ export class CustomerMapper implements Mapper<Customer, any> {
             raw.friendCode || undefined,
             raw.shopifyReceivedOrdersQuantity,
             raw.firstOrderDate,
-            raw.wallet
+            wallet
         );
     }
     public toPersistence(t: Customer): any {
@@ -56,7 +60,7 @@ export class CustomerMapper implements Mapper<Customer, any> {
             friendCode: t.friendCode,
             shopifyReceivedOrdersQuantity: t.shopifyReceivedOrdersQuantity,
             firstOrderDate: t.firstOrderDate,
-            wallet: t.wallet ? { balance: t.wallet.balance, amountToCharge: t.wallet.amountToCharge, paymentMethodForCharging: t.wallet.paymentMethodForCharging } : null,
+            wallet: t.wallet ? { balance: t.wallet.balance, amountToCharge: t.wallet.amountToCharge, paymentMethodForCharging: t.wallet.paymentMethodForCharging, isEnabled: t.wallet.isEnabled, datesOfCharge: t.wallet.datesOfCharge.map(dateOfCharge => ({ dayNumber: dateOfCharge.day.dayNumberOfWeek, hour: dateOfCharge.hour, minute: dateOfCharge.minute })) } : null,
         };
     }
 }

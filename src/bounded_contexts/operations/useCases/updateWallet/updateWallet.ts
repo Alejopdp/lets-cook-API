@@ -4,7 +4,7 @@ import { Day } from "../../domain/day/Day";
 import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 import { UpdateWalletDto } from "./updateWalletDto";
 
-export class UpateWallet {
+export class UpdateWallet {
     private _customerRepository: ICustomerRepository;
 
     constructor(customerRepository: ICustomerRepository) {
@@ -15,7 +15,7 @@ export class UpateWallet {
         const customer = await this.customerRepository.findByIdOrThrow(new CustomerId(dto.customerId));
         const datesOfCharge = dto.datesOfCharge.map(dateOfCharge => new DateOfCharge(new Day(dateOfCharge.dayNumber), dateOfCharge.hour, dateOfCharge.minute))
 
-        customer.updateWallet(dto.amountToCharge, dto.paymentMethodForChargingId, dto.isEnabled, datesOfCharge);
+        customer.updateWallet(dto.amountToCharge, dto.paymentMethodForCharging, dto.isEnabled, datesOfCharge);
 
         await this.customerRepository.save(customer);
     }

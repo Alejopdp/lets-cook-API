@@ -208,6 +208,31 @@ const WalletSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: "",
+    },
+    datesOfCharge: {
+        type: [
+            {
+                dayNumber: {
+                    type: Number,
+                    required: true,
+                },
+                hour: {
+                    type: String,
+                    required: true,
+                },
+                minute: {
+                    type: String,
+                    required: true,
+                },
+            },
+        ],
+        required: true,
+        default: [],
+    },
+    isEnabled: {
+        type: Boolean,
+        required: true,
+        default: true,
     }
 });
 

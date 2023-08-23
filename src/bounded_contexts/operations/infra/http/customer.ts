@@ -29,15 +29,13 @@ import { sendUpdateEmailEmailController } from "../../useCases/sendUpdateEmailEm
 import { exportAllCustomersActionsController } from "../../services/exportAllCustomersActions";
 import { Permission } from "../../../../bounded_contexts/IAM/domain/permission/Permission";
 import { deleteCustomerSubscriptionsAndOrdersController } from "../../useCases/deleteCustomerSubscriptionsAndOrders";
+import { createWalletController } from "../../useCases/createWallet";
+import { updateWalletController } from "../../useCases/updateWallet";
+import { chargeMoneyToWalletController } from "../../useCases/chargeMoneyToWallet";
 
 const customerRouter = express.Router();
 
-const options: multer.Options = {
-    dest: "/tmp",
-};
-
 // // GETs
-// customerRouter.get("/:email", (req, res) => emailValidatedController.execute(req, res));
 customerRouter.get("/", middleware.ensureAdminAuthenticated([]), (req, res) => getCustomerListController.execute(req, res));
 customerRouter.get("/by-name/:name", (req, res) => getCustomerByNameController.execute(req, res));
 customerRouter.get("/export", middleware.ensureAdminAuthenticated([Permission.EXPORT_CUSTOMERS]), (req, res) =>
@@ -75,6 +73,9 @@ customerRouter.put("/add-payment-method/:id", middleware.ensureAuthenticated(), 
 customerRouter.put("/delete/:id", middleware.ensureAdminAuthenticated([Permission.DELETE_CUSTOMER]), (req, res) =>
     deleteCustomerController.execute(req, res)
 );
+customerRouter.put("/wallet/charge/:customerId", (req, res) => chargeMoneyToWalletController.execute(req, res));
+customerRouter.put("/wallet/:customerId", (req, res) => updateWalletController.execute(req, res));
+
 
 // // POSTs
 customerRouter.post("/sign-up", (req, res) => signUpController.execute(req, res));
@@ -85,6 +86,7 @@ customerRouter.post("/social-auth/:token", (req, res) => socialNetworkAuthContro
 customerRouter.post("/setup-future-payment-method/:id", (req, res) => futurePaymentSetupController.execute(req, res));
 customerRouter.post("/check-if-email-exists", (req, res) => checkIfEmailExistsController.execute(req, res));
 customerRouter.post("/request-email-change/:customerId", (req, res) => sendUpdateEmailEmailController.execute(req, res));
+customerRouter.post("/wallet/:customerId", (req, res) => createWalletController.execute(req, res));
 
 // DELETEs
 customerRouter.delete("/subscriptions/:id", (req, res) => deleteCustomerSubscriptionsAndOrdersController.execute(req, res))

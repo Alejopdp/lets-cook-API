@@ -37,6 +37,7 @@ export class GetCustomerInformationAsAdminPresenter {
                 paymentMethodForCharging: customer.wallet.paymentMethodForCharging,
                 last4Numbers: customer.paymentMethods.find(pm => pm.id.toString() === customer.wallet?.paymentMethodForCharging)?.last4Numbers ?? "",
                 isEnabled: customer.wallet.isEnabled,
+                datesOfCharge: customer.wallet.datesOfCharge.map(dateOfCharge => ({ dayNumber: dateOfCharge.day.dayNumberOfWeek, hour: dateOfCharge.hour, minute: dateOfCharge.minute }))
             } : undefined,
 
             subscriptions: this.presentSubscriptions(subscriptions, locale),

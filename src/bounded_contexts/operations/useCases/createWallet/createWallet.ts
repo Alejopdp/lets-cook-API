@@ -14,7 +14,7 @@ export class CreateWallet {
         const customer = await this.customerRepository.findByIdOrThrow(new CustomerId(dto.customerId));
         const datesOfCharge = dto.datesOfCharge.map(dateOfCharge => new DateOfCharge(new Day(dateOfCharge.dayNumber), dateOfCharge.hour, dateOfCharge.minute))
 
-        customer.createWallet(dto.amountToCharge, dto.paymentMethodForChargingId, datesOfCharge);
+        customer.createWallet(dto.amountToCharge, dto.paymentMethodForCharging, datesOfCharge);
 
         await this.customerRepository.save(customer);
     }

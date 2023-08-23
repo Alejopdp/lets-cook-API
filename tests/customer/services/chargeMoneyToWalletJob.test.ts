@@ -86,11 +86,11 @@ describe("Charge money to wallet job", () => {
             await mockCustomerRepository.updateMany(customers)
 
             for (let i = 0; i < 8; i++) {
-                await createWallet.execute({ customerId: customers[i].id.toString(), amountToCharge: 27.99, paymentMethodForChargingId: customers[i].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }] })
+                await createWallet.execute({ customerId: customers[i].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[i].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }] })
             }
 
-            await createWallet.execute({ customerId: customers[8].id.toString(), amountToCharge: 27.99, paymentMethodForChargingId: customers[8].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 4, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }] })
-            await createWallet.execute({ customerId: customers[9].id.toString(), amountToCharge: 27.99, paymentMethodForChargingId: customers[9].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 2, hour: "13", minute: "45" }, { dayNumber: 4, hour: "17", minute: "30" }] })
+            await createWallet.execute({ customerId: customers[8].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[8].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 4, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }] })
+            await createWallet.execute({ customerId: customers[9].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[9].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 2, hour: "13", minute: "45" }, { dayNumber: 4, hour: "17", minute: "30" }] })
         })
 
         describe("When the service runs to schedules the jobs", () => {

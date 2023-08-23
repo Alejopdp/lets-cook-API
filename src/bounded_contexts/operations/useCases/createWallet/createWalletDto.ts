@@ -1,6 +1,6 @@
 export type CreateWalletDto = {
     amountToCharge: number;
-    paymentMethodForChargingId: string;
+    paymentMethodForCharging: string;
     customerId: string;
     datesOfCharge: { dayNumber: number, hour: string, minute: string }[];
 

@@ -89,7 +89,7 @@ describe("Create wallet Use Case", () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0,
-                    paymentMethodForChargingId: "wrongId",
+                    paymentMethodForCharging: "wrongId",
                     datesOfCharge: GOOD_DATES_OF_CHARGE
                 })).rejects.toThrow("El método de pago ingresado para cargar la billetera no existe")
             })
@@ -106,7 +106,7 @@ describe("Create wallet Use Case", () => {
                 await createWallet.execute({
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0.5,
-                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    paymentMethodForCharging: customerPaymentMethod.id.toString(),
                     datesOfCharge: GOOD_DATES_OF_CHARGE
                 })
             })
@@ -122,55 +122,185 @@ describe("Create wallet Use Case", () => {
         })
 
         describe("When the customer wanst to creat a wallet with less than 0.5", () => {
+            const CUSTOMER_ID = new CustomerId()
+            let customerPaymentMethod: PaymentMethod;
+            let customer: Customer
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+                customerPaymentMethod = new PaymentMethod("visa", "4242", 8, 2030, "420", false, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
+                await mockCustomerRepository.save(customer)
+            })
+
             it("Should throw an error", async () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0.4,
-                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    paymentMethodForCharging: customerPaymentMethod.id.toString(),
                     datesOfCharge: GOOD_DATES_OF_CHARGE
                 })).rejects.toThrow()
             })
         })
 
         describe("When the customer wants to create a wallet with a duplicated day of charge", () => {
+            const CUSTOMER_ID = new CustomerId()
+            let customerPaymentMethod: PaymentMethod;
+            let customer: Customer
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+                customerPaymentMethod = new PaymentMethod("visa", "4242", 8, 2030, "420", false, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
+                await mockCustomerRepository.save(customer)
+            })
+
             it("Should throw an error", async () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
-                    amountToCharge: 0,
-                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    amountToCharge: 15,
+                    paymentMethodForCharging: customerPaymentMethod.id.toString(),
                     datesOfCharge: DUPLICATED_DATES_OF_CHARGE
                 })).rejects.toThrow()
             })
         })
 
         describe("When the customer wants to create a wallet with more than 7 days of charge", () => {
+            const CUSTOMER_ID = new CustomerId()
+            let customerPaymentMethod: PaymentMethod;
+            let customer: Customer
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+                customerPaymentMethod = new PaymentMethod("visa", "4242", 8, 2030, "420", false, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
+                await mockCustomerRepository.save(customer)
+            })
+
             it("Should throw an error", async () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
-                    amountToCharge: 0,
-                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    amountToCharge: 20,
+                    paymentMethodForCharging: customerPaymentMethod.id.toString(),
                     datesOfCharge: [{ dayNumber: 3, hour: "17", minute: "30" }, { dayNumber: 5, hour: "17", minute: "30" }, { dayNumber: 6, hour: "17", minute: "30" }, { dayNumber: 0, hour: "17", minute: "30" }, { dayNumber: 4, hour: "17", minute: "30" }, { dayNumber: 2, hour: "17", minute: "30" }, { dayNumber: 1, hour: "17", minute: "30" }, { dayNumber: 3, hour: "17", minute: "30" }]
                 })).rejects.toThrow()
             })
         })
 
         describe("When te customer wants to create a wallet without specifyng the date of charge", () => {
+            const CUSTOMER_ID = new CustomerId()
+            let customerPaymentMethod: PaymentMethod;
+            let customer: Customer
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+                customerPaymentMethod = new PaymentMethod("visa", "4242", 8, 2030, "420", false, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
+                await mockCustomerRepository.save(customer)
+            })
+
             it("Should throw an error", async () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
-                    amountToCharge: 0,
-                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    amountToCharge: 15,
+                    paymentMethodForCharging: customerPaymentMethod.id.toString(),
                     datesOfCharge: []
                 })).rejects.toThrow()
             })
         })
 
         describe("When the customer wants to create a wallet having a wallet already", () => {
+            const CUSTOMER_ID = new CustomerId()
+            let customerPaymentMethod: PaymentMethod;
+            let customer: Customer
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+                customerPaymentMethod = new PaymentMethod("visa", "4242", 8, 2030, "420", false, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
+                await mockCustomerRepository.save(customer)
+                await createWalletUseCase.execute({
+                    customerId: CUSTOMER_ID.toString(),
+                    amountToCharge: 10,
+                    paymentMethodForCharging: customerPaymentMethod.id.toString(),
+                    datesOfCharge: GOOD_DATES_OF_CHARGE
+                })
+            })
             it("Should throw an error", async () => {
                 await expect(createWalletUseCase.execute({
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 10,
-                    paymentMethodForChargingId: customerPaymentMethod.id.toString(),
+                    paymentMethodForCharging: customerPaymentMethod.id.toString(),
                     datesOfCharge: GOOD_DATES_OF_CHARGE
                 })).rejects.toThrow()
             })
