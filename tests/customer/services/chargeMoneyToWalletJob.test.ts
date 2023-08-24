@@ -40,7 +40,7 @@ describe("Charge money to wallet job", () => {
 
     describe("Given many customers with wallets", () => {
         let customers: Customer[]
-        let jobs: schedule.Job[]
+        let jobs: schedule.Job[] | undefined
 
         beforeAll(async () => {
             const customer_1 = Customer.create(
@@ -99,16 +99,16 @@ describe("Charge money to wallet job", () => {
             it("Should schedule 8 jobs", async () => {
                 jobs = await chargeWalletJob.execute({ executionDate: EXECUTION_DATE })
 
-                expect(jobs.length).toBe(8)
+                expect(jobs?.length).toBe(8)
                 for (let i = 0; i < 8; i++) {
-                    expect(jobs[i].nextInvocation().getHours()).toEqual(13)
-                    expect(jobs[i].nextInvocation().getMinutes()).toEqual(45)
+                    expect(jobs?.[i].nextInvocation().getHours() ?? "").toEqual(13)
+                    expect(jobs?.[i].nextInvocation().getMinutes() ?? "").toEqual(45)
                 }
             })
 
             afterAll(() => {
                 for (let i = 0; i < 8; i++) {
-                    jobs[i].cancel()
+                    jobs?.[i].cancel()
                 }
             })
         })
@@ -117,7 +117,7 @@ describe("Charge money to wallet job", () => {
 
             beforeAll(() => {
                 for (let i = 0; i < 8; i++) {
-                    jobs[i].invoke()
+                    jobs?.[i].invoke()
                 }
             })
 
