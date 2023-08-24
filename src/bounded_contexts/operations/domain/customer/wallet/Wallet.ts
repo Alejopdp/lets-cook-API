@@ -52,6 +52,15 @@ export class Wallet extends Entity<Wallet>  {
         this.datesOfCharge = datesOfCharge;
     }
 
+    public buy(amountToPay: number): void {
+        if (this.balance < amountToPay) throw new Error("No hay suficiente saldo en la billetera");
+
+        const bigAmountToPay = new Big(amountToPay);
+        const bigBalance = new Big(this.balance);
+
+        this.balance = Number(bigBalance.minus(bigAmountToPay));
+    }
+
     /**
      * Getter balance
      * @return {number}

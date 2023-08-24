@@ -1,6 +1,9 @@
 jest.mock("../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService")
 import moment from "moment"
 import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
+import { CreateWallet } from "../../../src/bounded_contexts/operations/useCases/createWallet/createWallet"
+import { ChargeMoneyToWalletUseCase } from "../../../src/bounded_contexts/operations/useCases/chargeMoneyToWallet/chargeMoneyToWallet"
+import { ChargeMoneyToWallet } from "../../../src/bounded_contexts/operations/services/chargeMoneyToWallet/chargeMoneyToWallet"
 import { InMemoryCustomerRepository } from "../../../src/bounded_contexts/operations/infra/repositories/customer/inMemoryCustomerRepository"
 import { InMemorySusbcriptionRepository } from "../../../src/bounded_contexts/operations/infra/repositories/subscription/inMemorySubscriptionRepository"
 import { InMemoryShippingZoneRepository } from "../../../src/bounded_contexts/operations/infra/repositories/shipping/inMemoryShippingZoneRepository"
@@ -29,6 +32,7 @@ import { PaymentIntent } from "../../../src/bounded_contexts/operations/applicat
 import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
 import { gourmetPlan, gourmetPlanSku, planGourmetVariant2Persons2Recipes, planGourmetVariant2Persons3Recipes } from "../../mocks/plan"
 import { TUESDAY, WEDNESDAY } from "../../mocks/days"
+import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -576,8 +580,7 @@ describe("Creating a subscription in different week days", () => {
 
         describe("Creating a susbcription on Monday", () => {
             beforeAll(async () => {
-                const today = new Date()
-                const purchaseDate = new Date(2023, 6, 31, today.getHours(), today.getMinutes(), today.getSeconds())
+                const purchaseDate = new Date(2023, 6, 31, 17)
 
                 createSubscriptionDto = { ...createSubscriptionDto, purchaseDate }
                 subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
@@ -987,6 +990,394 @@ describe("Creating a subscripion with the payment integration Failure (Stripe mo
     })
 })
 
+describe("Given a customer with wallet", () => {
+    describe("When the customer creates a subscription with the wallet as the payment method, having enough money", () => {
+        const CUSTOMER_ID = new CustomerId()
+        const PURCHASE_DATE = new Date(2023, 7, 23)
+        let customer: Customer;
+        let customerPaymentMethod: PaymentMethod;
+        let firstSubscriptionResult: any
+
+        beforeAll(async () => {
+            customer = Customer.create(
+                "alejoscotti+wallet@gmail.com",
+                true,
+                "",
+                [],
+                0,
+                new Date(),
+                undefined,
+                undefined,
+                CUSTOMER_PASSWORD,
+                "active",
+                undefined,
+                undefined,
+                CUSTOMER_ID
+            )
+            customerPaymentMethod = new PaymentMethod("Visa", "4242", 6, 2029, "520", true, "stripe_id")
+            customer.addPaymentMethod(customerPaymentMethod)
+            mockCustomerRepository.save(customer)
+
+            const createWalletUseCase = new CreateWallet(mockCustomerRepository)
+            await createWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 200, datesOfCharge: [{ dayNumber: 1, hour: "13", minute: "45" }], paymentMethodForCharging: customerPaymentMethod.id.toString() })
+
+            //@ts-ignore
+            mockPaymentService.paymentIntent.mockImplementationOnce(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string, offSession: boolean): Promise<PaymentIntent> => await ({
+                status: "succeeded",
+                client_secret: "client_secret",
+                id: "id",
+            }))
+            const chargeMoneyService = new ChargeMoneyToWallet(mockPaymentService)
+            const chargeMoneyToWalletUseCase = new ChargeMoneyToWalletUseCase(mockCustomerRepository, chargeMoneyService)
+            await chargeMoneyToWalletUseCase.execute({ amountToCharge: 200, customerId: CUSTOMER_ID.toString() })
+
+            firstSubscriptionResult = await createSubscriptionUseCase.execute({
+                customerId: CUSTOMER_ID.toString(),
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "",
+                stripePaymentMethodId: "",
+                couponId: undefined,
+                paymentMethodId: "wallet",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: PURCHASE_DATE
+            })
+        })
+
+        describe("Subscription validation", () => {
+            it("Should create the subscription with the created date as the purchase date", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.createdAt.getDay()).toEqual(PURCHASE_DATE.getDay())
+                expect(subscription.createdAt.getMonth()).toEqual(PURCHASE_DATE.getMonth())
+                expect(subscription.createdAt.getFullYear()).toEqual(PURCHASE_DATE.getFullYear())
+            })
+
+            it("Should have a restriction comment", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.restrictionComment).toBe("")
+            })
+
+            it("Should have the planId", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.plan.id).toEqual(gourmetPlan.id)
+            })
+
+            it("Should have the planSku", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.plan.planSku).toEqual(gourmetPlanSku)
+            })
+
+            it("Should have the planName", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.plan.name).toEqual(gourmetPlan.name)
+            })
+
+            it("Should have the planVariantId", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.planVariantId).toEqual(planGourmetVariant2Persons2Recipes.id)
+            })
+
+            it("Should have the planVariantSku", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                const planVariant = subscription.plan.getPlanVariantById(subscription.planVariantId)
+                expect(planVariant?.sku).toEqual(planGourmetVariant2Persons2Recipes.sku)
+            })
+
+            it("Should have the plan variant description", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                const planVariant = subscription.plan.getPlanVariantById(subscription.planVariantId)
+                expect(planVariant?.description).toEqual(planGourmetVariant2Persons2Recipes.description)
+            })
+
+            it("Should have the plan variant price", async () => {
+                const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
+                expect(subscription.price).toEqual(planGourmetVariant2Persons2Recipes.getPaymentPrice())
+            })
+
+
+        })
+
+        describe("Use case response", () => {
+            it("Should return a subscription", () => {
+                expect(firstSubscriptionResult).toBeDefined()
+                expect(firstSubscriptionResult).toHaveProperty("subscription")
+            })
+
+
+            it("Should return the first order", () => {
+                expect(firstSubscriptionResult).toHaveProperty("firstOrder")
+            })
+
+            it("Should return the customer payment methods", () => {
+                expect(firstSubscriptionResult).toHaveProperty("customerPaymentMethods")
+            })
+
+            it("Should return a billed amount", () => {
+                expect(firstSubscriptionResult).toHaveProperty("amountBilled")
+            })
+
+            it("Should return the tax", () => {
+                expect(firstSubscriptionResult).toHaveProperty("tax")
+            })
+
+            it("Should return the shipping cost", () => {
+                expect(firstSubscriptionResult).toHaveProperty("shippingCost")
+            })
+
+            it("Should return the payment order human id", () => {
+                expect(firstSubscriptionResult).toHaveProperty("billedPaymentOrderHumanId")
+            })
+        })
+
+        describe("Wallet validation", () => {
+            it("Should have the wallet charged with the amount of the subscription", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+                expect(customer.wallet?.balance).toBe(162.01)
+            })
+
+            // it("Should create a wallet movement with the amount of the subscription", async () => {
+            //     const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+            //     expect(customer.wallet.movements.length).toBe(1)
+            //     expect(customer.wallet.movements[0].amount).toBe(-firstSubscriptionResult.subscription.price)
+            // })
+
+            // it("Should create a wallet movement with the subscription id", async () => {
+            //     const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+            //     expect(customer.wallet.movements[0].subscriptionId).toBe(firstSubscriptionResult.subscription.id)
+            // })
+
+            // it("Should create a wallet movement with the wallet movement type as 'subscription'", async () => {
+            //     const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+            //     expect(customer.wallet.movements[0].type).toBe("subscription")
+            // })
+
+            // it("Should create a wallet movement with the wallet movement status as 'charged'", async () => {
+            //     const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+            //     expect(customer.wallet.movements[0].status).toBe("charged")
+            // })
+
+            // it("Should create a wallet movement with the wallet movement date as the purchase date", async () => {
+            //     const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+            //     expect(customer.wallet.movements[0].date.getTime()).toBe(PURCHASE_DATE.getTime())
+            // })
+
+        })
+
+        describe("Orders validation", () => {
+            it("Should create 12 orders", async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                expect(orders.length).toBe(12)
+            })
+
+            it("Should bill the first order", async () => {
+                const orders = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                const firstOrder: Order = orders[0]
+                expect(firstOrder.isBilled()).toBe(true)
+            })
+
+            // El resto tiene que estar en activas
+
+            it("Should have no discount on any order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.discountAmount).toBe(0)
+                }
+                )
+            })
+
+            it("Should create the shipping dates for the orders as the day of the week of the shipping zone", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.shippingDate.getDay()).toBe(TUESDAY.dayNumberOfWeek)
+                })
+            })
+
+            it("Should create the rest of orders with 7 days of difference as shipping dates", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id);
+                orders.forEach((order, index) => {
+                    const previousOrder = orders[index - 1];
+                    if (previousOrder) {
+                        const orderDate = new Date(order.shippingDate);
+                        const previousOrderDate = new Date(previousOrder.shippingDate);
+
+                        // Suma 7 días a la fecha anterior
+                        previousOrderDate.setDate(previousOrderDate.getDate() + 7);
+
+                        // Compara solo los días, meses y años
+                        expect(orderDate.getFullYear()).toBe(previousOrderDate.getFullYear());
+                        expect(orderDate.getMonth()).toBe(previousOrderDate.getMonth());
+                        expect(orderDate.getDate()).toBe(previousOrderDate.getDate());
+                    }
+                });
+            });
+
+
+            it("Should create a payment order for each order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.paymentOrderId).toBeDefined()
+                })
+            })
+
+            it("Should create a shipping date after the billing date of each payment order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach(async (order) => {
+                    const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findById(order.paymentOrderId!, Locale.es)
+                    expect(order.shippingDate.getTime()).toBeGreaterThan(paymentOrder!.billingDate.getTime())
+                })
+            })
+
+            it("Should relate a week to each order", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.week).toBeDefined()
+                })
+            })
+
+        })
+
+
+        describe("Customer details validation", () => {
+            it("Should update the customer name", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+                expect(customer.getPersonalInfo().fullName).toBe(`${CUSTOMER_FIRST_NAME} ${CUSTOMER_LAST_NAME}`)
+            })
+
+            it("Should update the customer phone", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+                expect(customer.getPersonalInfo().phone1).toBe(CUSTOMER_PHONE)
+            })
+
+            it("Should update the customer address", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+                expect(customer.getShippingAddress().addressName).toBe(CUSTOMER_ADDRESS_NAME)
+                expect(customer.getShippingAddress().addressDetails).toBe(CUSTOMER_ADDRESS_DETAILS)
+            })
+
+            it("Should update the customer latitude and longitude if changed", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+                expect(customer.getShippingAddress().latitude).toBe(CUSTOMER_LATITUDE)
+                expect(customer.getShippingAddress().longitude).toBe(CUSTOMER_LONGITUDE)
+            })
+
+            it("Should create the friend code for the customer", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+                expect(customer.friendCode).toBeDefined()
+            })
+
+        })
+
+        describe("Payment orders validation", () => {
+
+            it("Should create 12 paymnet orders", async () => {
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                expect(paymentOrders.length).toBe(12)
+            })
+
+            it("Should assign saturdays at 00:00 as billing dates for every payment order", async () => {
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.billingDate.getDay()).toBe(6)
+                    expect(paymentOrder.billingDate.getHours()).toBe(0)
+                    expect(paymentOrder.billingDate.getMinutes()).toBe(0)
+                    expect(paymentOrder.billingDate.getSeconds()).toBe(0)
+                })
+            })
+
+            it("Should bill the first payment order", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.isBilled()).toBe(true)
+            })
+
+            it("Should assign a stripeId to the first payment order", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.paymentIntentId).toBeDefined()
+                expect(firstPaymentOrder.paymentIntentId).toBe("Monedero")
+            })
+
+            it("Should left the rest of payment orders unbilled", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.isActive()).toBe(true)
+                })
+            })
+
+            it("Should assign an human id to the billed payment order", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.humanId).toBeDefined()
+            })
+
+            it("Should bill the cost of the shipping zone correctly", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.shippingCost).toBe(MOCK_SHIPPING_COST)
+            })
+
+            it("Should bill the cost of the plan variant correctly", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const firstPaymentOrder = paymentOrders[0]
+                expect(firstPaymentOrder.amount).toBe(planGourmetVariant2Persons2Recipes.getPaymentPrice())
+            })
+
+            it("Should assign the same amount to the rest of payment orders", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.amount).toBe(planGourmetVariant2Persons2Recipes.getPaymentPrice())
+                })
+            })
+
+            it("Should assign the same shipping cost to the rest of payment orders", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.shippingCost).toBe(MOCK_SHIPPING_COST)
+                })
+            })
+
+
+            it("Should create the rest of payment orders with 7 days of difference as billing dates", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(customer.id)
+                paymentOrders.sort((a, b) => a.billingDate.getTime() - b.billingDate.getTime())
+                const restOfPaymentOrders = paymentOrders.slice(1)
+                restOfPaymentOrders.forEach((paymentOrder, index) => {
+                    const previousPaymentOrder = restOfPaymentOrders[index - 1]
+                    if (previousPaymentOrder) {
+                        const difference = moment(paymentOrder.billingDate).diff(moment(previousPaymentOrder.billingDate), 'days')
+                        expect(difference).toBe(7)
+                    }
+
+                })
+            })
+        })
+    })
+})
+
 describe("Creating a subscripion with the 3D Secure", () => {
     const CUSTOMER_ID = new CustomerId()
     let createSubscriptionUseCaseWith3DSecurePaymentMethod: CreateSubscription
@@ -1062,4 +1453,6 @@ describe("Creating a subscripion with the 3D Secure", () => {
         const orders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(createSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
         expect(orders[0].state.title).toBe("ORDER_PENDING_PAYMENT")
     })
+
+
 })

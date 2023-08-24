@@ -114,7 +114,7 @@ export class Customer extends Entity<Customer> {
     public createWallet(amountToCharge: number, paymentMethodForCharging: string, datesOfCharge: DateOfCharge[]): void {
         if (this.wallet) throw new Error("Ya tienes una billetera creada");
         if (!paymentMethodForCharging) throw new Error("Tienes que ingresar un método de pago para cargar la billetera");
-        const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.value === paymentMethodForCharging);
+        const paymentMethod: PaymentMethod | undefined = this.paymentMethods.find((method) => method.id.toString() === paymentMethodForCharging);
 
         if (!paymentMethod) throw new Error("El método de pago ingresado para cargar la billetera no existe");
 
@@ -136,6 +136,11 @@ export class Customer extends Entity<Customer> {
         this.wallet.updateDatesOfCharge(datesOfCharge);
         this.wallet.paymentMethodForCharging = paymentMethodForCharging;
         this.wallet.isEnabled = isEnabled
+    }
+
+    public buyWithWallet(amountToPay: number): void {
+        if (!this.wallet) throw new Error("No se puede comprar con la billetera porque no existe");
+        this.wallet.buy(amountToPay);
     }
 
     public getPaymentMethodForChargingTheWallet(): PaymentMethod {
