@@ -26,6 +26,7 @@ describe("Charge money to wallet job", () => {
             status: "succeeded",
             client_secret: "client_secret",
             id: "id",
+            amount: 0
         }))
 
     })

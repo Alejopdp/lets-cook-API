@@ -69,20 +69,20 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
     findFutureOrdersByCustomer(customerId: CustomerId): Promise<PaymentOrder[]> {
         throw new Error("Method not implemented.");
     }
-    findActiveByCustomerAndBillingDate(billingDate: Date, customerId: CustomerId): Promise<PaymentOrder | undefined> {
-        throw new Error("Method not implemented.");
+    public async findActiveByCustomerAndBillingDate(billingDate: Date, customerId: CustomerId): Promise<PaymentOrder | undefined> {
+        return this.paymentOrders.find((paymentOrder) => paymentOrder.customerId.equals(customerId) && paymentOrder.billingDate.getTime() === billingDate.getTime() && paymentOrder.state.isActive());
     }
     public async findActiveByCustomerAndBillingDateList(billingDates: Date[], customerId: CustomerId): Promise<PaymentOrder[]> {
         return this.paymentOrders.filter((paymentOrder) => paymentOrder.customerId.equals(customerId) && billingDates.some(bd => bd.getTime() === paymentOrder.billingDate.getTime()) && paymentOrder.state.isActive());
     }
-    findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
-        throw new Error("Method not implemented.");
+    public async findActiveByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
+        return this.paymentOrders.filter((paymentOrder) => paymentOrder.billingDate.getTime() === billingDate.getTime() && paymentOrder.state.isActive());
     }
-    findByBillingDateList(billingDateList: Date[], customerId: CustomerId): Promise<PaymentOrder[]> {
-        throw new Error("Method not implemented.");
+    public async findByBillingDateList(billingDateList: Date[], customerId: CustomerId): Promise<PaymentOrder[]> {
+        return this.paymentOrders.filter((paymentOrder) => paymentOrder.customerId.equals(customerId) && billingDateList.some(bd => bd.getTime() === paymentOrder.billingDate.getTime()));
     }
-    findByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
-        throw new Error("Method not implemented.");
+    public async findByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
+        return this.paymentOrders.filter((paymentOrder) => paymentOrder.billingDate.getTime() === billingDate.getTime());
     }
     public async findByIdList(paymentOrdersIds: PaymentOrderId[]): Promise<PaymentOrder[]> {
         return this.paymentOrders.filter((paymentOrder) => paymentOrdersIds.some((paymentOrderId) => paymentOrderId.equals(paymentOrder.id)));

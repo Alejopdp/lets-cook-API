@@ -53,7 +53,8 @@ const createSubscriptionUseCase = new CreateSubscription(mockCustomerRepository,
 mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementation(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string): Promise<PaymentIntent> => ({
     client_secret: "client_secret",
     id: "id",
-    status: "succeeded"
+    status: "succeeded",
+    amount: 0
 }))
 
 const CUSTOMER_FIRST_NAME = "Alejo"
@@ -918,7 +919,8 @@ describe("Creating a subscripion with the payment integration Failure (Stripe mo
             return {
                 client_secret: "client_secret",
                 id: "id",
-                status: "canceled"
+                status: "canceled",
+                amount: 0
             }
         }
         )
@@ -1026,6 +1028,7 @@ describe("Given a customer with wallet", () => {
                 status: "succeeded",
                 client_secret: "client_secret",
                 id: "id",
+                amount: 0
             }))
             const chargeMoneyService = new ChargeMoneyToWallet(mockPaymentService)
             const chargeMoneyToWalletUseCase = new ChargeMoneyToWalletUseCase(mockCustomerRepository, chargeMoneyService)
@@ -1389,7 +1392,8 @@ describe("Creating a subscripion with the 3D Secure", () => {
             return {
                 client_secret: "client_secret",
                 id: "id",
-                status: "requires_action"
+                status: "requires_action",
+                amount: 0
             }
         }
         )

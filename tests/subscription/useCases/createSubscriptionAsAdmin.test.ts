@@ -53,7 +53,8 @@ const createSubscriptionUseCase = new CreateSubscriptionAsAdmin(mockCustomerRepo
 mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementation(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string): Promise<PaymentIntent> => ({
     client_secret: "client_secret",
     id: "id",
-    status: "succeeded"
+    status: "succeeded",
+    amount: 0
 }))
 
 //@ts-ignore
@@ -61,6 +62,7 @@ mockPaymentService.paymentIntent.mockImplementation(async (amount: number, payme
     status: "succeeded",
     client_secret: "client_secret",
     id: "id",
+    amount: 0
 }))
 
 
@@ -457,10 +459,11 @@ describe("Create subscription as admin use case", () => {
 
         describe("When it buys a subscription using the wallet having enough money", () => {
             let firstSubscriptionResult: any
+            let newDto: CreateSubscriptionAsAdminDto
 
 
             beforeAll(async () => {
-                const newDto: CreateSubscriptionAsAdminDto = { customerId: CUSTOMER_ID.toString(), locale: Locale.es, planFrequency: "weekly", useWalletAsPaymentMethod: true, couponCode: "", planId: gourmetPlan.id.toString(), planVariantId: planGourmetVariant2Persons2Recipes.id.toString(), purchaseDate: PURCHASE_DATE }
+                newDto = { customerId: CUSTOMER_ID.toString(), locale: Locale.es, planFrequency: "weekly", useWalletAsPaymentMethod: true, couponCode: "", planId: gourmetPlan.id.toString(), planVariantId: planGourmetVariant2Persons2Recipes.id.toString(), purchaseDate: PURCHASE_DATE }
 
                 firstSubscriptionResult = await createSubscriptionUseCase.execute(newDto)
             })
@@ -468,9 +471,9 @@ describe("Create subscription as admin use case", () => {
             describe("Subscription validation", () => {
                 it("Should create the subscription with the created date as the purchase date", async () => {
                     const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
-                    expect(subscription.createdAt.getDay()).toEqual(createSubscriptionDto.purchaseDate.getDay())
-                    expect(subscription.createdAt.getMonth()).toEqual(createSubscriptionDto.purchaseDate.getMonth())
-                    expect(subscription.createdAt.getFullYear()).toEqual(createSubscriptionDto.purchaseDate.getFullYear())
+                    expect(subscription.createdAt.getDay()).toEqual(newDto.purchaseDate.getDay())
+                    expect(subscription.createdAt.getMonth()).toEqual(newDto.purchaseDate.getMonth())
+                    expect(subscription.createdAt.getFullYear()).toEqual(newDto.purchaseDate.getFullYear())
                 })
 
                 it("Should have the planId", async () => {

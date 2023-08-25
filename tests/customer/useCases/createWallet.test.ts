@@ -119,6 +119,18 @@ describe("Create wallet Use Case", () => {
                 expect(customerWithWallet.wallet?.amountToCharge).toBe(0.5)
                 expect(customerWithWallet.wallet?.paymentMethodForCharging).toBe(customerPaymentMethod.id.toString())
             })
+
+            it("Should create the wallet as a payment method", async () => {
+                const customerWithWallet: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+
+                expect(customerWithWallet.paymentMethods.find(paymentMethod => paymentMethod.id.toString() === "wallet")).toBeTruthy()
+            })
+
+            it("Should not set the wallet as default", async () => {
+                const customerWithWallet: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+
+                expect(customerWithWallet.getDefaultPaymentMethod()?.id.toString()).not.toBe("wallet")
+            })
         })
 
         describe("When the customer wanst to creat a wallet with less than 0.5", () => {

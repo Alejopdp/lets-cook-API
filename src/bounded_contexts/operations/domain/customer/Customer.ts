@@ -14,6 +14,7 @@ import { Order } from "../order/Order";
 import { Wallet } from "./wallet/Wallet";
 import { UniqueEntityID } from "../../../../core/domain/UniqueEntityID";
 import { DateOfCharge } from "./wallet/DateOfCharge";
+import { WalletPaymentMehtod } from "./paymentMethod/WalletPaymentMethod";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -119,6 +120,7 @@ export class Customer extends Entity<Customer> {
         if (!paymentMethod) throw new Error("El método de pago ingresado para cargar la billetera no existe");
 
         this.wallet = new Wallet(0, amountToCharge, paymentMethodForCharging, true, datesOfCharge, new UniqueEntityID());
+        this.addPaymentMethod(new WalletPaymentMehtod(false))
     }
 
     public chargeMoneyToWallet(amountToCharge: number): void {
@@ -141,6 +143,15 @@ export class Customer extends Entity<Customer> {
     public buyWithWallet(amountToPay: number): void {
         if (!this.wallet) throw new Error("No se puede comprar con la billetera porque no existe");
         this.wallet.buy(amountToPay);
+    }
+
+    public payBillingJobWithWallet(amountToPay: number): boolean {
+        let succeeded = false
+        if (!this.wallet) return succeeded;
+
+        succeeded = this.wallet.payBillingJob(amountToPay);
+
+        return succeeded;
     }
 
     public getPaymentMethodForChargingTheWallet(): PaymentMethod {
@@ -369,8 +380,9 @@ export class Customer extends Entity<Customer> {
         stripeId: string,
         isDefault: boolean
     ): void {
+        if (paymentId === "wallet" && !this.wallet) throw new Error("No se puede agregar la billetera porque no existe")
         const filterPaymentById = this.paymentMethods.filter((payment: PaymentMethod) => payment.id.value === paymentId);
-
+        if (filterPaymentById.length === 0) throw new Error("El método de pago seleccionado no existe");
         if (filterPaymentById.length > 0) {
             if (isDefault) {
                 for (let paymentMethod of this.paymentMethods) {
@@ -381,7 +393,6 @@ export class Customer extends Entity<Customer> {
                     }
                 }
             }
-            // filterPaymentById[0].changePaymentData(brand, last4Numbers, exp_month, exp_year, cvc, stripeId, isDefault);
         } else {
             if (isDefault) {
                 if (this.paymentMethods.length > 0) {
