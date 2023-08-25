@@ -34,6 +34,7 @@ import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { AssignOrdersWithDifferentFreqToPaymentOrders } from "../../services/assignOrdersWithDifferentFreqToPaymentOrders/assignOrdersWithDifferentFreqToPaymentOrders";
 import { AssignOrdersWithDifferentFreqToPaymentOrdersDto } from "../../services/assignOrdersWithDifferentFreqToPaymentOrders/assignOrdersWithDifferentFreqToPaymentOrdersDto";
 import { CreateManySubscriptionsDto } from "./createManySubscriptionsDto";
+import { PaymentIntent } from "../../application/paymentService";
 
 export class CreateManySubscriptions {
     private _customerRepository: ICustomerRepository;
@@ -77,7 +78,7 @@ export class CreateManySubscriptions {
     public async execute(dto: CreateManySubscriptionsDto): Promise<{
         subscriptions: Subscription[];
         paymentMethodId: string | undefined;
-        paymentIntent: Stripe.PaymentIntent;
+        paymentIntent: Stripe.PaymentIntent | PaymentIntent;
         paymentOrder: PaymentOrder;
     }> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
@@ -164,24 +165,7 @@ export class CreateManySubscriptions {
 
         if (!!!customerDefaultPaymentMethod && !!!dto.stripePaymentMethodId) throw new Error("Es necesario ingresar un método de pago");
 
-        const paymentIntent = await this.paymentService.paymentIntent(
-            totalPrice,
-            dto.stripePaymentMethodId ? dto.stripePaymentMethodId : customer.getDefaultPaymentMethod()?.stripeId!,
-            customer.email,
-            customer.stripeId,
-            false
-        );
-
-        newPaymentOrders[0].paymentIntentId = paymentIntent.id;
-        newPaymentOrders[0].shippingCost = 0;
-
-        if (paymentIntent.status === "requires_action") {
-            newPaymentOrders[0].toPendingConfirmation(orders);
-        } else {
-            newPaymentOrders[0]?.toBilled(orders, customer);
-            newPaymentOrders[0] ? newPaymentOrders[0].addHumanId(paymentOrderWithHumanIdCount) : "";
-        }
-
+        const paymentIntent = await this.charge(totalPrice, customer, newPaymentOrders, orders, paymentOrderWithHumanIdCount, customerDefaultPaymentMethod?.id.toString(), dto.stripePaymentMethodId)
         const subscriptions: Subscription[] = _.flatten(frequencySusbcriptionEntries.map((entry) => entry[1]));
 
         await this.notificationService.notifyAdminsAboutNewSubscriptionsSuccessfullyCreated(
@@ -189,7 +173,6 @@ export class CreateManySubscriptions {
             customer.email,
             dto.plans.map((dtoPlan) => plansMap[dtoPlan.planId].name)
         );
-        // await this.notificationService.notifyCustomerAboutNewSubscriptionSuccessfullyCreated();
         await this.subscriptionRepository.bulkSave(subscriptions);
         await this.orderRepository.insertMany(orders);
         await this.customerRepository.save(customer);
@@ -206,21 +189,59 @@ export class CreateManySubscriptions {
                 customer.id
             )
         );
-        // const ticketDto: PaymentOrderBilledNotificationDto = {
-        //             customerEmail: customer.email,
-        //             foodVAT: Math.round((totalPrice + Number.EPSILON) * 100) / 100,
-        //             orders: [orders[0]],
-        //             paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
-        //             phoneNumber: customer.personalInfo?.phone1 || "",
-        //             shippingAddressCity: "",
-        //             shippingAddressName: customer.getShippingAddress().name || "",
-        //             shippingCost: newPaymentOrders[0].shippingCost,
-        //             shippingCustomerName: customer.getPersonalInfo().fullName || "",
-        //             shippingDate: orders[0].getHumanShippmentDay(),
-        //             totalAmount: totalPrice,
-        //         };
-        //         this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
+
         return { subscriptions, paymentMethodId: customerDefaultPaymentMethod?.stripeId, paymentIntent, paymentOrder: newPaymentOrders[0] };
+    }
+
+    private async charge(totalPrice: number, customer: Customer, newPaymentOrders: PaymentOrder[], orders: Order[], paymentOrderWithHumanIdCount: number, paymentMethodId?: string, stripePaymentMethodId?: string): Promise<Stripe.PaymentIntent | PaymentIntent> {
+        if (paymentMethodId === "wallet") {
+            return this.chargeWithWallet(newPaymentOrders, totalPrice, customer, orders, paymentOrderWithHumanIdCount)
+        }
+        var paymentIntent: PaymentIntent = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+            amount: 0
+        };
+
+        paymentIntent = await this.paymentService.paymentIntent(
+            totalPrice,
+            stripePaymentMethodId ?? customer.getDefaultPaymentMethod()?.stripeId!,
+            customer.email,
+            customer.stripeId,
+            false
+        );
+
+        newPaymentOrders[0].paymentIntentId = paymentIntent.id;
+        newPaymentOrders[0].shippingCost = 0;
+
+        if (paymentIntent.status === "requires_action") {
+            newPaymentOrders[0].toPendingConfirmation(orders);
+        } else {
+            newPaymentOrders[0]?.toBilled(orders, customer);
+            newPaymentOrders[0] ? newPaymentOrders[0].addHumanId(paymentOrderWithHumanIdCount) : "";
+        }
+
+        return paymentIntent;
+    }
+
+    private chargeWithWallet(newPaymentOrders: PaymentOrder[], totalPrice: number, customer: Customer, orders: Order[], paymentOrdersWithHumanIdCount: number): any {
+        var paymentIntent: PaymentIntent = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+            amount: 0
+        };
+        const paymentOrder = newPaymentOrders[0]
+
+        customer.buyWithWallet(totalPrice)
+
+        paymentOrder.paymentIntentId = "Monedero"
+        paymentOrder.shippingCost = 0
+        paymentOrder?.toBilled(orders, customer);
+        paymentOrder?.addHumanId(paymentOrdersWithHumanIdCount)
+        return paymentIntent
+
     }
 
     /**
