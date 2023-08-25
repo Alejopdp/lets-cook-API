@@ -56,9 +56,9 @@ export class ChargeOnePaymentOrder {
             await Promise.all([
                 this.customerRepository.findByIdOrThrow(paymentOrder.customerId),
                 this.shippingZoneRepository.findAllActive(),
-                this.weekRepository.findWeekTwelveWeeksLater(),
-                this.weekRepository.findWeekTwelveBiweeksLater(),
-                this.weekRepository.findWeekTwelveMonthsLater(),
+                this.weekRepository.findWeekTwelveWeeksLater(dto.queryDate),
+                this.weekRepository.findWeekTwelveBiweeksLater(dto.queryDate),
+                this.weekRepository.findWeekTwelveMonthsLater(dto.queryDate),
                 this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
             ]);
         // const customer: Customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);

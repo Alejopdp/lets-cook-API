@@ -288,6 +288,7 @@ export class CreateSubscription {
             id: "",
             status: "succeeded",
             client_secret: "",
+            amount: 0
         };
         const paymentOrder = newPaymentOrders[0]
 
@@ -331,6 +332,7 @@ export class CreateSubscription {
             id: "",
             status: "succeeded",
             client_secret: "",
+            amount: 0
         };
         const paymentOrder = newPaymentOrders[0]
 
@@ -345,6 +347,7 @@ export class CreateSubscription {
         paymentOrder?.toBilled(orders, customer);
         paymentOrder ? paymentOrder.addHumanId(paymentOrdersWithHumanIdCount) : "";
         if (customerSubscriptionsQty === 0) this.createFriendCodeService.execute({ customer });
+        paymentIntent.amount = Math.round(amountToBill * 100)
 
         return { billedAmount: amountToBill, paymentIntent }
 

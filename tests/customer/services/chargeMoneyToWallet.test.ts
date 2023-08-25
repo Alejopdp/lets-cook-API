@@ -82,6 +82,7 @@ describe("Charge money to wallet service", () => {
                 status: "succeeded",
                 client_secret: "client_secret",
                 id: "id",
+                amount: 0
             }))
 
 

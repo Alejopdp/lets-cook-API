@@ -61,6 +61,18 @@ export class Wallet extends Entity<Wallet>  {
         this.balance = Number(bigBalance.minus(bigAmountToPay));
     }
 
+    public payBillingJob(amountToPay: number): boolean {
+        let succeeded = false;
+        if (this.balance < amountToPay) return succeeded
+
+        const bigAmountToPay = new Big(amountToPay);
+        const bigBalance = new Big(this.balance);
+
+        this.balance = Number(bigBalance.minus(bigAmountToPay));
+        succeeded = true;
+        return succeeded
+    }
+
     /**
      * Getter balance
      * @return {number}

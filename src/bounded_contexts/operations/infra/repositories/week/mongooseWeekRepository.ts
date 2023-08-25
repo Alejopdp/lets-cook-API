@@ -151,8 +151,8 @@ export class MongooseWeekRepository implements IWeekRepository {
         return weekDb ? weekMapper.toDomain(weekDb) : undefined;
     }
 
-    public async findWeekTwelveWeeksLater(): Promise<Week | undefined> {
-        const dayInTwelveWeeks = new Date();
+    public async findWeekTwelveWeeksLater(queryDate: Date): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date(queryDate)
         dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 7 * 12);
 
         const weekDb = await WeekModel.findOne({ minDay: { $lte: dayInTwelveWeeks }, maxDay: { $gte: dayInTwelveWeeks } });
@@ -160,8 +160,8 @@ export class MongooseWeekRepository implements IWeekRepository {
         return weekDb ? weekMapper.toDomain(weekDb) : undefined;
     }
 
-    public async findWeekTwelveBiweeksLater(): Promise<Week | undefined> {
-        const dayInTwelveWeeks = new Date();
+    public async findWeekTwelveBiweeksLater(queryDate: Date): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date(queryDate);
         dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 14 * 12 + 2); // + 2 cause if not it will get one week previous to shipping date
 
 
@@ -170,8 +170,8 @@ export class MongooseWeekRepository implements IWeekRepository {
         return weekDb ? weekMapper.toDomain(weekDb) : undefined;
     }
 
-    public async findWeekTwelveMonthsLater(): Promise<Week | undefined> {
-        const dayInTwelveWeeks = new Date();
+    public async findWeekTwelveMonthsLater(queryDate: Date): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date(queryDate);
         dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 28 * 12 + 2); // + 2 cause if not it will get one week previous to shipping date
 
         const weekDb = await WeekModel.findOne({ minDay: { $lte: dayInTwelveWeeks }, maxDay: { $gte: dayInTwelveWeeks } });

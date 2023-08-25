@@ -49,7 +49,7 @@ export class StripeService implements IPaymentService {
 
         const paymentIntent = await this.stripe.paymentIntents.create(paymentIntentParams);
 
-        return { client_secret: paymentIntent.client_secret, id: paymentIntent.id, status: paymentIntent.status }
+        return { client_secret: paymentIntent.client_secret, id: paymentIntent.id, status: paymentIntent.status, amount: paymentIntent.amount }
     }
 
     public async createCustomer(email: string): Promise<any> {

@@ -17,6 +17,7 @@ export class ChargeOnePaymentOrderController extends BaseController {
         try {
             const dto: ChargeOnePaymentOrderDto = {
                 paymentOrderId: this.req.params.id,
+                queryDate: new Date()
             };
 
             const result = await this.chargeOnePaymentOrder.execute(dto);

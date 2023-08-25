@@ -2,11 +2,12 @@ import Stripe from "stripe";
 import { Order } from "../../domain/order/Order";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Subscription } from "../../domain/subscription/Subscription";
+import { PaymentIntent } from "../../application/paymentService";
 
 export class CreateManySubscriptionsPresenter {
     public present(
         subscriptions: Subscription[],
-        paymentIntent: Stripe.PaymentIntent,
+        paymentIntent: Stripe.PaymentIntent | PaymentIntent,
         paymentOrder: PaymentOrder,
         paymentMethodId: string
     ): any {

@@ -17,8 +17,7 @@ export interface IWeekRepository {
     findActualWeek(): Promise<Week | undefined>;
     findNextWeek(): Promise<Week | undefined>;
     findLastAndNextEight(): Promise<Week[]>;
-    findWeekTwelveWeeksLater(): Promise<Week | undefined>;
-    findWeekTwelveBiweeksLater(): Promise<Week | undefined>;
-    findWeekTwelveMonthsLater(): Promise<Week | undefined>;
-    // findWeeksForTwoYearsFromNow(): Promise<Week[]>
+    findWeekTwelveWeeksLater(queryDate: Date): Promise<Week | undefined>;
+    findWeekTwelveBiweeksLater(queryDate: Date): Promise<Week | undefined>;
+    findWeekTwelveMonthsLater(queryDate: Date): Promise<Week | undefined>;
 }
