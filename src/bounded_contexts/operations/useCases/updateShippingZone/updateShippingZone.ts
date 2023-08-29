@@ -61,6 +61,7 @@ export class UpdateShippingZone {
             await updateOrdersShippingDateAfterUpdatingAShippingZoneDay.execute({
                 shippingZone,
                 newShippingDayOfWeek,
+                queryDate: dto.queryDate,
             });
         }
     }

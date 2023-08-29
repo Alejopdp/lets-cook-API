@@ -72,7 +72,7 @@ export class Subscription extends Entity<Subscription> {
     public createNewOrdersWithoutDependency(shippingZone: ShippingZone, orderedWeeks: Week[], purchaseDate: Date): Order[] {
         const orders: Order[] = [];
         const deliveryDate: Date = this.getFirstOrderShippingDateWithoutDateDependency(shippingZone.getDayNumberOfWeek(), purchaseDate);
-        const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
+        const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6, purchaseDate); // Saturday
         const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
         const skipWeek: boolean = purchaseDate.getDay() === 0;
         if (this.coupon) this.coupon.addApplication(this.customer);
@@ -148,7 +148,7 @@ export class Subscription extends Entity<Subscription> {
     public createNewOrders(shippingZone: ShippingZone, orderedWeeks: Week[]): Order[] {
         const orders: Order[] = [];
         const deliveryDate: Date = this.getFirstOrderShippingDate(shippingZone.getDayNumberOfWeek());
-        const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6); // Saturday
+        const billingDate = MomentTimeService.getDayOfThisWeekByDayNumber(6, new Date()); // Saturday
         const hasFreeShipping = this._coupon?.type.type === "free"; // TO DO: Add coupon isType methods
         const skipWeek: boolean = new Date().getDay() === 0;
         if (this.coupon) this.coupon.addApplication(this.customer);
@@ -405,8 +405,8 @@ export class Subscription extends Entity<Subscription> {
         return this.plan.getPlanVariantLabel(this.planVariantId, locale);
     }
 
-    public getNextChoosableRecipesOrder(orders: Order[] = []): Order | undefined {
-        const order: Order | undefined = orders.find((order) => order.isInTimeToChooseRecipes());
+    public getNextChoosableRecipesOrder(orders: Order[] = [], queryDate: Date): Order | undefined {
+        const order: Order | undefined = orders.find((order) => order.isInTimeToChooseRecipes(queryDate));
 
         return order;
     }

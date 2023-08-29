@@ -6,4 +6,5 @@ export interface UpdateShippingZoneDto {
     state: string;
     radio: any[];
     day: number;
+    queryDate: Date;
 }
