@@ -2,6 +2,7 @@ import { Entity } from "../../../../../core/domain/Entity";
 import { UniqueEntityID } from "../../../../../core/domain/UniqueEntityID";
 import { DateOfCharge } from "./DateOfCharge";
 import Big from 'big.js';
+import { WalletMovementLog } from "./WalletMovementLog/WalletMovementLog";
 
 export class Wallet extends Entity<Wallet>  {
     private _balance: number;
@@ -9,9 +10,10 @@ export class Wallet extends Entity<Wallet>  {
     private _paymentMethodForCharging: string;
     private _isEnabled: boolean;
     private _datesOfCharge: DateOfCharge[];
+    private _walletMovements: WalletMovementLog[];
 
 
-    constructor(balance: number, amountToCharge: number, paymentMethodForCharging: string, isEnabled: boolean, datesOfCharge: DateOfCharge[], id?: UniqueEntityID) {
+    constructor(balance: number, amountToCharge: number, paymentMethodForCharging: string, isEnabled: boolean, datesOfCharge: DateOfCharge[], walletMovements: WalletMovementLog[], id?: UniqueEntityID) {
         if (isEnabled && datesOfCharge.length === 0) throw new Error("Tienes que ingresar al menos una fecha de cobro");
         if (datesOfCharge.length > 7) throw new Error("You cannot select more than 7 days of charge");
         if (amountToCharge < 0.5) throw new Error("Amount to charge must be greater than 0.5");
@@ -25,6 +27,7 @@ export class Wallet extends Entity<Wallet>  {
         this._paymentMethodForCharging = paymentMethodForCharging;
         this._isEnabled = isEnabled;
         this._datesOfCharge = datesOfCharge;
+        this._walletMovements = walletMovements;
     }
 
     public chargeMoney(amount: number): void {
@@ -113,6 +116,24 @@ export class Wallet extends Entity<Wallet>  {
     public get datesOfCharge(): DateOfCharge[] {
         return this._datesOfCharge;
     }
+
+
+    /**
+     * Getter walletMovements
+     * @return {WalletMovementLog[]}
+     */
+    public get walletMovements(): WalletMovementLog[] {
+        return this._walletMovements;
+    }
+
+    /**
+     * Setter walletMovements
+     * @param {WalletMovementLog[]} value
+     */
+    public set walletMovements(value: WalletMovementLog[]) {
+        this._walletMovements = value;
+    }
+
 
     /**
      * Setter isEnabled

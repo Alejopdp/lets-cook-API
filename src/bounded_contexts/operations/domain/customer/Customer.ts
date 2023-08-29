@@ -119,7 +119,7 @@ export class Customer extends Entity<Customer> {
 
         if (!paymentMethod) throw new Error("El método de pago ingresado para cargar la billetera no existe");
 
-        this.wallet = new Wallet(0, amountToCharge, paymentMethodForCharging, true, datesOfCharge, new UniqueEntityID());
+        this.wallet = new Wallet(0, amountToCharge, paymentMethodForCharging, true, datesOfCharge, [], new UniqueEntityID());
         this.addPaymentMethod(new WalletPaymentMehtod(false))
     }
 
