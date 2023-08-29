@@ -4,4 +4,5 @@ import { ShippingZone } from "../../domain/shipping/ShippingZone";
 export interface UpdateOrdersShippingDateAfterUpdatingAShippingZoneDayDto {
     shippingZone: ShippingZone;
     newShippingDayOfWeek: Day;
+    queryDate: Date
 }

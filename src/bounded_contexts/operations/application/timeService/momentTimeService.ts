@@ -60,8 +60,8 @@ export class MomentTimeService {
         )} ${maxMonthWithCapitalLetter}`;
     }
 
-    public static getDayOfThisWeekByDayNumber(dayNumber: number): Date {
-        var today: Date = new Date();
+    public static getDayOfThisWeekByDayNumber(dayNumber: number, queryDate: Date): Date {
+        var today: Date = new Date(queryDate);
         // today.setDate(today.getDate() + 5); // Testing days
         const date: Date = new Date(today.getFullYear(), today.getMonth());
         const differenceInDays = dayNumber - today.getDay();

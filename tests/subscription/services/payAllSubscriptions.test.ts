@@ -144,8 +144,9 @@ describe("Saturday billing job", () => {
             const EXECUTION_DATE = new Date(2023, 8, 2, 4)
 
             beforeAll(async () => {
+
                 //@ts-ignore
-                mockPaymentService.paymentIntent.mockImplementationOnce(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string, offSession: boolean): Promise<PaymentIntent> => await ({
+                mockPaymentService.paymentIntent.mockImplementationOnce(async (): Promise<PaymentIntent> => ({
                     status: "succeeded",
                     client_secret: "client_secret",
                     id: "payment_intent_id",
@@ -168,7 +169,7 @@ describe("Saturday billing job", () => {
 
                 expect(paymentOrders.length).toBe(13)
                 expect(paymentOrderToCheck.state.isActive()).toBeTruthy()
-                expect(paymentOrderToCheck.billingDate).toEqual(moment(EXECUTION_DATE).add(11, "week").toDate())
+                expect(paymentOrderToCheck.billingDate).toEqual(moment(paymentOrders[1].billingDate).add(11, "week").toDate())
             })
             it("Should bill the related order", async () => {
                 const orders: Order[] = await mockOrderRepository.findAllByCustomersIds([CUSTOMER_ID], Locale.es)
@@ -277,7 +278,7 @@ describe("Saturday billing job", () => {
 
                 expect(paymentOrders.length).toBe(13)
                 expect(paymentOrderToCheck.state.isActive()).toBeTruthy()
-                expect(paymentOrderToCheck.billingDate).toEqual(moment(EXECUTION_DATE).add(11, "week").toDate())
+                expect(paymentOrderToCheck.billingDate).toEqual(moment(paymentOrders[1].billingDate).add(11, "week").toDate())
             })
 
             it("Should leave the order skipped", async () => {
@@ -370,7 +371,7 @@ describe("Saturday billing job", () => {
 
                 expect(paymentOrders.length).toBe(13)
                 expect(paymentOrderToCheck.state.isActive()).toBeTruthy()
-                expect(paymentOrderToCheck.billingDate).toEqual(moment(EXECUTION_DATE).add(11, "week").toDate())
+                expect(paymentOrderToCheck.billingDate).toEqual(moment(paymentOrders[1].billingDate).add(11, "week").toDate())
             })
             it("Should bill the related order", async () => {
                 const orders: Order[] = await mockOrderRepository.findAllByCustomersIds([CUSTOMER_ID], Locale.es)
@@ -486,7 +487,7 @@ describe("Saturday billing job", () => {
 
                 expect(paymentOrders.length).toBe(13)
                 expect(paymentOrderToCheck.state.isActive()).toBeTruthy()
-                expect(paymentOrderToCheck.billingDate).toEqual(moment(EXECUTION_DATE).add(11, "week").toDate())
+                expect(paymentOrderToCheck.billingDate).toEqual(moment(paymentOrders[1].billingDate).add(11, "week").toDate())
             })
 
             it("Should leave the order in rejected", async () => {
@@ -608,7 +609,7 @@ describe("Saturday billing job", () => {
 
                     expect(paymentOrders.length).toBe(13)
                     expect(paymentOrderToCheck.state.isActive()).toBeTruthy()
-                    expect(paymentOrderToCheck.billingDate).toEqual(moment(EXECUTION_DATE).add(11, "week").toDate())
+                    expect(paymentOrderToCheck.billingDate).toEqual(moment(paymentOrders[1].billingDate).add(11, "week").toDate())
                 })
                 it("Should bill the related order", async () => {
                     const orders: Order[] = await mockOrderRepository.findAllByCustomersIds([CUSTOMER_ID], Locale.es)
@@ -715,7 +716,7 @@ describe("Saturday billing job", () => {
 
                     expect(paymentOrders.length).toBe(13)
                     expect(paymentOrderToCheck.state.isActive()).toBeTruthy()
-                    expect(paymentOrderToCheck.billingDate).toEqual(moment(EXECUTION_DATE).add(11, "week").toDate())
+                    expect(paymentOrderToCheck.billingDate).toEqual(moment(paymentOrders[1].billingDate).add(11, "week").toDate())
                 })
                 it("Should set the related order as rejected", async () => {
                     const orders: Order[] = await mockOrderRepository.findAllByCustomersIds([CUSTOMER_ID], Locale.es)

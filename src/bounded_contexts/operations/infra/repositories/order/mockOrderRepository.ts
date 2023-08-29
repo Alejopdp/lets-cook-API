@@ -84,7 +84,7 @@ export class InMemoryOrderRepository implements IOrderRepository {
         throw new Error("Method not implemented.");
     }
     public async findNextTwelveBySubscription(subscriptionId: SubscriptionId, locale: Locale, queryDate: Date): Promise<Order[]> {
-        return this.orders.filter((order) => order.subscriptionId.equals(subscriptionId) && order.shippingDate.getTime() > queryDate.getTime()).sort((o1, o2) => o1.shippingDate > o2.shippingDate ? 1 : -1);
+        return this.orders.filter((order) => order.subscriptionId.equals(subscriptionId) && order.shippingDate.getTime() > queryDate.getTime()).sort((o1, o2) => o1.shippingDate.getTime() > o2.shippingDate.getTime() ? 1 : -1);
     }
     getCountByPaymentOrderIdMap(paymentOrdersIds: PaymentOrderId[], locale: Locale): Promise<{ [key: string]: number; }> {
         throw new Error("Method not implemented.");
