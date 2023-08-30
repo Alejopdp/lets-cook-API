@@ -15,7 +15,7 @@ export class ChargeMoneyToWalletUseCase {
     public async execute(dto: ChargeMoneyToWalletDto): Promise<any> {
         const customer = await this.customerRepository.findByIdOrThrow(new CustomerId(dto.customerId))
 
-        await this.chargeMoneyService.execute({ customer, amountToCharge: dto.amountToCharge })
+        await this.chargeMoneyService.execute({ customer, amountToCharge: dto.amountToCharge, paymentMethodId: dto.paymentMethodId })
         await this.customerRepository.save(customer)
     }
 

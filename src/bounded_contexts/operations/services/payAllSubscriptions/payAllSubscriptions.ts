@@ -312,8 +312,6 @@ export class PayAllSubscriptions {
                 true
             );
         }
-        console.log("PAYMENT INTENT: ", paymentIntent)
-
         return paymentIntent
 
     }

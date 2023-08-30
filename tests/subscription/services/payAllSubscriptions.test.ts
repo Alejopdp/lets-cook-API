@@ -43,6 +43,7 @@ import { InMemoryRateRepository } from "../../../src/bounded_contexts/operations
 import { UpdateDiscountAfterSkippingOrders } from "../../../src/bounded_contexts/operations/services/updateDiscountsAfterSkippingOrders/updateDiscountsAfterSkippingOrders"
 import { IStorageService } from "../../../src/bounded_contexts/operations/application/storageService/IStorageService"
 import exp from "constants"
+import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum"
 
 const mockStorageService: IStorageService = new MockStorageService()
 const mockCustomerRepository = new InMemoryCustomerRepository([])
@@ -653,6 +654,10 @@ describe("Saturday billing job", () => {
 
                 it("Should not call the payment service", async () => {
                     expect(mockPaymentService.paymentIntent).not.toHaveBeenCalled()
+                })
+
+                it("Should create a wallet movement log", async () => {
+                    expect(customer.wallet?.walletMovements.filter(log => log.type === WalletMovementLogType.PAY_SATURDAY_JOB_WITH_WALLET).length).toBe(1)
                 })
 
                 afterAll(async () => {

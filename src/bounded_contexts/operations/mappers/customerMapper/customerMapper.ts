@@ -19,7 +19,7 @@ export class CustomerMapper implements Mapper<Customer, any> {
         const billingAddress: Billing | undefined = raw.billingAddress ? billingMapper.toDomain(raw.billingAddress) : undefined;
         const paymentMethods: PaymentMethod[] = raw.paymentMethods.map((rawMethod: any) => paymentMethodMapper.toDomain(rawMethod));
         const personalInfo: PersonalInfo | undefined = raw.personalInfo ? personalInfoMapper.toDomain(raw.personalInfo) : undefined;
-        const wallet: Wallet | undefined = raw.wallet ? new Wallet(raw.wallet.balance, raw.wallet.amountToCharge, raw.wallet.paymentMethodForCharging, raw.wallet.isEnabled, raw.wallet.datesOfCharge.map((dateOfCharge: any) => new DateOfCharge(new Day(dateOfCharge.dayNumber), dateOfCharge.hour, dateOfCharge.minute))) : undefined;
+        const wallet: Wallet | undefined = raw.wallet ? new Wallet(raw.wallet.balance, raw.wallet.amountToCharge, raw.wallet.paymentMethodForCharging, raw.wallet.isEnabled, raw.wallet.datesOfCharge.map((dateOfCharge: any) => new DateOfCharge(new Day(dateOfCharge.dayNumber), dateOfCharge.hour, dateOfCharge.minute)), []) : undefined;
 
         return Customer.create(
             raw.email,

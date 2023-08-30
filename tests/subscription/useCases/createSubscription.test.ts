@@ -33,6 +33,7 @@ import { Subscription } from "../../../src/bounded_contexts/operations/domain/su
 import { gourmetPlan, gourmetPlanSku, planGourmetVariant2Persons2Recipes, planGourmetVariant2Persons3Recipes } from "../../mocks/plan"
 import { TUESDAY, WEDNESDAY } from "../../mocks/days"
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod"
+import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -182,6 +183,7 @@ describe("Create Subscription Use Case", () => {
                 const subscription: Subscription = await mockSubscriptionRepository.findByIdOrThrow(firstSubscriptionResult.subscription.id, Locale.es)
                 expect(subscription.price).toEqual(planGourmetVariant2Persons2Recipes.getPaymentPrice())
             })
+
 
 
         })
@@ -1150,6 +1152,10 @@ describe("Given a customer with wallet", () => {
                 expect(customer.wallet?.balance).toBe(162.01)
             })
 
+            it("Should create a wallet movement", async () => {
+                const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+                expect(customer.wallet?.walletMovements.filter(log => log.type === WalletMovementLogType.PURCHASE_PLAN_WITH_WALLET).length).toBe(1)
+            })
             // it("Should create a wallet movement with the amount of the subscription", async () => {
             //     const customer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
             //     expect(customer.wallet.movements.length).toBe(1)

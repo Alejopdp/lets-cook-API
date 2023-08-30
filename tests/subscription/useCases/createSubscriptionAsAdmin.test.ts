@@ -33,6 +33,7 @@ import { Subscription } from "../../../src/bounded_contexts/operations/domain/su
 import { gourmetPlan, gourmetPlanSku, planGourmetVariant2Persons2Recipes, planGourmetVariant2Persons3Recipes } from "../../mocks/plan"
 import { TUESDAY, WEDNESDAY } from "../../mocks/days"
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod"
+import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -720,6 +721,10 @@ describe("Create subscription as admin use case", () => {
 
             it("Should rest the amount of the plan variant to the wallet", async () => {
                 expect(customer.wallet?.balance).toBe(62.01)
+            })
+
+            it("Should create a wallet movement", async () => {
+                expect(customer.wallet?.walletMovements.filter(log => log.type === WalletMovementLogType.PURCHASE_PLAN_WITH_WALLET).length).toBe(1)
             })
 
             it("Should throw an error if the plan variant is not found", async () => {
