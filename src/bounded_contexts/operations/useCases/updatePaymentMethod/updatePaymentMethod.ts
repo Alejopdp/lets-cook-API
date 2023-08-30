@@ -6,6 +6,7 @@ import { UpdatePaymentMethodDto } from "./updatePaymentMethodDto";
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
+import { WalletMovementLogType } from "../../domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
 
 export class UpdatePaymentMethod {
     private _customerRepository: ICustomerRepository;
@@ -46,6 +47,8 @@ export class UpdatePaymentMethod {
                 customer.id
             )
         );
+
+        if (dto.paymentId === "wallet") customer.addWalletMovementLog(WalletMovementLogType.SELECT_WALLET_AS_DEFAULT)
     }
 
     /**

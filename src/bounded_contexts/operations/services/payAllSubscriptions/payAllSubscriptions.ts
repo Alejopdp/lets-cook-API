@@ -50,7 +50,7 @@ export class PayAllSubscriptions {
 
     public async execute(dto: PayAllSubscriptionsDto): Promise<void> {
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
-        const today: Date = dto.executionDate ?? new Date();
+        const today: Date = dto.executionDate ? new Date(dto.executionDate) : new Date()
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAllActive();
@@ -174,7 +174,7 @@ export class PayAllSubscriptions {
             const subscriptionId = subscription.id.value;
             const customerId = subscription.customer.id.value;
             const baseOrderForCreatingThe12Order = subscriptionOrderMap[subscriptionId];
-            if (subscription.state.isCancelled()) continue;
+            if (subscription.isCancelled()) continue;
             if (subscription.frequency.isOneTime()) continue // TODO: End subscription
 
             if (
@@ -312,7 +312,6 @@ export class PayAllSubscriptions {
                 true
             );
         }
-
         return paymentIntent
 
     }

@@ -15,6 +15,7 @@ export class ChargeMoneyToWalletController extends BaseController {
             const dto: ChargeMoneyToWalletDto = {
                 customerId: this.req.params.customerId,
                 amountToCharge: this.req.body.amountToCharge,
+                paymentMethodId: this.req.body.paymentMethodId
             };
 
             await this.chargeMoneyToWallet.execute(dto);
