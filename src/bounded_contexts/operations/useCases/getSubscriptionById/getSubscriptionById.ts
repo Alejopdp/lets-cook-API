@@ -4,7 +4,6 @@ import { IOrderRepository } from "../../infra/repositories/order/IOrderRepositor
 import { GetSubscriptionByIdDto } from "./getSubscriptionByIdDto";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { Subscription } from "../../domain/subscription/Subscription";
-import { Customer } from "../../domain/customer/Customer";
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";

@@ -150,11 +150,11 @@ export class GetSubscriptionByIdPresenter {
 
         const nextActiveOrder: Order | undefined = subscription.getNextOrderToShip(orders);
         const nextSecondActiveOrder: Order | undefined = subscription.getNextSecondOrderToShip(orders);
-        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isGoingToBeShippedThisWeek() ? nextActiveOrder : null;
+        const actualWeekOrder = nextActiveOrder && nextActiveOrder.isGoingToBeShippedThisWeek(queryDate) ? nextActiveOrder : null;
         const nextWeekOrder =
-            nextActiveOrder && nextActiveOrder.isGoingToBeShippedNextWeek()
+            nextActiveOrder && nextActiveOrder.isGoingToBeShippedNextWeek(queryDate)
                 ? nextActiveOrder
-                : nextSecondActiveOrder && nextSecondActiveOrder.isGoingToBeShippedNextWeek()
+                : nextSecondActiveOrder && nextSecondActiveOrder.isGoingToBeShippedNextWeek(queryDate)
                     ? nextSecondActiveOrder
                     : null; // TO DO: Get 2nd Next Active order
         const hasChosenRecipesForActualWeek = !!!actualWeekOrder ? false : actualWeekOrder.hasChosenRecipes();
@@ -214,7 +214,7 @@ export class GetSubscriptionByIdPresenter {
             hasChosenRecipesForNextWeek,
             actualWeekOrder: actualWeekOrder ? await this.presentWeekRecipes(actualWeekOrder, locale) : null,
             nextWeekOrder: nextWeekOrder ? await this.presentWeekRecipes(nextWeekOrder, locale) : null,
-            canChooseRecipesForNextWeekOrder: !!nextWeekOrder && nextWeekOrder.isInTimeToChooseRecipes() && canChooseRecipes,
+            canChooseRecipesForNextWeekOrder: !!nextWeekOrder && nextWeekOrder.isInTimeToChooseRecipes(queryDate) && canChooseRecipes,
             skippedOrders,
             canChooseRecipes,
             nextTwelveOrders,

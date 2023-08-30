@@ -406,23 +406,23 @@ export class Order extends Entity<Order> {
         return Utils.roundTwoDecimals(this.getFinalKitPrice() / (planVariant.numberOfPersons || 1));
     }
 
-    public isGoingToBeShippedThisWeek(): boolean {
-        const today: Date = new Date();
+    public isGoingToBeShippedThisWeek(queryDate: Date): boolean {
+        const today: Date = new Date(queryDate);
         const auxMinDay = new Date(this.week.minDay);
         auxMinDay.setDate(auxMinDay.getDate() - 1);
 
         return today >= auxMinDay && today <= this.week.maxDay;
     }
 
-    public isInTimeToChooseRecipes(): boolean {
-        const today = new Date();
+    public isInTimeToChooseRecipes(queryDate: Date): boolean {
+        const today = new Date(queryDate);
         const fridayAt2359: Date = new Date(today.getFullYear(), today.getMonth());
         const differenceInDays = 5 - today.getDay(); // 5 === day number of Friday
 
         fridayAt2359.setDate(today.getDate() + differenceInDays); // Delivery day of this week
         fridayAt2359.setHours(23, 59, 59);
 
-        const todayWithDummyHours = new Date();
+        const todayWithDummyHours = new Date(queryDate);
         todayWithDummyHours.setHours(0, 0, 0, 0);
 
         const weekMinDayWithDummyHours = new Date(this.week.minDay);
@@ -432,12 +432,12 @@ export class Order extends Entity<Order> {
             today < fridayAt2359 &&
             todayWithDummyHours < weekMinDayWithDummyHours &&
             (this.isActive() || this.isBilled()) &&
-            this.isGoingToBeShippedNextWeek()
+            this.isGoingToBeShippedNextWeek(queryDate)
         );
     }
 
-    public isGoingToBeShippedNextWeek(): boolean {
-        const today: Date = new Date();
+    public isGoingToBeShippedNextWeek(queryDate: Date): boolean {
+        const today: Date = new Date(queryDate);
         const auxMinDay = new Date(this.week.minDay);
         auxMinDay.setDate(auxMinDay.getDate() - 1);
         const minDayDifferenceInDays = (auxMinDay.getTime() - today.getTime()) / (1000 * 3600 * 24);

@@ -40,6 +40,7 @@ export class UpdateShippingZoneController extends BaseController {
                 state: this.req.body.state,
                 radio: coordinates,
                 day: parseInt(this.req.body.shippingDayOfWeek),
+                queryDate: new Date(),
             };
 
             await this.updateShippingZone.execute(dto);

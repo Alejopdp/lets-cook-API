@@ -1,57 +1,12 @@
-import { ChooseRecipesForOrder } from "../../../src/bounded_contexts/operations/useCases/chooseRecipesForOrder/chooseRecipesForOrder"
-import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
-import { CancelASubscription } from "../../../src/bounded_contexts/operations/useCases/cancelASubscription/cancelASubscription"
-import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
 import { Customer } from "../../../src/bounded_contexts/operations/domain/customer/Customer";
 import { InMemoryCustomerRepository } from "../../../src/bounded_contexts/operations/infra/repositories/customer/inMemoryCustomerRepository";
 import { CustomerId } from "../../../src/bounded_contexts/operations/domain/customer/CustomerId";
-import { InMemorySusbcriptionRepository } from "../../../src/bounded_contexts/operations/infra/repositories/subscription/inMemorySubscriptionRepository";
-import { InMemoryShippingZoneRepository } from "../../../src/bounded_contexts/operations/infra/repositories/shipping/inMemoryShippingZoneRepository";
-import { InMemoryPlanRepository } from "../../../src/bounded_contexts/operations/infra/repositories/plan/mockPlanRepository";
-import { MockWeekRepository } from "../../../src/bounded_contexts/operations/infra/repositories/week/mockWeekRepository";
-import { InMemoryOrderRepository } from "../../../src/bounded_contexts/operations/infra/repositories/order/mockOrderRepository";
-import { InMemoryCouponRepository } from "../../../src/bounded_contexts/operations/infra/repositories/coupon/mockCouponRepository";
-import { MockPaymentService } from "../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService";
-import { MockNotificationService } from "../../../src/shared/notificationService/mockNotificationService";
-import { InMemoryPaymentOrderRepository } from "../../../src/bounded_contexts/operations/infra/repositories/paymentOrder/mockPaymentOrderRepository";
-import { InMemoryRateRepository } from "../../../src/bounded_contexts/operations/infra/repositories/rate/inMemoryRateRepository";
-import { InMemoryLogRepository } from "../../../src/bounded_contexts/operations/infra/repositories/log/mockLogRepository";
-import { MockRecipeRepository } from "../../../src/bounded_contexts/operations/infra/repositories/recipe/mockRecipeRepository";
-import { CreateFriendCode } from "../../../src/bounded_contexts/operations/services/createFriendCode/createFriendCode";
 import { CreateWallet } from "../../../src/bounded_contexts/operations/useCases/createWallet/createWallet";
-import { UpdateDiscountAfterSkippingOrders } from "../../../src/bounded_contexts/operations/services/updateDiscountsAfterSkippingOrders/updateDiscountsAfterSkippingOrders";
-import { CreatePaymentOrders } from "../../../src/bounded_contexts/operations/services/createPaymentOrders/createPaymentOrders";
-import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/operations/services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
-import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
-import { ChooseRecipesForOrderDto } from "../../../src/bounded_contexts/operations/useCases/chooseRecipesForOrder/chooseRecipesForOrderDto";
-import { gourmetPlan, planVegetariano, planVegetarianoVariant2Persons2Recipes } from "../../mocks/plan";
-import { arepasDeCrhistian, bowlDeQuinoa, burgerHallouli, rissotoDeBoniato } from "../../mocks/recipe";
-import { CUSTOMER_ADDRESS_DETAILS, CUSTOMER_ADDRESS_NAME, CUSTOMER_EMAIL, CUSTOMER_FIRST_NAME, CUSTOMER_LAST_NAME, CUSTOMER_LATITUDE, CUSTOMER_LONGITUDE, CUSTOMER_PASSWORD, CUSTOMER_PHONE } from "../../mocks/customer"
-import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio";
-import { Coordinates } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/Coordinates";
-import { TUESDAY } from "../../mocks/days";
-import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZone";
-import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order";
-import { RecipeRating } from "../../../src/bounded_contexts/operations/domain/recipeRating/RecipeRating";
-import { IMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/IMailingListService";
-import { MockMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/mockMailingListService";
+import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
+import { CUSTOMER_EMAIL, CUSTOMER_PASSWORD, CUSTOMER_PHONE } from "../../mocks/customer"
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod";
-import { DateOfCharge } from "../../../src/bounded_contexts/operations/domain/customer/wallet/DateOfCharge";
-import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day";
 
-const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
-const mockShippingZoneRepository = new InMemoryShippingZoneRepository([])
-const mockPlanRepository = new InMemoryPlanRepository([])
-const mockWeekRepository = new MockWeekRepository()
-const mockOrderRepository = new InMemoryOrderRepository([])
 const mockCustomerRepository = new InMemoryCustomerRepository([])
-const mockCouponRepository = new InMemoryCouponRepository([])
-const mockPaymentService = new MockPaymentService()
-const mockNotificationService = new MockNotificationService()
-const mockPaymentOrderRepository = new InMemoryPaymentOrderRepository([])
-const mockRecipeRatingRepository = new InMemoryRateRepository([])
-const mockLogRepository = new InMemoryLogRepository([])
-const mockRecipeRepository = new MockRecipeRepository([])
 
 const createWalletUseCase = new CreateWallet(mockCustomerRepository)
 
@@ -130,6 +85,14 @@ describe("Create wallet Use Case", () => {
                 const customerWithWallet: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
 
                 expect(customerWithWallet.getDefaultPaymentMethod()?.id.toString()).not.toBe("wallet")
+            })
+
+            it("Should add a log to the wallet", async () => {
+                const customerWithWallet: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+
+                expect(customerWithWallet.wallet?.walletMovements.length).toBe(1)
+                expect(customerWithWallet.wallet?.walletMovements[0].type).toBe(WalletMovementLogType.CREATE_WALLET)
+                expect(customerWithWallet.id.toString()).toBe(customerWithWallet.wallet?.walletMovements[0].customerId.toString())
             })
         })
 

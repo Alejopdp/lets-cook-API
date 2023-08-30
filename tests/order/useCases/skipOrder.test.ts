@@ -110,7 +110,6 @@ const valenciaPolygon = [
 const customerShippingZoneRadio = new ShippingZoneRadio(valenciaPolygon.map((coordinates) => new Coordinates(coordinates[0], coordinates[1])))
 const MOCK_SHIPPING_COST = 10
 const DAY = new Day(2)
-const PURCHASE_DATE = new Date(2023)
 
 const customerShippingZone = ShippingZone.create("Valencia", "valencia", MOCK_SHIPPING_COST, "active", customerShippingZoneRadio, TUESDAY)
 mockShippingZoneRepository.save(customerShippingZone)
@@ -120,6 +119,8 @@ describe("Skip Order Use case", () => {
     describe("Given a user with 1 main plan subscription", () => {
         let createSubscriptionDto: any
         let firstSubscriptionResult: any
+        const PURCHASE_DATE = new Date(2023, 7, 3, 10, 0, 0)
+        const QUERY_DATE = new Date(2023, 7, 9, 10, 0, 0)
 
         beforeAll(async () => {
             createSubscriptionDto = {
@@ -143,7 +144,7 @@ describe("Skip Order Use case", () => {
                 shippingProvince: "Valencia",
                 shippingPostalCode: "46120",
                 shippingCountry: "España",
-                purchaseDate: new Date(2023, 7, 3, 10, 0, 0)
+                purchaseDate: PURCHASE_DATE
             }
 
 
@@ -161,7 +162,7 @@ describe("Skip Order Use case", () => {
                     ordersToSkip: [skippedOrder.id.toString()],
                     ordersToReactivate: [],
                     nameOrEmailOfAdminExecutingRequest: "",
-                    queryDate: new Date()
+                    queryDate: QUERY_DATE
 
                 })
             })
@@ -206,7 +207,7 @@ describe("Skip Order Use case", () => {
                     ordersToSkip: [skippedOrder.id.toString()],
                     ordersToReactivate: [],
                     nameOrEmailOfAdminExecutingRequest: "",
-                    queryDate: new Date()
+                    queryDate: QUERY_DATE
 
                 })
 
@@ -215,7 +216,7 @@ describe("Skip Order Use case", () => {
                     ordersToSkip: [],
                     ordersToReactivate: [skippedOrder.id.toString()],
                     nameOrEmailOfAdminExecutingRequest: "",
-                    queryDate: new Date()
+                    queryDate: QUERY_DATE
                 })
 
             })
@@ -267,7 +268,7 @@ describe("Skip Order Use case", () => {
                     ordersToSkip: skippedOrders.map((order) => order.id.toString()),
                     ordersToReactivate: [],
                     nameOrEmailOfAdminExecutingRequest: "",
-                    queryDate: new Date()
+                    queryDate: QUERY_DATE
 
                 })
 
@@ -323,7 +324,7 @@ describe("Skip Order Use case", () => {
                     ordersToSkip: [billedOrder.id.toString()],
                     ordersToReactivate: [],
                     nameOrEmailOfAdminExecutingRequest: "",
-                    queryDate: new Date()
+                    queryDate: QUERY_DATE
 
                 })).rejects.toThrow()
             })

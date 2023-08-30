@@ -2,9 +2,11 @@ import { Customer } from "@src/bounded_contexts/operations/domain/customer/Custo
 import { CustomerId } from "@src/bounded_contexts/operations/domain/customer/CustomerId";
 import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
 import { ICustomerRepository } from "./ICustomerRepository";
+import { WalletMovementLog } from "@src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLog";
 
 export class InMemoryCustomerRepository implements ICustomerRepository {
     private customers: Customer[] = [];
+    private walletMovements: WalletMovementLog[] = [];
 
     public constructor(customers: Customer[]) {
         this.customers = customers;

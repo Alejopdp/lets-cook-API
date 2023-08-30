@@ -1,5 +1,4 @@
 import express from "express";
-import multer from "multer";
 import { codeValidationController } from "../../useCases/validateCodeToRecoverPassword";
 import { signUpController } from "../../useCases/signUp";
 import { signInController } from "../../useCases/signIn";

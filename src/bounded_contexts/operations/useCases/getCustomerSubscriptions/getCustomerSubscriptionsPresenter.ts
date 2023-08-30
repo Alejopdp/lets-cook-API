@@ -88,7 +88,7 @@ export class GetCustomerSubscriptionsPresenter {
 
             // Removing duplicated plans for one_time additional plans
 
-            const nextOrder = subscription.getNextChoosableRecipesOrder(orderSubscriptionMap[subscription.id.value]);
+            const nextOrder = subscription.getNextChoosableRecipesOrder(orderSubscriptionMap[subscription.id.value], queryDate);
 
             if (
                 !!nextOrder &&
