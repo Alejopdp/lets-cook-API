@@ -92,6 +92,7 @@ describe("Create wallet Use Case", () => {
 
                 expect(customerWithWallet.wallet?.walletMovements.length).toBe(1)
                 expect(customerWithWallet.wallet?.walletMovements[0].type).toBe(WalletMovementLogType.CREATE_WALLET)
+                expect(customerWithWallet.id.toString()).toBe(customerWithWallet.wallet?.walletMovements[0].customerId.toString())
             })
         })
 

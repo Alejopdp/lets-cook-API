@@ -30,4 +30,4 @@ const WalletMovementLogSchema = new mongoose.Schema(
     { collection: "WalletMovementLog", timestamps: true }
 );
 
-export const Role = mongoose.model("WalletMovementLog", WalletMovementLogSchema);
+export const WalletMovementLog = mongoose.model("WalletMovementLog", WalletMovementLogSchema);

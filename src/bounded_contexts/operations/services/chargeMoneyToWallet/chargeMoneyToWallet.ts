@@ -1,4 +1,5 @@
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
+import { WalletMovementLogType } from "../../domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
 import { ChargeMoneyToWalletDto } from "./ChargeMoneyToWalletDto";
 
 export class ChargeMoneyToWallet {

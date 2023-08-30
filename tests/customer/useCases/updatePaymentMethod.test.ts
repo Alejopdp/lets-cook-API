@@ -40,6 +40,7 @@ import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/c
 import { DateOfCharge } from "../../../src/bounded_contexts/operations/domain/customer/wallet/DateOfCharge";
 import { Day } from "../../../src/bounded_contexts/operations/domain/day/Day";
 import { MockStorageService } from "../../../src/bounded_contexts/operations/application/storageService/mockStorageService";
+import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
 
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
 const mockShippingZoneRepository = new InMemoryShippingZoneRepository([])
@@ -182,6 +183,10 @@ describe("Update payment method use case", () => {
                 })
 
                 expect(customer.getDefaultPaymentMethod()?.id.toString()).toBe("wallet")
+            })
+
+            it("Should create a wallet movement log", async () => {
+                expect(customer.wallet?.walletMovements.filter(log => log.type === WalletMovementLogType.SELECT_WALLET_AS_DEFAULT).length).toBe(1)
             })
 
             afterAll(async () => {

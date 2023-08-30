@@ -8,6 +8,7 @@ import { CUSTOMER_ADDRESS_DETAILS, CUSTOMER_ADDRESS_NAME, CUSTOMER_EMAIL, CUSTOM
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod";
 import { ChargeMoneyToWallet } from "../../../src/bounded_contexts/operations/services/chargeMoneyToWallet/chargeMoneyToWallet"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService";
+import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockPaymentService = new MockPaymentService() as jest.Mocked<MockPaymentService>
@@ -111,6 +112,12 @@ describe("Charge money to wallet service", () => {
                 const updatedCustomer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
 
                 expect(updatedCustomer.wallet?.balance).toEqual(32.97)
+            })
+
+            it("Should create a wallet movement log", async () => {
+                const updatedCustomer: Customer = await mockCustomerRepository.findByIdOrThrow(CUSTOMER_ID)
+
+                expect(updatedCustomer.wallet?.walletMovements.filter(log => log.type === WalletMovementLogType.CHARGE_WALLET).length).toEqual(2)
             })
         })
     })

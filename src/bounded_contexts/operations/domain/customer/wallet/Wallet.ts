@@ -30,6 +30,10 @@ export class Wallet extends Entity<Wallet>  {
         this._walletMovements = walletMovements;
     }
 
+    public addWalletMovementLog(walletMovementLog: WalletMovementLog): void {
+        this.walletMovements.push(walletMovementLog);
+    }
+
     public chargeMoney(amount: number): void {
         if (amount < 0.5) throw new Error("Amount to charge must be greater than 0.5");
         const bigAmountToCharge = new Big(amount);

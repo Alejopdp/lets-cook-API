@@ -2,23 +2,19 @@ import { CustomerId } from "../../CustomerId";
 import { WalletMovementLog } from "./WalletMovementLog";
 import { WalletMovementLogType } from "./WalletMovementLogTypeEnum";
 
-export class CreateWalletLog implements WalletMovementLog {
+export class PurchasePlanWithWalletLog implements WalletMovementLog {
     private _type: string;
     private _title: string;
     private _description: string;
     private _customerId: CustomerId;
     private _createdAt: Date;
 
-    constructor(customerId: CustomerId, createdAt: Date) {
-        this._type = WalletMovementLogType.CREATE_WALLET;
+    constructor(customerId: CustomerId, createDate: Date) {
+        this._type = WalletMovementLogType.PURCHASE_PLAN_WITH_WALLET;
         this._title = "";
         this._description = "";
         this._customerId = customerId;
-        this._createdAt = createdAt;
-
-    }
-    getTitle(): string {
-        throw new Error("Method not implemented.");
+        this._createdAt = createDate;
     }
 
 

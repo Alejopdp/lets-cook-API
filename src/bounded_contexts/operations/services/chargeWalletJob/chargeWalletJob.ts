@@ -21,8 +21,6 @@ export class ChargeWalletJob {
             const newJobs = [];
             const remainingJobs = []
 
-            console.log("Customers: ", customers.map(customer => customer.email))
-
             for (const customer of customers) {
                 for (const dateOfCharge of customer.wallet?.datesOfCharge ?? []) {
                     const today: Date = dto.executionDate ?? new Date()
@@ -40,7 +38,6 @@ export class ChargeWalletJob {
                             await this.customerRepository.save(customer);
                         });
 
-                        console.log("New Job: ", job.name)
                         newJobs.push(job);
                     }
                 }
