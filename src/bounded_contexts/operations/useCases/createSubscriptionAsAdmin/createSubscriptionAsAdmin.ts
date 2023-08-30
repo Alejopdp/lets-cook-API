@@ -5,7 +5,6 @@ import {
 } from "@src/shared/notificationService/INotificationService";
 import Stripe from "stripe";
 import { IPaymentService } from "../../application/paymentService/IPaymentService";
-import { CouponId } from "../../domain/cupons/CouponId";
 import { Coupon } from "../../domain/cupons/Cupon";
 import { CustomerId } from "../../domain/customer/CustomerId";
 import { PaymentMethod } from "../../domain/customer/paymentMethod/PaymentMethod";
@@ -32,6 +31,9 @@ import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymen
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
 import { createFriendCode } from "../../services/createFriendCode";
 import { CreateSubscriptionAsAdminDto } from "./createSubscriptionAsAdminDto";
+import { PaymentIntent } from "../../application/paymentService";
+import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
+import { Customer } from "../../domain/customer/Customer";
 
 export class CreateSubscriptionAsAdmin {
     private _customerRepository: ICustomerRepository;
@@ -96,14 +98,14 @@ export class CreateSubscriptionAsAdmin {
             planFrequency,
             new SubscriptionActive(),
             "",
-            new Date(),
+            dto.purchaseDate,
             customer,
             plan.getPlanVariantPrice(planVariantId),
             undefined,
             coupon,
             undefined,
             undefined,
-            new Date() // TO DO: Calculate
+            new Date() // TODO: Calculate
         );
 
         const customerShippingZone: ShippingZone | undefined = shippingZones.find((zone) =>
@@ -111,7 +113,7 @@ export class CreateSubscriptionAsAdmin {
         );
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
-        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek()), new Date()); // Skip if it is not Sunday?
+        const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek()), dto.purchaseDate); // Skip if it is not Sunday?
         const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
 
         const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
@@ -133,6 +135,68 @@ export class CreateSubscriptionAsAdmin {
             coupon?.type.type === "free" ||
             customerSubscriptions.some((sub) => sub.coupon?.type.type === "free") || // !== free because in subscription.getPriceWithDiscount it's taken into account
             customerSubscriptions.length > 0;
+
+        const { billedAmount, paymentIntent } = await this.charge(customer, newPaymentOrders, hasFreeShipping, customerShippingZone.cost, customerSubscriptionHistory.length, orders, paymentOrdersWithHumanIdCount, dto.useWalletAsPaymentMethod)
+
+
+        if (orders[0].isBilled() && dto.couponCode) orders[0].couponCode = coupon?.couponCode ?? ""
+        const notificationDto: NewSubscriptionNotificationDto = {
+            customerEmail: customer.email,
+            customerFirstName: customer.email,
+            customerLastName: customer.getPersonalInfo().lastName!,
+            firstOrderId: orders[0].id.value as string,
+            hasIndicatedRestrictions: subscription.restrictionComment,
+            isPlanAhorro: false,
+            planName: subscription.plan.name,
+            recipeSelection: [],
+            shippingCost: hasFreeShipping ? 0 : customerShippingZone.cost,
+            shippingDay: orders[0].getHumanShippmentDay(dto.locale),
+            planSku: subscription.plan.planSku.code,
+        };
+        await this.subscriptionRepository.save(subscription);
+        await this.orderRepository.insertMany(orders);
+        await this.customerRepository.save(customer);
+        if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
+        if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
+        if (coupon) await this.couponRepository.save(coupon);
+
+        this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
+
+        const ticketDto: PaymentOrderBilledNotificationDto = {
+            customerEmail: customer.email,
+            foodVAT: Math.round((billedAmount * 0.1 + Number.EPSILON) * 100) / 100,
+            orders: [orders[0]],
+            paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
+            phoneNumber: customer.personalInfo?.phone1 || "",
+            shippingAddressCity: "",
+            shippingAddressName: customer.getShippingAddress().addressName || "",
+            shippingCost: newPaymentOrders[0].shippingCost,
+            shippingCustomerName: customer.getPersonalInfo().fullName || "",
+            shippingDate: orders[0].getHumanShippmentDay(dto.locale),
+            totalAmount: billedAmount,
+            discountAmount: newPaymentOrders[0].getDiscountAmountOrShippingCostIfHasFreeShipping(),
+        };
+        this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
+
+        return {
+            subscription,
+            paymentIntent,
+            // firstOrder: today.getDay() === 0 ? orders[1] : orders[0],
+            firstOrder: orders[0],
+            billedPaymentOrderHumanId: newPaymentOrders[0].getHumanIdOrIdValue(),
+            customerPaymentMethods: customer.paymentMethods,
+            amountBilled: billedAmount,
+            tax:
+                Math.round((billedAmount - newPaymentOrders[0].shippingCost) * 0.1) +
+                (hasFreeShipping ? 0 : Math.round(newPaymentOrders[0].shippingCost * 0.21)),
+            shippingCost: hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost,
+        };
+    }
+
+    private async charge(customer: Customer, newPaymentOrders: PaymentOrder[], hasFreeShipping: boolean, customerShippingZoneCost: number, customerSubscriptionsQty: number, orders: Order[], paymentOrdersWithHumanIdCount: number, useWalletAsPaymentMethod: boolean): Promise<{ billedAmount: number, paymentIntent: PaymentIntent }> {
+        if (useWalletAsPaymentMethod) {
+            return this.chargeWithWallet(customer, newPaymentOrders, hasFreeShipping, customerShippingZoneCost, customerSubscriptionsQty, orders, paymentOrdersWithHumanIdCount)
+        }
 
         var paymentIntent: Stripe.PaymentIntent = {
             id: "",
@@ -175,13 +239,13 @@ export class CreateSubscriptionAsAdmin {
         };
 
         const amountToBill = hasFreeShipping
-            ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZone.cost * 100)) / 100
+            ? (Math.round(newPaymentOrders[0].getTotalAmount() * 100) - Math.round(customerShippingZoneCost * 100)) / 100
             : newPaymentOrders[0].getTotalAmount();
 
         if (amountToBill >= 0.5) {
             paymentIntent = await this.paymentService.paymentIntent(
                 amountToBill,
-                customerDefaultPaymentMethod.stripeId,
+                customer.getDefaultPaymentMethod()?.stripeId ?? "",
                 customer.email,
                 customer.stripeId,
                 true
@@ -189,7 +253,8 @@ export class CreateSubscriptionAsAdmin {
         }
 
         newPaymentOrders[0].paymentIntentId = paymentIntent.id;
-        newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZone.cost;
+        newPaymentOrders[0].shippingCost = hasFreeShipping ? 0 : customerShippingZoneCost;
+
 
         if (!!paymentIntent && paymentIntent.status === "requires_action") {
             throw new Error("El método de pago del cliente requiere una confirmación por parte de el");
@@ -198,61 +263,37 @@ export class CreateSubscriptionAsAdmin {
         } else {
             newPaymentOrders[0]?.toBilled(orders, customer);
             newPaymentOrders[0] ? newPaymentOrders[0].addHumanId(paymentOrdersWithHumanIdCount) : "";
-            if (customerSubscriptionHistory.length === 0) createFriendCode.execute({ customer });
+            if (customerSubscriptionsQty === 0) createFriendCode.execute({ customer });
         }
 
-        if (orders[0].isBilled() && dto.couponCode) orders[0].couponCode = coupon?.couponCode ?? ""
-        const notificationDto: NewSubscriptionNotificationDto = {
-            customerEmail: customer.email,
-            customerFirstName: customer.email,
-            customerLastName: customer.getPersonalInfo().lastName!,
-            firstOrderId: orders[0].id.value as string,
-            hasIndicatedRestrictions: subscription.restrictionComment,
-            isPlanAhorro: false,
-            planName: subscription.plan.name,
-            recipeSelection: [],
-            shippingCost: hasFreeShipping ? 0 : customerShippingZone.cost,
-            shippingDay: orders[0].getHumanShippmentDay(dto.locale),
-            planSku: subscription.plan.planSku.code,
-        };
-        await this.subscriptionRepository.save(subscription);
-        await this.orderRepository.insertMany(orders);
-        await this.customerRepository.save(customer);
-        if (newPaymentOrders.length > 0) await this.paymentOrderRepository.bulkSave(newPaymentOrders);
-        if (paymentOrdersToUpdate.length > 0) await this.paymentOrderRepository.updateMany(paymentOrdersToUpdate);
-        if (coupon) await this.couponRepository.save(coupon);
+        return { billedAmount: amountToBill, paymentIntent };
+    }
 
-        this.notificationService.notifyAdminsAboutNewSubscriptionSuccessfullyCreated(notificationDto);
-
-        const ticketDto: PaymentOrderBilledNotificationDto = {
-            customerEmail: customer.email,
-            foodVAT: Math.round((amountToBill * 0.1 + Number.EPSILON) * 100) / 100,
-            orders: [orders[0]],
-            paymentOrderHumanNumber: (newPaymentOrders[0].getHumanIdOrIdValue() as string) || "",
-            phoneNumber: customer.personalInfo?.phone1 || "",
-            shippingAddressCity: "",
-            shippingAddressName: customer.getShippingAddress().addressName || "",
-            shippingCost: newPaymentOrders[0].shippingCost,
-            shippingCustomerName: customer.getPersonalInfo().fullName || "",
-            shippingDate: orders[0].getHumanShippmentDay(dto.locale),
-            totalAmount: amountToBill,
-            discountAmount: newPaymentOrders[0].getDiscountAmountOrShippingCostIfHasFreeShipping(),
+    private async chargeWithWallet(customer: Customer, newPaymentOrders: PaymentOrder[], hasFreeShipping: boolean, customerShippingZoneCost: number, customerSubscriptionsQty: number, orders: Order[], paymentOrdersWithHumanIdCount: number): Promise<{ billedAmount: number, paymentIntent: PaymentIntent }> {
+        // Si un usuario elige como método de pago la billetera, se le cobrará el monto al balance actual
+        var paymentIntent: PaymentIntent = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+            amount: 0
         };
-        this.notificationService.notifyCustomerAboutPaymentOrderBilled(ticketDto);
+        const paymentOrder = newPaymentOrders[0]
 
-        return {
-            subscription,
-            paymentIntent,
-            // firstOrder: today.getDay() === 0 ? orders[1] : orders[0],
-            firstOrder: orders[0],
-            billedPaymentOrderHumanId: newPaymentOrders[0].getHumanIdOrIdValue(),
-            customerPaymentMethods: customer.paymentMethods,
-            amountBilled: amountToBill,
-            tax:
-                Math.round((amountToBill - newPaymentOrders[0].shippingCost) * 0.1) +
-                (hasFreeShipping ? 0 : Math.round(newPaymentOrders[0].shippingCost * 0.21)),
-            shippingCost: hasFreeShipping ? 0 : newPaymentOrders[0].shippingCost,
-        };
+        const amountToBill = hasFreeShipping
+            ? (Math.round(paymentOrder.getTotalAmount() * 100) - Math.round(customerShippingZoneCost * 100)) / 100
+            : paymentOrder.getTotalAmount();
+
+        customer.buyWithWallet(amountToBill)
+
+        paymentOrder.paymentIntentId = "Monedero"
+        paymentOrder.shippingCost = hasFreeShipping ? 0 : customerShippingZoneCost;
+        paymentOrder?.toBilled(orders, customer);
+        paymentOrder ? paymentOrder.addHumanId(paymentOrdersWithHumanIdCount) : "";
+        if (customerSubscriptionsQty === 0) createFriendCode.execute({ customer });
+
+        paymentIntent.amount = Math.round(amountToBill * 100)
+        return { billedAmount: amountToBill, paymentIntent }
+
     }
 
     /**

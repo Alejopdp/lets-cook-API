@@ -68,7 +68,8 @@ const chooseRecipesForOrderUseCase = new ChooseRecipesForOrder(mockOrderReposito
 mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementation(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string): Promise<PaymentIntent> => ({
     client_secret: "client_secret",
     id: "id",
-    status: "succeeded"
+    status: "succeeded",
+    amount: 0
 }))
 
 const CUSTOMER_FIRST_NAME = "Alejo"

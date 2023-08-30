@@ -34,6 +34,7 @@ export class UpdatePaymentMethod {
             dto.isDefault
         );
         await this.customerRepository.save(customer);
+
         this.logRepository.save(
             new Log(
                 LogType.CREDIT_CARD_UPDATED,

@@ -35,14 +35,26 @@ export class MockWeekRepository implements IWeekRepository {
     findLastAndNextEight(): Promise<Week[]> {
         throw new Error("Method not implemented.");
     }
-    findWeekTwelveWeeksLater(): Promise<Week | undefined> {
-        throw new Error("Method not implemented.");
+
+    public async findWeekTwelveWeeksLater(queryDate: Date): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date(queryDate)
+        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 7 * 12);
+
+        return this.weeks.find((week) => week.containsDate(dayInTwelveWeeks));
     }
-    findWeekTwelveBiweeksLater(): Promise<Week | undefined> {
-        throw new Error("Method not implemented.");
+
+    public async findWeekTwelveBiweeksLater(queryDate: Date): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date(queryDate)
+        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 14 * 12 + 2); // + 2 cause if not it will get one week previous to shipping date
+
+        return this.weeks.find((week) => week.containsDate(dayInTwelveWeeks));
     }
-    findWeekTwelveMonthsLater(): Promise<Week | undefined> {
-        throw new Error("Method not implemented.");
+
+    public async findWeekTwelveMonthsLater(queryDate: Date): Promise<Week | undefined> {
+        const dayInTwelveWeeks = new Date(queryDate)
+        dayInTwelveWeeks.setDate(dayInTwelveWeeks.getDate() + 28 * 12 + 2); // + 2 cause if not it will get one week previous to shipping date
+
+        return this.weeks.find((week) => week.containsDate(dayInTwelveWeeks));
     }
     public async findNextTwelveByFrequency(frequency: IPlanFrequency, baseDate: Date, dateOfExecution: Date, skipWeek?: boolean): Promise<Week[]> {
         const dateOfExecutionTime = dateOfExecution.getTime();

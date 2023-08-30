@@ -26,6 +26,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                         friendCode: customerDb.friendCode,
                         shopifyReceivedOrdersQuantity: customerDb.shopifyReceivedOrdersQuantity,
                         firstOrderDate: customerDb.firstOrderDate,
+                        wallet: customerDb.wallet,
                     },
                 }
             );

@@ -26,6 +26,8 @@ export class CreateSubscriptionAsAdminController extends BaseController {
                 planVariantId: this.req.body.planVariantId,
                 couponCode: this.req.body.couponCode,
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                purchaseDate: new Date(),
+                useWalletAsPaymentMethod: this.req.body.useWalletAsPaymentMethod
             };
 
             const result = await this.createSubscriptionAsAdmin.execute(dto);

@@ -16,6 +16,8 @@ import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/I
 import { IShippingZoneRepository } from "../../infra/repositories/shipping/IShippingZoneRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
+import { PayAllSubscriptionsDto } from "./payAllSubscriptionsDto";
+import { PaymentIntent } from "../../application/paymentService";
 export class PayAllSubscriptions {
     private _customerRepository: ICustomerRepository;
     private _orderRepository: IOrderRepository;
@@ -46,10 +48,9 @@ export class PayAllSubscriptions {
         this._notificationService = notificationService;
     }
 
-    public async execute(): Promise<void> {
+    public async execute(dto: PayAllSubscriptionsDto): Promise<void> {
         logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
-        // const today: Date = new Date(2021, 11, 25);
-        const today: Date = new Date();
+        const today: Date = dto.executionDate ?? new Date();
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
         const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAllActive();
@@ -66,9 +67,9 @@ export class PayAllSubscriptions {
         const subscriptionOrderMap: { [subscriptionId: string]: Order } = {};
         const rejectedPaymentOrders: PaymentOrder[] = [];
         const ordersWithError: Order[] = [];
-        const weeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveWeeksLater();
-        const biweeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveBiweeksLater();
-        const monthlyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveMonthsLater();
+        const weeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveWeeksLater(dto.executionDate);
+        const biweeklyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveBiweeksLater(dto.executionDate);
+        const monthlyOrdersWeek: Week | undefined = await this.weekRepository.findWeekTwelveMonthsLater(dto.executionDate);
         const newOrders: Order[] = [];
         const frequencyWeekMap: { [frequency: string]: Week } = {};
         const customerShippingZoneMap: { [customerId: string]: ShippingZone | undefined } = {};
@@ -118,32 +119,13 @@ export class PayAllSubscriptions {
                 try {
                     logger.info(`Starting payment order ${paymentOrderId} processing`);
                     const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
-                    const shippingCost = customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost ?? 0;
                     const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some(
                         (order) => order.hasFreeShipping
                     );
-                    const totalAmount = customerHasFreeShipping
-                        ? (Math.round(paymentOrderToBill.amount * 100) - Math.round(paymentOrderToBill.discountAmount * 100)) / 100
-                        : (Math.round(paymentOrderToBill.amount * 100) -
-                            Math.round(paymentOrderToBill.discountAmount * 100) +
-                            Math.round(shippingCost * 100)) /
-                        100;
+                    const shippingCost = customerHasFreeShipping ? 0 : customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost ?? 0;
+                    const totalAmount = this.getTotalAmountToBill(shippingCost, paymentOrderToBill.amount, paymentOrderToBill.discountAmount)
 
-                    var paymentIntent: Stripe.PaymentIntent | { id: string; status: string; client_secret: string } = {
-                        id: "",
-                        status: "succeeded",
-                        client_secret: "",
-                    };
-
-                    if (totalAmount >= 0.5) {
-                        paymentIntent = await this.paymentService.paymentIntent(
-                            totalAmount,
-                            paymentOrderCustomer.getDefaultPaymentMethod()?.stripeId!,
-                            paymentOrderCustomer.email,
-                            paymentOrderCustomer.stripeId as string,
-                            true
-                        );
-                    }
+                    const paymentIntent = await this.charge(totalAmount, paymentOrderCustomer)
 
                     paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
                     paymentOrdersWithHumanIdCount++;
@@ -155,7 +137,7 @@ export class PayAllSubscriptions {
                             phoneNumber: paymentOrderCustomer.personalInfo?.phone1 || "",
                             shippingAddressCity: "",
                             shippingAddressName: paymentOrderCustomer.getShippingAddress().addressName || "",
-                            shippingCost: customerHasFreeShipping ? 0 : shippingCost,
+                            shippingCost,
                             shippingCustomerName: paymentOrderCustomer.getPersonalInfo().fullName || "",
                             shippingDate: paymentOrderOrderMap[paymentOrderId][0].getHumanShippmentDay(
                                 (<any>Locale)[paymentOrderCustomer.personalInfo?.preferredLanguage || "es"]
@@ -175,10 +157,9 @@ export class PayAllSubscriptions {
 
                     paymentOrderToBill.paymentIntentId = paymentIntent.id;
                 } catch (error: any) {
-                    // @ts-ignore
+                    console.log("Error: ", error)
                     logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
                     paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
-                    // @ts-ignore
                     paymentOrderToBill.paymentIntentId = error?.payment_intent?.id ?? "";
                 }
             } else {
@@ -259,7 +240,7 @@ export class PayAllSubscriptions {
                     paymentOrdersToBill.push(existentPaymentOrder); // Is not going to be billed, its just an aweful name for updating the existent PO with the repository
                 } else {
                     const newPaymentOrder = new PaymentOrder(
-                        billingDateAndOrders[1][0].shippingDate || new Date(),
+                        billingDateAndOrders[1][0].shippingDate || new Date(today),
                         new PaymentOrderActive(),
                         "",
                         new Date(billingDateAndOrders[0]),
@@ -301,6 +282,55 @@ export class PayAllSubscriptions {
             }
         }
         logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
+    }
+
+    public getTotalAmountToBill(shippingCost: number, planAmount: number, discountAmount: number): number {
+        const totalAmount =
+            (Math.round(planAmount * 100) -
+                Math.round(discountAmount * 100) +
+                Math.round(shippingCost * 100)) /
+            100;
+
+        return totalAmount
+    }
+
+    private async charge(totalAmount: number, customer: Customer): Promise<Stripe.PaymentIntent | PaymentIntent> {
+        if (customer.getDefaultPaymentMethod()?.id.toString() === "wallet") return this.chargeWithWallet(totalAmount, customer)
+        var paymentIntent: Stripe.PaymentIntent | PaymentIntent = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+            amount: 0
+        };
+
+        if (totalAmount >= 0.5) {
+            paymentIntent = await this.paymentService.paymentIntent(
+                totalAmount,
+                customer.getDefaultPaymentMethod()?.stripeId!,
+                customer.email,
+                customer.stripeId as string,
+                true
+            );
+        }
+
+        return paymentIntent
+
+    }
+
+    private chargeWithWallet(totalAmount: number, customer: Customer): PaymentIntent {
+        var paymentIntent: PaymentIntent = {
+            id: "Monedero",
+            status: "succeeded",
+            client_secret: "",
+            amount: totalAmount
+        };
+
+        const succeeded = customer.payBillingJobWithWallet(totalAmount)
+
+        if (!succeeded) paymentIntent.status = "cancelled"
+
+        return paymentIntent
+
     }
 
     /**

@@ -11,7 +11,8 @@ export class Wallet extends Entity<Wallet>  {
     private _datesOfCharge: DateOfCharge[];
 
 
-    constructor(balance: number, amountToCharge: number, paymentMethodForCharging: string, isEnabled: boolean, datesOfCharge: DateOfCharge[], id: UniqueEntityID) {
+    constructor(balance: number, amountToCharge: number, paymentMethodForCharging: string, isEnabled: boolean, datesOfCharge: DateOfCharge[], id?: UniqueEntityID) {
+        if (isEnabled && datesOfCharge.length === 0) throw new Error("Tienes que ingresar al menos una fecha de cobro");
         if (datesOfCharge.length > 7) throw new Error("You cannot select more than 7 days of charge");
         if (amountToCharge < 0.5) throw new Error("Amount to charge must be greater than 0.5");
         const days = datesOfCharge.map(dateOfCharge => dateOfCharge.day.dayNumberOfWeek);
@@ -49,6 +50,27 @@ export class Wallet extends Entity<Wallet>  {
 
 
         this.datesOfCharge = datesOfCharge;
+    }
+
+    public buy(amountToPay: number): void {
+        if (this.balance < amountToPay) throw new Error("No hay suficiente saldo en la billetera");
+
+        const bigAmountToPay = new Big(amountToPay);
+        const bigBalance = new Big(this.balance);
+
+        this.balance = Number(bigBalance.minus(bigAmountToPay));
+    }
+
+    public payBillingJob(amountToPay: number): boolean {
+        let succeeded = false;
+        if (this.balance < amountToPay) return succeeded
+
+        const bigAmountToPay = new Big(amountToPay);
+        const bigBalance = new Big(this.balance);
+
+        this.balance = Number(bigBalance.minus(bigAmountToPay));
+        succeeded = true;
+        return succeeded
     }
 
     /**

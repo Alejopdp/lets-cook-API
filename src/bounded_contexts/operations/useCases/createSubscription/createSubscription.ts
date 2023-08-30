@@ -281,10 +281,14 @@ export class CreateSubscription {
     }
 
     private async charge(customer: Customer, newPaymentOrders: PaymentOrder[], hasFreeShipping: boolean, customerShippingZoneCost: number, customerSubscriptionsQty: number, orders: Order[], paymentMethodId: string, paymentOrdersWithHumanIdCount: number, stripePaymentMethodId?: string): Promise<{ billedAmount: number, paymentIntent: PaymentIntent }> {
+        if (paymentMethodId === "wallet") {
+            return this.chargeWithWallet(customer, newPaymentOrders, hasFreeShipping, customerShippingZoneCost, customerSubscriptionsQty, orders, paymentMethodId, paymentOrdersWithHumanIdCount)
+        }
         var paymentIntent: PaymentIntent = {
             id: "",
             status: "succeeded",
             client_secret: "",
+            amount: 0
         };
         const paymentOrder = newPaymentOrders[0]
 
@@ -322,6 +326,32 @@ export class CreateSubscription {
         return { billedAmount: amountToBill, paymentIntent }
     }
 
+    private async chargeWithWallet(customer: Customer, newPaymentOrders: PaymentOrder[], hasFreeShipping: boolean, customerShippingZoneCost: number, customerSubscriptionsQty: number, orders: Order[], paymentMethodId: string, paymentOrdersWithHumanIdCount: number): Promise<{ billedAmount: number, paymentIntent: PaymentIntent }> {
+        // Si un usuario elige como método de pago la billetera, se le cobrará el monto al balance actual
+        var paymentIntent: PaymentIntent = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+            amount: 0
+        };
+        const paymentOrder = newPaymentOrders[0]
+
+        const amountToBill = hasFreeShipping
+            ? (Math.round(paymentOrder.getTotalAmount() * 100) - Math.round(customerShippingZoneCost * 100)) / 100
+            : paymentOrder.getTotalAmount();
+
+        customer.buyWithWallet(amountToBill)
+
+        paymentOrder.paymentIntentId = "Monedero"
+        paymentOrder.shippingCost = hasFreeShipping ? 0 : customerShippingZoneCost;
+        paymentOrder?.toBilled(orders, customer);
+        paymentOrder ? paymentOrder.addHumanId(paymentOrdersWithHumanIdCount) : "";
+        if (customerSubscriptionsQty === 0) this.createFriendCodeService.execute({ customer });
+        paymentIntent.amount = Math.round(amountToBill * 100)
+
+        return { billedAmount: amountToBill, paymentIntent }
+
+    }
     /**
      * Getter customerRepository
      * @return {ICustomerRepository}

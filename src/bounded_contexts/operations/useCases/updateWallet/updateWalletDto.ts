@@ -1,6 +1,6 @@
 export type UpdateWalletDto = {
     amountToCharge: number;
-    paymentMethodForChargingId: string;
+    paymentMethodForCharging: string;
     customerId: string;
     isEnabled: boolean;
     datesOfCharge: { dayNumber: number, hour: string, minute: string }[];

@@ -2,12 +2,14 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import helmet from "helmet";
+import { scheduleJob } from "node-schedule";
 import * as Sentry from "@sentry/node";
 import * as Tracing from "@sentry/tracing";
 import * as http from "http";
 import { v1Router } from "./api/v1";
 import { billingJob } from "../../bounded_contexts/operations/application/billingJob";
 import v8 from "v8"
+import { chargeWalletJob } from "../../bounded_contexts/operations/services/chargeWalletJob";
 const app = express();
 
 /** Sentry **/
@@ -81,6 +83,17 @@ app.use(
 app.use("/api/v1", v1Router);
 
 billingJob.initialize();
+
+scheduleJob("schedule_wallets_job", "*/5 * * * *", async () => {
+    try {
+        console.log("*********************************** STARTING WALLET JOB ***********************************")
+        await chargeWalletJob.execute({ executionDate: new Date() })
+        console.log("*********************************** ENDING WALLET JOB ***********************************")
+    } catch (error) {
+        console.log("Error: ", error)
+    }
+})
+
 
 console.log("HEAP STATISTICS - New: ", v8.getHeapStatistics());
 

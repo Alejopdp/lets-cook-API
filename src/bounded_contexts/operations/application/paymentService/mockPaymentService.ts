@@ -12,7 +12,8 @@ export class MockPaymentService implements IPaymentService {
         return {
             client_secret: "client_secret",
             id: "id",
-            status: "succeeded"
+            status: "succeeded",
+            amount: 0
         }
     }
     createCustomer(email: string): Promise<any> {

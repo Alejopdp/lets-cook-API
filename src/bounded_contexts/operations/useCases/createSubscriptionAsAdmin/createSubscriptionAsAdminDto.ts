@@ -8,4 +8,6 @@ export interface CreateSubscriptionAsAdminDto {
     planVariantId: string;
     locale: Locale;
     couponCode: string;
+    purchaseDate: Date;
+    useWalletAsPaymentMethod: boolean;
 }
