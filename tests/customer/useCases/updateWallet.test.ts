@@ -61,13 +61,13 @@ describe("Update Wallet Use Case", () => {
             })
         })
 
-        describe("When the user updates the amount to charge to an amount greater than 0.5", () => {
+        describe("When the user updates the amount to charge to an amount greater than 5", () => {
             beforeAll(async () => {
-                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
+                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
             })
             it("Should update the amount correctly", () => {
 
-                expect(customer.wallet?.amountToCharge).toBe(0.6)
+                expect(customer.wallet?.amountToCharge).toBe(6)
             })
         })
 
@@ -77,7 +77,7 @@ describe("Update Wallet Use Case", () => {
             beforeAll(async () => {
                 newCustomerPaymentMethod = new PaymentMethod("visa", "4242", 8, 2030, "420", false, "stripe_id_2")
                 customer.addPaymentMethod(newCustomerPaymentMethod)
-                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: newCustomerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
+                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 66, paymentMethodForCharging: newCustomerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
             })
 
             it("Should update the payment method correctly", () => {
@@ -87,13 +87,13 @@ describe("Update Wallet Use Case", () => {
 
         describe("When the user updates the payment method for charging to an invalid payment method", () => {
             it("Should throw an error", async () => {
-                await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: "invalid_payment_method_id", datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })).rejects.toThrowError()
+                await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: "invalid_payment_method_id", datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })).rejects.toThrowError()
             })
         })
 
         describe("When the user updates the wallet without a payment method for charging", () => {
             it("Should throw an error", async () => {
-                await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: "", datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })).rejects.toThrow()
+                await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: "", datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })).rejects.toThrow()
             })
         })
 
@@ -101,7 +101,7 @@ describe("Update Wallet Use Case", () => {
             const NEW_DATES_OF_CHARGE = [{ dayNumber: 2, hour: "13", minute: "45" }, { dayNumber: 4, hour: "17", minute: "30" }]
 
             beforeAll(async () => {
-                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: NEW_DATES_OF_CHARGE, isEnabled: true })
+                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: NEW_DATES_OF_CHARGE, isEnabled: true })
             })
 
             it("Should update the dates of charge correctly", () => {
@@ -119,19 +119,19 @@ describe("Update Wallet Use Case", () => {
             const NEW_DATES_OF_CHARGE = [{ dayNumber: 2, hour: "13", minute: "45" }, { dayNumber: 2, hour: "17", minute: "30" }]
 
             it("Should throw an error", async () => {
-                await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: NEW_DATES_OF_CHARGE, isEnabled: true })).rejects.toThrowError()
+                await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: NEW_DATES_OF_CHARGE, isEnabled: true })).rejects.toThrowError()
             })
         })
 
         describe("When the user updates the dates of charge to an empty array", () => {
             it("Should throw an error", async () => {
-                await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: [], isEnabled: true })).rejects.toThrowError()
+                await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: [], isEnabled: true })).rejects.toThrowError()
             })
         })
 
         describe("When the user disables the charging", () => {
             beforeAll(async () => {
-                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: false })
+                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: false })
             })
 
             it("Should disable the charging", () => {
@@ -145,22 +145,22 @@ describe("Update Wallet Use Case", () => {
 
         describe("When the user tries to update the wallet when it is disabled", () => {
             beforeAll(async () => {
-                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
-                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: false })
+                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
+                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: false })
             })
             it("Should throw an error if it is not enabling it", async () => {
-                await expect(updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: false })).rejects.toThrowError()
+                await expect(updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 6, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: false })).rejects.toThrowError()
             })
 
             it("Should not throw an error if it is enabling it", async () => {
-                await expect(updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.8, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })).resolves.not.toThrow()
+                await expect(updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 8, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })).resolves.not.toThrow()
             })
         })
 
         describe("When the user enables the charging", () => {
 
             beforeAll(async () => {
-                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.8, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
+                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 8, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
             })
 
             it("Should enable the charging", () => {
