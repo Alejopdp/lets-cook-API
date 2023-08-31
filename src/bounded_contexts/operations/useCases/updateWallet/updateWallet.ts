@@ -18,6 +18,21 @@ export class UpdateWallet {
         customer.updateWallet(dto.amountToCharge, dto.paymentMethodForCharging, dto.isEnabled, datesOfCharge);
 
         await this.customerRepository.save(customer);
+
+        return {
+            balance: customer.wallet?.balance,
+            amountToCharge: customer.wallet?.amountToCharge,
+            paymentMethodForCharging: customer.wallet?.paymentMethodForCharging,
+            last4Numbers: customer.paymentMethods.find(pm => pm.id.toString() === customer.wallet?.paymentMethodForCharging)?.last4Numbers ?? "",
+            isEnabled: customer.wallet?.isEnabled,
+            datesOfCharge: customer.wallet?.datesOfCharge.map(dateOfCharge => ({ dayNumber: dateOfCharge.day.dayNumberOfWeek, hour: dateOfCharge.hour, minute: dateOfCharge.minute })),
+            walletMovementsLogs: customer.wallet?.walletMovements.map((log: any) => ({
+                type: log.type,
+                title: log.title,
+                description: log.description,
+                createdAt: log.createdAt,
+            })),
+        }
     }
 
 

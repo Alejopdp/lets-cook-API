@@ -19,9 +19,9 @@ export class CreateWalletController extends BaseController {
                 datesOfCharge: this.req.body.datesOfCharge,
             };
 
-            await this.createWallet.execute(dto);
+            const presentedWallet = await this.createWallet.execute(dto);
 
-            return this.ok(this.res);
+            return this.ok(this.res, presentedWallet);
         } catch (error: any) {
             return this.fail(error);
         }

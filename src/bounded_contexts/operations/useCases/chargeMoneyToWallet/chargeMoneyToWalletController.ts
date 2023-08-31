@@ -18,9 +18,9 @@ export class ChargeMoneyToWalletController extends BaseController {
                 paymentMethodId: this.req.body.paymentMethodId
             };
 
-            await this.chargeMoneyToWallet.execute(dto);
+            const presentedWallet = await this.chargeMoneyToWallet.execute(dto);
 
-            return this.ok(this.res);
+            return this.ok(this.res, presentedWallet);
         } catch (error: any) {
             return this.fail(error);
         }

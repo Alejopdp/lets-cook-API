@@ -4,6 +4,7 @@ import { Customer as MongooseCustomer } from "../../../../../infraestructure/mon
 import { customerMapper } from "../../../mappers/customerMapper";
 import { CustomerId } from "../../../domain/customer/CustomerId";
 import { Week } from "@src/bounded_contexts/operations/domain/week/Week";
+import { WalletMovementLog } from "../../../../../infraestructure/mongoose/models/walletMovementLog";
 
 export class MongooseCustomerRepository implements ICustomerRepository {
     public async save(customer: Customer): Promise<void> {
@@ -30,8 +31,27 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                     },
                 }
             );
+
+            const latestLog = await WalletMovementLog.findOne({ customer: customer.id.toString() }).sort({ createdAt: -1 });
+            const latestTimestamp = latestLog ? latestLog.createdAt.getTime() : new Date(0).getTime();
+            const newLogs = customer.wallet?.walletMovements.filter((log: any) => log.createdAt.getTime() > latestTimestamp);
+
+            if (newLogs && newLogs.length > 0) {
+                await WalletMovementLog.insertMany(newLogs.map((log: any) => ({
+                    type: log.type,
+                    title: log.title,
+                    description: log.description,
+                    customer: customer.id.toString()
+                })));
+            }
+
         } else {
-            await MongooseCustomer.create(customerDb);
+            await Promise.all([MongooseCustomer.create(customerDb), WalletMovementLog.insertMany(customer.wallet?.walletMovements.map((log: any) => ({
+                type: log.type,
+                title: log.title,
+                description: log.description,
+                customer: customer.id.toString()
+            })) ?? [])])
         }
     }
 
@@ -41,7 +61,25 @@ export class MongooseCustomerRepository implements ICustomerRepository {
             deletionFlag: false,
         });
 
-        return !!customerDb ? customerMapper.toDomain(customerDb) : undefined;
+
+        if (!customerDb) {
+            return undefined;
+        }
+
+        if (customerDb.wallet) {
+            const logsDb = await WalletMovementLog.find({ customer: customerDb._id }, undefined, { sort: { createdAt: -1 } }).lean();
+            customerDb.wallet = {
+                //@ts-ignore
+                ...customerDb.wallet, walletMovements: logsDb.map((log: any) => ({
+                    type: log.type,
+                    title: log.title,
+                    description: log.description,
+                    createdAt: log.createdAt,
+                }))
+            }
+        }
+
+        return customerMapper.toDomain(customerDb);
     }
 
     public async isEmailVerified(email: string): Promise<boolean> {
@@ -50,9 +88,26 @@ export class MongooseCustomerRepository implements ICustomerRepository {
     }
 
     public async findById(id: CustomerId): Promise<Customer | undefined> {
-        const customerDb = await MongooseCustomer.findById(id.value);
+        const customerDb = await MongooseCustomer.findById(id.value).lean();
 
-        return !!customerDb ? customerMapper.toDomain(customerDb) : undefined;
+        if (!customerDb) {
+            return undefined;
+        }
+
+        if (customerDb.wallet) {
+            const logsDb = await WalletMovementLog.find({ customer: customerDb._id }, undefined, { sort: { createdAt: -1 } }).lean();
+            customerDb.wallet = {
+                //@ts-ignore
+                ...customerDb.wallet, walletMovements: logsDb.map((log: any) => ({
+                    type: log.type,
+                    title: log.title,
+                    description: log.description,
+                    createdAt: log.createdAt,
+                }))
+            }
+        }
+
+        return customerMapper.toDomain(customerDb);
     }
 
     public async findByIdList(ids: CustomerId[]): Promise<Customer[]> {
@@ -68,9 +123,27 @@ export class MongooseCustomerRepository implements ICustomerRepository {
     }
 
     public async findBy(conditions: any): Promise<Customer[]> {
-        const customerDb = await MongooseCustomer.find({ ...conditions, deletionFlag: false }).lean()
+        const customersDb = await MongooseCustomer.find({ ...conditions, deletionFlag: false }).lean()
+        const customerIds = customersDb.map(customer => customer._id);
+        const walletMovementLogsDb = await WalletMovementLog.find({ customer: { $in: customerIds } }, undefined, { sort: { createdAt: -1 } }).lean();
 
-        return customerDb.map((raw: any) => customerMapper.toDomain(raw));
+
+        const logsByCustomer = walletMovementLogsDb.reduce((acc: any, log: any) => {
+            if (!acc[log.customer]) acc[log.customer] = [];
+            acc[log.customer].push(log);
+            return acc;
+        }, {});
+
+        // Asociar logs a cada cliente
+        const customersWithLogs = customersDb.map((customer: any) => !customer.wallet ? ({ ...customer }) : ({
+            ...customer,
+            wallet: {
+                ...customer.wallet,
+                walletMovements: logsByCustomer[customer._id] || []
+            }
+        }));
+
+        return customersWithLogs.map((raw: any) => customerMapper.toDomain(raw));
     }
 
     public async findByIdOrThrow(customerId: CustomerId): Promise<Customer> {

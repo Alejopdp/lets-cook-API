@@ -20,9 +20,9 @@ export class UpdateWalletController extends BaseController {
                 isEnabled: this.req.body.isEnabled,
             };
 
-            await this.updateWallet.execute(dto);
+            const presentedWallet = await this.updateWallet.execute(dto);
 
-            return this.ok(this.res);
+            return this.ok(this.res, presentedWallet);
         } catch (error: any) {
             return this.fail(error);
         }
