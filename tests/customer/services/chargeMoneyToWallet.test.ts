@@ -97,9 +97,9 @@ describe("Charge money to wallet service", () => {
             })
         })
 
-        describe("When it tries to charge money to the wallet with an amount less than 0.5", () => {
+        describe("When it tries to charge money to the wallet with an amount less than 5", () => {
             it("Should throw an error", async () => {
-                await expect(chargeMoneyToWalletService.execute({ customer, amountToCharge: 0.4 })).rejects.toThrowError()
+                await expect(chargeMoneyToWalletService.execute({ customer, amountToCharge: 0.6 })).rejects.toThrowError()
             })
         })
 
