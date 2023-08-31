@@ -35,7 +35,7 @@ export class Wallet extends Entity<Wallet>  {
     }
 
     public chargeMoney(amount: number): void {
-        if (amount < 0.5) throw new Error("Amount to charge must be greater than 0.5");
+        if (amount < 5) throw new Error("Amount to charge must be at least 5");
         const bigAmountToCharge = new Big(amount);
         const bigBalance = new Big(this.balance);
 
@@ -43,7 +43,7 @@ export class Wallet extends Entity<Wallet>  {
     }
 
     public updateAmountToCharge(amountToCharge: number): void {
-        if (amountToCharge < 0.5) throw new Error("Amount to charge must be greater than 0.5");
+        if (amountToCharge < 5) throw new Error("Amount to charge must be at least 5");
 
         this.amountToCharge = amountToCharge;
     }
