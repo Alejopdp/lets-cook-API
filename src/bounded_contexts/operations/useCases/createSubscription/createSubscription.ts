@@ -39,6 +39,18 @@ import { CreateFriendCode } from "../../services/createFriendCode/createFriendCo
 import { Customer } from "../../domain/customer/Customer";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 
+export type CreateSubscriptionResponse = {
+    subscription: Subscription;
+    paymentIntent: PaymentIntent;
+    firstOrder: Order;
+    customerPaymentMethods: PaymentMethod[];
+    amountBilled: number;
+    tax: number;
+    shippingCost: number;
+    billedPaymentOrderHumanId: string | number;
+};
+
+
 export class CreateSubscription {
     private _customerRepository: ICustomerRepository;
     private _subscriptionRepository: ISubscriptionRepository;
@@ -84,16 +96,7 @@ export class CreateSubscription {
         this._createFriendCodeService = createFriendCodeService;
     }
 
-    public async execute(dto: CreateSubscriptionDto): Promise<{
-        subscription: Subscription;
-        paymentIntent: PaymentIntent;
-        firstOrder: Order;
-        customerPaymentMethods: PaymentMethod[];
-        amountBilled: number;
-        tax: number;
-        shippingCost: number;
-        billedPaymentOrderHumanId: string | number;
-    }> {
+    public async execute(dto: CreateSubscriptionDto): Promise<CreateSubscriptionResponse> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount, shippingZones] = await Promise.all([
             this.subscriptionRepository.findByCustomerId(customerId, Locale.es),

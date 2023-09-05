@@ -29,12 +29,22 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { AssignOrdersToPaymentOrders } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { AssignOrdersToPaymentOrdersDto } from "../../services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrdersDto";
-import { createFriendCode } from "../../services/createFriendCode";
+import { CreateFriendCode } from "../../services/createFriendCode/createFriendCode";
 import { CreateSubscriptionAsAdminDto } from "./createSubscriptionAsAdminDto";
 import { PaymentIntent } from "../../application/paymentService";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Customer } from "../../domain/customer/Customer";
 
+export type CreateSubscriptionAsAdminResponse = {
+    subscription: Subscription;
+    paymentIntent: PaymentIntent;
+    firstOrder: Order;
+    billedPaymentOrderHumanId: string | number;
+    customerPaymentMethods: PaymentMethod[];
+    amountBilled: number;
+    tax: number;
+    shippingCost: number;
+}
 export class CreateSubscriptionAsAdmin {
     private _customerRepository: ICustomerRepository;
     private _subscriptionRepository: ISubscriptionRepository;
@@ -47,6 +57,7 @@ export class CreateSubscriptionAsAdmin {
     private _assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders;
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _couponRepository: ICouponRepository;
+    private _createFriendCodeService: CreateFriendCode;
 
     constructor(
         customerRepository: ICustomerRepository,
@@ -59,7 +70,8 @@ export class CreateSubscriptionAsAdmin {
         notificationService: INotificationService,
         assignOrdersToPaymentOrderService: AssignOrdersToPaymentOrders,
         paymentOrderRepository: IPaymentOrderRepository,
-        couponRepository: ICouponRepository
+        couponRepository: ICouponRepository,
+        createFriendCodeService: CreateFriendCode
     ) {
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
@@ -72,8 +84,9 @@ export class CreateSubscriptionAsAdmin {
         this._assignOrdersToPaymentOrderService = assignOrdersToPaymentOrderService;
         this._paymentOrderRepository = paymentOrderRepository;
         this._couponRepository = couponRepository;
+        this._createFriendCodeService = createFriendCodeService;
     }
-    public async execute(dto: CreateSubscriptionAsAdminDto): Promise<any> {
+    public async execute(dto: CreateSubscriptionAsAdminDto): Promise<CreateSubscriptionAsAdminResponse> {
         const customerId: CustomerId = new CustomerId(dto.customerId);
         const [customerSubscriptionHistory, customer, plan, paymentOrdersWithHumanIdCount, shippingZones] = await Promise.all([
             this.subscriptionRepository.findByCustomerId(customerId, dto.locale),
@@ -114,7 +127,7 @@ export class CreateSubscriptionAsAdmin {
         if (!!!customerShippingZone) throw new Error("La dirección ingresada no está dentro de ninguna de nuestras zonas de envío");
 
         const nextTwelveWeeks: Week[] = await this.weekRepository.findNextTwelveByFrequency(subscription.frequency, subscription.getFirstOrderShippingDate(customerShippingZone.getDayNumberOfWeek()), dto.purchaseDate); // Skip if it is not Sunday?
-        const orders: Order[] = subscription.createNewOrders(customerShippingZone, nextTwelveWeeks);
+        const orders: Order[] = subscription.createNewOrdersWithoutDependency(customerShippingZone, nextTwelveWeeks, dto.purchaseDate);
 
         const assignOrdersToPaymentOrdersDto: AssignOrdersToPaymentOrdersDto = {
             customerId: customer.id,
@@ -263,7 +276,7 @@ export class CreateSubscriptionAsAdmin {
         } else {
             newPaymentOrders[0]?.toBilled(orders, customer);
             newPaymentOrders[0] ? newPaymentOrders[0].addHumanId(paymentOrdersWithHumanIdCount) : "";
-            if (customerSubscriptionsQty === 0) createFriendCode.execute({ customer });
+            if (customerSubscriptionsQty === 0) this.createFriendCodeService.execute({ customer });
         }
 
         return { billedAmount: amountToBill, paymentIntent };
@@ -289,7 +302,7 @@ export class CreateSubscriptionAsAdmin {
         paymentOrder.shippingCost = hasFreeShipping ? 0 : customerShippingZoneCost;
         paymentOrder?.toBilled(orders, customer);
         paymentOrder ? paymentOrder.addHumanId(paymentOrdersWithHumanIdCount) : "";
-        if (customerSubscriptionsQty === 0) createFriendCode.execute({ customer });
+        if (customerSubscriptionsQty === 0) this.createFriendCodeService.execute({ customer });
 
         paymentIntent.amount = Math.round(amountToBill * 100)
         return { billedAmount: amountToBill, paymentIntent }
@@ -383,4 +396,13 @@ export class CreateSubscriptionAsAdmin {
     public get couponRepository(): ICouponRepository {
         return this._couponRepository;
     }
+
+    /**
+     * Getter createFriendCodeService
+     * @return {CreateFriendCode}
+     */
+    public get createFriendCodeService(): CreateFriendCode {
+        return this._createFriendCodeService;
+    }
+
 }
