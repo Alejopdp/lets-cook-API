@@ -121,7 +121,7 @@ export class CancelASubscription {
             new Date(),
             subscription.customer.id
         );
-        this.logRepository.save(log);
+        await this.logRepository.save(log);
     }
 
     /**

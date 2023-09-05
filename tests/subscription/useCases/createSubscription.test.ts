@@ -1,6 +1,6 @@
 jest.mock("../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService")
 import moment from "moment"
-import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
+import { CreateSubscription, CreateSubscriptionResponse } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
 import { CreateWallet } from "../../../src/bounded_contexts/operations/useCases/createWallet/createWallet"
 import { ChargeMoneyToWalletUseCase } from "../../../src/bounded_contexts/operations/useCases/chargeMoneyToWallet/chargeMoneyToWallet"
 import { ChargeMoneyToWallet } from "../../../src/bounded_contexts/operations/services/chargeMoneyToWallet/chargeMoneyToWallet"
@@ -279,7 +279,7 @@ describe("Create Subscription Use Case", () => {
             it("Should create a shipping date after the billing date of each payment order", async () => {
                 const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
                 orders.forEach(async (order) => {
-                    const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findById(order.paymentOrderId!, Locale.es)
+                    const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(order.paymentOrderId!)
                     expect(order.shippingDate.getTime()).toBeGreaterThan(paymentOrder!.billingDate.getTime())
                 })
             })
@@ -576,7 +576,7 @@ describe("Creating a subscription in different week days", () => {
         shippingCountry: "España",
         purchaseDate: new Date() // Change it before each test
     }
-    let subscriptionResult: any
+    let subscriptionResult: CreateSubscriptionResponse
 
 
     describe("Creating a susbcription for a shipping zone with shipping day on Tuesday", () => {
@@ -1243,7 +1243,7 @@ describe("Given a customer with wallet", () => {
             it("Should create a shipping date after the billing date of each payment order", async () => {
                 const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
                 orders.forEach(async (order) => {
-                    const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findById(order.paymentOrderId!, Locale.es)
+                    const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(order.paymentOrderId!)
                     expect(order.shippingDate.getTime()).toBeGreaterThan(paymentOrder!.billingDate.getTime())
                 })
             })

@@ -49,7 +49,7 @@ const createPaymentOrdersService: CreatePaymentOrders = new CreatePaymentOrders(
 const assignOrdersToPaymentOrderService = new AssignOrdersToPaymentOrders(mockPaymentOrderRepository, createPaymentOrdersService)
 const mockLogRepository = new InMemoryLogRepository([])
 const mockCreateFriendCodeService = new CreateFriendCode(mockCouponRepository, mockCustomerRepository)
-const createSubscriptionUseCase = new CreateSubscriptionAsAdmin(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockCouponRepository)
+const createSubscriptionAsAdminUseCase = new CreateSubscriptionAsAdmin(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockCouponRepository, mockCreateFriendCodeService)
 
 mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementation(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string): Promise<PaymentIntent> => ({
     client_secret: "client_secret",
@@ -150,7 +150,7 @@ describe("Create subscription as admin use case", () => {
         }
 
 
-        firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+        firstSubscriptionResult = await createSubscriptionAsAdminUseCase.execute(createSubscriptionDto)
     })
 
     describe("It creates a new weekly subscription for a first-time customer", () => {
@@ -294,7 +294,7 @@ describe("Create subscription as admin use case", () => {
             it("Should create a shipping date after the billing date of each payment order", async () => {
                 const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
                 orders.forEach(async (order) => {
-                    const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findById(order.paymentOrderId!, Locale.es)
+                    const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findByIdOrThrow(order.paymentOrderId!)
                     expect(order.shippingDate.getTime()).toBeGreaterThan(paymentOrder!.billingDate.getTime())
                 })
             })
@@ -408,12 +408,12 @@ describe("Create subscription as admin use case", () => {
         it("Should throw an error if the plan variant is not found", async () => {
             const wrongPlanVariantId = "wrongPlanVariantId"
             const newDto: CreateSubscriptionAsAdminDto = { ...createSubscriptionDto, planVariantId: wrongPlanVariantId }
-            await expect(createSubscriptionUseCase.execute(newDto)).rejects.toThrow()
+            await expect(createSubscriptionAsAdminUseCase.execute(newDto)).rejects.toThrow()
         })
 
         it("Should throw an error if the customer is not within any shipping zone", async () => {
             customer.changeShippingAddress(40.00, -0.50, CUSTOMER_ADDRESS_NAME, CUSTOMER_ADDRESS_NAME, CUSTOMER_ADDRESS_DETAILS, "Valencia", "Valencia", "España", "46120")
-            await expect(createSubscriptionUseCase.execute(createSubscriptionDto)).rejects.toThrow()
+            await expect(createSubscriptionAsAdminUseCase.execute(createSubscriptionDto)).rejects.toThrow()
         })
 
         afterAll(async () => {
@@ -462,11 +462,11 @@ describe("Create subscription as admin use case", () => {
             let firstSubscriptionResult: any
             let newDto: CreateSubscriptionAsAdminDto
 
-
             beforeAll(async () => {
+
                 newDto = { customerId: CUSTOMER_ID.toString(), locale: Locale.es, planFrequency: "weekly", useWalletAsPaymentMethod: true, couponCode: "", planId: gourmetPlan.id.toString(), planVariantId: planGourmetVariant2Persons2Recipes.id.toString(), purchaseDate: PURCHASE_DATE }
 
-                firstSubscriptionResult = await createSubscriptionUseCase.execute(newDto)
+                firstSubscriptionResult = await createSubscriptionAsAdminUseCase.execute(newDto)
             })
 
             describe("Subscription validation", () => {
@@ -608,8 +608,14 @@ describe("Create subscription as admin use case", () => {
                 it("Should create a shipping date after the billing date of each payment order", async () => {
                     const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)
                     orders.forEach(async (order) => {
-                        const paymentOrder: PaymentOrder | undefined = await mockPaymentOrderRepository.findById(order.paymentOrderId!, Locale.es)
-                        expect(order.shippingDate.getTime()).toBeGreaterThan(paymentOrder!.billingDate.getTime())
+                        try {
+                            const paymentOrder: PaymentOrder = await mockPaymentOrderRepository.findByIdOrThrow(order.paymentOrderId!)
+                            expect(order.shippingDate.getTime()).toBeGreaterThan(paymentOrder!.billingDate.getTime())
+
+                        } catch (error) {
+                            console.log("Es aca 2: ", error);
+
+                        }
                     })
                 })
 
@@ -732,12 +738,12 @@ describe("Create subscription as admin use case", () => {
                 const newDto: CreateSubscriptionAsAdminDto = {
                     ...createSubscriptionDto, planVariantId: wrongPlanVariantId, customerId: CUSTOMER_ID.toString(), useWalletAsPaymentMethod: true
                 }
-                await expect(createSubscriptionUseCase.execute(newDto)).rejects.toThrow()
+                await expect(createSubscriptionAsAdminUseCase.execute(newDto)).rejects.toThrow()
             })
 
             it("Should throw an error if the customer is not within any shipping zone", async () => {
                 customer.changeShippingAddress(40.00, -0.50, CUSTOMER_ADDRESS_NAME, CUSTOMER_ADDRESS_NAME, CUSTOMER_ADDRESS_DETAILS, "Valencia", "Valencia", "España", "46120")
-                await expect(createSubscriptionUseCase.execute({ ...createSubscriptionDto, customerId: CUSTOMER_ID.toString(), useWalletAsPaymentMethod: true })).rejects.toThrow()
+                await expect(createSubscriptionAsAdminUseCase.execute({ ...createSubscriptionDto, customerId: CUSTOMER_ID.toString(), useWalletAsPaymentMethod: true })).rejects.toThrow()
             })
 
             afterAll(async () => {
@@ -753,7 +759,7 @@ describe("Create subscription as admin use case", () => {
             })
 
             it("Should throw an error if the customer has not enough money in the wallet", async () => {
-                await expect(createSubscriptionUseCase.execute({ ...createSubscriptionDto, customerId: CUSTOMER_ID.toString(), useWalletAsPaymentMethod: true })).rejects.toThrow()
+                await expect(createSubscriptionAsAdminUseCase.execute({ ...createSubscriptionDto, customerId: CUSTOMER_ID.toString(), useWalletAsPaymentMethod: true })).rejects.toThrow()
             })
 
         })

@@ -20,7 +20,7 @@ export class InMemoryLogRepository implements ILogRepository {
     findAllBetweenDate(startDate: Date, endDate: Date): Promise<Log[]> {
         throw new Error("Method not implemented.");
     }
-    findAllByCustomer(customerId: CustomerId): Promise<Log[]> {
-        throw new Error("Method not implemented.");
+    public async findAllByCustomer(customerId: CustomerId): Promise<Log[]> {
+        return this.logs.filter(log => log.customerId.toString() === customerId.toString());
     }
 }
