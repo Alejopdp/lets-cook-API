@@ -7,13 +7,14 @@ import { GetRecipesForOrder } from "./getRecipesForOrder";
 import { GetRecipesForOrderController } from "./getRecipesForOrderController";
 import { GetRecipesForOrderPresenter } from "./getRecipesForOrderPresenter";
 
+export const getRecipesForOrderPresenter: GetRecipesForOrderPresenter = new GetRecipesForOrderPresenter(v3S3Service);
 export const getRecipesForOrder: GetRecipesForOrder = new GetRecipesForOrder(
     mongooseOrderRepository,
     mongooseRecipeRepository,
     mongooseSubscriptionRepository,
-    mongooseRateRepository
+    mongooseRateRepository,
+    getRecipesForOrderPresenter
 );
-export const getRecipesForOrderPresenter: GetRecipesForOrderPresenter = new GetRecipesForOrderPresenter(v3S3Service);
 export const getRecipesForOrderController: GetRecipesForOrderController = new GetRecipesForOrderController(
     getRecipesForOrder,
     getRecipesForOrderPresenter
