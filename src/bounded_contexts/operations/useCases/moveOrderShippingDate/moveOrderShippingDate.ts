@@ -89,7 +89,6 @@ export class MoveOrderShippingDate {
                     throw new Error(`No existe una semana que contenga la nueva billing date ${newPaymentOrderBillingDate}`);
 
                 if (!!!newPaymentOrder) {
-                    console.log("Esto tiene que aparecer una vez: ")
                     newPaymentOrder = new PaymentOrder(
                         order.shippingDate,
                         PaymentOrderStateFactory.createState(actualPaymentOrder.state.title),

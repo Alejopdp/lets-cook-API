@@ -86,8 +86,6 @@ export class ExportNextOrdersWithRecipesSelection {
 
         const subscriptions: Subscription[] = await this.subscriptionRepository.findByIdList(subscriptionsIds);
         const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findAll(Locale.es);
-        // const paymentOrders: PaymentOrder[] = await this.paymentOrderRepository.findByIdList(paymentOrdersIds);
-        // const shippingZones: ShippingZone[] = await this.shippingZoneRepository.findAll();
         const subscriptionMap: { [subscriptionId: string]: Subscription } = {};
         const customerOrdersMap: { [customerId: string]: Order[] } = {};
         const paymentOrderMap: { [paymentOrderId: string]: PaymentOrder } = {};

@@ -5,16 +5,17 @@ import { WeekId } from "../../../domain/week/WeekId";
 import { IWeekRepository } from "./IWeekRepository";
 
 const createMockWeeks = (): Week[] => {
-    let startDate = new Date("2023-07-17T00:00:00.000+00:00");
-    let endDate = new Date("2023-07-23T23:59:00.000+00:00");
+    let startDate = new Date("2021-01-04T00:00:00.000+00:00");
+    let endDate = new Date("2040-11-30T23:59:00.000+00:00");
     let weeks = [];
 
-    for (let i = 0; i < 500; i++) {
-        const week = new Week(new Date(startDate), new Date(endDate), new WeekId());
-
+    while (startDate.getTime() <= endDate.getTime()) {
+        const week = new Week(
+            new Date(startDate),
+            new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000),
+            new WeekId());
         weeks.push(week);
-        startDate.setDate(startDate.getDate() + 7);
-        endDate.setDate(endDate.getDate() + 7);
+        startDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
     }
 
     return weeks

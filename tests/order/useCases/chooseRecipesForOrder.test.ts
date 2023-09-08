@@ -22,7 +22,7 @@ import { CreatePaymentOrders } from "../../../src/bounded_contexts/operations/se
 import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/operations/services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
 import { ChooseRecipesForOrderDto } from "../../../src/bounded_contexts/operations/useCases/chooseRecipesForOrder/chooseRecipesForOrderDto";
-import { gourmetPlan, planVegetariano, planVegetarianoVariant2Persons2Recipes } from "../../mocks/plan";
+import { gourmetPlan, planVegetariano, planVegetarianoVariant2Persons2Recipes, planVegetarianoVariant2Persons3Recipes } from "../../mocks/plan";
 import { arepasDeCrhistian, bowlDeQuinoa, burgerHallouli, rissotoDeBoniato } from "../../mocks/recipe";
 import { CUSTOMER_ADDRESS_DETAILS, CUSTOMER_ADDRESS_NAME, CUSTOMER_EMAIL, CUSTOMER_FIRST_NAME, CUSTOMER_LAST_NAME, CUSTOMER_LATITUDE, CUSTOMER_LONGITUDE, CUSTOMER_PASSWORD, CUSTOMER_PHONE } from "../../mocks/customer"
 import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio";
@@ -37,6 +37,7 @@ import { MoveOrderShippingDate } from "../../../src/bounded_contexts/operations/
 import { MomentTimeService } from "../../../src/bounded_contexts/operations/application/timeService/momentTimeService";
 import { CancelASubscription } from "../../../src/bounded_contexts/operations/useCases/cancelASubscription/cancelASubscription";
 import { MockMailingListService } from "../../../src/bounded_contexts/operations/application/mailingListService/mockMailingListService";
+import { SwapSubscriptionPlan } from "../../../src/bounded_contexts/operations/useCases/swapSubscriptionPlan/swapSubscriptionPlan";
 
 
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -74,6 +75,8 @@ const customerShippingZoneRadio = new ShippingZoneRadio(valenciaPolygon.map((coo
 const MOCK_SHIPPING_COST = 10
 const customerShippingZone = ShippingZone.create("Valencia", "valencia", MOCK_SHIPPING_COST, "active", customerShippingZoneRadio, TUESDAY)
 mockShippingZoneRepository.save(customerShippingZone)
+
+const swapSubscriptionPlanUseCase = new SwapSubscriptionPlan(mockSubscriptionRepository, mockOrderRepository, mockPlanRepository, mockPaymentOrderRepository, mockCouponRepository, mockShippingZoneRepository, mockLogRepository, mockRecipeRatingRepository)
 
 const CUSTOMER_ID = new CustomerId()
 
@@ -1958,4 +1961,104 @@ describe("Given a new subscription with a skipped week", () => {
 
         // TODO_ Si soy usuario, debería elegir para el 22 (semana +2)
     })
+})
+
+describe("Given a new customer with a new subscription", () => {
+    const CUSTOMER_ID = new CustomerId()
+    let customer: Customer
+    let subscriptionResult: any
+    const PURCHASE_DATE: Date = new Date(2023, 7, 14, 17)
+
+    beforeAll(async () => {
+        customer = Customer.create(
+            CUSTOMER_EMAIL,
+            true,
+            "",
+            [],
+            0,
+            new Date(),
+            undefined,
+            undefined,
+            CUSTOMER_PASSWORD,
+            "active",
+            undefined,
+            undefined,
+            CUSTOMER_ID
+        )
+        await mockCustomerRepository.save(customer)
+
+        const createSubscriptionDto: CreateSubscriptionDto = {
+            customerId: CUSTOMER_ID.toString(),
+            planId: planVegetariano.id.toString(),
+            planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+            planFrequency: "weekly",
+            restrictionComment: "string",
+            stripePaymentMethodId: "",
+            couponId: undefined,
+            paymentMethodId: "string",
+            addressName: CUSTOMER_ADDRESS_NAME,
+            addressDetails: CUSTOMER_ADDRESS_DETAILS,
+            latitude: CUSTOMER_LATITUDE,
+            longitude: CUSTOMER_LONGITUDE,
+            customerFirstName: CUSTOMER_FIRST_NAME,
+            customerLastName: CUSTOMER_LAST_NAME,
+            phone1: CUSTOMER_PHONE,
+            locale: Locale.es,
+            shippingCity: "Alboraya",
+            shippingProvince: "Valencia",
+            shippingPostalCode: "46120",
+            shippingCountry: "España",
+            purchaseDate: PURCHASE_DATE
+        }
+        subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+
+    })
+
+    describe("When the customer swaps the plan before choosing recipes", () => {
+        beforeAll(async () => {
+            await swapSubscriptionPlanUseCase.execute({
+                nameOrEmailOfAdminExecutingRequest: "",
+                newPlanId: planVegetariano.id.toString(),
+                newPlanVariantId: planVegetarianoVariant2Persons3Recipes.id.toString(),
+                queryDate: new Date(2023, 7, 15, 4),
+                subscriptionId: subscriptionResult.subscription.id.toString(),
+            })
+        })
+
+        it("Should choose the old plan quantity of recipes", async () => {
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: true,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                choosingDate: new Date(2023, 7, 15, 15),
+                isInCheckout: false
+            }
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).resolves.not.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+
+            const firstOrder: Order = subscriptionResult.firstOrder
+
+            expect(firstOrder.recipeSelection.length).toBe(1)
+            expect(firstOrder.recipeSelection[0].quantity).toBe(2)
+        })
+
+        it("Should throw an error if the user chooses the old plan quantity", async () => {
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: true,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [{ quantity: 3, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                choosingDate: new Date(2023, 7, 15, 15),
+                isInCheckout: false
+            }
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+        })
+    })
+
 })

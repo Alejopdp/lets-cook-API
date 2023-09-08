@@ -60,7 +60,7 @@ class PayAllSubscriptions {
     public async execute(fromDate: Date, howManyTimes: number): Promise<void> {
         for (let i = 0; i < howManyTimes; i++) {
 
-            logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
+            if (process.env.NODE_ENV === "production") logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
             // const today: Date = new Date(2021, 11, 25);
             if (fromDate.getDay() !== 6) throw new Error("From date should be saturday")
             const today: Date = fromDate
@@ -124,14 +124,14 @@ class PayAllSubscriptions {
                 subscriptionOrderMap[order.subscriptionId.value] = order;
             }
 
-            logger.info(`${ordersToBill.length} orders to process`);
+            if (process.env.NODE_ENV === "production") logger.info(`${ordersToBill.length} orders to process`);
 
             // PAYMENT ORDERS BILLING
             for (let paymentOrderToBill of paymentOrdersToBill) {
                 if (paymentOrderToBill.state.title === "PAYMENT_ORDER_ACTIVE") {
                     const paymentOrderId: string = paymentOrderToBill.id.value as string;
                     try {
-                        logger.info(`Starting payment order ${paymentOrderId} processing`);
+                        if (process.env.NODE_ENV === "production") logger.info(`Starting payment order ${paymentOrderId} processing`);
                         const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
                         const shippingCost = customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost ?? 0;
                         const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some(
@@ -180,24 +180,24 @@ class PayAllSubscriptions {
                                 paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
                                 discountAmount: paymentOrderToBill.getDiscountAmountOrShippingCostIfHasFreeShipping(),
                             }
-                            logger.info(`${paymentOrderId} processing succeeded`);
+                            if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing succeeded`);
                             paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
                             notificationDtos.push(notificationDto);
                         } else {
-                            logger.info(`${paymentOrderId} processing failed`);
+                            if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing failed`);
                             paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
                         }
 
                         paymentOrderToBill.paymentIntentId = paymentIntent.id;
                     } catch (error: any) {
                         // @ts-ignore
-                        logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
+                        if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
                         paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
                         // @ts-ignore
                         paymentOrderToBill.paymentIntentId = error?.payment_intent?.id ?? "";
                     }
                 } else {
-                    logger.info(`Skipping payment order ${paymentOrderToBill.id.value} due to state ${paymentOrderToBill.state.title}`);
+                    if (process.env.NODE_ENV === "production") logger.info(`Skipping payment order ${paymentOrderToBill.id.value} due to state ${paymentOrderToBill.state.title}`);
                 }
             }
 
@@ -267,7 +267,7 @@ class PayAllSubscriptions {
                     );
 
                     if (!!existentPaymentOrder) {
-                        logger.info(`Existe una orden para el ${new Date(billingDateAndOrders[0])}`);
+                        if (process.env.NODE_ENV === "production") logger.info(`Existe una orden para el ${new Date(billingDateAndOrders[0])}`);
 
                         billingDateAndOrders[1].forEach((order) => existentPaymentOrder.addOrder(order));
                         // existentPaymentOrder.addOrder()
@@ -292,9 +292,9 @@ class PayAllSubscriptions {
                 }
             }
 
-            logger.info(`${paymentOrdersToBill.filter((po) => po.state.isBilled()).length} processed succesfully`);
-            logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).length} with payment rejected`);
-            logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).map((po) => po.id.value)}`);
+            if (process.env.NODE_ENV === "production") logger.info(`${paymentOrdersToBill.filter((po) => po.state.isBilled()).length} processed succesfully`);
+            if (process.env.NODE_ENV === "production") logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).length} with payment rejected`);
+            if (process.env.NODE_ENV === "production") logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).map((po) => po.id.value)}`);
 
             // await this.orderRepository.saveOrdersWithNewState(ordersToBill);
             await this.orderRepository.updateMany(ordersToBill);
@@ -307,7 +307,7 @@ class PayAllSubscriptions {
                     await this.notificationService.notifyCustomerAboutPaymentOrderBilled(dto);
                 }
             }
-            logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
+            if (process.env.NODE_ENV === "production") logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
 
             today.setDate(today.getDate() + 7)
         }
