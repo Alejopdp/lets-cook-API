@@ -24,8 +24,24 @@ export class MockRecipeRepository implements IRecipeRepository {
     public async findByIdList(recipesIds: RecipeId[]): Promise<Recipe[]> {
         return this.database.filter((recipe) => recipesIds.some((id) => id.equals(recipe.id)));
     }
-    findForOrder(order: Order, restrictionId?: RecipeRestrictionId): Promise<Recipe[]> {
-        throw new Error("Method not implemented.");
+    public async findForOrder(order: Order, restrictionId?: RecipeRestrictionId): Promise<Recipe[]> {
+
+        if (!!restrictionId) {
+            return this.database.filter((recipe) => {
+                return (
+                    recipe.relatedPlans.some((planId) => planId.equals(order.plan.id)) &&
+                    recipe.availableWeeks.some((week) => week.id.equals(order.week.id)) &&
+                    recipe.recipeVariants.some((variant) => variant.restriction.id.equals(restrictionId))
+                );
+            });
+        } else {
+            return this.database.filter((recipe) => {
+                return (
+                    recipe.relatedPlans.some((planId) => planId.equals(order.plan.id)) &&
+                    recipe.availableWeeks.some((week) => week.id.equals(order.week.id))
+                );
+            });
+        }
     }
     findNextWeekRecipes(): Promise<Recipe[]> {
         throw new Error("Method not implemented.");

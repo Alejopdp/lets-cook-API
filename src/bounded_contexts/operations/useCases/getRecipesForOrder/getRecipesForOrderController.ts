@@ -19,10 +19,10 @@ export class GetRecipesForOrderController extends BaseController {
             const dto: GetRecipesForOrderDto = {
                 orderId: this.req.params.orderId,
                 locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
+                queryDate: new Date()
             };
 
-            const { recipes, order, subscription, recipeRatings, averageRecipeRatingsMap } = await this.getRecipesForOrder.execute(dto);
-            const presented = await this.getRecipesForOrderPresenter.present(recipes, order, subscription, dto.locale, recipeRatings, averageRecipeRatingsMap);
+            const presented = await this.getRecipesForOrder.execute(dto);
 
             return this.ok(this.res, presented);
         } catch (error: any) {

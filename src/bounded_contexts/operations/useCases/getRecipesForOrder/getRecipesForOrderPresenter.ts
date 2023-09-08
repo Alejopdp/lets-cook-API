@@ -8,13 +8,49 @@ import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { Week } from "../../domain/week/Week";
 
+export type GetRecipesForOrderPresenterResponse = {
+    recipes: PresentedRecipe[];
+    nextDeliveryLabel: string;
+    maxRecipesQty: number;
+    subscriptionId: string;
+    actualChosenRecipes: any[];
+    planId: string;
+};
+
+type PresentedRecipe = {
+    id: string;
+    name: string;
+    sku: string;
+    shortDescription: string;
+    longDescription: string;
+    cookDuration: string;
+    cookDurationNumberValue: number;
+    nutritionalInfo: any;
+    difficultyLevel: string;
+    orderPriority: number | undefined;
+    imageUrl: string;
+    imagesUrls: string[];
+    weight: string;
+    weightNumberValue: number;
+    backOfficeTags: string[];
+    imageTags: string[];
+    availableWeeks: any[];
+    availableMonths: string[];
+    relatedPlans: string[];
+    tools: string[];
+    recipeVariants: any[];
+    userRating: number;
+    averageRating: number;
+};
+
+
 export class GetRecipesForOrderPresenter {
     private _storageService: IStorageService;
 
     constructor(storageService: IStorageService) {
         this._storageService = storageService;
     }
-    public async present(recipes: Recipe[], order: Order, subscription: Subscription, locale: Locale, recipeRatings: RecipeRating[], averageRecipeRatingsMap: Map<string, number>): Promise<any> {
+    public async present(recipes: Recipe[], order: Order, subscription: Subscription, locale: Locale, recipeRatings: RecipeRating[], averageRecipeRatingsMap: Map<string, number>): Promise<GetRecipesForOrderPresenterResponse> {
         const presentedRecipes = [];
         const recipeRateMap = new Map<string, number>();
 
@@ -27,10 +63,10 @@ export class GetRecipesForOrderPresenter {
         }
 
         return {
-            recipes: presentedRecipes.sort((r1, r2) => r1.orderPriority - r2.orderPriority),
+            recipes: presentedRecipes.sort((r1, r2) => r1.orderPriority! - r2.orderPriority!),
             nextDeliveryLabel: order.getHumanShippmentDay(locale),
-            maxRecipesQty: subscription.getMaxRecipesQty(),
-            subscriptionId: subscription.id.value,
+            maxRecipesQty: order.getNumberOfRecipesOrReturn0(),
+            subscriptionId: subscription.id.toString(),
             actualChosenRecipes: order.recipeSelection.map((recipeSelection) => ({
                 recipeId: recipeSelection.recipe.id.value,
                 quantity: recipeSelection.quantity,
@@ -40,7 +76,7 @@ export class GetRecipesForOrderPresenter {
         };
     }
 
-    private async presentRecipe(recipe: Recipe, subscription: Subscription, recipeRating: number, averageRecipeRatingsMap: Map<string, number>): Promise<any> {
+    private async presentRecipe(recipe: Recipe, subscription: Subscription, recipeRating: number, averageRecipeRatingsMap: Map<string, number>): Promise<PresentedRecipe> {
         const recipeUrl = recipe.getMainImageUrl() ? await this.storageService.getPresignedUrlForFile(recipe.getMainImageUrl()) : "";
 
         const recipeImages: string[] = [];
@@ -50,7 +86,7 @@ export class GetRecipesForOrderPresenter {
             recipeImages.push(presignedUrl);
         }
         return {
-            id: recipe.id.value,
+            id: recipe.id.toString(),
             name: recipe.recipeGeneralData.name,
             sku: recipe.recipeGeneralData.recipeSku.code,
             shortDescription: recipe.recipeGeneralData.recipeDescription.shortDescription,
@@ -75,7 +111,7 @@ export class GetRecipesForOrderPresenter {
                 };
             }),
             availableMonths: recipe.availableMonths,
-            relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.value),
+            relatedPlans: recipe.relatedPlans.map((planId: PlanId) => planId.toString()),
             tools: recipe.recipeTools,
             recipeVariants: recipe.recipeVariants
                 .filter((variant) => variant.restriction.id.equals(subscription.restriction?.id) || !!!subscription.restriction)
