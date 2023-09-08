@@ -49,7 +49,7 @@ export class PayAllSubscriptions {
     }
 
     public async execute(dto: PayAllSubscriptionsDto): Promise<void> {
-        logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
+        if (process.env.NODE_ENV === "production") logger.info(`*********************************** STARTING BILLING JOB ***********************************`);
         const today: Date = dto.executionDate ? new Date(dto.executionDate) : new Date()
         today.setHours(0, 0, 0, 0);
         const customers: Customer[] = await this.customerRepository.findAll();
@@ -110,14 +110,14 @@ export class PayAllSubscriptions {
             subscriptionOrderMap[order.subscriptionId.value] = order;
         }
 
-        logger.info(`${ordersToBill.length} orders to process`);
+        if (process.env.NODE_ENV === "production") logger.info(`${ordersToBill.length} orders to process`);
 
         // PAYMENT ORDERS BILLING
         for (let paymentOrderToBill of paymentOrdersToBill) {
-            if (paymentOrderToBill.state.title === "PAYMENT_ORDER_ACTIVE") {
+            if (paymentOrderToBill.isActive()) {
                 const paymentOrderId: string = paymentOrderToBill.id.value as string;
                 try {
-                    logger.info(`Starting payment order ${paymentOrderId} processing`);
+                    if (process.env.NODE_ENV === "production") logger.info(`Starting payment order ${paymentOrderId} processing`);
                     const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
                     const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some(
                         (order) => order.hasFreeShipping
@@ -147,23 +147,23 @@ export class PayAllSubscriptions {
                             paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
                             discountAmount: paymentOrderToBill.getDiscountAmountOrShippingCostIfHasFreeShipping(),
                         }
-                        logger.info(`${paymentOrderId} processing succeeded`);
+                        if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing succeeded`);
                         paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
                         notificationDtos.push(notificationDto);
                     } else {
-                        logger.info(`${paymentOrderId} processing failed`);
+                        if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing failed`);
                         paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
                     }
 
                     paymentOrderToBill.paymentIntentId = paymentIntent.id;
                 } catch (error: any) {
                     console.log("Error: ", error)
-                    logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
+                    if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
                     paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
                     paymentOrderToBill.paymentIntentId = error?.payment_intent?.id ?? "";
                 }
             } else {
-                logger.info(`Skipping payment order ${paymentOrderToBill.id.value} due to state ${paymentOrderToBill.state.title}`);
+                if (process.env.NODE_ENV === "production") logger.info(`Skipping payment order ${paymentOrderToBill.id.value} due to state ${paymentOrderToBill.state.title}`);
             }
         }
 
@@ -233,7 +233,7 @@ export class PayAllSubscriptions {
                 );
 
                 if (!!existentPaymentOrder) {
-                    logger.info(`Existe una orden para el ${new Date(billingDateAndOrders[0])}`);
+                    if (process.env.NODE_ENV === "production") logger.info(`Existe una orden para el ${new Date(billingDateAndOrders[0])}`);
 
                     billingDateAndOrders[1].forEach((order) => existentPaymentOrder.addOrder(order));
                     // existentPaymentOrder.addOrder()
@@ -266,9 +266,9 @@ export class PayAllSubscriptions {
             order.couponCode = sub.coupon?.couponCode ?? ""
         }
 
-        logger.info(`${paymentOrdersToBill.filter((po) => po.state.isBilled()).length} processed succesfully`);
-        logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).length} with payment rejected`);
-        logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).map((po) => po.id.value)}`);
+        if (process.env.NODE_ENV === "production") logger.info(`${paymentOrdersToBill.filter((po) => po.state.isBilled()).length} processed succesfully`);
+        if (process.env.NODE_ENV === "production") logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).length} with payment rejected`);
+        if (process.env.NODE_ENV === "production") logger.info(`${paymentOrdersToBill.filter((po) => po.state.isRejected()).map((po) => po.id.value)}`);
 
         // await this.orderRepository.saveOrdersWithNewState(ordersToBill);
         await this.orderRepository.updateMany(ordersToBill);
@@ -281,7 +281,7 @@ export class PayAllSubscriptions {
                 await this.notificationService.notifyCustomerAboutPaymentOrderBilled(dto);
             }
         }
-        logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
+        if (process.env.NODE_ENV === "production") logger.info(`*********************************** BILLING JOB ENDED ***********************************`);
     }
 
     public getTotalAmountToBill(shippingCost: number, planAmount: number, discountAmount: number): number {

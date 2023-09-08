@@ -82,8 +82,6 @@ export class InMemoryPaymentOrderRepository implements IPaymentOrderRepository {
         return this.paymentOrders.filter((paymentOrder) => paymentOrder.customerId.equals(customerId) && billingDateList.some(bd => bd.getTime() === paymentOrder.billingDate.getTime()));
     }
     public async findByBillingDate(billingDate: Date): Promise<PaymentOrder[]> {
-        console.log("Searching date: ", billingDate.toISOString())
-
         return this.paymentOrders.filter((paymentOrder) => paymentOrder.billingDate.getTime() === billingDate.getTime());
     }
     public async findByIdList(paymentOrdersIds: PaymentOrderId[]): Promise<PaymentOrder[]> {

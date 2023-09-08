@@ -67,9 +67,6 @@ mockPaymentService.paymentIntent.mockImplementation(async (amount: number, payme
 }))
 
 
-const CUSTOMER_FIRST_NAME = "Alejo"
-const CUSTOMER_LAST_NAME = "Scotti"
-const CUSTOMER_PHONE = "634135817"
 const CUSTOMER_ADDRESS_NAME = "Vicent Blasco Ibañez 5"
 const CUSTOMER_ADDRESS_DETAILS = "Bloque 7, Escalera 2, Puerta 9"
 const CUSTOMER_LATITUDE = 39.4869251

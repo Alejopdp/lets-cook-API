@@ -1,7 +1,6 @@
 import { Order } from "../../domain/order/Order";
 import { OrderId } from "../../domain/order/OrderId";
 import { Recipe } from "../../domain/recipe/Recipe";
-import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
 import { Subscription } from "../../domain/subscription/Subscription";
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
@@ -9,20 +8,24 @@ import { IRecipeRepository } from "../../infra/repositories/recipe/IRecipeReposi
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { GetRecipesForOrderDto } from "./getRecipesForOrderDto";
 import { performance } from "perf_hooks";
+import { GetRecipesForOrderPresenter, GetRecipesForOrderPresenterResponse } from "./getRecipesForOrderPresenter";
 
 export class GetRecipesForOrder {
     private _orderRepository: IOrderRepository;
     private _recipeRepository: IRecipeRepository;
     private _subscriptionRepository: ISubscriptionRepository;
     private _recipeRatingRepository: IRateRepository
+    private _getRecipesForOrderPresenter: GetRecipesForOrderPresenter;
 
-    constructor(orderRepository: IOrderRepository, recipeRepository: IRecipeRepository, subscriptionRepository: ISubscriptionRepository, recipeRatingRepository: IRateRepository) {
+    constructor(orderRepository: IOrderRepository, recipeRepository: IRecipeRepository, subscriptionRepository: ISubscriptionRepository, recipeRatingRepository: IRateRepository, getRecipesForOrderPresenter: GetRecipesForOrderPresenter) {
         this._orderRepository = orderRepository;
         this._recipeRepository = recipeRepository;
         this._subscriptionRepository = subscriptionRepository;
         this._recipeRatingRepository = recipeRatingRepository;
+        this._getRecipesForOrderPresenter = getRecipesForOrderPresenter;
     }
-    public async execute(dto: GetRecipesForOrderDto): Promise<{ recipes: Recipe[]; order: Order; subscription: Subscription, recipeRatings: RecipeRating[], averageRecipeRatingsMap: Map<string, number> }> {
+
+    public async execute(dto: GetRecipesForOrderDto): Promise<GetRecipesForOrderPresenterResponse> {
         const orderId: OrderId = new OrderId(dto.orderId);
         const order: Order = await this.orderRepository.findByIdOrThrow(orderId, dto.locale);
         const subscription: Subscription = await this.subscriptionRepository.findByIdOrThrow(order.subscriptionId, dto.locale);
@@ -48,7 +51,7 @@ export class GetRecipesForOrder {
             ))
         );
 
-        return { recipes, order, subscription, recipeRatings: customerRecipesRatings, averageRecipeRatingsMap };
+        return this.getRecipesForOrderPresenter.present(recipes, order, subscription, dto.locale, customerRecipesRatings, averageRecipeRatingsMap);
     }
 
     /**
@@ -82,5 +85,14 @@ export class GetRecipesForOrder {
     public get recipeRatingRepository(): IRateRepository {
         return this._recipeRatingRepository;
     }
+
+    /**
+     * Getter getRecipesForOrderPresenter
+     * @return {GetRecipesForOrderPresenter}
+     */
+    public get getRecipesForOrderPresenter(): GetRecipesForOrderPresenter {
+        return this._getRecipesForOrderPresenter;
+    }
+
 
 }

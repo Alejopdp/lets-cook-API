@@ -24,7 +24,7 @@ import { CreateFriendCode } from "../../../src/bounded_contexts/operations/servi
 import { CreatePaymentOrders } from "../../../src/bounded_contexts/operations/services/createPaymentOrders/createPaymentOrders";
 import { AssignOrdersToPaymentOrders } from "../../../src/bounded_contexts/operations/services/assignOrdersToPaymentOrders/assignOrdersToPaymentOrders";
 import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
-import { gourmetPlan, planGourmetVariant2Persons2Recipes, planVegetariano, planVegetarianoVariant2Persons2Recipes, planVegetarianoVariant2Persons4Recipes } from "../../mocks/plan";
+import { gourmetPlan, planGourmetVariant2Persons2Recipes, planVegetariano, planVegetarianoVariant2Persons2Recipes, planVegetarianoVariant2Persons3Recipes, planVegetarianoVariant2Persons4Recipes, planVegetarianoVariant4Persons2Recipes } from "../../mocks/plan";
 import { arepasDeCrhistian, bowlDeQuinoa, burgerHallouli, rissotoDeBoniato } from "../../mocks/recipe";
 import { CUSTOMER_ADDRESS_DETAILS, CUSTOMER_ADDRESS_NAME, CUSTOMER_EMAIL, CUSTOMER_FIRST_NAME, CUSTOMER_LAST_NAME, CUSTOMER_LATITUDE, CUSTOMER_LONGITUDE, CUSTOMER_PASSWORD, CUSTOMER_PHONE } from "../../mocks/customer"
 import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio";
@@ -41,6 +41,7 @@ import { LogType } from "../../../src/bounded_contexts/operations/domain/custome
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService"
 import { PayAllSubscriptions } from "../../../src/bounded_contexts/operations/services/payAllSubscriptions/payAllSubscriptions"
+import { SwapSubscriptionPlan } from "../../../src/bounded_contexts/operations/useCases/swapSubscriptionPlan/swapSubscriptionPlan"
 
 
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -74,6 +75,7 @@ const chooseRecipesForOrderUseCase = new ChooseRecipesForOrder(mockOrderReposito
 const cancelASubscriptionUseCase = new CancelASubscription(mockSubscriptionRepository, mockOrderRepository, mockPaymentOrderRepository, mockNotificationService, mockMailingListService, mockLogRepository, mockRecipeRatingRepository)
 const createSubscriptionAsAdminUseCase = new CreateSubscriptionAsAdmin(mockCustomerRepository, mockSubscriptionRepository, mockShippingZoneRepository, mockPlanRepository, mockWeekRepository, mockOrderRepository, mockPaymentService, mockNotificationService, assignOrdersToPaymentOrderService, mockPaymentOrderRepository, mockCouponRepository, mockCreateFriendCodeService)
 const payAllSubscriptions = new PayAllSubscriptions(mockCustomerRepository, mockOrderRepository, mockPaymentOrderRepository, mockPaymentService, mockSubscriptionRepository, mockWeekRepository, mockShippingZoneRepository, mockNotificationService)
+const swapSubscriptionPlanUseCase = new SwapSubscriptionPlan(mockSubscriptionRepository, mockOrderRepository, mockPlanRepository, mockPaymentOrderRepository, mockCouponRepository, mockShippingZoneRepository, mockLogRepository, mockRecipeRatingRepository)
 
 const valenciaPolygon = [
     [39.75, -0.78],  // Noroeste
@@ -92,6 +94,15 @@ mockPaymentService.createPaymentIntentAndSetupForFutureUsage.mockImplementation(
     status: "succeeded",
     amount: 0
 }))
+
+//@ts-ignore
+mockPaymentService.paymentIntent.mockImplementation(async (): Promise<PaymentIntent> => ({
+    status: "succeeded",
+    client_secret: "client_secret",
+    id: "payment_intent_id",
+    amount: 0
+}))
+
 
 describe('Cancel subscriptiont tests', () => {
     describe("Given a user with an active subscription and recipes chosen", () => {
@@ -425,14 +436,6 @@ describe('Cancel subscriptiont tests', () => {
                     useWalletAsPaymentMethod: false
                 }
 
-                //@ts-ignore
-                mockPaymentService.paymentIntent.mockImplementationOnce(async (): Promise<PaymentIntent> => ({
-                    status: "succeeded",
-                    client_secret: "client_secret",
-                    id: "payment_intent_id",
-                    amount: 0
-                }))
-
                 secondSubscriptionResult = await createSubscriptionAsAdminUseCase.execute(createSecondSubscriptionDto)
                 await cancelASubscriptionUseCase.execute({ cancellationComment: "", cancellationReason: "", subscriptionId: secondSubscriptionResult.subscription.id.toString(), nameOrEmailOfAdminExecutingRequest: "", queryDate: SECOND_SUBSCRIPTION_CANCELLATIOIN_DATE })
             })
@@ -549,14 +552,6 @@ describe('Cancel subscriptiont tests', () => {
             customer.addPaymentMethod(CUSTOMER_PAYMENT_METHOD)
 
 
-            //@ts-ignore
-            mockPaymentService.paymentIntent.mockImplementationOnce(async (): Promise<PaymentIntent> => ({
-                status: "succeeded",
-                client_secret: "client_secret",
-                id: "payment_intent_id",
-                amount: 0
-            }))
-
             firstSubscriptionResult = await createSubscriptionAsAdminUseCase.execute({
                 couponCode: "",
                 customerId: CUSTOMER_ID.toString(),
@@ -578,9 +573,21 @@ describe('Cancel subscriptiont tests', () => {
             }
 
             firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            await swapSubscriptionPlanUseCase.execute({
+                nameOrEmailOfAdminExecutingRequest: "",
+                newPlanId: planVegetariano.id.toString(),
+                newPlanVariantId: planVegetarianoVariant4Persons2Recipes.id.toString(),
+                queryDate: new Date(2022, 6, 22, 10, 50),
+                subscriptionId: firstSubscriptionResult.subscription.id.toString()
+            })
 
-            // Swap de variante 32 a 42
-            // Swap de variante de Admin de 42 a 32
+            await swapSubscriptionPlanUseCase.execute({
+                nameOrEmailOfAdminExecutingRequest: "Alejo Scotti",
+                newPlanId: planVegetariano.id.toString(),
+                newPlanVariantId: planVegetarianoVariant2Persons3Recipes.id.toString(),
+                queryDate: new Date(2022, 6, 22, 11, 50),
+                subscriptionId: firstSubscriptionResult.subscription.id.toString()
+            })
 
             await payAllSubscriptions.execute({ executionDate: new Date(2022, 6, 23, 3, 50) })
 
@@ -658,13 +665,23 @@ describe('Cancel subscriptiont tests', () => {
             await payAllSubscriptions.execute({ executionDate: new Date(2022, 9, 8, 3, 50) })
             await payAllSubscriptions.execute({ executionDate: new Date(2022, 9, 15, 3, 50) })
 
+
+
+            await swapSubscriptionPlanUseCase.execute({
+                nameOrEmailOfAdminExecutingRequest: "",
+                newPlanId: gourmetPlan.id.toString(),
+                newPlanVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                queryDate: new Date(2022, 9, 20, 11),
+                subscriptionId: firstSubscriptionResult.subscription.id.toString()
+            })
+
             await cancelASubscriptionUseCase.execute({ cancellationComment: "", cancellationReason: "", subscriptionId: firstSubscriptionResult.subscription.id.toString(), nameOrEmailOfAdminExecutingRequest: "", queryDate: new Date(2022, 9, 20, 12) })
 
             createSubscriptionDto = {
                 ...createSubscriptionDto,
                 planId: planVegetariano.id.toString(),
                 planVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
-                purchaseDate: new Date(2022, 9, 20, 17, 5)
+                purchaseDate: new Date(2022, 9, 20, 19, 5)
             }
 
             firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
@@ -672,6 +689,15 @@ describe('Cancel subscriptiont tests', () => {
             // SWAP DE PLAN completo
 
             await payAllSubscriptions.execute({ executionDate: new Date(2022, 9, 22, 4, 10) })
+
+            await swapSubscriptionPlanUseCase.execute({
+                nameOrEmailOfAdminExecutingRequest: "",
+                newPlanId: gourmetPlan.id.toString(),
+                newPlanVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                queryDate: new Date(2022, 9, 28, 11),
+                subscriptionId: firstSubscriptionResult.subscription.id.toString()
+            })
+
             await payAllSubscriptions.execute({ executionDate: new Date(2022, 9, 29, 4, 10) })
             await cancelASubscriptionUseCase.execute({ cancellationComment: "", cancellationReason: "", subscriptionId: firstSubscriptionResult.subscription.id.toString(), nameOrEmailOfAdminExecutingRequest: "", queryDate: new Date(2022, 10, 4, 16) })
             //
@@ -763,14 +789,6 @@ describe('Cancel subscriptiont tests', () => {
             await cancelASubscriptionUseCase.execute({ cancellationComment: "", cancellationReason: "", queryDate: new Date(2023, 7, 4, 9), subscriptionId: seventhSubscriptionResult.subscription.id.toString() })
 
             await payAllSubscriptions.execute({ executionDate: new Date(2023, 7, 5, 3) })
-
-            //@ts-ignore
-            mockPaymentService.paymentIntent.mockImplementationOnce(async (): Promise<PaymentIntent> => ({
-                status: "succeeded",
-                client_secret: "client_secret",
-                id: "payment_intent_id",
-                amount: 0
-            }))
 
             const eightSubscriptionResult = await createSubscriptionAsAdminUseCase.execute({
                 customerId: CUSTOMER_ID.toString(),
