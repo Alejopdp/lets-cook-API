@@ -55,7 +55,7 @@ describe("Update Wallet Use Case", () => {
             await createWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 27.99, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE })
         })
 
-        describe("When the user updates the amount to charge to an amount less than 0.5", () => {
+        describe("When the user updates the amount to charge to an amount less than 5", () => {
             it("Should throw an error", async () => {
                 await expect(() => updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 0.4, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })).rejects.toThrow()
             })
@@ -154,6 +154,21 @@ describe("Update Wallet Use Case", () => {
 
             it("Should not throw an error if it is enabling it", async () => {
                 await expect(updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 8, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })).resolves.not.toThrow()
+            })
+        })
+
+        describe("When the user enables the charging", () => {
+
+            beforeAll(async () => {
+                await updateWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 8, paymentMethodForCharging: customerPaymentMethod.id.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, isEnabled: true })
+            })
+
+            it("Should enable the charging", () => {
+                expect(customer.wallet?.isEnabled).toBe(true)
+            })
+
+            it("Should create a wallet movement log", () => {
+                expect(customer.wallet?.walletMovements.filter(log => log.type === WalletMovementLogType.ENABLE_WALLET).length).toBe(2)  // TODO: Remove dependency with previous case
             })
         })
 
