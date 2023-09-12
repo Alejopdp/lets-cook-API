@@ -15,20 +15,29 @@ export class InMemoryCouponRepository implements ICouponRepository {
     saveMany(coupons: Coupon[]): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    findAll(): Promise<Coupon[]> {
-        throw new Error("Method not implemented.");
+    public async findAll(): Promise<Coupon[]> {
+        return this.coupons;
     }
-    findById(couponId: CouponId): Promise<Coupon | undefined> {
-        throw new Error("Method not implemented.");
+
+    public async findById(couponId: CouponId): Promise<Coupon | undefined> {
+        return this.coupons.find((coupon) => coupon.id.equals(couponId));
     }
-    findByIdOrThrow(couponId: CouponId): Promise<Coupon> {
-        throw new Error("Method not implemented.");
+
+    public async findByIdOrThrow(couponId: CouponId): Promise<Coupon> {
+        const coupon: Coupon | undefined = await this.findById(couponId);
+
+        if (!coupon) throw new Error("Coupon not found");
+
+        return coupon;
     }
-    findByCode(couponCode: string): Promise<Coupon | undefined> {
-        throw new Error("Method not implemented.");
+
+    public async findByCode(couponCode: string): Promise<Coupon | undefined> {
+        return this.coupons.find((coupon) => coupon.couponCode === couponCode);
     }
-    findActiveByCode(couponCode: string): Promise<Coupon | undefined> {
-        throw new Error("Method not implemented.");
+
+
+    public async findActiveByCode(couponCode: string): Promise<Coupon | undefined> {
+        return this.coupons.find((coupon) => coupon.couponCode === couponCode && coupon.state === "ACTIVE");
     }
     deleteByCode(couponCode: string): Promise<void> {
         throw new Error("Method not implemented.");

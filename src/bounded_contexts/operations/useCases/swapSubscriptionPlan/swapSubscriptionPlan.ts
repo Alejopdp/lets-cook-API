@@ -19,6 +19,7 @@ import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
 import { IRateRepository } from "../../infra/repositories/rate/IRateRepository";
 import { RecipeRating } from "../../domain/recipeRating/RecipeRating";
+import Big from "big.js";
 
 export class SwapSubscriptionPlan {
     private _subscriptionRepository: ISubscriptionRepository;
@@ -101,6 +102,8 @@ export class SwapSubscriptionPlan {
             for (let paymentOrder of paymentOrders) {
                 var oldPlanDiscount = coupon?.getDiscount(oldPlan, oldPlanVariantId, paymentOrder.shippingCost) ?? 0;
                 var newPlanDiscount = coupon?.getDiscount(newPlan, newPlanVariantId, paymentOrder.shippingCost) ?? 0;
+
+                // if (Number(new Big(subscription.price).minus(new Big(newPlanDiscount))) < 0) newPlanDiscount = subscription.price;
 
                 paymentOrder.updateAmountsAfterSwappingPlan(oldSubscriptionPrice, subscription.getPrice(), oldPlanDiscount, newPlanDiscount);
             }

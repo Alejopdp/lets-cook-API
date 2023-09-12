@@ -10,16 +10,20 @@ import { PlanVariantId } from "../plan/PlanVariant/PlanVariantId";
 import { Customer } from "../customer/Customer";
 import { CustomerId } from "../customer/CustomerId";
 import { CouponState } from "./CouponState";
+import { CouponRequirementType } from "./CouponRequirementType";
+import { CouponApplicationType } from "./CouponApplicationType";
+import { MaxChargeQtyType } from "./CouponMaxChargeQtyType";
+import Big from "big.js";
 
 export class Coupon extends Entity<Coupon> {
     private _couponCode: string;
     private _type: ICouponType;
-    private _minRequireType: string;
+    private _minRequireType: CouponRequirementType;
     private _minRequireValue: number;
-    private _productsForApplyingType: string;
+    private _productsForApplyingType: CouponApplicationType;
     private _productsForApplyingValue: PlanId[];
     private _limites: ILimitAplication[];
-    private _maxChargeQtyType: string;
+    private _maxChargeQtyType: MaxChargeQtyType;
     private _maxChargeQtyValue: number;
     private _startDate: Date;
     private _endDate?: Date;
@@ -30,12 +34,12 @@ export class Coupon extends Entity<Coupon> {
     protected constructor(
         couponCode: string,
         type: ICouponType,
-        minRequireType: string,
+        minRequireType: CouponRequirementType,
         minRequireValue: number,
-        productsForApplyingType: string,
+        productsForApplyingType: CouponApplicationType,
         productsForApplyingValue: PlanId[],
         limites: ILimitAplication[],
-        maxChargeQtyType: string,
+        maxChargeQtyType: MaxChargeQtyType,
         maxChargeQtyValue: number,
         startDate: Date,
         state: CouponState,
@@ -64,12 +68,12 @@ export class Coupon extends Entity<Coupon> {
     public static create(
         couponCode: string,
         type: ICouponType,
-        minRequireType: string,
+        minRequireType: CouponRequirementType,
         minRequireValue: number,
-        productsForApplyingType: string,
+        productsForApplyingType: CouponApplicationType,
         productsForApplyingValue: PlanId[],
         limites: ILimitAplication[],
-        maxChargeQtyType: string,
+        maxChargeQtyType: MaxChargeQtyType,
         maxChargeQtyValue: number,
         startDate: Date,
         state: CouponState,
@@ -141,12 +145,8 @@ export class Coupon extends Entity<Coupon> {
 
     public getDiscount(plan: Plan, planVariantId: PlanVariantId, shippingCost: number): number {
         const price = plan.getPlanVariantPrice(planVariantId);
-        if (this.type.type === "free") return shippingCost;
-        else if (this.type.type === "percent") {
-            return (price * this.type.value) / 100;
-        } else {
-            return this.type.value;
-        }
+
+        return this.type.getDiscountAmount(price, shippingCost);
     }
 
     public isFreeShippingCoupon(): boolean {
@@ -193,10 +193,10 @@ export class Coupon extends Entity<Coupon> {
     }
 
     /**
-     * Getter planSku
-     * @return {number}
+     * Getter minRequireType
+     * @return {CouponRequirementType}
      */
-    public get minRequireType(): string {
+    public get minRequireType(): CouponRequirementType {
         return this._minRequireType;
     }
 
@@ -209,10 +209,10 @@ export class Coupon extends Entity<Coupon> {
     }
 
     /**
-     * Getter imageUrl
-     * @return {PlanId}
+     * Getter productsForApplyingType
+     * @return {CouponApplicationType}
      */
-    public get productsForApplyingType(): string {
+    public get productsForApplyingType(): CouponApplicationType {
         return this._productsForApplyingType;
     }
 
@@ -233,10 +233,10 @@ export class Coupon extends Entity<Coupon> {
     }
 
     /**
-     * Getter isActive
-     * @return {number}
+     * Getter maxChargeQtyType
+     * @return {MaxChargeQtyType}
      */
-    public get maxChargeQtyType(): string {
+    public get maxChargeQtyType(): MaxChargeQtyType {
         return this._maxChargeQtyType;
     }
 
@@ -306,9 +306,9 @@ export class Coupon extends Entity<Coupon> {
 
     /**
      * Setter planSku
-     * @param {String} value
+     * @param {CouponRequirementType} value
      */
-    public set minRequireType(value: string) {
+    public set minRequireType(value: CouponRequirementType) {
         this._minRequireType = value;
     }
 
@@ -321,10 +321,10 @@ export class Coupon extends Entity<Coupon> {
     }
 
     /**
-     * Setter isActive
-     * @param {string} value
+     * Setter productsForApplyingType
+     * @param {CouponApplicationType} value
      */
-    public set productsForApplyingType(value: string) {
+    public set productsForApplyingType(value: CouponApplicationType) {
         this._productsForApplyingType = value;
     }
 
@@ -346,10 +346,10 @@ export class Coupon extends Entity<Coupon> {
     }
 
     /**
-     * Setter availablePlanFrecuencies
-     * @param {string} value
+     * Setter maxChargeQtyType
+     * @param {MaxChargeQtyType} value
      */
-    public set maxChargeQtyType(value: string) {
+    public set maxChargeQtyType(value: MaxChargeQtyType) {
         this._maxChargeQtyType = value;
     }
 

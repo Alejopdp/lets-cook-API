@@ -1,13 +1,10 @@
-import { logger } from "../../../../../config";
 import { IStorageService } from "../../application/storageService/IStorageService";
-import { Locale } from "../../domain/locale/Locale";
 import { Coupon } from "../../domain/cupons/Cupon";
 import { PlanId } from "../../domain/plan/PlanId";
 import { ICouponType } from "../../domain/cupons/CuponType/ICuponType";
 import { FixedPrice } from "../../domain/cupons/CuponType/FixedPrice";
 import { FreeShipping } from "../../domain/cupons/CuponType/FreeShipping";
 import { PercentPrice } from "../../domain/cupons/CuponType/PercentagePrice";
-import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
 import { ICouponRepository } from "../../infra/repositories/coupon/ICouponRepository";
 import { CreateCouponCSVDto } from "./createCouponDto";
 import { CouponState } from "../../domain/cupons/CouponState";
@@ -26,8 +23,8 @@ export class CreateCoupon {
             dto.discountType === "fixed"
                 ? new FixedPrice(dto.discountType, dto.discountValue)
                 : dto.discountType === "free"
-                ? new FreeShipping(dto.discountType, dto.discountValue)
-                : new PercentPrice(dto.discountType, dto.discountValue);
+                    ? new FreeShipping(dto.discountType, dto.discountValue)
+                    : new PercentPrice(dto.discountType, dto.discountValue);
         const productsForApplying: PlanId[] = dto.productsForApplyingValue.map((id: string) => new PlanId(id));
 
         const coupon: Coupon = Coupon.create(
