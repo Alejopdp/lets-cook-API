@@ -9,6 +9,11 @@ export class FreeShipping implements ICouponType {
         this.value = 0;
     }
 
+    public getDiscountAmount(planVariantPrice: number, shippingCost: number): number {
+        return shippingCost
+    }
+
+
     applyCoupon(totalPrice: number): number {
         throw new Error("Method not implemented.");
     }
