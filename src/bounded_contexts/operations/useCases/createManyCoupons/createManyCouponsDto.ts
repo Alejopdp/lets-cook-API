@@ -1,15 +1,18 @@
+import { CouponApplicationType } from "../../domain/cupons/CouponApplicationType";
+import { MaxChargeQtyType } from "../../domain/cupons/CouponMaxChargeQtyType";
+import { CouponRequirementType } from "../../domain/cupons/CouponRequirementType";
 import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
 
 export interface CouponToCreate {
     couponCode: string;
     discountType: string;
     discountValue: number;
-    minRequireType: string;
+    minRequireType: CouponRequirementType;
     minRequireValue: number;
-    productsForApplyingType: string;
+    productsForApplyingType: CouponApplicationType;
     productsForApplyingValue: string[];
     limites: ILimitAplication[];
-    maxChargeQtyType: string;
+    maxChargeQtyType: MaxChargeQtyType;
     maxChargeQtyValue: number;
     startDate: Date;
     endDate?: Date;

@@ -16,6 +16,7 @@ import { IOrderState } from "./orderState/IOrderState";
 import { RecipeSelection } from "./RecipeSelection";
 import { RecipeVariantRestriction } from "../recipe/RecipeVariant/recipeVariantResitriction/RecipeVariantRestriction";
 import { Locale } from "../locale/Locale";
+import Big from "big.js";
 
 export class Order extends Entity<Order> {
     private _shippingDate: Date;
@@ -283,12 +284,14 @@ export class Order extends Entity<Order> {
     }
 
     public swapPlan(newPlan: Plan, newPlanVariantId: PlanVariantId, newCouponDiscount: number): void {
-        if (this.isBilled()) return;
+        if (this.isBilled() || this.isCancelled()) return;
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
         this.recipeSelection = [];
         this.recipesVariantsIds = [];
         this.price = newPlan.getPlanVariantPrice(newPlanVariantId);
+
+        // if (Number(new Big(this.price).minus(new Big(newCouponDiscount))) < 0) newCouponDiscount = this.price
 
         if (this.discountAmount > 0) this.discountAmount = newCouponDiscount;
     }

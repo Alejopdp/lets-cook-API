@@ -369,7 +369,6 @@ export class Subscription extends Entity<Subscription> {
     }
 
     public swapPlan(nextOrders: Order[], newPlan: Plan, newPlanVariantId: PlanVariantId, shippingCost: number): void {
-        // TO DO: Validations
         this.plan = newPlan;
         this.planVariantId = newPlanVariantId;
         this.price = this.plan.getPlanVariantPrice(this.planVariantId);

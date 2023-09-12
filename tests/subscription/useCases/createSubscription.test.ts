@@ -34,6 +34,9 @@ import { gourmetPlan, gourmetPlanSku, planGourmetVariant2Persons2Recipes, planGo
 import { TUESDAY, WEDNESDAY } from "../../mocks/days"
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod"
 import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum"
+import { Coupon } from "../../../src/bounded_contexts/operations/domain/cupons/Cupon"
+import { CouponTypeFactory } from "../../../src/bounded_contexts/operations/domain/cupons/CuponType/CouponTypeFactory"
+import { CouponState } from "../../../src/bounded_contexts/operations/domain/cupons/CouponState"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -1464,5 +1467,244 @@ describe("Creating a subscripion with the 3D Secure", () => {
         expect(orders[0].state.title).toBe("ORDER_PENDING_PAYMENT")
     })
 
+
+})
+
+describe("Given a new customer", () => {
+    describe("When he buys a new subscription with coupon", () => {
+        describe("When it is a fixed price coupon, for all products, with no limit usage and no expire date and a discount amount lower than the price plan", () => {
+            const CUSTOMER_ID = new CustomerId()
+            const PURCHASE_DATE = new Date(2023, 7, 23)
+            const COUPON_START_DATE = new Date(2023, 7, 1)
+            let customer: Customer;
+            let customerPaymentMethod: PaymentMethod;
+            let createSubscriptionResult: any
+            let coupon: Coupon
+            let createSubscriptionDto: CreateSubscriptionDto;
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+
+                customerPaymentMethod = new PaymentMethod("Visa", "4242", 6, 2029, "520", true, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
+                mockCustomerRepository.save(customer)
+
+                const fixedCouponType = CouponTypeFactory.create("fixed", 10.99)
+                coupon = Coupon.create("11_EUROS", fixedCouponType, "none", 0, "all", [], [], "all_fee", 0, COUPON_START_DATE, CouponState.ACTIVE, 0)
+
+                mockCouponRepository.save(coupon)
+
+                createSubscriptionDto = {
+                    customerId: CUSTOMER_ID.toString(),
+                    planId: gourmetPlan.id.toString(),
+                    planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                    planFrequency: "weekly",
+                    restrictionComment: "string",
+                    stripePaymentMethodId: "",
+                    couponId: coupon.id.toString(),
+                    paymentMethodId: "string",
+                    addressName: CUSTOMER_ADDRESS_NAME,
+                    addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                    latitude: CUSTOMER_LATITUDE,
+                    longitude: CUSTOMER_LONGITUDE,
+                    customerFirstName: CUSTOMER_FIRST_NAME,
+                    customerLastName: CUSTOMER_LAST_NAME,
+                    phone1: CUSTOMER_PHONE,
+                    locale: Locale.es,
+                    shippingCity: "Alboraya",
+                    shippingProvince: "Valencia",
+                    shippingPostalCode: "46120",
+                    shippingCountry: "España",
+                    purchaseDate: PURCHASE_DATE
+                }
+
+                createSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should set the discount amount on the payment orders", async () => {
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                paymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.discountAmount).toBe(10.99)
+                })
+            })
+
+            it("Should set the discount amount on the orders", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(createSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.discountAmount).toBe(10.99)
+                })
+            })
+        })
+
+        describe("When it is a fixed price coupon, for all products, with no limit usage and no expire date and a discount amount greater than the price plan", () => {
+            const PRICE_PLAN = planGourmetVariant2Persons2Recipes.getPaymentPrice()
+            const CUSTOMER_ID = new CustomerId()
+            const PURCHASE_DATE = new Date(2023, 7, 23)
+            const COUPON_START_DATE = new Date(2023, 7, 1)
+            let customer: Customer;
+            let customerPaymentMethod: PaymentMethod;
+            let createSubscriptionResult: any
+            let coupon: Coupon
+            let createSubscriptionDto: CreateSubscriptionDto;
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+
+                customerPaymentMethod = new PaymentMethod("Visa", "4242", 6, 2029, "520", true, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
+                mockCustomerRepository.save(customer)
+
+                const fixedCouponType = CouponTypeFactory.create("fixed", 39.99)
+                coupon = Coupon.create("40_EUROS", fixedCouponType, "none", 0, "all", [], [], "all_fee", 0, COUPON_START_DATE, CouponState.ACTIVE, 0)
+
+                mockCouponRepository.save(coupon)
+
+                createSubscriptionDto = {
+                    customerId: CUSTOMER_ID.toString(),
+                    planId: gourmetPlan.id.toString(),
+                    planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                    planFrequency: "weekly",
+                    restrictionComment: "string",
+                    stripePaymentMethodId: "",
+                    couponId: coupon.id.toString(),
+                    paymentMethodId: "string",
+                    addressName: CUSTOMER_ADDRESS_NAME,
+                    addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                    latitude: CUSTOMER_LATITUDE,
+                    longitude: CUSTOMER_LONGITUDE,
+                    customerFirstName: CUSTOMER_FIRST_NAME,
+                    customerLastName: CUSTOMER_LAST_NAME,
+                    phone1: CUSTOMER_PHONE,
+                    locale: Locale.es,
+                    shippingCity: "Alboraya",
+                    shippingProvince: "Valencia",
+                    shippingPostalCode: "46120",
+                    shippingCountry: "España",
+                    purchaseDate: PURCHASE_DATE
+                }
+
+                createSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should set the discount amount on the payment orders", async () => {
+                const paymentOrders = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                paymentOrders.forEach((paymentOrder) => {
+                    expect(paymentOrder.discountAmount).toBe(PRICE_PLAN)
+                })
+            })
+
+            it("Should set the discount amount on the orders", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(createSubscriptionResult.subscription.id)
+                orders.forEach((order) => {
+                    expect(order.discountAmount).toBe(PRICE_PLAN)
+                })
+            })
+        })
+
+    })
+
+    describe("When he buys a new subscription with coupon", () => {
+        describe("When it is a fixed price coupon, for all products, with limited amount of usage and no expire date", () => {
+            const CUSTOMER_ID = new CustomerId()
+            const PURCHASE_DATE = new Date(2023, 7, 23)
+            const COUPON_START_DATE = new Date(2023, 7, 1)
+            let customer: Customer;
+            let customerPaymentMethod: PaymentMethod;
+            let createSubscriptionResult: any
+            let coupon: Coupon
+            let createSubscriptionDto: CreateSubscriptionDto;
+
+            beforeAll(async () => {
+                customer = Customer.create(
+                    CUSTOMER_EMAIL,
+                    true,
+                    "",
+                    [],
+                    0,
+                    new Date(),
+                    undefined,
+                    undefined,
+                    CUSTOMER_PASSWORD,
+                    "active",
+                    undefined,
+                    undefined,
+                    CUSTOMER_ID
+                )
+
+                customerPaymentMethod = new PaymentMethod("Visa", "4242", 6, 2029, "520", true, "stripe_id")
+                customer.addPaymentMethod(customerPaymentMethod)
+                mockCustomerRepository.save(customer)
+
+                const fixedCouponType = CouponTypeFactory.create("fixed", 39.99)
+                coupon = Coupon.create("40_EUROS", fixedCouponType, "none", 0, "all", [], [], "more_one_fee", 4, COUPON_START_DATE, CouponState.ACTIVE, 0)
+
+                mockCouponRepository.save(coupon)
+
+                createSubscriptionDto = {
+                    customerId: CUSTOMER_ID.toString(),
+                    planId: gourmetPlan.id.toString(),
+                    planVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                    planFrequency: "weekly",
+                    restrictionComment: "string",
+                    stripePaymentMethodId: "",
+                    couponId: coupon.id.toString(),
+                    paymentMethodId: "string",
+                    addressName: CUSTOMER_ADDRESS_NAME,
+                    addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                    latitude: CUSTOMER_LATITUDE,
+                    longitude: CUSTOMER_LONGITUDE,
+                    customerFirstName: CUSTOMER_FIRST_NAME,
+                    customerLastName: CUSTOMER_LAST_NAME,
+                    phone1: CUSTOMER_PHONE,
+                    locale: Locale.es,
+                    shippingCity: "Alboraya",
+                    shippingProvince: "Valencia",
+                    shippingPostalCode: "46120",
+                    shippingCountry: "España",
+                    purchaseDate: PURCHASE_DATE
+                }
+
+                createSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            })
+
+            it("Should set the discount amount in the same payment orders qty as the coupont limit", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                expect(paymentOrders.filter(po => po.discountAmount > 0).length).toBe(4)
+            })
+
+            it("Should set the discount amount in the same orders qty as the coupont limit", async () => {
+                const orders: Order[] = await mockOrderRepository.findAllBySubscriptionId(createSubscriptionResult.subscription.id)
+                expect(orders.filter(o => o.discountAmount > 0).length).toBe(4)
+            })
+        })
+    })
 
 })

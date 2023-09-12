@@ -1,8 +1,6 @@
 import { BaseController } from "../../../../core/infra/BaseController";
 import { CreateCouponDto } from "./createCouponDto";
-import fs from "fs";
 import { CreateCoupon } from "./createCoupon";
-import { Locale } from "../../domain/locale/Locale";
 
 export class CreateCouponController extends BaseController {
     private _createCoupon: CreateCoupon;

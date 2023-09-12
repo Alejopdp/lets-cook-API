@@ -6,6 +6,9 @@ import { IExportService } from "../../application/exportService/IExportService";
 import { ILimitAplication } from "../../domain/cupons/LimitAplication/ILimitAplication";
 import { LimitApplicationFactory } from "../../domain/cupons/LimitAplication/LimitApplicationFactory";
 import { CreateManyCouponsPresenter } from "./createManyCouponsWithCsvPresenter";
+import { CouponApplicationType } from "../../domain/cupons/CouponApplicationType";
+import { MaxChargeQtyType } from "../../domain/cupons/CouponMaxChargeQtyType";
+import { CouponRequirementType } from "../../domain/cupons/CouponRequirementType";
 
 export class CreateManyCouponsWithCsvController extends BaseController {
     private _createCoupon: CreateManyCoupons;
@@ -50,10 +53,10 @@ export class CreateManyCouponsWithCsvController extends BaseController {
                 } else {
                     couponsToCreate.push({
                         limites: limits,
-                        productsForApplyingType: matrix[i][6],
+                        productsForApplyingType: matrix[i][6] as CouponApplicationType,
                         productsForApplyingValue: appliesToSpecificProducts ? [matrix[i][7]] : [],
                         couponCode: matrix[i][8],
-                        maxChargeQtyType: matrix[i][9],
+                        maxChargeQtyType: matrix[i][9] as MaxChargeQtyType,
                         maxChargeQtyValue: parseInt(matrix[i][10]),
                         startDate: new Date(
                             parseInt(matrix[i][11].split("/")[2]),
@@ -69,7 +72,7 @@ export class CreateManyCouponsWithCsvController extends BaseController {
                             : undefined,
                         discountType: matrix[i][13],
                         discountValue: parseInt(matrix[i][14]),
-                        minRequireType: matrix[i][15],
+                        minRequireType: matrix[i][15] as CouponRequirementType,
                         minRequireValue: parseInt(matrix[i][16]),
                         state: matrix[i][17],
                     });

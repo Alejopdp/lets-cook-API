@@ -9,6 +9,9 @@ export class PercentPrice implements ICouponType {
         this.type = "percent";
         this.value = value;
     }
+    public getDiscountAmount(planVariantPrice: number): number {
+        return (planVariantPrice * this.value) / 100;
+    }
 
     applyCoupon(totalPrice: number): number {
         throw new Error("Method not implemented.");

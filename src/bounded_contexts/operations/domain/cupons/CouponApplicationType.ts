@@ -1,0 +1,1 @@
+export type CouponApplicationType = "all" | "specific";

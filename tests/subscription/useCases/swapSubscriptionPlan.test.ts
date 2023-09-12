@@ -32,7 +32,7 @@ import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/pa
 import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService"
 import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
-import { gourmetPlan, gourmetPlanSku, planGourmetVariant2Persons2Recipes, planGourmetVariant2Persons3Recipes, planVegetariano, planVegetarianoVariant2Persons3Recipes, planVegetarianoVariant2Persons5Recipes } from "../../mocks/plan"
+import { gourmetPlan, gourmetPlanSku, planGourmetVariant2Persons2Recipes, planGourmetVariant2Persons3Recipes, planVegetariano, planVegetarianoVariant2Persons2Recipes, planVegetarianoVariant2Persons3Recipes, planVegetarianoVariant2Persons5Recipes } from "../../mocks/plan"
 import { TUESDAY, WEDNESDAY } from "../../mocks/days"
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod"
 import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum"
@@ -43,6 +43,9 @@ import { ChooseRecipesForOrder } from "../../../src/bounded_contexts/operations/
 import { MockRecipeRepository } from "../../../src/bounded_contexts/operations/infra/repositories/recipe/mockRecipeRepository"
 import { bowlDeQuinoa, burgerHallouli, rissotoDeBoniato } from "../../mocks/recipe"
 import { UpdateDiscountAfterSkippingOrders } from "../../../src/bounded_contexts/operations/services/updateDiscountsAfterSkippingOrders/updateDiscountsAfterSkippingOrders"
+import { Coupon } from "../../../src/bounded_contexts/operations/domain/cupons/Cupon"
+import { CouponTypeFactory } from "../../../src/bounded_contexts/operations/domain/cupons/CuponType/CouponTypeFactory"
+import { CouponState } from "../../../src/bounded_contexts/operations/domain/cupons/CouponState"
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockSubscriptionRepository = new InMemorySusbcriptionRepository([])
@@ -534,6 +537,316 @@ describe("Swap plan use case", () => {
                     expect(order.plan.id.toString()).toBe(gourmetPlan.id.toString())
                     expect(order.planVariantId.toString()).toBe(planGourmetVariant2Persons3Recipes.id.toString())
                     expect(order.price).toBe(SECOND_PLAN_PRICE)
+                }
+            })
+
+        })
+    })
+
+    describe("Given a customer with a subscription using a non expire fixed price coupon", () => {
+        const FIRST_PLAN_PRICE = planGourmetVariant2Persons3Recipes.getPaymentPrice()
+        const SECOND_PLAN_PRICE = planGourmetVariant2Persons2Recipes.getPaymentPrice()
+        const PURCHASE_DATE = new Date(2023, 5, 12, 15)
+        const CUSTOMER_ID = new CustomerId()
+        const COUPON_START_DATE = new Date(2023, 7, 1)
+        let customer: Customer
+        let subscriptionResult: CreateSubscriptionResponse
+        let coupon: Coupon;
+
+        beforeAll(async () => {
+
+            customer = Customer.create(
+                CUSTOMER_EMAIL,
+                true,
+                "",
+                [],
+                0,
+                new Date(),
+                undefined,
+                undefined,
+                CUSTOMER_PASSWORD,
+                "active",
+                undefined,
+                undefined,
+                CUSTOMER_ID
+            )
+
+            await mockCustomerRepository.save(customer)
+            const fixedCouponType = CouponTypeFactory.create("fixed", 39.99)
+            coupon = Coupon.create("40_EUROS", fixedCouponType, "none", 0, "all", [], [], "all_fee", 0, COUPON_START_DATE, CouponState.ACTIVE, 0)
+
+            mockCouponRepository.save(coupon)
+
+
+            const createSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons3Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: coupon.id.toString(),
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: PURCHASE_DATE
+            }
+
+            subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+        })
+
+        describe("When the customer swaps to a plan that it's price is lower than the coupon discount", () => {
+            beforeAll(async () => {
+                await swapSubscriptionPlanUseCase.execute({
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    newPlanId: gourmetPlan.id.toString(),
+                    newPlanVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                    queryDate: new Date(2023, 5, 12, 19),
+                    subscriptionId: subscriptionResult.subscription.id.toString(),
+                })
+            })
+
+            it("Should set the discount amount of the payment order equal to the plan price", async () => {
+                const subscriptionPaymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                const activePaymentOrders: PaymentOrder[] = subscriptionPaymentOrders.filter((paymentOrder) => paymentOrder.isActive() || paymentOrder.isCancelled())
+
+                for (const paymentOrder of activePaymentOrders) {
+                    expect(paymentOrder.discountAmount).toBe(SECOND_PLAN_PRICE)
+                }
+            })
+
+
+
+            it("Should set the discount amount of the orders equal to the plan price", async () => {
+                const subscriptionOrders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                const activeOrders: Order[] = subscriptionOrders.filter((order) => order.isActive() || order.isSkipped())
+
+                for (const order of activeOrders) {
+                    expect(order.discountAmount).toBe(SECOND_PLAN_PRICE)
+                }
+            })
+        })
+    })
+
+    describe("Given a customer with a subscription using a non expired percentage price coupon", () => {
+        const FIRST_PLAN_PRICE = planGourmetVariant2Persons3Recipes.getPaymentPrice()
+        const SECOND_PLAN_PRICE = planGourmetVariant2Persons2Recipes.getPaymentPrice()
+        const PURCHASE_DATE = new Date(2023, 5, 12, 15)
+        const CUSTOMER_ID = new CustomerId()
+        const COUPON_START_DATE = new Date(2023, 7, 1)
+        let customer: Customer
+        let subscriptionResult: CreateSubscriptionResponse
+        let coupon: Coupon;
+
+        beforeAll(async () => {
+
+            customer = Customer.create(
+                CUSTOMER_EMAIL,
+                true,
+                "",
+                [],
+                0,
+                new Date(),
+                undefined,
+                undefined,
+                CUSTOMER_PASSWORD,
+                "active",
+                undefined,
+                undefined,
+                CUSTOMER_ID
+            )
+
+            await mockCustomerRepository.save(customer)
+            const percentCouponType = CouponTypeFactory.create("percent", 100)
+            coupon = Coupon.create("100_PERCENTAGE", percentCouponType, "none", 0, "all", [], [], "all_fee", 0, COUPON_START_DATE, CouponState.ACTIVE, 0)
+
+            mockCouponRepository.save(coupon)
+
+
+            const createSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons3Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: coupon.id.toString(),
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: PURCHASE_DATE
+            }
+
+            subscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+        })
+
+        describe("When the customer swaps to a plan that it's price is lower than the coupon discount", () => {
+            beforeAll(async () => {
+                await swapSubscriptionPlanUseCase.execute({
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    newPlanId: gourmetPlan.id.toString(),
+                    newPlanVariantId: planGourmetVariant2Persons2Recipes.id.toString(),
+                    queryDate: new Date(2023, 5, 12, 17),
+                    subscriptionId: subscriptionResult.subscription.id.toString(),
+                })
+            })
+
+            it("Should set the discount amount of the payment order equal to the plan price", async () => {
+                const subscriptionPaymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                const activePaymentOrders: PaymentOrder[] = subscriptionPaymentOrders.filter((paymentOrder) => paymentOrder.isActive() || paymentOrder.isCancelled())
+
+                for (const paymentOrder of activePaymentOrders) {
+                    expect(paymentOrder.discountAmount).toBe(SECOND_PLAN_PRICE)
+                }
+            })
+
+
+
+            it("Should set the discount amount of the orders equal to the plan price", async () => {
+                const subscriptionOrders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(subscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+                const activeOrders: Order[] = subscriptionOrders.filter((order) => order.isActive() || order.isSkipped())
+
+                for (const order of activeOrders) {
+                    expect(order.discountAmount).toBe(SECOND_PLAN_PRICE)
+                }
+            })
+        })
+    })
+
+    describe("Given a customer with 2 subscriptions. One with a fixed coupon, another with a percentage coupon", () => {
+        const FIRST_PLAN_PRICE = planGourmetVariant2Persons3Recipes.getPaymentPrice()
+        const SECOND_PLAN_PRICE = planGourmetVariant2Persons2Recipes.getPaymentPrice()
+        const FIRST_PURCHASE_DATE = new Date(2023, 5, 12, 15)
+        const SECOND_PURCHASE_DATE = new Date(2023, 5, 13, 15)
+        const CUSTOMER_ID = new CustomerId()
+        const COUPON_START_DATE = new Date(2023, 7, 1)
+        let customer: Customer
+        let firstSubscriptionResult: CreateSubscriptionResponse
+        let secondSubscriptionResult: CreateSubscriptionResponse
+        let fixed_coupon: Coupon;
+        let percent_coupon: Coupon;
+
+        beforeAll(async () => {
+
+            customer = Customer.create(
+                CUSTOMER_EMAIL,
+                true,
+                "",
+                [],
+                0,
+                new Date(),
+                undefined,
+                undefined,
+                CUSTOMER_PASSWORD,
+                "active",
+                undefined,
+                undefined,
+                CUSTOMER_ID
+            )
+
+            await mockCustomerRepository.save(customer)
+
+            const percentCouponType = CouponTypeFactory.create("percent", 100)
+            const fixedCouponType = CouponTypeFactory.create("fixed", 29.99)
+            fixed_coupon = Coupon.create("30_EUROS", fixedCouponType, "none", 0, "all", [], [], "all_fee", 0, COUPON_START_DATE, CouponState.ACTIVE, 0)
+            percent_coupon = Coupon.create("100_PERCENTAGE", percentCouponType, "none", 0, "all", [], [], "all_fee", 0, COUPON_START_DATE, CouponState.ACTIVE, 0)
+
+            mockCouponRepository.save(fixed_coupon)
+            mockCouponRepository.save(percent_coupon)
+
+
+            const createSubscriptionDto: CreateSubscriptionDto = {
+                customerId: CUSTOMER_ID.toString(),
+                planId: gourmetPlan.id.toString(),
+                planVariantId: planGourmetVariant2Persons3Recipes.id.toString(),
+                planFrequency: "weekly",
+                restrictionComment: "string",
+                stripePaymentMethodId: "",
+                couponId: fixed_coupon.id.toString(),
+                paymentMethodId: "string",
+                addressName: CUSTOMER_ADDRESS_NAME,
+                addressDetails: CUSTOMER_ADDRESS_DETAILS,
+                latitude: CUSTOMER_LATITUDE,
+                longitude: CUSTOMER_LONGITUDE,
+                customerFirstName: CUSTOMER_FIRST_NAME,
+                customerLastName: CUSTOMER_LAST_NAME,
+                phone1: CUSTOMER_PHONE,
+                locale: Locale.es,
+                shippingCity: "Alboraya",
+                shippingProvince: "Valencia",
+                shippingPostalCode: "46120",
+                shippingCountry: "España",
+                purchaseDate: FIRST_PURCHASE_DATE
+            }
+
+            firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
+            secondSubscriptionResult = await createSubscriptionUseCase.execute({ ...createSubscriptionDto, couponId: percent_coupon.id.toString(), purchaseDate: SECOND_PURCHASE_DATE, planVariantId: planGourmetVariant2Persons2Recipes.id.toString() })
+        })
+
+        it("Should set the discount amount of the payment orders correctly", async () => {
+            const subscriptionPaymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+            const activePaymentOrders: PaymentOrder[] = subscriptionPaymentOrders.filter((paymentOrder) => paymentOrder.isActive() || paymentOrder.isCancelled())
+
+            for (const paymentOrder of activePaymentOrders) {
+                expect(paymentOrder.discountAmount).toBe(57.98)
+            }
+        })
+
+        it("Should set the discount amount of the first subscription orders correctly", async () => {
+            const subscriptionOrders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(firstSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+            const activeOrders: Order[] = subscriptionOrders.filter((order) => order.isActive() || order.isSkipped())
+
+            for (const order of activeOrders) {
+                expect(order.discountAmount).toBe(29.99)
+            }
+        })
+
+        it("Should set the discount amount of the second subscription orders correctly", async () => {
+            const subscriptionOrders: Order[] = (await mockOrderRepository.findAllBySubscriptionId(secondSubscriptionResult.subscription.id)).sort((a, b) => a.shippingDate.getTime() - b.shippingDate.getTime())
+            const activeOrders: Order[] = subscriptionOrders.filter((order) => order.isActive() || order.isSkipped())
+
+            for (const order of activeOrders) {
+                expect(order.discountAmount).toBe(27.99)
+            }
+        })
+
+        describe("When the customer swaps the subscription with percent coupont", () => {
+            beforeAll(async () => {
+                await swapSubscriptionPlanUseCase.execute({
+                    nameOrEmailOfAdminExecutingRequest: "",
+                    newPlanId: planVegetariano.id.toString(),
+                    newPlanVariantId: planVegetarianoVariant2Persons2Recipes.id.toString(),
+                    queryDate: new Date(2023, 5, 14, 17),
+                    subscriptionId: secondSubscriptionResult.subscription.id.toString(),
+                })
+            })
+
+            it("Should set the discount amount of the payment order correctly", async () => {
+                const subscriptionPaymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                const activePaymentOrders: PaymentOrder[] = subscriptionPaymentOrders.filter((paymentOrder) => paymentOrder.isActive() || paymentOrder.isCancelled())
+
+                for (const paymentOrder of activePaymentOrders) {
+                    expect(paymentOrder.discountAmount).toBe(56.48)
                 }
             })
 
