@@ -20,6 +20,7 @@ export class GetGoogleReviews {
     }
 
     private randomizeReviews(reviews: ReviewDto[]): ReviewDto[] {
+        if (!reviews || reviews.length === 0) return []
         const randomReviews = []
         var qtyOfReviews = reviews.length
 

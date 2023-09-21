@@ -84,7 +84,7 @@ app.use("/api/v1", v1Router);
 
 billingJob.initialize();
 
-scheduleJob("schedule_wallets_job", "*/30 * * * *", async () => {
+scheduleJob("schedule_wallets_job", "*/10 * * * *", async () => {
     try {
         console.log("*********************************** STARTING WALLET JOB ***********************************")
         await chargeWalletJob.execute({ executionDate: new Date() })
