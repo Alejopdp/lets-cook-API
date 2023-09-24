@@ -325,6 +325,8 @@ export class Subscription extends Entity<Subscription> {
         const differenceInDays = shippingDayWeekNumber - purchaseDate.getDay();
 
         deliveryDate.setDate(purchaseDate.getDate() + differenceInDays); // Delivery day of this week
+        deliveryDate.setHours(23, 59, 59)
+
 
         if (this.firstShippingDateHasToSkipWeekWithoutDependency(shippingDayWeekNumber, purchaseDate)) {
             deliveryDate.setDate(deliveryDate.getDate() + 7); // Delivery day of this week

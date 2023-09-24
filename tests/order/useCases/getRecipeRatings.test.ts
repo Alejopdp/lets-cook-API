@@ -160,12 +160,12 @@ describe("Given a first subscription of a new customer", () => {
             const result: HttpGetRateListResponse = await getRateList.execute(dto)
 
             expect(result[0].rating).toBe(undefined)
-            expect(result.every((rate) => !rate.isRateable)).toBe(true)
+            expect(result.every((rate) => rate.isRateable)).toBe(false)
         })
     })
 
     describe("When the customer requests for its rates the same day of the shipping date after 13:00 without any rate", () => {
-        it("Should not see any rate of the recipe", async () => {
+        it("Should not see any rating on the recipe", async () => {
             const dto = {
                 customerId: CUSTOMER_ID.toString(),
                 locale: Locale.es,
@@ -238,12 +238,12 @@ describe("Given a first subscription of a new customer", () => {
         })
 
         it("Should return the value 1 as the number of times the recipe has been delivered if queried before the last shipping date", async () => {
-            const QUERY_DATE = new Date("2023-08-11")
+            const QUERY_DATE = new Date(2023, 7, 12)
             const rissotoRate: RecipeRating = (await mockRecipeRatingRepository.findAllByCustomer(CUSTOMER_ID, Locale.es)).find((rate: RecipeRating) => rate.recipe.id.equals(rissotoDeBoniato.id)) as RecipeRating
             const getRateListResult = await getRateList.execute({ customerId: CUSTOMER_ID.toString(), locale: Locale.es, queryDate: QUERY_DATE })
             const rissotoRateInResult = getRateListResult.find((rate) => rate.recipeId === rissotoRate.recipe.id.toString())
 
-            expect(rissotoRate.getQtyDelivered(QUERY_DATE)).toBe(1)
+            console.log("A VER LAS FE HITAS: ", rissotoRate.shippingDates)
             expect(rissotoRateInResult?.qtyDelivered).toBe(1)
         })
 

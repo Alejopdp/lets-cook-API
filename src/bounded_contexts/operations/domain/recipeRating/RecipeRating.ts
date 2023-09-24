@@ -70,12 +70,13 @@ export class RecipeRating extends Entity<RecipeRating> {
     }
 
     public getQtyDelivered(queryDate: Date): number {
-        const lastShippingDate = this.getLastShippingDate(queryDate);
-        if (!lastShippingDate) return 0;
+        const lastShippedDate = this.getLastShippedDate(queryDate);
+        if (!lastShippedDate) return 0;
 
-        const lastShippingDateAt13 = new Date(lastShippingDate.getFullYear(), lastShippingDate.getMonth(), lastShippingDate.getDate(), 13, 0, 0, 0);
 
-        return this.shippingDates.filter((date) => date.getTime() <= lastShippingDateAt13.getTime()).length;
+        const qtyOfDeliveriesBeforeLastShippingDateAt13 = this.shippingDates.filter((date) => date.getTime() <= lastShippedDate.getTime()).length;
+
+        return qtyOfDeliveriesBeforeLastShippingDateAt13;
     }
 
     public isRateable(queryDate: Date): boolean {
@@ -83,15 +84,16 @@ export class RecipeRating extends Entity<RecipeRating> {
         if (!firstShippingDate) return false;
 
         const firstShippingDateAt13 = new Date(firstShippingDate.getFullYear(), firstShippingDate.getMonth(), firstShippingDate.getDate(), 13, 0, 0, 0);
+        const isQueryingAfter13AndItHasAtLeastOneDelivery = queryDate.getTime() >= firstShippingDateAt13.getTime()
 
-        return this.getQtyDelivered(queryDate) >= 0 && queryDate.getTime() >= firstShippingDateAt13.getTime();
+        return isQueryingAfter13AndItHasAtLeastOneDelivery
     }
 
     public isRated(): boolean {
         return !!this.rating && this.rating > 0;
     }
 
-    public getLastShippingDate(queryDate: Date): Date | undefined {
+    public getLastShippedDate(queryDate: Date): Date | undefined {
         const lastShippingDate = this.shippingDates
             .filter((date) => {
                 const auxShippingDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 13, 0, 0, 0);
