@@ -70,6 +70,7 @@ export class GetPlanListPresenter {
                 description: variant.getLabel(locale),
                 descriptionWithPrice: variant.getLabelWithPrice(locale),
                 attributes: variant.attributes.map((attr) => [attr.key, attr.value]),
+                isDeleted: variant.isDeleted
             });
             counter = 0;
         }
