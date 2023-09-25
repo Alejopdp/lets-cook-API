@@ -17,7 +17,7 @@ export class PaySaturdayJobWithWalletLog implements WalletMovementLog {
         this._description = "";
         this._customerId = customerId;
         this._createdAt = createdAt;
-        this._amount = amount;
+        this._amount = -Math.abs(amount);
     }
 
     public getTitle(locale: Locale): string {

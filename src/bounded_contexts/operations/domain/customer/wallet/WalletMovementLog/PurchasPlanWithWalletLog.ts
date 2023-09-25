@@ -17,7 +17,7 @@ export class PurchasePlanWithWalletLog implements WalletMovementLog {
         this._description = "";
         this._customerId = customerId;
         this._createdAt = createDate;
-        this._amount = amount;
+        this._amount = -Math.abs(amount);
     }
 
     public getTitle(locale: Locale): string {
