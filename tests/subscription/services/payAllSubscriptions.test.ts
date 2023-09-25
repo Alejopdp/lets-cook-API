@@ -578,8 +578,8 @@ describe("Saturday billing job", () => {
                     id: "id",
                     amount: 0
                 }))
-                await createWallet.execute({ amountToCharge: 100, customerId: CUSTOMER_ID.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, paymentMethodForCharging: customer.getDefaultPaymentMethod()?.id.toString() ?? "" })
-                await chargeMoneyToWallet.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 100 })
+                await createWallet.execute({ amountToCharge: 100, customerId: CUSTOMER_ID.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, paymentMethodForCharging: customer.getDefaultPaymentMethod()?.id.toString() ?? "", locale: Locale.es })
+                await chargeMoneyToWallet.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 100, locale: Locale.es })
                 await updatePaymentMethodUseCase.execute({ brand: "", customerId: CUSTOMER_ID.toString(), cvc: "", exp_month: 8, exp_year: 2030, isDefault: true, last4Numbers: "", nameOrEmailOfAdminExecutingRequest: "", paymentId: "wallet", stripeId: "" })
 
             })

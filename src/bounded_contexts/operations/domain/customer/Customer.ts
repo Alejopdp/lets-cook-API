@@ -188,6 +188,7 @@ export class Customer extends Entity<Customer> {
             title: log.getTitle(locale),
             description: log.description,
             createdAt: log.createdAt,
+            amount: log.amount
         })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
 

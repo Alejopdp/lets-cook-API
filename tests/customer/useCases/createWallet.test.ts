@@ -5,6 +5,7 @@ import { CreateWallet } from "../../../src/bounded_contexts/operations/useCases/
 import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
 import { CUSTOMER_EMAIL, CUSTOMER_PASSWORD, CUSTOMER_PHONE } from "../../mocks/customer"
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod";
+import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 
@@ -45,7 +46,8 @@ describe("Create wallet Use Case", () => {
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0,
                     paymentMethodForCharging: "wrongId",
-                    datesOfCharge: GOOD_DATES_OF_CHARGE
+                    datesOfCharge: GOOD_DATES_OF_CHARGE,
+                    locale: Locale.es
                 })).rejects.toThrow("El método de pago ingresado para cargar la billetera no existe")
             })
 
@@ -62,7 +64,9 @@ describe("Create wallet Use Case", () => {
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0.5,
                     paymentMethodForCharging: customerPaymentMethod.id.toString(),
-                    datesOfCharge: GOOD_DATES_OF_CHARGE
+                    datesOfCharge: GOOD_DATES_OF_CHARGE,
+                    locale: Locale.es
+
                 })
             })
 
@@ -127,7 +131,8 @@ describe("Create wallet Use Case", () => {
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 0.4,
                     paymentMethodForCharging: customerPaymentMethod.id.toString(),
-                    datesOfCharge: GOOD_DATES_OF_CHARGE
+                    datesOfCharge: GOOD_DATES_OF_CHARGE,
+                    locale: Locale.es
                 })).rejects.toThrow()
             })
         })
@@ -163,7 +168,8 @@ describe("Create wallet Use Case", () => {
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 15,
                     paymentMethodForCharging: customerPaymentMethod.id.toString(),
-                    datesOfCharge: DUPLICATED_DATES_OF_CHARGE
+                    datesOfCharge: DUPLICATED_DATES_OF_CHARGE,
+                    locale: Locale.es
                 })).rejects.toThrow()
             })
         })
@@ -199,7 +205,9 @@ describe("Create wallet Use Case", () => {
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 20,
                     paymentMethodForCharging: customerPaymentMethod.id.toString(),
-                    datesOfCharge: [{ dayNumber: 3, hour: "17", minute: "30" }, { dayNumber: 5, hour: "17", minute: "30" }, { dayNumber: 6, hour: "17", minute: "30" }, { dayNumber: 0, hour: "17", minute: "30" }, { dayNumber: 4, hour: "17", minute: "30" }, { dayNumber: 2, hour: "17", minute: "30" }, { dayNumber: 1, hour: "17", minute: "30" }, { dayNumber: 3, hour: "17", minute: "30" }]
+                    datesOfCharge: [{ dayNumber: 3, hour: "17", minute: "30" }, { dayNumber: 5, hour: "17", minute: "30" }, { dayNumber: 6, hour: "17", minute: "30" }, { dayNumber: 0, hour: "17", minute: "30" }, { dayNumber: 4, hour: "17", minute: "30" }, { dayNumber: 2, hour: "17", minute: "30" }, { dayNumber: 1, hour: "17", minute: "30" }, { dayNumber: 3, hour: "17", minute: "30" }],
+                    locale: Locale.es
+
                 })).rejects.toThrow()
             })
         })
@@ -235,7 +243,9 @@ describe("Create wallet Use Case", () => {
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 15,
                     paymentMethodForCharging: customerPaymentMethod.id.toString(),
-                    datesOfCharge: []
+                    datesOfCharge: [],
+                    locale: Locale.es
+
                 })).rejects.toThrow()
             })
         })
@@ -268,7 +278,9 @@ describe("Create wallet Use Case", () => {
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 10,
                     paymentMethodForCharging: customerPaymentMethod.id.toString(),
-                    datesOfCharge: GOOD_DATES_OF_CHARGE
+                    datesOfCharge: GOOD_DATES_OF_CHARGE,
+                    locale: Locale.es
+
                 })
             })
             it("Should throw an error", async () => {
@@ -276,7 +288,9 @@ describe("Create wallet Use Case", () => {
                     customerId: CUSTOMER_ID.toString(),
                     amountToCharge: 10,
                     paymentMethodForCharging: customerPaymentMethod.id.toString(),
-                    datesOfCharge: GOOD_DATES_OF_CHARGE
+                    datesOfCharge: GOOD_DATES_OF_CHARGE,
+                    locale: Locale.es
+
                 })).rejects.toThrow()
             })
         })

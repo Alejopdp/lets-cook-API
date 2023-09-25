@@ -9,6 +9,7 @@ import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/c
 import { ChargeMoneyToWallet } from "../../../src/bounded_contexts/operations/services/chargeMoneyToWallet/chargeMoneyToWallet"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService";
 import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
+import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockPaymentService = new MockPaymentService() as jest.Mocked<MockPaymentService>
@@ -88,7 +89,7 @@ describe("Charge money to wallet service", () => {
 
 
             await mockCustomerRepository.save(customer)
-            await createWallet.execute({ amountToCharge: 10, customerId: CUSTOMER_ID.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, paymentMethodForCharging: customerPaymentMethod.id.toString() })
+            await createWallet.execute({ amountToCharge: 10, customerId: CUSTOMER_ID.toString(), datesOfCharge: GOOD_DATES_OF_CHARGE, paymentMethodForCharging: customerPaymentMethod.id.toString(), locale: Locale.es })
         })
 
         describe("When it tries to charge money to the wallet with a negative amount", () => {

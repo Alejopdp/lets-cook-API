@@ -1201,7 +1201,7 @@ describe("Given a customer with wallet", () => {
             mockCustomerRepository.save(customer)
 
             const createWalletUseCase = new CreateWallet(mockCustomerRepository)
-            await createWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 200, datesOfCharge: [{ dayNumber: 1, hour: "13", minute: "45" }], paymentMethodForCharging: customerPaymentMethod.id.toString() })
+            await createWalletUseCase.execute({ customerId: CUSTOMER_ID.toString(), amountToCharge: 200, datesOfCharge: [{ dayNumber: 1, hour: "13", minute: "45" }], paymentMethodForCharging: customerPaymentMethod.id.toString(), locale: Locale.es })
 
             //@ts-ignore
             mockPaymentService.paymentIntent.mockImplementationOnce(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string, offSession: boolean): Promise<PaymentIntent> => await ({
@@ -1212,7 +1212,7 @@ describe("Given a customer with wallet", () => {
             }))
             const chargeMoneyService = new ChargeMoneyToWallet(mockPaymentService)
             const chargeMoneyToWalletUseCase = new ChargeMoneyToWalletUseCase(mockCustomerRepository, chargeMoneyService)
-            await chargeMoneyToWalletUseCase.execute({ amountToCharge: 200, customerId: CUSTOMER_ID.toString() })
+            await chargeMoneyToWalletUseCase.execute({ amountToCharge: 200, customerId: CUSTOMER_ID.toString(), locale: Locale.es })
 
             firstSubscriptionResult = await createSubscriptionUseCase.execute({
                 customerId: CUSTOMER_ID.toString(),

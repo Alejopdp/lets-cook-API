@@ -451,7 +451,7 @@ describe("Create subscription as admin use case", () => {
             const createWalletUseCase = new CreateWallet(mockCustomerRepository)
             const chargeMoneyToWalletUseCase = new ChargeMoneyToWallet(mockPaymentService)
 
-            await createWalletUseCase.execute({ customerId: customer.id.toString(), amountToCharge: 100, datesOfCharge: GOOD_DATES_OF_CHARGE, paymentMethodForCharging: customerPaymentMethod.id.toString() })
+            await createWalletUseCase.execute({ customerId: customer.id.toString(), amountToCharge: 100, datesOfCharge: GOOD_DATES_OF_CHARGE, paymentMethodForCharging: customerPaymentMethod.id.toString(), locale: Locale.es })
             await chargeMoneyToWalletUseCase.execute({ customer, amountToCharge: 100 })
         })
 

@@ -8,6 +8,7 @@ import { CUSTOMER_EMAIL, CUSTOMER_PASSWORD } from "../../mocks/customer"
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod";
 import { MockStorageService } from "../../../src/bounded_contexts/operations/application/storageService/mockStorageService";
 import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
+import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockLogRepository = new InMemoryLogRepository([])
@@ -121,6 +122,7 @@ describe("Update payment method use case", () => {
                     amountToCharge: 100,
                     datesOfCharge: GOOD_DATES_OF_CHARGE,
                     paymentMethodForCharging: PAYMENT_METHOD_1.id.toString(),
+                    locale: Locale.es
                 })
             })
 
