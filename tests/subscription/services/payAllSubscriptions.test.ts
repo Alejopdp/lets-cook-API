@@ -513,11 +513,11 @@ describe("Saturday billing job", () => {
                 expect(orders[12].paymentOrderId?.equals(paymentOrders[12].id)).toBe(true)
             })
 
-            it("Should assign a human id to the payment order", async () => {
+            it("Should not assign a human id to the payment order", async () => {
                 const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
                 const paymentOrderToCheck = paymentOrders[1]
 
-                expect(paymentOrderToCheck.humanId).toBeDefined()
+                expect(paymentOrderToCheck.humanId).not.toBeDefined()
             })
 
             it("Should pass the correct amount to bill to the payment service", async () => {
@@ -737,6 +737,13 @@ describe("Saturday billing job", () => {
                     expect(paymentOrderToCheck.paymentIntentId).toEqual("Monedero")
                 })
 
+                it("Should not assign a human ID to the payment order", async () => {
+                    const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+                    const paymentOrderToCheck = paymentOrders[1]
+
+                    expect(paymentOrderToCheck.humanId).not.toBeDefined()
+                })
+
                 it("Should create a new order", async () => {
                     const orders: Order[] = (await mockOrderRepository.findAllByCustomersIds([CUSTOMER_ID], Locale.es)).sort((a: Order, b: Order) => a.shippingDate.getTime() - b.shippingDate.getTime())
                     const orderToCheck = orders[12]
@@ -750,13 +757,6 @@ describe("Saturday billing job", () => {
                     const paymentOrders: PaymentOrder[] = (await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)).sort((a: PaymentOrder, b: PaymentOrder) => a.billingDate.getTime() - b.billingDate.getTime())
                     const orders: Order[] = (await mockOrderRepository.findAllByCustomersIds([CUSTOMER_ID], Locale.es)).sort((a: Order, b: Order) => a.shippingDate.getTime() - b.shippingDate.getTime())
                     expect(orders[12].paymentOrderId?.equals(paymentOrders[12].id)).toBe(true)
-                })
-
-                it("Should assign a human id to the payment order", async () => {
-                    const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
-                    const paymentOrderToCheck = paymentOrders[1]
-
-                    expect(paymentOrderToCheck.humanId).toBeDefined()
                 })
 
                 it("Should not rest the wallet balance", async () => {

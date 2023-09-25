@@ -127,10 +127,10 @@ export class PayAllSubscriptions {
 
                     const paymentIntent = await this.charge(totalAmount, paymentOrderCustomer)
 
-                    paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
-                    paymentOrdersWithHumanIdCount++;
                     // TO DO: Handlear insuficiencia de fondos | pagos rechazados | etc
                     if (paymentIntent.status === "succeeded") {
+                        paymentOrderToBill.addHumanId(paymentOrdersWithHumanIdCount);
+                        paymentOrdersWithHumanIdCount++;
                         const notificationDto = {
                             customerEmail: paymentOrderCustomer.email,
                             foodVAT: Math.round((totalAmount * 0.1 + Number.EPSILON) * 100) / 100,
