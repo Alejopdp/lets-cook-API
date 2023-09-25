@@ -48,7 +48,7 @@ export class UpdatePaymentMethod {
             )
         );
 
-        if (dto.paymentId === "wallet") customer.addWalletMovementLog(WalletMovementLogType.SELECT_WALLET_AS_DEFAULT)
+        if (dto.paymentId === "wallet") customer.addWalletMovementLog(WalletMovementLogType.SELECT_WALLET_AS_DEFAULT, 0)
     }
 
     /**

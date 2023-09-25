@@ -9,13 +9,13 @@ import { SelectWalletAsDefaultLog } from "./SelectWalletAsDefaultLog";
 import { WalletMovementLogType } from "./WalletMovementLogTypeEnum"
 
 export class WalletMovementLogFactory {
-    static create(type: string, title: string, description: string, customerId: CustomerId, createdAt: Date) {
+    static create(type: string, title: string, description: string, customerId: CustomerId, createdAt: Date, amount: number) {
         switch (type) {
             case WalletMovementLogType.CREATE_WALLET:
                 return new CreateWalletLog(customerId, createdAt)
 
             case WalletMovementLogType.CHARGE_WALLET:
-                return new ChargeWalletLog(customerId, createdAt);
+                return new ChargeWalletLog(customerId, createdAt, amount);
 
             case WalletMovementLogType.DISABLE_WALLET:
                 return new DisableWalletLog(customerId, createdAt);
@@ -24,10 +24,10 @@ export class WalletMovementLogFactory {
                 return new EnableWalletLog(customerId, createdAt);
 
             case WalletMovementLogType.PAY_SATURDAY_JOB_WITH_WALLET:
-                return new PaySaturdayJobWithWalletLog(customerId, createdAt);
+                return new PaySaturdayJobWithWalletLog(customerId, createdAt, amount);
 
             case WalletMovementLogType.PURCHASE_PLAN_WITH_WALLET:
-                return new PurchasePlanWithWalletLog(customerId, createdAt);
+                return new PurchasePlanWithWalletLog(customerId, createdAt, amount);
 
             case WalletMovementLogType.SELECT_WALLET_AS_DEFAULT:
                 return new SelectWalletAsDefaultLog(customerId, createdAt);

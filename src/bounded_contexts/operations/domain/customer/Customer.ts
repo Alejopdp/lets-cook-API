@@ -1,4 +1,3 @@
-// Principal
 import { Entity } from "../../../../core/domain/Entity";
 import { CustomerId } from "./CustomerId";
 import { UserPassword } from "../../../IAM/domain/user/UserPassword";
@@ -23,6 +22,7 @@ import { EnableWalletLog } from "./wallet/WalletMovementLog/EnableWalletLog";
 import { PaySaturdayJobWithWalletLog } from "./wallet/WalletMovementLog/PaySaturdayJobWithWalletLog";
 import { PurchasePlanWithWalletLog } from "./wallet/WalletMovementLog/PurchasPlanWithWalletLog";
 import { SelectWalletAsDefaultLog } from "./wallet/WalletMovementLog/SelectWalletAsDefaultLog";
+import { WalletMovementLog } from "./wallet/WalletMovementLog/WalletMovementLog";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -120,13 +120,13 @@ export class Customer extends Entity<Customer> {
         );
     }
 
-    public addWalletMovementLog(logType: WalletMovementLogType): void {
+    public addWalletMovementLog(logType: WalletMovementLogType, amount: number): void {
         switch (logType) {
             case WalletMovementLogType.CREATE_WALLET:
                 this.wallet?.addWalletMovementLog(new CreateWalletLog(this.id, new Date()));
                 break;
             case WalletMovementLogType.CHARGE_WALLET:
-                this.wallet?.addWalletMovementLog(new ChargeWalletLog(this.id, new Date()));
+                this.wallet?.addWalletMovementLog(new ChargeWalletLog(this.id, new Date(), amount));
                 break;
             case WalletMovementLogType.DISABLE_WALLET:
                 this.wallet?.addWalletMovementLog(new DisableWalletLog(this.id, new Date()));
@@ -135,10 +135,10 @@ export class Customer extends Entity<Customer> {
                 this.wallet?.addWalletMovementLog(new EnableWalletLog(this.id, new Date()));
                 break;
             case WalletMovementLogType.PAY_SATURDAY_JOB_WITH_WALLET:
-                this.wallet?.addWalletMovementLog(new PaySaturdayJobWithWalletLog(this.id, new Date()));
+                this.wallet?.addWalletMovementLog(new PaySaturdayJobWithWalletLog(this.id, new Date(), amount));
                 break;
             case WalletMovementLogType.PURCHASE_PLAN_WITH_WALLET:
-                this.wallet?.addWalletMovementLog(new PurchasePlanWithWalletLog(this.id, new Date()));
+                this.wallet?.addWalletMovementLog(new PurchasePlanWithWalletLog(this.id, new Date(), amount));
                 break;
             case WalletMovementLogType.SELECT_WALLET_AS_DEFAULT:
                 this.wallet?.addWalletMovementLog(new SelectWalletAsDefaultLog(this.id, new Date()));
@@ -162,7 +162,7 @@ export class Customer extends Entity<Customer> {
     public chargeMoneyToWallet(amountToCharge: number): void {
         if (!this.wallet) throw new Error("No se puede cargar dinero a la billetera porque no existe");
         this.wallet.chargeMoney(amountToCharge);
-        this.addWalletMovementLog(WalletMovementLogType.CHARGE_WALLET)
+        this.addWalletMovementLog(WalletMovementLogType.CHARGE_WALLET, amountToCharge)
     }
 
     public updateWallet(amountToCharge: number, paymentMethodForCharging: string, isEnabled: boolean, datesOfCharge: DateOfCharge[]): void {
@@ -174,15 +174,28 @@ export class Customer extends Entity<Customer> {
         this.wallet.updateAmountToCharge(amountToCharge);
         this.wallet.updateDatesOfCharge(datesOfCharge);
         this.wallet.paymentMethodForCharging = paymentMethodForCharging;
-        if (this.wallet.isEnabled !== isEnabled) this.addWalletMovementLog(isEnabled ? WalletMovementLogType.ENABLE_WALLET : WalletMovementLogType.DISABLE_WALLET)
+        if (this.wallet.isEnabled !== isEnabled) this.addWalletMovementLog(isEnabled ? WalletMovementLogType.ENABLE_WALLET : WalletMovementLogType.DISABLE_WALLET, 0)
         this.wallet.isEnabled = isEnabled
 
+    }
+
+    public getPresentedWalletMovements(locale: Locale): any[] {
+        if (!this.wallet) return []
+
+
+        return this.wallet.walletMovements.map((log: WalletMovementLog) => ({
+            type: log.type,
+            title: log.getTitle(locale),
+            description: log.description,
+            createdAt: log.createdAt,
+            amount: log.amount
+        })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
 
     public buyWithWallet(amountToPay: number): void {
         if (!this.wallet) throw new Error("No se puede comprar con la billetera porque no existe");
         this.wallet.buy(amountToPay);
-        this.addWalletMovementLog(WalletMovementLogType.PURCHASE_PLAN_WITH_WALLET)
+        this.addWalletMovementLog(WalletMovementLogType.PURCHASE_PLAN_WITH_WALLET, amountToPay)
     }
 
     public payBillingJobWithWallet(amountToPay: number): boolean {
@@ -190,7 +203,7 @@ export class Customer extends Entity<Customer> {
         if (!this.wallet) return succeeded;
 
         succeeded = this.wallet.payBillingJob(amountToPay);
-        if (succeeded) this.addWalletMovementLog(WalletMovementLogType.PAY_SATURDAY_JOB_WITH_WALLET);
+        if (succeeded) this.addWalletMovementLog(WalletMovementLogType.PAY_SATURDAY_JOB_WITH_WALLET, amountToPay);
 
         return succeeded;
     }

@@ -10,6 +10,7 @@ import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/c
 import { ChargeMoneyToWallet } from "../../../src/bounded_contexts/operations/services/chargeMoneyToWallet/chargeMoneyToWallet"
 import { ChargeWalletJob } from "../../../src/bounded_contexts/operations/services/chargeWalletJob/chargeWalletJob"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService";
+import { Locale } from "../../../src/bounded_contexts/operations/domain/locale/Locale";
 
 const mockCustomerRepository = new InMemoryCustomerRepository([])
 const mockPaymentService = new MockPaymentService() as jest.Mocked<MockPaymentService>
@@ -87,11 +88,11 @@ describe("Charge money to wallet job", () => {
             await mockCustomerRepository.updateMany(customers)
 
             for (let i = 0; i < 8; i++) {
-                await createWallet.execute({ customerId: customers[i].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[i].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }] })
+                await createWallet.execute({ customerId: customers[i].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[i].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }], locale: Locale.es })
             }
 
-            await createWallet.execute({ customerId: customers[8].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[8].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 4, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }] })
-            await createWallet.execute({ customerId: customers[9].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[9].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 2, hour: "13", minute: "45" }, { dayNumber: 4, hour: "17", minute: "30" }] })
+            await createWallet.execute({ customerId: customers[8].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[8].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 4, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }], locale: Locale.es })
+            await createWallet.execute({ customerId: customers[9].id.toString(), amountToCharge: 27.99, paymentMethodForCharging: customers[9].getDefaultPaymentMethod()?.id.toString()!, datesOfCharge: [{ dayNumber: 2, hour: "13", minute: "45" }, { dayNumber: 4, hour: "17", minute: "30" }], locale: Locale.es })
         })
 
         describe("When the service runs to schedules the jobs", () => {

@@ -19,6 +19,12 @@ const WalletMovementLogSchema = new mongoose.Schema(
             type: String,
         },
 
+        amount: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+
         customer: {
             type: String,
             ref: "Customer",

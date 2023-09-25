@@ -1,6 +1,7 @@
 import { BaseController } from "../../../../core/infra/BaseController";
 import { UpdateWalletDto } from "./updateWalletDto";
 import { UpdateWallet } from "./updateWallet";
+import { Locale } from "../../domain/locale/Locale";
 
 export class UpdateWalletController extends BaseController {
     private _updateWallet: UpdateWallet;
@@ -18,6 +19,7 @@ export class UpdateWalletController extends BaseController {
                 paymentMethodForCharging: this.req.body.paymentMethodForCharging,
                 datesOfCharge: this.req.body.datesOfCharge,
                 isEnabled: this.req.body.isEnabled,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             const presentedWallet = await this.updateWallet.execute(dto);
