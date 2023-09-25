@@ -25,7 +25,7 @@ export class EnableWalletLog implements WalletMovementLog {
             case Locale.en:
                 return "Your wallet has been activated";
             case Locale.ca:
-                return "Se ha activado tu monedero";
+                return "S'ha activat el teu moneder";
             case Locale.es:
                 return "Se ha activado tu monedero";
             default:

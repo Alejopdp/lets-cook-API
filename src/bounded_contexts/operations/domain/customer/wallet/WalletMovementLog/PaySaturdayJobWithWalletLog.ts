@@ -25,7 +25,7 @@ export class PaySaturdayJobWithWalletLog implements WalletMovementLog {
             case Locale.en:
                 return "The weekly subscription payment has been made";
             case Locale.ca:
-                return "Se ha realizado el pago semanal de la suscripción";
+                return "S'ha realitzat el pagament setmanal de la subscripció";
             case Locale.es:
                 return "Se ha realizado el pago semanal de la suscripción";
             default:

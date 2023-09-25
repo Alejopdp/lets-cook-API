@@ -25,7 +25,7 @@ export class PurchasePlanWithWalletLog implements WalletMovementLog {
             case Locale.en:
                 return "Plan purchased with wallet manually";
             case Locale.ca:
-                return "Se ha comprado un plan con monedero manualmente";
+                return "S'ha comprat un pla amb moneder manualment";
             case Locale.es:
                 return "Se ha comprado un plan con monedero manualmente";
             default:

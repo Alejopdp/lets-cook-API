@@ -3,7 +3,7 @@ import { CustomerId } from "../../CustomerId";
 import { WalletMovementLog } from "./WalletMovementLog";
 import { WalletMovementLogType } from "./WalletMovementLogTypeEnum";
 
-export class SelectWalletAsDefaultLog implements WalletMovementLog {
+export class RefundWalletLog implements WalletMovementLog {
     private _type: string;
     private _title: string;
     private _description: string;
@@ -11,27 +11,29 @@ export class SelectWalletAsDefaultLog implements WalletMovementLog {
     private _createdAt: Date;
     private _amount: number;
 
-    constructor(customerId: CustomerId, createdAt: Date) {
-        this._type = WalletMovementLogType.SELECT_WALLET_AS_DEFAULT;
+    constructor(customerId: CustomerId, createdAt: Date, amount: number) {
+        this._type = WalletMovementLogType.REFUND_WALLET;
         this._title = "";
         this._description = "";
         this._customerId = customerId;
         this._createdAt = createdAt;
-        this._amount = 0;
+        this._amount = amount;
     }
+
 
     public getTitle(locale: Locale): string {
         switch (locale) {
             case Locale.en:
-                return "Wallet has been chosen as the default payment method";
+                return "A refund has been processed";
             case Locale.ca:
-                return "S'ha triat a moneder com a pagament predefinit";
+                return "S'ha realitzat un reemborsament";
             case Locale.es:
-                return "Se ha elegido a monedero como pago predefinido";
+                return "Se ha realizado un reembolso";
             default:
-                return "Se ha elegido a monedero como pago predefinido"
+                return "Se ha realizado un reembolso"
         }
     }
+
 
 
     /**
