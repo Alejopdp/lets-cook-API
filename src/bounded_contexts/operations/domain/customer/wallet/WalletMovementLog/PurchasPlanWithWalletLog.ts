@@ -1,3 +1,4 @@
+import { Locale } from "../../../locale/Locale";
 import { CustomerId } from "../../CustomerId";
 import { WalletMovementLog } from "./WalletMovementLog";
 import { WalletMovementLogType } from "./WalletMovementLogTypeEnum";
@@ -8,15 +9,29 @@ export class PurchasePlanWithWalletLog implements WalletMovementLog {
     private _description: string;
     private _customerId: CustomerId;
     private _createdAt: Date;
+    private _amount: number;
 
-    constructor(customerId: CustomerId, createDate: Date) {
+    constructor(customerId: CustomerId, createDate: Date, amount: number) {
         this._type = WalletMovementLogType.PURCHASE_PLAN_WITH_WALLET;
         this._title = "";
         this._description = "";
         this._customerId = customerId;
         this._createdAt = createDate;
+        this._amount = amount;
     }
 
+    public getTitle(locale: Locale): string {
+        switch (locale) {
+            case Locale.en:
+                return "Plan purchased with wallet manually";
+            case Locale.ca:
+                return "Se ha comprado un plan con monedero manualmente";
+            case Locale.es:
+                return "Se ha comprado un plan con monedero manualmente";
+            default:
+                return "Se ha comprado un plan con monedero manualmente"
+        }
+    }
 
     /**
      * Getter type
@@ -59,6 +74,24 @@ export class PurchasePlanWithWalletLog implements WalletMovementLog {
     public get createdAt(): Date {
         return this._createdAt;
     }
+
+
+    /**
+     * Getter amount
+     * @return {number}
+     */
+    public get amount(): number {
+        return this._amount;
+    }
+
+    /**
+     * Setter amount
+     * @param {number} value
+     */
+    public set amount(value: number) {
+        this._amount = value;
+    }
+
 
     /**
      * Setter createdAt

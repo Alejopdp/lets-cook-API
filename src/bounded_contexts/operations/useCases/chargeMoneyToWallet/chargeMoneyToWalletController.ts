@@ -1,4 +1,5 @@
 import { BaseController } from "../../../../core/infra/BaseController";
+import { Locale } from "../../domain/locale/Locale";
 import { ChargeMoneyToWalletUseCase } from "./chargeMoneyToWallet";
 import { ChargeMoneyToWalletDto } from "./chargeMoneyToWalletDto";
 
@@ -15,7 +16,8 @@ export class ChargeMoneyToWalletController extends BaseController {
             const dto: ChargeMoneyToWalletDto = {
                 customerId: this.req.params.customerId,
                 amountToCharge: this.req.body.amountToCharge,
-                paymentMethodId: this.req.body.paymentMethodId
+                paymentMethodId: this.req.body.paymentMethodId,
+                locale: (<any>Locale)[this.req.query.locale as string] || Locale.es,
             };
 
             const presentedWallet = await this.chargeMoneyToWallet.execute(dto);

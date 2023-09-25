@@ -1,3 +1,4 @@
+import { Locale } from "../../../locale/Locale";
 import { CustomerId } from "../../CustomerId";
 import { WalletMovementLog } from "./WalletMovementLog";
 import { WalletMovementLogType } from "./WalletMovementLogTypeEnum";
@@ -8,6 +9,7 @@ export class CreateWalletLog implements WalletMovementLog {
     private _description: string;
     private _customerId: CustomerId;
     private _createdAt: Date;
+    private _amount: number;
 
     constructor(customerId: CustomerId, createdAt: Date) {
         this._type = WalletMovementLogType.CREATE_WALLET;
@@ -15,10 +17,21 @@ export class CreateWalletLog implements WalletMovementLog {
         this._description = "";
         this._customerId = customerId;
         this._createdAt = createdAt;
+        this._amount = 0;
 
     }
-    getTitle(): string {
-        throw new Error("Method not implemented.");
+
+    public getTitle(locale: Locale): string {
+        switch (locale) {
+            case Locale.en:
+                return "Your wallet has been created";
+            case Locale.ca:
+                return "Se ha creado tu monedero";
+            case Locale.es:
+                return "Se ha creado tu monedero";
+            default:
+                return "Se ha creado tu monedero"
+        }
     }
 
 
@@ -63,6 +76,24 @@ export class CreateWalletLog implements WalletMovementLog {
     public get createdAt(): Date {
         return this._createdAt;
     }
+
+
+    /**
+     * Getter amount
+     * @return {number}
+     */
+    public get amount(): number {
+        return this._amount;
+    }
+
+    /**
+     * Setter amount
+     * @param {number} value
+     */
+    public set amount(value: number) {
+        this._amount = value;
+    }
+
 
     /**
      * Setter createdAt

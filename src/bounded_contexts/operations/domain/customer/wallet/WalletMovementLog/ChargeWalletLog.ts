@@ -1,3 +1,4 @@
+import { Locale } from "../../../locale/Locale";
 import { CustomerId } from "../../CustomerId";
 import { WalletMovementLog } from "./WalletMovementLog";
 import { WalletMovementLogType } from "./WalletMovementLogTypeEnum";
@@ -8,15 +9,29 @@ export class ChargeWalletLog implements WalletMovementLog {
     private _description: string;
     private _customerId: CustomerId;
     private _createdAt: Date;
+    private _amount: number;
 
-    constructor(customerId: CustomerId, createdAt: Date) {
+    constructor(customerId: CustomerId, createdAt: Date, amount: number) {
         this._type = WalletMovementLogType.CHARGE_WALLET;
         this._title = "";
         this._description = "";
         this._customerId = customerId;
         this._createdAt = createdAt;
+        this._amount = amount;
     }
 
+    public getTitle(locale: Locale): string {
+        switch (locale) {
+            case Locale.en:
+                return "New funds added to the wallet";
+            case Locale.ca:
+                return "Nueva carga en el monedero";
+            case Locale.es:
+                return "Nueva carga en el monedero";
+            default:
+                return "Nueva carga en el monedero"
+        }
+    }
 
     /**
      * Getter type
@@ -59,6 +74,24 @@ export class ChargeWalletLog implements WalletMovementLog {
     public get createdAt(): Date {
         return this._createdAt;
     }
+
+
+    /**
+     * Getter amount
+     * @return {number}
+     */
+    public get amount(): number {
+        return this._amount;
+    }
+
+    /**
+     * Setter amount
+     * @param {number} value
+     */
+    public set amount(value: number) {
+        this._amount = value;
+    }
+
 
     /**
      * Setter createdAt

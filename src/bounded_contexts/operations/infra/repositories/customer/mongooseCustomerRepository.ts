@@ -41,7 +41,8 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                     type: log.type,
                     title: log.title,
                     description: log.description,
-                    customer: customer.id.toString()
+                    customer: customer.id.toString(),
+                    amount: log.amount
                 })));
             }
 
@@ -50,7 +51,8 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                 type: log.type,
                 title: log.title,
                 description: log.description,
-                customer: customer.id.toString()
+                customer: customer.id.toString(),
+                amount: log.amount
             })) ?? [])])
         }
     }
@@ -75,6 +77,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                     title: log.title,
                     description: log.description,
                     createdAt: log.createdAt,
+                    amount: log.amount
                 }))
             }
         }
@@ -103,6 +106,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
                     title: log.title,
                     description: log.description,
                     createdAt: log.createdAt,
+                    amount: log.amount
                 }))
             }
         }

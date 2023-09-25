@@ -1,3 +1,4 @@
+import { Locale } from "../../../locale/Locale";
 import { CustomerId } from "../../CustomerId";
 import { WalletMovementLog } from "./WalletMovementLog";
 import { WalletMovementLogType } from "./WalletMovementLogTypeEnum";
@@ -8,6 +9,7 @@ export class SelectWalletAsDefaultLog implements WalletMovementLog {
     private _description: string;
     private _customerId: CustomerId;
     private _createdAt: Date;
+    private _amount: number;
 
     constructor(customerId: CustomerId, createdAt: Date) {
         this._type = WalletMovementLogType.SELECT_WALLET_AS_DEFAULT;
@@ -15,8 +17,21 @@ export class SelectWalletAsDefaultLog implements WalletMovementLog {
         this._description = "";
         this._customerId = customerId;
         this._createdAt = createdAt;
+        this._amount = 0;
     }
 
+    public getTitle(locale: Locale): string {
+        switch (locale) {
+            case Locale.en:
+                return "Wallet has been chosen as the default payment method";
+            case Locale.ca:
+                return "Se ha elegido a monedero como pago predefinido";
+            case Locale.es:
+                return "Se ha elegido a monedero como pago predefinido";
+            default:
+                return "Se ha elegido a monedero como pago predefinido"
+        }
+    }
 
 
     /**
@@ -60,6 +75,24 @@ export class SelectWalletAsDefaultLog implements WalletMovementLog {
     public get createdAt(): Date {
         return this._createdAt;
     }
+
+
+    /**
+     * Getter amount
+     * @return {number}
+     */
+    public get amount(): number {
+        return this._amount;
+    }
+
+    /**
+     * Setter amount
+     * @param {number} value
+     */
+    public set amount(value: number) {
+        this._amount = value;
+    }
+
 
     /**
      * Setter createdAt
