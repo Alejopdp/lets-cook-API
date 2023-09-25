@@ -26,7 +26,7 @@ export class CreateWalletLog implements WalletMovementLog {
             case Locale.en:
                 return "Your wallet has been created";
             case Locale.ca:
-                return "Se ha creado tu monedero";
+                return "S'ha creat el teu moneder";
             case Locale.es:
                 return "Se ha creado tu monedero";
             default:

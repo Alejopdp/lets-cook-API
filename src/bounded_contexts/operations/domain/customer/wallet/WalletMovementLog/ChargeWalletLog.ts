@@ -25,7 +25,7 @@ export class ChargeWalletLog implements WalletMovementLog {
             case Locale.en:
                 return "New funds added to the wallet";
             case Locale.ca:
-                return "Nueva carga en el monedero";
+                return "Nova càrrega en el moneder";
             case Locale.es:
                 return "Nueva carga en el monedero";
             default:

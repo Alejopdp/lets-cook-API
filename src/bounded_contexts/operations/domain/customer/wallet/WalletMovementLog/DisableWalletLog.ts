@@ -26,7 +26,7 @@ export class DisableWalletLog implements WalletMovementLog {
             case Locale.en:
                 return "Your wallet has been deactivated";
             case Locale.ca:
-                return "Se ha desactivado tu monedero";
+                return "S'ha desactivat el teu moneder";
             case Locale.es:
                 return "Se ha desactivado tu monedero";
             default:
