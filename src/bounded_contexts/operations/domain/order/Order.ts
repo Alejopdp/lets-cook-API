@@ -99,8 +99,9 @@ export class Order extends Entity<Order> {
         const isTuesday = choosingDate.getDay() === 2;
         const isWednesday = choosingDate.getDay() === 3;
         const isFridayAfter23 = choosingDate.getDay() === 5 && choosingDate.getHours() >= 23 && choosingDate.getMinutes() >= 59;
-        const isChoosingTheSameDateOfCreation = MomentTimeService.isSameDay(choosingDate, this.createdAt);
         const isChoosingRecipesForTheCurrentWeek = this.week.containsDate(choosingDate) && this.week.containsDate(this.shippingDate);
+
+        if (this.shippingDate.getTime() < choosingDate.getTime()) throw new Error("No puedes elegir recetas para una semana que ya pasó.");
 
         if (isMonday && isChoosingRecipesForTheCurrentWeek && !isAdminChoosing) {
             throw new Error('No puedes elegir recetas el lunes para una entrega el martes o miércoles de la misma semana.');

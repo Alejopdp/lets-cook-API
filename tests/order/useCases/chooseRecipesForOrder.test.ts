@@ -300,6 +300,24 @@ describe("Given a user with a brand new subscription purchased on Friday", () =>
 
         })
 
+        it("Should throw an error if the customer tries to choose recipes for a past order", async () => {
+            const FUTURE_CHOOSING_DATE: Date = new Date(2023, 8, 25, 17)
+
+            const chooseRecipesForOrderDto: ChooseRecipesForOrderDto = {
+                isAdminChoosing: false,
+                orderId: subscriptionResult.firstOrder.id.toString(),
+                recipeSelection: [{ quantity: 2, recipeId: arepasDeCrhistian.id.toString(), recipeVariantId: arepasDeCrhistian.recipeVariants[0].id.toString() }],
+                choosingDate: FUTURE_CHOOSING_DATE,
+                isInCheckout: false
+            }
+            const originalWeeksArepas = [...arepasDeCrhistian.availableWeeks]
+            arepasDeCrhistian.availableWeeks = [...arepasDeCrhistian.availableWeeks, subscriptionResult.firstOrder.week]
+
+            await expect(chooseRecipesForOrderUseCase.execute(chooseRecipesForOrderDto)).rejects.toThrow()
+            arepasDeCrhistian.availableWeeks = [...originalWeeksArepas]
+        })
+
+
         describe("When has a shipping day set to Tuesdays", () => {
             const CUSTOMER_ID = new CustomerId()
             let customer: Customer;
