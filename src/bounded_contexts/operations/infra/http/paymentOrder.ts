@@ -7,7 +7,7 @@ import { createSubscriptionController } from "../../useCases/createSubscription"
 import { getCustomerPaymentOrdersController } from "../../useCases/getCustomerPaymentOrders";
 import { getPaymentOrderByIdController } from "../../useCases/getPaymentOrderById";
 import { getPaymentOrdersAsAdminController } from "../../useCases/getPaymentOrdersAsAdmin";
-import { refundPaymentOrderController } from "../../useCases/refundPaymentOrder.ts";
+import { refundPaymentOrderController } from "../../useCases/refundPaymentOrder";
 import { retryPaymentOrderOfRejectedPaymentOrderController } from "../../useCases/retryPaymentOfRejectedPaymentOrder";
 import { updatePaymentOrderAndOrdersStateController } from "../../useCases/updatePaymentOrderAndOrdersState";
 import { UpdatePaymentOrderAndOrdersStateController } from "../../useCases/updatePaymentOrderAndOrdersState/updatePaymentOrderAndOrdersStateController";
