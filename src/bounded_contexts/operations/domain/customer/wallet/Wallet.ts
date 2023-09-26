@@ -42,6 +42,13 @@ export class Wallet extends Entity<Wallet>  {
         this.balance = Number(bigAmountToCharge.plus(bigBalance));
     }
 
+    public refundMoney(amount: number): void {
+        const bigAmountToCharge = new Big(amount);
+        const bigBalance = new Big(this.balance);
+
+        this.balance = Number(bigAmountToCharge.plus(bigBalance));
+    }
+
     public updateAmountToCharge(amountToCharge: number): void {
         if (amountToCharge < 5) throw new Error("Amount to charge must be at least 5");
 

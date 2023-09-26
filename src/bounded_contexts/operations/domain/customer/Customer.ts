@@ -198,7 +198,7 @@ export class Customer extends Entity<Customer> {
 
     public refundMoneyToWallet(amountToRefund: number): void {
         if (!this.wallet) throw new Error("No se puede reembolsar dinero a la billetera porque no existe");
-        this.wallet.chargeMoney(amountToRefund);
+        this.wallet.refundMoney(amountToRefund);
         this.addWalletMovementLog(WalletMovementLogType.REFUND_WALLET, amountToRefund)
     }
 
