@@ -23,6 +23,7 @@ import { PaySaturdayJobWithWalletLog } from "./wallet/WalletMovementLog/PaySatur
 import { PurchasePlanWithWalletLog } from "./wallet/WalletMovementLog/PurchasPlanWithWalletLog";
 import { SelectWalletAsDefaultLog } from "./wallet/WalletMovementLog/SelectWalletAsDefaultLog";
 import { WalletMovementLog } from "./wallet/WalletMovementLog/WalletMovementLog";
+import { RefundWalletLog } from "./wallet/WalletMovementLog/RefundWalletLog";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -143,6 +144,9 @@ export class Customer extends Entity<Customer> {
             case WalletMovementLogType.SELECT_WALLET_AS_DEFAULT:
                 this.wallet?.addWalletMovementLog(new SelectWalletAsDefaultLog(this.id, new Date()));
                 break;
+            case WalletMovementLogType.REFUND_WALLET:
+                this.wallet?.addWalletMovementLog(new RefundWalletLog(this.id, new Date(), amount));
+                break;
             default:
                 break;
         }
@@ -190,6 +194,12 @@ export class Customer extends Entity<Customer> {
             createdAt: log.createdAt,
             amount: log.amount
         })).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    }
+
+    public refundMoneyToWallet(amountToRefund: number): void {
+        if (!this.wallet) throw new Error("No se puede reembolsar dinero a la billetera porque no existe");
+        this.wallet.chargeMoney(amountToRefund);
+        this.addWalletMovementLog(WalletMovementLogType.REFUND_WALLET, amountToRefund)
     }
 
     public buyWithWallet(amountToPay: number): void {

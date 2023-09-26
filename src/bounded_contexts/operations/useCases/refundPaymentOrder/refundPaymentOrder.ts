@@ -6,24 +6,37 @@ import { IPaymentService } from "../../application/paymentService/IPaymentServic
 import { ILogRepository } from "../../infra/repositories/log/ILogRepository";
 import { Log } from "../../domain/customer/log/Log";
 import { LogType } from "../../domain/customer/log/LogType";
+import { ICustomerRepository } from "../../infra/repositories/customer/ICustomerRepository";
 
 export class RefundPaymentOrder {
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _paymentService: IPaymentService;
     private _logRepository: ILogRepository;
+    private _customerRepository: ICustomerRepository;
 
-    constructor(paymentOrderRepository: IPaymentOrderRepository, paymentService: IPaymentService, logRepository: ILogRepository) {
+    constructor(paymentOrderRepository: IPaymentOrderRepository, paymentService: IPaymentService, logRepository: ILogRepository, customerRepository: ICustomerRepository) {
         this._paymentOrderRepository = paymentOrderRepository;
         this._paymentService = paymentService;
         this._logRepository = logRepository;
+        this._customerRepository = customerRepository;
     }
 
     public async execute(dto: RefundPaymentOrderDto): Promise<PaymentOrder> {
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(new PaymentOrderId(dto.paymentOrderId));
+        const hasBeenPaidWithWallet = paymentOrder.paymentIntentId === "Monedero";
+        const hasBeenPaidInStripe = !!paymentOrder.paymentIntentId && !hasBeenPaidWithWallet;
 
-        if (!!paymentOrder.paymentIntentId) await this.paymentService.refund(paymentOrder.paymentIntentId, dto.amount);
+        if (hasBeenPaidInStripe) await this.paymentService.refund(paymentOrder.paymentIntentId, dto.amount);
 
         paymentOrder.refund(dto.amount);
+
+        if (hasBeenPaidWithWallet) {
+            const customer = await this.customerRepository.findByIdOrThrow(paymentOrder.customerId);
+
+            customer.refundMoneyToWallet(dto.amount)
+
+            await this.customerRepository.save(customer);
+        }
 
         await this.paymentOrderRepository.save(paymentOrder);
         this.logRepository.save(
@@ -67,5 +80,14 @@ export class RefundPaymentOrder {
      */
     public get logRepository(): ILogRepository {
         return this._logRepository;
+    }
+
+
+    /**
+     * Getter customerRepository
+     * @return {ICustomerRepository}
+     */
+    public get customerRepository(): ICustomerRepository {
+        return this._customerRepository;
     }
 }

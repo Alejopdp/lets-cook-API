@@ -222,6 +222,7 @@ export class PaymentOrder extends Entity<PaymentOrder> {
             this.state.toRefunded(this);
         else this.state.toPartiallyRefunded(this);
 
+
         this.quantityRefunded = (Math.round(this.quantityRefunded * 100) + Math.round(amount * 100)) / 100;
     }
 

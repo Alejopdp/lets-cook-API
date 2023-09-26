@@ -21,10 +21,7 @@ const chargeMoneyToWalletService = new ChargeMoneyToWallet(mockPaymentService)
 describe("Charge money to wallet service", () => {
     describe("Given a customer without a wallet", () => {
         const CUSTOMER_ID = new CustomerId()
-        let customerPaymentMethod: PaymentMethod;
         let customer: Customer
-        const GOOD_DATES_OF_CHARGE = [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 3, hour: "17", minute: "30" }]
-        const DUPLICATED_DATES_OF_CHARGE = [{ dayNumber: 1, hour: "13", minute: "45" }, { dayNumber: 1, hour: "17", minute: "30" }, { dayNumber: 3, hour: "17", minute: "30" }]
 
         beforeAll(async () => {
             customer = Customer.create(
