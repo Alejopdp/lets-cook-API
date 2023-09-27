@@ -89,6 +89,7 @@ export class RetryPaymentOfRejectedPaymentOrder {
         paymentOrder.addHumanId(paymentOrderWithHumanIdCount);
 
         await this.paymentOrderRepository.save(paymentOrder);
+        await this.customerRepository.save(customer);
 
         return paymentOrder;
     }
