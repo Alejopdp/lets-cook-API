@@ -143,7 +143,7 @@ export class PayAllSubscriptions {
                                 (<any>Locale)[paymentOrderCustomer.personalInfo?.preferredLanguage || "es"]
                             ),
                             totalAmount,
-                            orders: paymentOrderOrderMap[paymentOrderId].filter((order) => !order.isCancelled()),
+                            orders: paymentOrderOrderMap[paymentOrderId].filter((order) => !order.isCancelled() && !order.isSkipped()),
                             paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
                             discountAmount: paymentOrderToBill.getDiscountAmountOrShippingCostIfHasFreeShipping(),
                         }
