@@ -8,6 +8,8 @@ import { IPaymentService } from "../../application/paymentService/IPaymentServic
 import { IOrderRepository } from "../../infra/repositories/order/IOrderRepository";
 import { Order } from "../../domain/order/Order";
 import { Locale } from "../../domain/locale/Locale";
+import Stripe from "stripe";
+import { PaymentIntent } from "../../application/paymentService";
 
 export class RetryPaymentOfRejectedPaymentOrder {
     private _paymentOrderRepository: IPaymentOrderRepository;
@@ -38,29 +40,52 @@ export class RetryPaymentOfRejectedPaymentOrder {
             await this.orderRepository.findByPaymentOrderId(paymentOrder.id, Locale.es),
             await this.paymentOrderRepository.countPaymentOrdersWithHumanId(),
         ]);
-        // const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrder.id);
 
-        const paymentIntent = await this.paymentService.paymentIntent(
-            paymentOrder.getFinalAmount(),
-            customer.getDefaultPaymentMethod()?.stripeId!,
-            customer.email,
-            customer.stripeId,
-            true
-        );
+        var paymentIntent: Stripe.PaymentIntent | PaymentIntent = {
+            id: "",
+            status: "succeeded",
+            client_secret: "",
+            amount: 0
+        };
+        const customerHasWalletAsDefaultPaymentMethod = customer.getDefaultPaymentMethod()?.id.toString() === "wallet";
+
+        if (customerHasWalletAsDefaultPaymentMethod) {
+            const succeeded = customer.payBillingJobWithWallet(paymentOrder.getFinalAmount());
+
+            if (!succeeded) throw new Error("Ocurrió un error inesperado, intenta nuevamente");
+
+            paymentIntent = {
+                id: "Monedero",
+                status: "succeeded",
+                client_secret: "",
+                amount: paymentOrder.getFinalAmount()
+            };
+        }
+
+        if (!customerHasWalletAsDefaultPaymentMethod) {
+            const stripePaymentIntent = await this.paymentService.paymentIntent(
+                paymentOrder.getFinalAmount(),
+                customer.getDefaultPaymentMethod()?.stripeId!,
+                customer.email,
+                customer.stripeId,
+                true
+            );
+
+            paymentIntent = stripePaymentIntent;
+        }
+
 
         if (!!!paymentIntent) throw new Error("Ocurrió un error inesperado, intenta nuevamente");
         if (paymentIntent.status === "canceled") throw new Error("Error al procesar el pago, el mismo fue cancelado");
-        // if (paymentIntent.status === "processing")
         if (paymentIntent.status === "requires_action")
             throw new Error("Error al procesar el pago, el cliente no autorizó el uso de la tarjeta");
-        // if (paymentIntent.status === "requires_capture") throw new Error("Error al procesar el pago, el cliente no autorizó el uso de la tarjeta");
         if (paymentIntent.status === "requires_confirmation")
             throw new Error("Error al procesar el pago, el cliente no autorizó el uso de la tarjeta");
         if (paymentIntent.status === "requires_payment_method")
             throw new Error("Error al procesar el pago, el cliente necesita agregar un método de pago");
 
-        paymentOrder.toBilled(orders, customer);
         paymentOrder.paymentIntentId = paymentIntent.id;
+        paymentOrder.toBilled(orders, customer);
         paymentOrder.addHumanId(paymentOrderWithHumanIdCount);
 
         await this.paymentOrderRepository.save(paymentOrder);

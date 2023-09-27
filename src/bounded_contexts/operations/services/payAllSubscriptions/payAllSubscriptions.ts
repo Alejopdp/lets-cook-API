@@ -93,7 +93,6 @@ export class PayAllSubscriptions {
             customerShippingZoneMap[customer.id.value] = customerShippingZone;
         }
 
-        // CUSTOMER SHIPPING ZONE REPOSITORY
 
         // PAYMENT ORDER - ORDER MAP
         for (let order of ordersToBill) {
