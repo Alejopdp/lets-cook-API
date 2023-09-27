@@ -18,6 +18,7 @@ import { ISubscriptionRepository } from "../../infra/repositories/subscription/I
 import { IWeekRepository } from "../../infra/repositories/week/IWeekRepository";
 import { PayAllSubscriptionsDto } from "./payAllSubscriptionsDto";
 import { PaymentIntent } from "../../application/paymentService";
+import { WalletMovementLogType } from "../../domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum";
 export class PayAllSubscriptions {
     private _customerRepository: ICustomerRepository;
     private _orderRepository: IOrderRepository;
@@ -325,7 +326,12 @@ export class PayAllSubscriptions {
 
         const succeeded = customer.payBillingJobWithWallet(totalAmount)
 
-        if (!succeeded) paymentIntent.status = "cancelled"
+        if (!succeeded) {
+            paymentIntent.status = "cancelled"
+            customer.addWalletMovementLog(WalletMovementLogType.PAYMENT_REJECTED, totalAmount)
+        }
+
+
 
         return paymentIntent
 

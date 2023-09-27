@@ -764,6 +764,10 @@ describe("Saturday billing job", () => {
                     expect(mockPaymentService.paymentIntent).not.toHaveBeenCalled()
                 })
 
+                it("Should add a rejected wallet movement log", async () => {
+                    expect(customer.wallet?.walletMovements.filter(log => log.type === WalletMovementLogType.PAYMENT_REJECTED).length).toBe(1)
+                })
+
                 afterAll(async () => {
                     mockPaymentOrderRepository.$paymentOrders = mockPaymentOrderRepository.$paymentOrders.filter((paymentOrder: PaymentOrder) => !paymentOrder.customerId.equals(CUSTOMER_ID))
                     mockOrderRepository.$orders = mockOrderRepository.$orders.filter((order: Order) => !order.customer.id.equals(CUSTOMER_ID))

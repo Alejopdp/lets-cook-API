@@ -24,6 +24,7 @@ import { PurchasePlanWithWalletLog } from "./wallet/WalletMovementLog/PurchasPla
 import { SelectWalletAsDefaultLog } from "./wallet/WalletMovementLog/SelectWalletAsDefaultLog";
 import { WalletMovementLog } from "./wallet/WalletMovementLog/WalletMovementLog";
 import { RefundWalletLog } from "./wallet/WalletMovementLog/RefundWalletLog";
+import { PaymentRejectedWalletLog } from "./wallet/WalletMovementLog/PaymentRejectedWalletLog";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -146,6 +147,9 @@ export class Customer extends Entity<Customer> {
                 break;
             case WalletMovementLogType.REFUND_WALLET:
                 this.wallet?.addWalletMovementLog(new RefundWalletLog(this.id, new Date(), amount));
+                break;
+            case WalletMovementLogType.PAYMENT_REJECTED:
+                this.wallet?.addWalletMovementLog(new PaymentRejectedWalletLog(this.id, new Date(), amount));
                 break;
             default:
                 break;
