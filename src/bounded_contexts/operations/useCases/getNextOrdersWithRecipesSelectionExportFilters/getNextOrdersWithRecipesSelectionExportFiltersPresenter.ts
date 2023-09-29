@@ -32,7 +32,8 @@ export class GetNextOrdersWithRecipesSelectionExportFiltersPresenter {
         return weeks.map((week) => ({
             value: week.id.value,
             label: week.getShorterLabel(),
-        }));
+            minDay: week.minDay
+        })).sort((week1, week2) => (week1.minDay.getTime() > week2.minDay.getTime() ? 1 : -1));
     }
 
     private presentDates(dates: Date[]): FilterOption[] {
@@ -45,7 +46,7 @@ export class GetNextOrdersWithRecipesSelectionExportFiltersPresenter {
     private presentCustomers(customers: Customer[]): FilterOption[] {
         const sortedCustomers = customers.sort((customer1, customer2) =>
             !!!customer2.personalInfo?.name ||
-            (!!customer1.personalInfo?.name && customer1.personalInfo?.name.toLowerCase() > customer2.personalInfo?.name.toLowerCase())
+                (!!customer1.personalInfo?.name && customer1.personalInfo?.name.toLowerCase() > customer2.personalInfo?.name.toLowerCase())
                 ? 1
                 : -1
         );
