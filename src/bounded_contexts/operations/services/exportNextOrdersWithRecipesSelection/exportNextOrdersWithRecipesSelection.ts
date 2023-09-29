@@ -40,10 +40,6 @@ export class ExportNextOrdersWithRecipesSelection {
         this._paymentOrderRepository = paymentOrderRepository;
     }
 
-    // Agregar columna con cantidad de entregas hasta la fecha. N payment orders billed de una semana cuentan como 1 entrega, con que haya solo 1 cuenta como entrega,
-    // Obtener todas las payment orders del customer hasta la fecha mas alta que se ingrese como filtro (El filtro tendrá semanas)
-    // Por cada semana, sumar 1 en cada semana que tenga al menos 1 payment order billed
-
     public async execute(dto: ExportNextOrdersWithRecipesSelectionDto): Promise<void> {
         const weeksIds: WeekId[] = dto.weeks.map((id: string) => new WeekId(id));
         const orders: Order[] =
@@ -131,11 +127,12 @@ export class ExportNextOrdersWithRecipesSelection {
         }
 
         for (let order of activeOrders) {
-            const subscription = subscriptionMap[order.subscriptionId.value];
+            const subscription = subscriptionMap[order.subscriptionId.toString()];
             const orderPlanVariant = order.plan.getPlanVariantById(order.planVariantId);
 
             if (order.recipeSelection.length === 0) {
                 for (let i = 0; i < (order.getNumberOfRecipesOrReturn0() || 1); i++) {
+
                     ordersExport.push({
                         stripePaymentId:
                             order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
@@ -180,7 +177,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         chooseState: order.plan.abilityToChooseRecipes ? RecipeSelectionState.AUN_NO_ELIGIO : RecipeSelectionState.NO_ELIGE,
                         pricePlan: order.getTotalPrice(),
                         kitPrice: order.getKitPrice(),
-                        coupon: order.couponCode,
+                        coupon: order.couponCode || subscription.coupon?.couponCode || "",
                         planDiscount: order.discountAmount,
                         kitDiscount: order.getKitDiscount(),
                         finalPrice: order.getTotalPrice() - order.discountAmount,
@@ -202,6 +199,7 @@ export class ExportNextOrdersWithRecipesSelection {
 
             for (let recipeSelection of order.recipeSelection) {
                 for (let i = 0; i < recipeSelection.quantity; i++) {
+
                     ordersExport.push({
                         stripePaymentId:
                             order.paymentOrderId && paymentOrderMap[order.paymentOrderId.value]
@@ -248,7 +246,7 @@ export class ExportNextOrdersWithRecipesSelection {
                         chooseState: order.choseByAdmin ? RecipeSelectionState.ELEGIDA_POR_LC : RecipeSelectionState.ELIGIO, // TO DO: Elegido por LC
                         pricePlan: order.getTotalPrice(),
                         kitPrice: order.getKitPrice(),
-                        coupon: order.couponCode,
+                        coupon: order.couponCode || subscription.coupon?.couponCode || "",
                         planDiscount: order.discountAmount,
                         kitDiscount: order.getKitDiscount(),
                         finalKitPrice: order.getFinalKitPrice(),
