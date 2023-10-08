@@ -7,13 +7,14 @@ import { GetPaymentOrderById } from "./getPaymentOrderById";
 import { GetPaymentOrderByIdController } from "./getPaymentOrderByIdController";
 import { GetPaymentOrderByIdPresenter } from "./getPaymentOrderByIdPresenter";
 
+const getPaymentOrderByIdPresenter: GetPaymentOrderByIdPresenter = new GetPaymentOrderByIdPresenter(v3S3Service);
 export const getPaymentOrderById: GetPaymentOrderById = new GetPaymentOrderById(
     mongoosePaymentOrderReposiotry,
     mongooseOrderRepository,
     mongooseCustomerRepository,
-    mongooseSubscriptionRepository
+    mongooseSubscriptionRepository,
+    getPaymentOrderByIdPresenter
 );
-export const getPaymentOrderByIdPresenter: GetPaymentOrderByIdPresenter = new GetPaymentOrderByIdPresenter(v3S3Service);
 export const getPaymentOrderByIdController: GetPaymentOrderByIdController = new GetPaymentOrderByIdController(
     getPaymentOrderById,
     getPaymentOrderByIdPresenter

@@ -131,7 +131,6 @@ describe("Create Subscription Use Case", () => {
             purchaseDate: new Date()
         }
 
-
         firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
     })
 

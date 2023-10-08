@@ -1,3 +1,4 @@
+import Big from "big.js";
 import { IStorageService } from "../../application/storageService/IStorageService";
 import { Customer } from "../../domain/customer/Customer";
 import { Locale } from "../../domain/locale/Locale";
@@ -6,6 +7,37 @@ import { RecipeSelection } from "../../domain/order/RecipeSelection";
 import { PaymentOrder } from "../../domain/paymentOrder/PaymentOrder";
 import { Subscription } from "../../domain/subscription/Subscription";
 
+type PresentedOrder = {
+    id: string;
+    number: number;
+    shippingDate: string;
+    state: string;
+    hasRecipes: boolean;
+    recipes: any[];
+    planIcon: string;
+    planName: string;
+    planVariant: string;
+    amount: number;
+};
+
+export type GetPaymentOrderByIdHttpResponse = {
+    id: string;
+    amount: number;
+    billingDate: string;
+    discountAmount: number;
+    couponCodes: (string | undefined)[];
+    shippingCost: number;
+    customer: string;
+    customerName: string;
+    state: string;
+    orders: PresentedOrder[];
+    totalAmount: number;
+    subtotal: number;
+    taxes: number;
+    paymentIntentId: string;
+    quantityRefunded: number;
+    humanId: string | undefined;
+}
 export class GetPaymentOrderByIdPresenter {
     private _storageService: IStorageService;
 
@@ -19,27 +51,28 @@ export class GetPaymentOrderByIdPresenter {
         customer: Customer,
         subscriptions: Subscription[],
         locale: Locale
-    ): Promise<any> {
+    ): Promise<GetPaymentOrderByIdHttpResponse> {
         const presentedOrders = await this.presentOrders(orders, locale);
 
         return {
-            id: paymentOrder.id.value,
+            id: paymentOrder.id.toString(),
             amount: paymentOrder.amount,
             billingDate: paymentOrder.getHumanBillingDate(locale),
             discountAmount: paymentOrder.getDiscountAmountOrShippingCostIfHasFreeShipping(),
             couponCodes: subscriptions.map((subscription) => subscription.coupon?.couponCode),
             shippingCost: paymentOrder.shippingCost,
-            customer: paymentOrder.customerId.value,
-            customerName: customer.getPersonalInfo().fullName,
-            // state: paymentOrder.state.humanTitle,
+            customer: paymentOrder.customerId.toString(),
+            customerName: customer.getPersonalInfo().fullName!,
             state: paymentOrder.state.title,
             orders: presentedOrders,
             totalAmount: paymentOrder.getFinalAmount(),
             subtotal: paymentOrder.amount,
             taxes: paymentOrder.shippingCost * 0.21 + paymentOrder.getPlansAmountMinusDiscount() * 0.1,
+            // taxes: parseFloat((paymentOrder.shippingCost * 0.21 + paymentOrder.getPlansAmountMinusDiscount() * 0.1).toFixed(2)),
             paymentIntentId: paymentOrder.paymentIntentId,
             quantityRefunded: paymentOrder.quantityRefunded,
             humanId: paymentOrder.getHumanIdOrIdValue(),
+
         };
     }
 
@@ -54,7 +87,6 @@ export class GetPaymentOrderByIdPresenter {
                 id: order.id.value,
                 number: order.counter,
                 shippingDate: order.getHumanShippmentDay(locale),
-                // state: order.state.humanTitle,
                 state: order.state.title,
                 hasRecipes: order.hasChosenRecipes(),
                 recipes: presentedRecipes,
