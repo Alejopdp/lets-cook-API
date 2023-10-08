@@ -61,7 +61,7 @@ export class MongooseCustomerRepository implements ICustomerRepository {
         const customerDb = await MongooseCustomer.findOne({
             email: { $regex: `^${email.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}$`, $options: "i" },
             deletionFlag: false,
-        });
+        }).lean();
 
 
         if (!customerDb) {

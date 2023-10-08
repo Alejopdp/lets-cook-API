@@ -45,6 +45,7 @@ export class LoginWithEmailController extends BaseController {
                     path: "/",
                 })
             );
+
             return this.ok(this.res, result.value);
         } catch (err: any) {
             return this.fail(err);
