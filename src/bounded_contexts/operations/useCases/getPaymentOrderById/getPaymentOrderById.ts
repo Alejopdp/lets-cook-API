@@ -8,28 +8,33 @@ import { IOrderRepository } from "../../infra/repositories/order/IOrderRepositor
 import { IPaymentOrderRepository } from "../../infra/repositories/paymentOrder/IPaymentOrderRepository";
 import { ISubscriptionRepository } from "../../infra/repositories/subscription/ISubscriptionRepository";
 import { GetPaymentOrderByIdDto } from "./getPaymentOrderByIdDto";
+import { GetPaymentOrderByIdHttpResponse, GetPaymentOrderByIdPresenter } from "./getPaymentOrderByIdPresenter";
 
 export class GetPaymentOrderById {
     private _paymentOrderRepository: IPaymentOrderRepository;
     private _orderRepository: IOrderRepository;
     private _customerRepository: ICustomerRepository;
     private _subscriptionRepository: ISubscriptionRepository;
+    private _presenter: GetPaymentOrderByIdPresenter
+        ;
 
     constructor(
         paymentOrderRepository: IPaymentOrderRepository,
         orderRepository: IOrderRepository,
         customerRepository: ICustomerRepository,
-        subscriptionRepository: ISubscriptionRepository
+        subscriptionRepository: ISubscriptionRepository,
+        presenter: GetPaymentOrderByIdPresenter
     ) {
         this._paymentOrderRepository = paymentOrderRepository;
         this._orderRepository = orderRepository;
         this._customerRepository = customerRepository;
         this._subscriptionRepository = subscriptionRepository;
+        this._presenter = presenter;
     }
 
     public async execute(
         dto: GetPaymentOrderByIdDto
-    ): Promise<{ paymentOrder: PaymentOrder; orders: Order[]; customer: Customer; subscriptions: Subscription[] }> {
+    ): Promise<GetPaymentOrderByIdHttpResponse> {
         const paymentOrderId: PaymentOrderId = new PaymentOrderId(dto.paymentOrderId);
         const paymentOrder: PaymentOrder = await this.paymentOrderRepository.findByIdOrThrow(paymentOrderId);
         const orders: Order[] = await this.orderRepository.findByPaymentOrderId(paymentOrderId, dto.locale);
@@ -38,7 +43,7 @@ export class GetPaymentOrderById {
             orders.filter((order) => order.discountAmount > 0).map((order) => order.subscriptionId)
         );
 
-        return { paymentOrder, orders, customer, subscriptions };
+        return this.presenter.present(paymentOrder, orders, customer, subscriptions, dto.locale);
     }
 
     /**
@@ -72,4 +77,13 @@ export class GetPaymentOrderById {
     public get subscriptionRepository(): ISubscriptionRepository {
         return this._subscriptionRepository;
     }
+    /**
+ * Getter presenter
+ * @return {GetPaymentOrderByIdPresenter}
+ */
+    public get presenter(): GetPaymentOrderByIdPresenter {
+        return this._presenter;
+    }
+
+
 }

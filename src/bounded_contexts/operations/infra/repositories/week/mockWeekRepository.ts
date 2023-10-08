@@ -10,16 +10,26 @@ const createMockWeeks = (): Week[] => {
     // let startDate = new Date(2021, 0, 4);
     // let endDate = new Date(2040, 10, 30, 23, 59, 0);
 
-    let weeks = [];
+    let weeks: Week[] = [];
 
-    while (startDate.getTime() <= endDate.getTime()) {
-        const week = new Week(
-            new Date(startDate),
-            new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000),
-            new WeekId());
+    // Write a loop that generates all the weeks from 2021-01-04 to 2040-11-30. The min day should be Monday and the max day should be Sunday at 23:59.
+
+    while (startDate <= endDate) {
+        const minDay = new Date(startDate);
+        const maxDay = new Date(startDate);
+        maxDay.setDate(maxDay.getDate() + 7);
+        maxDay.setHours(0);
+        maxDay.setMinutes(59);
+        maxDay.setSeconds(59);
+        maxDay.setMilliseconds(0);
+
+        const week = new Week(minDay, maxDay);
         weeks.push(week);
-        startDate = new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+        startDate.setDate(startDate.getDate() + 7);
     }
+
+
 
     return weeks
 
@@ -73,7 +83,7 @@ export class MockWeekRepository implements IWeekRepository {
 
         if (frequency.isWeekly()) {
             weeksDb = this.weeks.filter(week => week.minDay.getTime() >= dateOfExecutionTime)
-                .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 12);
+                .sort((a, b) => a.minDay.getTime() - b.minDay.getTime()).slice(0, 13);
 
             return weeksDb
         }

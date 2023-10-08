@@ -230,8 +230,8 @@ export class PaymentOrder extends Entity<PaymentOrder> {
         this.humanId = 20000 + actualPaymentOrdersWithHumanIdCount + 1;
     }
 
-    public getHumanIdOrIdValue(): string | number {
-        return !!this.humanId ? `#${this.humanId.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}` : this.id.value;
+    public getHumanIdOrIdValue(): string {
+        return !!this.humanId ? `#${this.humanId.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}` : this.id.toString();
     }
 
     public getPlansAmountMinusDiscount(): number {
