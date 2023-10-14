@@ -1,9 +1,7 @@
 jest.mock("../../../src/bounded_contexts/operations/application/paymentService/mockPaymentService")
-import moment from "moment"
 import { RetryPaymentOfRejectedPaymentOrder } from "../../../src/bounded_contexts/operations/useCases/retryPaymentOfRejectedPaymentOrder/retryPaymentOfRejectedPaymentOrder"
 import { CreateSubscription } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscription"
 import { CreateWallet } from "../../../src/bounded_contexts/operations/useCases/createWallet/createWallet"
-import { ChargeMoneyToWalletUseCase } from "../../../src/bounded_contexts/operations/useCases/chargeMoneyToWallet/chargeMoneyToWallet"
 import { ChargeMoneyToWallet } from "../../../src/bounded_contexts/operations/services/chargeMoneyToWallet/chargeMoneyToWallet"
 import { InMemoryCustomerRepository } from "../../../src/bounded_contexts/operations/infra/repositories/customer/inMemoryCustomerRepository"
 import { InMemorySusbcriptionRepository } from "../../../src/bounded_contexts/operations/infra/repositories/subscription/inMemorySubscriptionRepository"
@@ -26,18 +24,13 @@ import { ShippingZone } from "../../../src/bounded_contexts/operations/domain/sh
 import { ShippingZoneRadio } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/ShippingZoneRadio"
 import { Coordinates } from "../../../src/bounded_contexts/operations/domain/shipping/ShippingZoneRadio/Coordinates"
 import { CreateFriendCode } from "../../../src/bounded_contexts/operations/services/createFriendCode/createFriendCode"
-import { Order } from "../../../src/bounded_contexts/operations/domain/order/Order"
 import { PaymentOrder } from "../../../src/bounded_contexts/operations/domain/paymentOrder/PaymentOrder"
 import { CreateSubscriptionDto } from "../../../src/bounded_contexts/operations/useCases/createSubscription/createSubscriptionDto"
 import { PaymentIntent } from "../../../src/bounded_contexts/operations/application/paymentService"
-import { Subscription } from "../../../src/bounded_contexts/operations/domain/subscription/Subscription"
-import { gourmetPlan, gourmetPlanSku, planGourmetVariant2Persons2Recipes, planGourmetVariant2Persons3Recipes } from "../../mocks/plan"
-import { MONDAY, TUESDAY, WEDNESDAY } from "../../mocks/days"
+import { gourmetPlan, planGourmetVariant2Persons2Recipes } from "../../mocks/plan"
+import { TUESDAY } from "../../mocks/days"
 import { PaymentMethod } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethod"
 import { WalletMovementLogType } from "../../../src/bounded_contexts/operations/domain/customer/wallet/WalletMovementLog/WalletMovementLogTypeEnum"
-import { Coupon } from "../../../src/bounded_contexts/operations/domain/cupons/Cupon"
-import { CouponTypeFactory } from "../../../src/bounded_contexts/operations/domain/cupons/CuponType/CouponTypeFactory"
-import { CouponState } from "../../../src/bounded_contexts/operations/domain/cupons/CouponState"
 import { CUSTOMER_ADDRESS_DETAILS, CUSTOMER_ADDRESS_NAME, CUSTOMER_FIRST_NAME, CUSTOMER_LAST_NAME, CUSTOMER_LATITUDE, CUSTOMER_LONGITUDE, CUSTOMER_PHONE } from "../../mocks/customer"
 import { PayAllSubscriptions } from "../../../src/bounded_contexts/operations/services/payAllSubscriptions/payAllSubscriptions"
 import { PaymentMethodId } from "../../../src/bounded_contexts/operations/domain/customer/paymentMethod/PaymentMethodId"
@@ -152,7 +145,26 @@ describe("Retry payment of rejected payment order", () => {
             firstSubscriptionResult = await createSubscriptionUseCase.execute(createSubscriptionDto)
         })
 
-        describe("When retrying the payment using the wallet payment method", () => {
+        describe("When retrying the payment using the wallet payment method and not having enough balance", () => {
+
+            beforeAll(async () => {
+                const billingJob = new PayAllSubscriptions(mockCustomerRepository, mockOrderRepository, mockPaymentOrderRepository, mockPaymentService, mockSubscriptionRepository, mockWeekRepository, mockShippingZoneRepository, mockNotificationService)
+
+                customer.setDefaultPaymentMethod(new PaymentMethodId("wallet"))
+                customer.wallet!.balance = 10
+                await billingJob.execute({ executionDate: new Date(2023, 9, 7, 6) })
+            })
+
+            it("Should throw an error", async () => {
+                const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
+
+                await expect(retryPaymentOfPaymentOrderUseCase.execute({ paymentOrderId: paymentOrders[1].id.toString() })).rejects.toThrow()
+            })
+
+        })
+
+
+        describe("When retrying the payment using the wallet payment method and having enough balance", () => {
 
             beforeAll(async () => {
                 const billingJob = new PayAllSubscriptions(mockCustomerRepository, mockOrderRepository, mockPaymentOrderRepository, mockPaymentService, mockSubscriptionRepository, mockWeekRepository, mockShippingZoneRepository, mockNotificationService)
@@ -161,13 +173,6 @@ describe("Retry payment of rejected payment order", () => {
                 customer.wallet!.balance = 10
                 await billingJob.execute({ executionDate: new Date(2023, 9, 7, 6) })
                 customer.wallet!.balance = 182.01
-                //@ts-ignore
-                mockPaymentService.paymentIntent.mockImplementationOnce(async (amount: number, paymentMethod: string, receiptEmail: string, customerId: string, offSession: boolean): Promise<PaymentIntent> => await ({
-                    status: "cancelled",
-                    client_secret: "client_secret",
-                    id: "id",
-                    amount: 0
-                }))
 
                 const paymentOrders: PaymentOrder[] = await mockPaymentOrderRepository.findByCustomerId(CUSTOMER_ID)
                 await retryPaymentOfPaymentOrderUseCase.execute({ paymentOrderId: paymentOrders[1].id.toString() })
@@ -194,7 +199,21 @@ describe("Retry payment of rejected payment order", () => {
                 expect(paymentOrders[1].paymentIntentId).toBe("Monedero")
             })
 
+            it("Should add a the payment on Saturday wallet movement log", async () => {
+                const payBillingJobWalletLogs = customer.wallet!.walletMovements.filter(walletMovementLog => walletMovementLog.type === WalletMovementLogType.PAY_SATURDAY_JOB_WITH_WALLET)
+
+                expect(payBillingJobWalletLogs.length).toBe(1)
+            })
+
+            afterAll(async () => {
+                mockPaymentOrderRepository.$paymentOrders = []
+                mockSubscriptionRepository.$subscriptions = []
+                mockOrderRepository.$orders = []
+
+                customer.wallet!.balance = 0
+            })
 
         })
+
     })
 })
