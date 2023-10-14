@@ -19,17 +19,22 @@ export class ChargeWalletJob {
 
             const customers = await this.customerRepository.findAllWithWalletEnabled();
             const newJobs = [];
-            const remainingJobs = []
+            const alreadyScheduledJobs = []
 
             for (const customer of customers) {
                 for (const dateOfCharge of customer.wallet?.datesOfCharge ?? []) {
                     const today: Date = dto.executionDate ?? new Date()
+                    const dateOfChargeIsToday = dateOfCharge.day.dayNumberOfWeek === today.getDay()
+                    const hourOfChargeIsGreaterThanNow = parseInt(dateOfCharge.hour) > today.getHours()
+                    const hourAndMinutesOfChargeIsGreaterThanNow = (parseInt(dateOfCharge.hour) === today.getHours() && parseInt(dateOfCharge.minute) > today.getMinutes())
 
-                    if (dateOfCharge.day.dayNumberOfWeek === today.getDay() && (parseInt(dateOfCharge.hour) > today.getHours() || (parseInt(dateOfCharge.hour) === today.getHours() && parseInt(dateOfCharge.minute) > today.getMinutes()))) {
+                    if (dateOfChargeIsToday && (hourOfChargeIsGreaterThanNow || hourAndMinutesOfChargeIsGreaterThanNow)) {
 
-                        const jobId = `${customer.id.value}-${today.getDay()}`
-                        if (scheduledJobs[jobId]) {
-                            remainingJobs.push(scheduledJobs[jobId])
+                        const jobId = `${customer.id.toString()}-${today.getDay()}-${dateOfCharge.hour}-${dateOfCharge.minute}`
+                        const isAJobScheduledWithTheSameId = scheduledJobs[jobId]
+
+                        if (isAJobScheduledWithTheSameId) {
+                            alreadyScheduledJobs.push(scheduledJobs[jobId])
                             continue
                         }
 
@@ -45,8 +50,14 @@ export class ChargeWalletJob {
 
             // Cancel the scheduledJobs that doesn't match with the newJobs and the remainingJobs
             for (const scheduledJobId in scheduledJobs) {
-                if (scheduledJobId === "schedule_wallets_job" || scheduledJobId === "billing_job") continue
-                if (!newJobs.find(job => job.name === scheduledJobId) && !remainingJobs.find(job => job.name === scheduledJobId)) {
+                const isNotAChargeWalletJob = scheduledJobId === "schedule_wallets_job" || scheduledJobId === "billing_job"
+
+                if (isNotAChargeWalletJob) continue
+
+                const isANewJob = newJobs.find(job => job.name === scheduledJobId)
+                const isAnAlreadyScheduledJob = alreadyScheduledJobs.find(job => job.name === scheduledJobId)
+
+                if (!isANewJob && !isAnAlreadyScheduledJob) {
                     console.log("Scheduled Job Id to delete: ", scheduledJobId)
                     scheduledJobs[scheduledJobId].cancel()
                 }
