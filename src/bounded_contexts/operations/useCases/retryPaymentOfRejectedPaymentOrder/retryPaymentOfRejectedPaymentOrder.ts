@@ -74,15 +74,7 @@ export class RetryPaymentOfRejectedPaymentOrder {
             paymentIntent = stripePaymentIntent;
         }
 
-
-        if (!!!paymentIntent) throw new Error("Ocurrió un error inesperado, intenta nuevamente");
-        if (paymentIntent.status === "canceled") throw new Error("Error al procesar el pago, el mismo fue cancelado");
-        if (paymentIntent.status === "requires_action")
-            throw new Error("Error al procesar el pago, el cliente no autorizó el uso de la tarjeta");
-        if (paymentIntent.status === "requires_confirmation")
-            throw new Error("Error al procesar el pago, el cliente no autorizó el uso de la tarjeta");
-        if (paymentIntent.status === "requires_payment_method")
-            throw new Error("Error al procesar el pago, el cliente necesita agregar un método de pago");
+        this.throwErrorIfHasErrors(paymentIntent)
 
         paymentOrder.paymentIntentId = paymentIntent.id;
         paymentOrder.toBilled(orders, customer);
@@ -92,6 +84,17 @@ export class RetryPaymentOfRejectedPaymentOrder {
         await this.customerRepository.save(customer);
 
         return paymentOrder;
+    }
+
+    private throwErrorIfHasErrors(paymentIntent: Stripe.PaymentIntent | PaymentIntent) {
+        if (!!!paymentIntent) throw new Error("Ocurrió un error inesperado, intenta nuevamente");
+        if (paymentIntent.status === "canceled") throw new Error("Error al procesar el pago, el mismo fue cancelado");
+        if (paymentIntent.status === "requires_action")
+            throw new Error("Error al procesar el pago, el cliente no autorizó el uso de la tarjeta");
+        if (paymentIntent.status === "requires_confirmation")
+            throw new Error("Error al procesar el pago, el cliente no autorizó el uso de la tarjeta");
+        if (paymentIntent.status === "requires_payment_method")
+            throw new Error("Error al procesar el pago, el cliente necesita agregar un método de pago");
     }
 
     /**
