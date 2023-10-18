@@ -185,5 +185,9 @@ describe("Charge money to wallet job", () => {
 
             })
         })
+
+        afterAll(() => {
+            jobs?.forEach(job => job.cancel())
+        })
     })
 })
