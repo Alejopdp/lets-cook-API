@@ -114,11 +114,19 @@ export class GetPlanVariantsRecipesByWeekListPresenter {
             backOfficeTags: recipe.recipeBackOfficeTags.map((tag) => tag.name),
             imageTags: recipe.recipeImageTags.map((tag) => tag.name),
             availableWeeks: recipe.availableWeeks.map((week: Week) => {
+                const minDate = new Date(week.minDay);
+                minDate.setDate(minDate.getDate() - 1);
+                const maxDate = new Date(week.maxDay);
+                maxDate.setDate(maxDate.getDate() - 1);
+
                 return {
-                    id: week.id.value,
+                    id: week.id.toString(),
                     label: `${MomentTimeService.getNumberOfDayInMonth(week.minDay)}-${MomentTimeService.getNumberOfDayInMonth(
                         week.maxDay
                     )} ${MomentTimeService.getShortenedMonthName(week.minDay)}`,
+                    fecha_inicio: minDate.toISOString().split("T")[0],
+                    fecha_fin: maxDate.toISOString().split("T")[0]
+
                 };
             }),
             availableMonths: recipe.availableMonths,
