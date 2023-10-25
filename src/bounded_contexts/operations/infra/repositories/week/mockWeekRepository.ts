@@ -40,6 +40,9 @@ export class MockWeekRepository implements IWeekRepository {
     constructor(weeks?: Week[]) {
         this._weeks = weeks ?? createMockWeeks();
     }
+    findContaing(dates: Date[]): Promise<Week[]> {
+        throw new Error("Method not implemented.");
+    }
     findPreviousWeek(): Promise<Week | undefined> {
         throw new Error("Method not implemented.");
     }

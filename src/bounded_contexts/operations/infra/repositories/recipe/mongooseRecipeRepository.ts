@@ -236,4 +236,8 @@ export class MongooseRecipeRepository implements IRecipeRepository {
 
         return finalArray;
     }
+
+    public async findAllAvailableOnWeeks(weeksIds: WeekId[], locale?: Locale | undefined): Promise<Recipe[]> {
+        return await this.findBy({ availableWeeks: { $in: weeksIds } }, locale);
+    }
 }

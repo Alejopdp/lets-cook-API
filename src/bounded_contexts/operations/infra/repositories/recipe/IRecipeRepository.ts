@@ -17,6 +17,7 @@ export interface IRecipeRepository {
     findBy(conditions: any, locale?: Locale): Promise<Recipe[]>;
     delete(recipeId: RecipeId): Promise<void>;
     findByWeekId(weekId: WeekId, locale?: Locale): Promise<Recipe[]>;
+    findAllAvailableOnWeeks(weeksIds: WeekId[], locale?: Locale): Promise<Recipe[]>;
     findForOrder(order: Order, restrictionId?: RecipeRestrictionId, locale?: Locale): Promise<Recipe[]>;
     findByRecipeVariantSkuList(recipeVariantSkus: RecipeVariantSku[], locale?: Locale): Promise<Recipe[]>;
     findNextWeekRecipes(locale?: Locale): Promise<Recipe[]>;
