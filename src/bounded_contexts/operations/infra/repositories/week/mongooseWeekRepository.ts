@@ -188,4 +188,18 @@ export class MongooseWeekRepository implements IWeekRepository {
 
         return await this.findBy({ minDay: { $gte: minDay }, maxDay: { $lte: maxDay } });
     }
+
+    public async findContaing(dates: Date[]): Promise<Week[]> {
+        // Write the code that retrieves all the weeks whose minDay is less than the at least one date and whose maxDay is greater than the same date
+        const weeksDb = await WeekModel.find({
+            $or: dates.map((date) => ({
+                $and: [
+                    { minDay: { $lte: date } },
+                    { maxDay: { $gte: date } },
+                ],
+            })),
+        });
+
+        return weeksDb.map((week: any) => weekMapper.toDomain(week));
+    }
 }

@@ -13,7 +13,7 @@ export class GetRecipeListController extends BaseController {
 
     protected async executeImpl(): Promise<any> {
         try {
-            const dto: GetRecipeListDto = { locale: (<any>Locale)[this.req.query.locale as string] || Locale.es };
+            const dto: GetRecipeListDto = { locale: (<any>Locale)[this.req.query.locale as string] || Locale.es, dates: (this.req.query.dates as string | string[]) ?? undefined };
             const result = await this.getRecipeList.execute(dto);
 
             return this.ok(this.res, result);

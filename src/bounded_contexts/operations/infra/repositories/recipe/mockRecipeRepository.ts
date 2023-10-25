@@ -15,6 +15,9 @@ export class MockRecipeRepository implements IRecipeRepository {
     constructor(database: Recipe[]) {
         this._database = database;
     }
+    findAllAvailableOnWeeks(weeksIds: WeekId[], locale?: Locale | undefined): Promise<Recipe[]> {
+        throw new Error("Method not implemented.");
+    }
     findByRecipeVariantSkuOrThrow(recipeVariantId: string, locale: Locale): Promise<Recipe> {
         throw new Error("Method not implemented.");
     }
