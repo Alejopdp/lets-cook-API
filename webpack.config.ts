@@ -25,7 +25,7 @@ module.exports = {
             },
         ],
     },
-    mode: process.env.NODE_ENV === "production" ? "production" : "development",
+    mode: process.env.NODE_ENV === "production" ? "production" : "none",
     resolve: {
         extensions: [".tsx", ".ts", ".js", ".env", ".env.*"],
     },
