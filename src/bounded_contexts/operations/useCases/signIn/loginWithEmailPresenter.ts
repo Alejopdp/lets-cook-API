@@ -21,6 +21,7 @@ export class LoginWithEmailPresenter {
                     id: method.id.value,
                     card: method.getCardLabel(locale),
                     isDefault: method.isDefault,
+                    expirationDate: method.getExpirationDate(locale),
                 })),
                 preferredLanguage: customer.getPersonalInfo().preferredLanguage || Locale.es,
                 wallet: customer.wallet ? {
