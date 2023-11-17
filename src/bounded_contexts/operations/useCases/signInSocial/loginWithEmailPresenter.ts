@@ -19,7 +19,7 @@ export class LoginWithEmailPresenter {
                 },
                 paymentMethods: customer.paymentMethods.map((method) => ({
                     id: method.id.value,
-                    label: method.getCardLabel(locale),
+                    card: method.getCardLabel(locale),
                     isDefault: method.isDefault,
                 })),
                 preferredLanguage: customer.getPersonalInfo().preferredLanguage || Locale.es,

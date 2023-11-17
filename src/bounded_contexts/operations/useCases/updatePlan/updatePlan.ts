@@ -195,9 +195,8 @@ export class UpdatePlan {
         }
 
         for (let order of orders) {
-            const newPrice =
-                planVariantsPriceMap[order.planVariantId.toString()].newPriceWithOffer ||
-                planVariantsPriceMap[order.planVariantId.toString()].newPrice;
+            const planVariant = planVariantsPriceMap[order.planVariantId.toString()];
+            const newPrice = planVariant.newPriceWithOffer || planVariant.newPrice;
             const paymentOrder = paymentOrderMap[order.paymentOrderId!.toString()];
 
             paymentOrder.discountOrderAmount(order);
