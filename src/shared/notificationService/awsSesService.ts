@@ -161,7 +161,7 @@
 //         // else {
 //         //     await this.sendMail(
 //         //         [dto.customerEmail],
-//         //         `Hola ${dto.customerFirstName}, bienvenid@ a Let's cook!`,
+//         //         `Hola ${dto.customerFirstName}, bienvenid@ a LetsCook!`,
 //         //         "",
 //         //         welcomeTemplate(
 //         //             dto.customerFirstName,
@@ -203,7 +203,7 @@
 //     }
 
 //     public async notifyCustomerAboutPaymentOrderBilled(dto: PaymentOrderBilledNotificationDto): Promise<void> {
-//         await this.sendMail([dto.customerEmail], `Tu ticket de Let's Cook ${dto.paymentOrderHumanNumber}`, "", ticketTemplate(dto));
+//         await this.sendMail([dto.customerEmail], `Tu ticket de LetsCook ${dto.paymentOrderHumanNumber}`, "", ticketTemplate(dto));
 //     }
 
 //     public async sendUpdateEmailEmail(userEmail: string, changeEmailUrl: string, locale: Locale): Promise<void> {

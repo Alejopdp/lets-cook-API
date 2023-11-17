@@ -116,33 +116,29 @@ export const welcomeTemplate = (
 
                   Gracias por apuntarte a este planazo. A partir de ahora, con Let’s Cook, tu rutina y la de los tuyos será mucho más divertida y saludable. Te lo pondremos fácil para que puedas cocinar bueno y rico, aprender nuevas recetas y saborear platos con mucha chispa. ¿Pinta bien no?<br><br>
 
-                  ${
-                      Array.isArray(recipeSelection) && recipeSelection.length > 0
-                          ? `Vemos que ya has elegido tus primeras recetas de tu plan para la semana que viene. ¡Qué rapidez! Se notan las ganas de iniciarse en Let’s Cook. O el hambre… <br><br> Estas son las recetas que has elegido: <ul>${recipeSelection.map(
-                                (selection) => `<li>${selection.quantity} x ${selection.recipe.getName()}</li>`
-                            )} </ul>`
-                          : `Como te has apuntado al ${planName}, lo primero que debes hacer es elegir tus recetas para la semana que viene. ¿Cuáles serán los platos con los que iniciarás tu carrera de chef en Let’s Cook?  Entra en <a href="${process.env.CUSTOMER_ORIGIN_URL}/elegir-recetas/${firstOrderId}">nuestra web</a> con tu usuario y haz clic en “ELEGIR RECETAS”, selecciona las que más te apetezcan y acepta. ¿Tienes dudas? No te preocupes, te lo explicamos en este vídeo [ENLACE aún no definido porque la web todavia no esta terminada]. Normalmente registramos las elecciones de las recetas hasta el viernes anterior a las 23.59. Si para entonces no nos has indicado nada, enviaremos las más elegidas de la semana.`
-                  }
+                  ${Array.isArray(recipeSelection) && recipeSelection.length > 0
+            ? `Vemos que ya has elegido tus primeras recetas de tu plan para la semana que viene. ¡Qué rapidez! Se notan las ganas de iniciarse en Let’s Cook. O el hambre… <br><br> Estas son las recetas que has elegido: <ul>${recipeSelection.map(
+                (selection) => `<li>${selection.quantity} x ${selection.recipe.getName()}</li>`
+            )} </ul>`
+            : `Como te has apuntado al ${planName}, lo primero que debes hacer es elegir tus recetas para la semana que viene. ¿Cuáles serán los platos con los que iniciarás tu carrera de chef en Let’s Cook?  Entra en <a href="${process.env.CUSTOMER_ORIGIN_URL}/elegir-recetas/${firstOrderId}">nuestra web</a> con tu usuario y haz clic en “ELEGIR RECETAS”, selecciona las que más te apetezcan y acepta. ¿Tienes dudas? No te preocupes, te lo explicamos en este vídeo [ENLACE aún no definido porque la web todavia no esta terminada]. Normalmente registramos las elecciones de las recetas hasta el viernes anterior a las 23.59. Si para entonces no nos has indicado nada, enviaremos las más elegidas de la semana.`
+        }
 
-                  ${
-                      hasRestrictionComment
-                          ? "Si has marcado algún tipo de intolerancia o dieta especial, adaptaremos tu kit a tu perfil. Por ejemplo, sustituyendo el cuscús (gluten) por quinoa o el yogur (lactosa) por yogur sin lactosa<br><br>"
-                          : "<br>"
-                  }
+                  ${hasRestrictionComment
+            ? "Si has marcado algún tipo de intolerancia o dieta especial, adaptaremos tu kit a tu perfil. Por ejemplo, sustituyendo el cuscús (gluten) por quinoa o el yogur (lactosa) por yogur sin lactosa<br><br>"
+            : "<br>"
+        }
 
                   Los lunes recibirás por email las recetas paso-a-paso de los kits seleccionados y también en la etiqueta de los kits encontrarás 2 códigos QR: uno con la receta paso a paso y otro con la video-receta. Como ves, enviamos las recetas digitalmente, así reducimos al máximo el papel y cuidamos de nuestro planeta. ¡En Let’s Cook nada se tira!<br><br>
                   
-                  ${
-                      shippingCost > 0
-                          ? `En tu caso, al ser un envío de larga distancia, recibirás tu kit el ${shippingDay} y se te cobrará los gastos de envío a partir de la segunda entrega ${shippingCost}. Gracias por confiar en nosotr@s a pesar de los kilómetros que nos separan.<br><br>`
-                          : `Recibirás tus kits los ${shippingDay} entre las 3 PM y las 9 PM. Te enviaremos un WhatsApp el mismo ${shippingDay} para confirmar la hora de entrega.<br><br>`
-                  }
+                  ${shippingCost > 0
+            ? `En tu caso, al ser un envío de larga distancia, recibirás tu kit el ${shippingDay} y se te cobrará los gastos de envío a partir de la segunda entrega ${shippingCost}. Gracias por confiar en nosotr@s a pesar de los kilómetros que nos separan.<br><br>`
+            : `Recibirás tus kits los ${shippingDay} entre las 3 PM y las 9 PM. Te enviaremos un WhatsApp el mismo ${shippingDay} para confirmar la hora de entrega.<br><br>`
+        }
                   
-                  ${
-                      isPlanAhorro
-                          ? ""
-                          : "De cara a las próximas semanas, normalmente registramos las elecciones de las recetas hasta el viernes anterior a las 23.59. Si para entonces no nos has indicado nada, seleccionaremos las más elegidas. ¡Igual no siempre eres tan rápid@ como hoy!<br><br>"
-                  }
+                  ${isPlanAhorro
+            ? ""
+            : "De cara a las próximas semanas, normalmente registramos las elecciones de las recetas hasta el viernes anterior a las 23.59. Si para entonces no nos has indicado nada, seleccionaremos las más elegidas. ¡Igual no siempre eres tan rápid@ como hoy!<br><br>"
+        }
                   
                   
                   Si quieres saltar una semana, cancelar o cambiar algo de tu plan (dirección de entrega, teléfono, tarjeta, etc), puedes hacerlo en cualquier momento antes del cobro de cada sábado por la mañana. Solo tienes que entrar con tu usuario en nuestra web y administrar tu plan.
@@ -271,9 +267,8 @@ export const newSubscriptionTemplate = (
                       Nueva compra
                   </h2>
                       
-                    El cliente ${customerName} ha comprado un ${planName} ${
-        restrictionComment ? `y ha agregado el siguiente comentario: ${restrictionComment}` : ""
-    }
+                    El cliente ${customerName} ha comprado un ${planName} ${restrictionComment ? `y ha agregado el siguiente comentario: ${restrictionComment}` : ""
+        }
                   <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
   
                     </div>
@@ -385,9 +380,8 @@ export const newSubscriptionsTemplate = (customerName: string, planNames: string
                     Nueva compra
                 </h2>
                     
-                  El cliente ${customerName} ha agregado ${
-        planNames.length > 0 ? `los siguientes planes adicionales` : "el siguiente plan adicional"
-    }: ${planNames.map((name) => `<p>${name}</p>`)}
+                  El cliente ${customerName} ha agregado ${planNames.length > 0 ? `los siguientes planes adicionales` : "el siguiente plan adicional"
+        }: ${planNames.map((name) => `<p>${name}</p>`)}
                 <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
 
                   </div>
@@ -498,23 +492,18 @@ export const newCancellationTemplate = (subscription: Subscription, locale: Loca
                 <h2 style="color: #00a555; font-size: 24px; font-weight: 800; line-height: 24px; margin: 48px 0;">
                     Nueva cancelación de plan
                 </h2>
-                ${
-                    !!adminNameOrEmail
-                        ? `<p>el usuario Admin <b>${adminNameOrEmail}</b> ha cancelado el plan <b>${
-                              subscription.plan.name
-                          } ${subscription.getPlanVariantLabel(locale)}</b> con id ${
-                              subscription.id.value
-                          } del cliente <b>${subscription.customer.getFullNameOrEmail()}</b>. </p>`
-                        : `<p>El cliente <b>${subscription.customer.getFullNameOrEmail()}</b> ha cancelado su <b>${
-                              subscription.plan.name
-                          } ${subscription.getPlanVariantLabel(locale)}</b> con id ${subscription.id.value}</p>`
-                }
+                ${!!adminNameOrEmail
+            ? `<p>el usuario Admin <b>${adminNameOrEmail}</b> ha cancelado el plan <b>${subscription.plan.name
+            } ${subscription.getPlanVariantLabel(locale)}</b> con id ${subscription.id.value
+            } del cliente <b>${subscription.customer.getFullNameOrEmail()}</b>. </p>`
+            : `<p>El cliente <b>${subscription.customer.getFullNameOrEmail()}</b> ha cancelado su <b>${subscription.plan.name
+            } ${subscription.getPlanVariantLabel(locale)}</b> con id ${subscription.id.value}</p>`
+        }
                 <p>El motivo de la cancelación es: <b>${subscription.cancellationReason?.getHumanTitle() || ""}</b></p>
-                ${
-                    subscription.cancellationReason?.comment
-                        ? `<p>El cliente dejó el siguiente comentario: <b>${subscription.cancellationReason?.comment || ""}</b></p>`
-                        : ""
-                }
+                ${subscription.cancellationReason?.comment
+            ? `<p>El cliente dejó el siguiente comentario: <b>${subscription.cancellationReason?.comment || ""}</b></p>`
+            : ""
+        }
                   </div>
         </main>
 
@@ -740,11 +729,10 @@ export const addressChangeTemplate = (customer: Customer, adminNameOrEmail?: str
                 <h2 style="color: #00a555; font-size: 24px; font-weight: 800; line-height: 24px; margin: 48px 0;">
                     Cambio de dirección
                 </h2>
-                ${
-                    adminNameOrEmail
-                        ? `<p>El administrador ${adminNameOrEmail} ha cambiado la dirección del cliente ${customer.email} a:`
-                        : `<p>El cliente ${customer.email} ha cambiado su direcció a:</p>`
-                }
+                ${adminNameOrEmail
+            ? `<p>El administrador ${adminNameOrEmail} ha cambiado la dirección del cliente ${customer.email} a:`
+            : `<p>El cliente ${customer.email} ha cambiado su direcció a:</p>`
+        }
                 <ul>
                     <li>${customer.getShippingAddress().addressName}</li>
                     ${!!customer.getShippingAddress().addressDetails ? `<li>${customer.getShippingAddress().addressDetails}</li>` : ""}
@@ -862,11 +850,10 @@ export const restrictionChangeTemplate = (subscription: Subscription, adminNameO
                 <h2 style="color: #00a555; font-size: 24px; font-weight: 800; line-height: 24px; margin: 48px 0;">
                     Cambio de restricción
                 </h2>
-                ${
-                    !!adminNameOrEmail
-                        ? `<p><p>El administrador ${adminNameOrEmail} ha cambiado la restricción  del ${subscription.plan.name} (id: ${subscription.id.value}) a ${subscription.restrictionComment}. El cliente es ${subscription.customer.email}</p>`
-                        : `<p>El cliente ${subscription.customer.email} ha cambiado su restricción del ${subscription.plan.name} (id: ${subscription.id.value}) a ${subscription.restriction?.label}</p>`
-                }
+                ${!!adminNameOrEmail
+            ? `<p><p>El administrador ${adminNameOrEmail} ha cambiado la restricción  del ${subscription.plan.name} (id: ${subscription.id.value}) a ${subscription.restrictionComment}. El cliente es ${subscription.customer.email}</p>`
+            : `<p>El cliente ${subscription.customer.email} ha cambiado su restricción del ${subscription.plan.name} (id: ${subscription.id.value}) a ${subscription.restriction?.label}</p>`
+        }
                 <h4 style="color: #000000; font-size: 24px; font-weight: 700; line-height: 24px; margin: 48px 0;">
 
                   </div>
@@ -1451,7 +1438,7 @@ export const sendRecoverPasswordCodeTemplate = (code: string) => {
 								<td align="left" class="bodyTitle" id="footerText-8" style="font-family: 'Lato', Arial, Helvetica, sans-serif; font-size: 12px; line-height: 100%; color: #ffffff;">
 <p style="margin-top: 0px; margin-bottom: 10px;">Economiza tu tiempo</p>
 <p style="margin-top: 0px; margin-bottom: 10px;">Come saludable y variado</p>
-<p style="margin-top: 0px; margin-bottom: 0px;">Combate el fondwaste</p></td>
+<p style="margin-top: 0px; margin-bottom: 0px;">Combate el foodwaste</p></td>
 							</tr>
 							<tr>
 								<td height="25" class="spacingHeight-20"></td>
@@ -2133,7 +2120,7 @@ export const ticketTemplate = (dto: PaymentOrderBilledNotificationDto) => {
                     }
                 }
             </style>
-            <title>Tu ticket (Let's cook)</title>
+            <title>Tu ticket (LetsCook)</title>
             <meta name="robots" content="noindex, nofollow" />
         </head>
     
@@ -2413,7 +2400,7 @@ export const ticketTemplate = (dto: PaymentOrderBilledNotificationDto) => {
                                                                                         >
                                                                                             <strong
                                                                                                 ><span style="color: rgb(0, 0, 0)"
-                                                                                                    >Tu&nbsp;ticket de Let's cook</span
+                                                                                                    >Tu&nbsp;ticket de LetsCook</span
                                                                                                 ></strong
                                                                                             >
                                                                                         </p>
@@ -2457,16 +2444,15 @@ export const ticketTemplate = (dto: PaymentOrderBilledNotificationDto) => {
                                                                                         </p>
                                                                                         <div>
                                                                                         ${dto.orders.map(
-                                                                                            (order) =>
-                                                                                                `<p style="margin-top: 0px;margin-bottom: 10px;line-height: 150%;">
+        (order) =>
+            `<p style="margin-top: 0px;margin-bottom: 10px;line-height: 150%;">
                                                                                             <span style="color: rgb(0, 0, 0)"><span style="color: rgb(127, 140, 141)">
-                                                                                            <span>• ${
-                                                                                                order.plan.name
-                                                                                            } - ${order.getPlanVariantLabel(
-                                                                                                    order.planVariantId
-                                                                                                )}</span></span></span>
+                                                                                            <span>• ${order.plan.name
+            } - ${order.getPlanVariantLabel(
+                order.planVariantId
+            )}</span></span></span>
                                                                                         </p>`
-                                                                                        )}
+    )}
                                                                                         </div>
                                                                                         <p
                                                                                             style="
@@ -3173,7 +3159,7 @@ export const ticketTemplate = (dto: PaymentOrderBilledNotificationDto) => {
                                                                                                             margin-bottom: 0px;
                                                                                                         "
                                                                                                     >
-                                                                                                        Combate el fondwaste
+                                                                                                        Combate el foodwaste
                                                                                                     </p>
                                                                                                 </td>
                                                                                             </tr>
