@@ -19,8 +19,9 @@ export class LoginWithEmailPresenter {
                 },
                 paymentMethods: customer.paymentMethods.map((method) => ({
                     id: method.id.value,
-                    label: method.getCardLabel(locale),
+                    card: method.getCardLabel(locale),
                     isDefault: method.isDefault,
+                    expirationDate: method.getExpirationDate(locale),
                 })),
                 preferredLanguage: customer.getPersonalInfo().preferredLanguage || Locale.es,
                 wallet: customer.wallet ? {
