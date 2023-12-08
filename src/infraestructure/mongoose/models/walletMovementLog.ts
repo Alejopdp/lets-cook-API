@@ -15,7 +15,7 @@ const WalletMovementLogSchema = new mongoose.Schema(
         title: {
             type: String,
         },
-        descripion: {
+        description: {
             type: String,
         },
 
