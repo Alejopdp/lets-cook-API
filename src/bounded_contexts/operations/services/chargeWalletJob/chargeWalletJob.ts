@@ -39,8 +39,9 @@ export class ChargeWalletJob {
                         }
 
                         const job = scheduleJob(jobId, `${dateOfCharge.minute} ${dateOfCharge.hour} * * ${dateOfCharge.day.dayNumberOfWeek}`, async () => {
-                            await this.chargeMoneyToWallet.execute({ customer, amountToCharge: customer.wallet?.amountToCharge ?? 0 });
-                            await this.customerRepository.save(customer);
+                            let customerToCharge = await this.customerRepository.findByIdOrThrow(customer.id)
+                            await this.chargeMoneyToWallet.execute({ customer: customerToCharge, amountToCharge: customerToCharge.wallet?.amountToCharge ?? 0 });
+                            await this.customerRepository.save(customerToCharge);
                         });
 
                         newJobs.push(job);
