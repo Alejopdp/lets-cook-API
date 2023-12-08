@@ -25,6 +25,7 @@ import { SelectWalletAsDefaultLog } from "./wallet/WalletMovementLog/SelectWalle
 import { WalletMovementLog } from "./wallet/WalletMovementLog/WalletMovementLog";
 import { RefundWalletLog } from "./wallet/WalletMovementLog/RefundWalletLog";
 import { PaymentRejectedWalletLog } from "./wallet/WalletMovementLog/PaymentRejectedWalletLog";
+import { WalletPaymentMethodUpdatedLog } from "./wallet/WalletMovementLog/WalletPaymentMethodUpdatedLog";
 
 export class Customer extends Entity<Customer> {
     private _email: string;
@@ -122,7 +123,7 @@ export class Customer extends Entity<Customer> {
         );
     }
 
-    public addWalletMovementLog(logType: WalletMovementLogType, amount: number): void {
+    public addWalletMovementLog(logType: WalletMovementLogType, amount: number, description?: string): void {
         switch (logType) {
             case WalletMovementLogType.CREATE_WALLET:
                 this.wallet?.addWalletMovementLog(new CreateWalletLog(this.id, new Date()));
@@ -151,6 +152,8 @@ export class Customer extends Entity<Customer> {
             case WalletMovementLogType.PAYMENT_REJECTED:
                 this.wallet?.addWalletMovementLog(new PaymentRejectedWalletLog(this.id, new Date(), amount));
                 break;
+            case WalletMovementLogType.PAYMENT_METHOD_UPDATED:
+                this.wallet?.addWalletMovementLog(new WalletPaymentMethodUpdatedLog(this.id, new Date(), 0, description))
             default:
                 break;
         }
@@ -181,6 +184,7 @@ export class Customer extends Entity<Customer> {
 
         this.wallet.updateAmountToCharge(amountToCharge);
         this.wallet.updateDatesOfCharge(datesOfCharge);
+        if (this.wallet.paymentMethodForCharging !== paymentMethodForCharging) this.addWalletMovementLog(WalletMovementLogType.PAYMENT_METHOD_UPDATED, 0, paymentMethod.last4Numbers)
         this.wallet.paymentMethodForCharging = paymentMethodForCharging;
         if (this.wallet.isEnabled !== isEnabled) this.addWalletMovementLog(isEnabled ? WalletMovementLogType.ENABLE_WALLET : WalletMovementLogType.DISABLE_WALLET, 0)
         this.wallet.isEnabled = isEnabled

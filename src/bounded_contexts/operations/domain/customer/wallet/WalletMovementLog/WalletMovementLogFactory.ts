@@ -9,6 +9,7 @@ import { PurchasePlanWithWalletLog } from "./PurchasPlanWithWalletLog";
 import { RefundWalletLog } from "./RefundWalletLog";
 import { SelectWalletAsDefaultLog } from "./SelectWalletAsDefaultLog";
 import { WalletMovementLogType } from "./WalletMovementLogTypeEnum"
+import { WalletPaymentMethodUpdatedLog } from "./WalletPaymentMethodUpdatedLog";
 
 export class WalletMovementLogFactory {
     static create(type: string, title: string, description: string, customerId: CustomerId, createdAt: Date, amount: number) {
@@ -39,6 +40,8 @@ export class WalletMovementLogFactory {
 
             case WalletMovementLogType.PAYMENT_REJECTED:
                 return new PaymentRejectedWalletLog(customerId, createdAt, amount)
+            case WalletMovementLogType.PAYMENT_METHOD_UPDATED:
+                return new WalletPaymentMethodUpdatedLog(customerId, createdAt, amount, description)
             default:
                 throw new Error("Invalid wallet movement log type");
         }
