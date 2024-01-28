@@ -23,6 +23,5 @@ const resetDatabase = async () => {
         // await mongoose.connection.db.dropDatabase();
         // logger.info("Database dropped");
         // await loadMockData();
-        logger.info("Data correctly loaded");
     }
 };
