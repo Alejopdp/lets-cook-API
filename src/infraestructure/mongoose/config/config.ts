@@ -10,7 +10,6 @@ export const connectToDatabase = async () => {
         // mongoose.set("debug", IS_NOT_RUNNING_IN_DEVELOPMENT);
 
         // await resetDatabase();
-        logger.info("Database connected");
         logger.info(`Connected to: ${mongoUri}`)
     } catch (error) {
         console.log(error);
