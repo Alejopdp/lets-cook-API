@@ -119,7 +119,7 @@ export class PayAllSubscriptions {
                 try {
                     if (process.env.NODE_ENV === "production") logger.info(`Starting payment order ${paymentOrderId} processing`);
                     const paymentOrderCustomer = customerMap[paymentOrderToBill.customerId.value];
-                    const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderToBill.id.value].some(
+                    const customerHasFreeShipping = paymentOrderOrderMap[paymentOrderId]?.some(
                         (order) => order.hasFreeShipping
                     );
                     const shippingCost = customerHasFreeShipping ? 0 : customerShippingZoneMap[paymentOrderCustomer.id.value]?.cost ?? 0;
@@ -139,27 +139,27 @@ export class PayAllSubscriptions {
                             shippingAddressName: paymentOrderCustomer.getShippingAddress().addressName || "",
                             shippingCost,
                             shippingCustomerName: paymentOrderCustomer.getPersonalInfo().fullName || "",
-                            shippingDate: paymentOrderOrderMap[paymentOrderId][0].getHumanShippmentDay(
+                            shippingDate: paymentOrderOrderMap[paymentOrderId]?.[0].getHumanShippmentDay(
                                 (<any>Locale)[paymentOrderCustomer.personalInfo?.preferredLanguage || "es"]
                             ),
                             totalAmount,
-                            orders: paymentOrderOrderMap[paymentOrderId].filter((order) => !order.isCancelled() && !order.isSkipped()),
+                            orders: paymentOrderOrderMap[paymentOrderId]?.filter((order) => !order.isCancelled() && !order.isSkipped()),
                             paymentOrderHumanNumber: paymentOrderToBill.getHumanIdOrIdValue() as string,
                             discountAmount: paymentOrderToBill.getDiscountAmountOrShippingCostIfHasFreeShipping(),
                         }
                         if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing succeeded`);
-                        paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId], paymentOrderCustomer);
+                        paymentOrderToBill.toBilled(paymentOrderOrderMap[paymentOrderId] ?? [], paymentOrderCustomer);
                         notificationDtos.push(notificationDto);
                     } else {
                         if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing failed`);
-                        paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
+                        paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId] ?? []);
                     }
 
                     paymentOrderToBill.paymentIntentId = paymentIntent.id;
                 } catch (error: any) {
                     console.log("Error: ", error)
                     if (process.env.NODE_ENV === "production") logger.info(`${paymentOrderId} processing failed with error type ${error.type} and error code ${error.code}`);
-                    paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId]);
+                    paymentOrderToBill.toRejected(paymentOrderOrderMap[paymentOrderId] ?? []);
                     paymentOrderToBill.paymentIntentId = error?.payment_intent?.id ?? "";
                 }
             } else {
