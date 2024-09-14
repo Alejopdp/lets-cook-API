@@ -22,7 +22,7 @@ export class BillingJob {
     }
 
     /**
-     * Getter payAllSubscriptions
+     * 
      * @return {PayAllSubscriptions}
      */
     public get payAllSubscriptions(): PayAllSubscriptions {
